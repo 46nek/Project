@@ -6,6 +6,8 @@
 #include "Direct3D.h"
 #include "Camera.h"
 #include "Input.h"
+#include "Timer.h"
+#include "Model.h" 
 
 class Game
 {
@@ -32,6 +34,8 @@ private:
     Direct3D* m_D3D; // Direct3Dクラスのインスタンス
     Camera* m_Camera;
     Input* m_Input;
+    Timer* m_Timer;
+    Model* m_Model;
 
     int m_screenWidth, m_screenHeight;
 };

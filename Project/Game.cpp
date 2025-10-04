@@ -6,6 +6,8 @@ Game::Game()
     m_D3D = nullptr;
     m_Camera = nullptr;
     m_Input = nullptr;
+    m_Timer = nullptr;
+    m_Model = nullptr;
     ApplicationHandle = this;
 }
 
@@ -21,6 +23,15 @@ bool Game::Initialize()
 
     // Windows APIを初期化
     InitializeWindows(m_screenWidth, m_screenHeight);
+
+    // Timerオブジェクトを作成して初期化
+    m_Timer = new Timer;
+    if (!m_Timer) return false;
+    if (!m_Timer->Initialize())
+    {
+        MessageBox(m_hwnd, L"Could not initialize the Timer object.", L"Error", MB_OK);
+        return false;
+    }
 
     // Inputオブジェクトを作成して初期化
     m_Input = new Input;
@@ -48,17 +59,40 @@ bool Game::Initialize()
 
     // Direct3Dを初期化
     bool result = m_D3D->Initialize(m_hwnd, m_screenWidth, m_screenHeight);
+
+    if (!m_D3D) return false;
+
+    // Modelオブジェクトを作成
+    m_Model = new Model;
+    if (!m_Model) return false;
+
+    // Direct3Dデバイスを使ってModelを初期化
+    bool result = m_Model->Initialize(m_D3D->GetDevice());
     if (!result)
     {
-        MessageBox(m_hwnd, L"Could not initialize Direct3D", L"Error", MB_OK);
+        MessageBox(m_hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
         return false;
     }
+
+    // Direct3Dを初期化
+    result = m_D3D->Initialize(m_hwnd, m_screenWidth, m_screenHeight);
 
     return true;
 }
 
 void Game::Shutdown()
 {
+    if (m_Model)
+    {
+        m_Model->Shutdown();
+        delete m_Model;
+        m_Model = nullptr;
+    }
+    if (m_Timer)
+    {
+        delete m_Timer;
+        m_Timer = nullptr;
+    }
     if (m_Input)
     {
         delete m_Input;
@@ -118,30 +152,30 @@ void Game::Run()
 
 bool Game::Frame()
 {
+    m_Timer->Frame();
+    float deltaTime = m_Timer->GetTime();
+
+
     int mouseX, mouseY;
     m_Input->GetMouseDelta(mouseX, mouseY);
-    m_Camera->Turn(mouseX, mouseY);
+    m_Camera->Turn(mouseX, mouseY, deltaTime); 
 
-    // --- 入力処理 ---
-    // Wキーで前進
     if (m_Input->IsKeyDown('W'))
     {
-        m_Camera->MoveForward();
+        m_Camera->MoveForward(deltaTime); 
     }
-    // Sキーで後退
+    // (S, A, Dキーも同様にdeltaTimeを渡す)
     if (m_Input->IsKeyDown('S'))
     {
-        m_Camera->MoveBackward();
+        m_Camera->MoveBackward(deltaTime);
     }
-    // Aキーで左へ
     if (m_Input->IsKeyDown('A'))
     {
-        m_Camera->MoveLeft();
+        m_Camera->MoveLeft(deltaTime);
     }
-    // Dキーで右へ
     if (m_Input->IsKeyDown('D'))
     {
-        m_Camera->MoveRight();
+        m_Camera->MoveRight(deltaTime);
     }
 
     // カメラを更新
@@ -157,7 +191,9 @@ bool Game::Frame()
     // 背景色を青でクリア
     m_D3D->BeginScene(0.39f, 0.58f, 0.93f, 1.0f);
 
-    m_D3D->GetDeviceContext()->Draw(3, 0); // 三角形を描画
+    // --- モデルの描画 ---
+    m_Model->Render(m_D3D->GetDeviceContext());
+    m_D3D->GetDeviceContext()->DrawIndexed(m_Model->GetIndexCount(), 0, 0); // DrawではなくDrawIndexedを使う
 
     // バックバッファを画面に表示
     m_D3D->EndScene();

@@ -19,19 +19,18 @@ public:
     void Update();
     XMMATRIX GetViewMatrix();
 
-    void MoveForward();
-    void MoveBackward();
-    void MoveLeft();
-    void MoveRight();
+    void MoveForward(float deltaTime);
+    void MoveBackward(float deltaTime);
+    void MoveLeft(float deltaTime);
+    void MoveRight(float deltaTime);
 
-    void Turn(int mouseX, int mouseY);
+    void Turn(int mouseX, int mouseY, float deltaTime);
 
 private:
     float m_positionX, m_positionY, m_positionZ;
     float m_rotationX, m_rotationY, m_rotationZ;
     XMMATRIX m_viewMatrix;
     
-    float m_frameTime;
     float m_moveSpeed;
     float m_rotationSpeed;
 };

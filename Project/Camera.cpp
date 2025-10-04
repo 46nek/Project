@@ -11,7 +11,6 @@ Camera::Camera()
     m_rotationY = 0.0f;
     m_rotationZ = 0.0f;
 
-    m_frameTime = 0.016f; // 60FPSを想定
     m_moveSpeed = 5.0f;
     m_rotationSpeed = 1.0f;
 }
@@ -92,43 +91,38 @@ XMMATRIX Camera::GetViewMatrix()
     return m_viewMatrix;
 }
 
-void Camera::MoveForward()
-{
-    float radians = m_rotationY * 0.0174532925f; // 度数をラジアンに
-
-    // Y軸周りの回転に基づいて進行方向を計算
-    m_positionX += sinf(radians) * m_moveSpeed * m_frameTime;
-    m_positionZ += cosf(radians) * m_moveSpeed * m_frameTime;
-}
-
-void Camera::MoveBackward()
+void Camera::MoveForward(float deltaTime)
 {
     float radians = m_rotationY * 0.0174532925f;
-
-    m_positionX -= sinf(radians) * m_moveSpeed * m_frameTime;
-    m_positionZ -= cosf(radians) * m_moveSpeed * m_frameTime;
+    m_positionX += sinf(radians) * m_moveSpeed * deltaTime; 
+    m_positionZ += cosf(radians) * m_moveSpeed * deltaTime;
 }
 
-void Camera::MoveLeft()
+void Camera::MoveBackward(float deltaTime)
+{
+    float radians = m_rotationY * 0.0174532925f;
+    m_positionX -= sinf(radians) * m_moveSpeed * deltaTime; 
+    m_positionZ -= cosf(radians) * m_moveSpeed * deltaTime; 
+}
+
+void Camera::MoveLeft(float deltaTime)
 {
     float radians = (m_rotationY - 90.0f) * 0.0174532925f;
-
-    m_positionX += sinf(radians) * m_moveSpeed * m_frameTime;
-    m_positionZ += cosf(radians) * m_moveSpeed * m_frameTime;
+    m_positionX += sinf(radians) * m_moveSpeed * deltaTime; 
+    m_positionZ += cosf(radians) * m_moveSpeed * deltaTime; 
 }
 
-void Camera::MoveRight()
+void Camera::MoveRight(float deltaTime)
 {
     float radians = (m_rotationY + 90.0f) * 0.0174532925f;
-
-    m_positionX += sinf(radians) * m_moveSpeed * m_frameTime;
-    m_positionZ += cosf(radians) * m_moveSpeed * m_frameTime;
+    m_positionX += sinf(radians) * m_moveSpeed * deltaTime;
+    m_positionZ += cosf(radians) * m_moveSpeed * deltaTime; 
 }
 
-void Camera::Turn(int mouseX, int mouseY)
+void Camera::Turn(int mouseX, int mouseY, float deltaTime)
 {
-    float yaw = (float)mouseX * m_rotationSpeed * m_frameTime;
-    float pitch = (float)mouseY * m_rotationSpeed * m_frameTime;
+    float yaw = (float)mouseX * m_rotationSpeed * deltaTime;   
+    float pitch = (float)mouseY * m_rotationSpeed * deltaTime; 
 
     // ヨー（左右の回転）を更新
     m_rotationY += yaw;

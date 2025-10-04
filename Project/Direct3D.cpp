@@ -11,7 +11,6 @@ Direct3D::Direct3D()
     m_pVertexShader = nullptr;
     m_pPixelShader = nullptr;
     m_pVertexLayout = nullptr;
-    m_pVertexBuffer = nullptr;
     m_pMatrixBuffer = nullptr;
 }
 
@@ -104,23 +103,6 @@ bool Direct3D::Initialize(HWND hWnd, int screenWidth, int screenHeight)
     pPSBlob->Release();
     if (FAILED(hr)) return false;
 
-    // 頂点バッファの作成
-    SimpleVertex vertices[] =
-    {
-        { {  0.0f,  0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-        { {  0.5f, -0.5f, 0.5f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-        { { -0.5f, -0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f, 1.0f } },
-    };
-
-    D3D11_BUFFER_DESC bd = {};
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = sizeof(SimpleVertex) * 3;
-    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bd.CPUAccessFlags = 0;
-    D3D11_SUBRESOURCE_DATA InitData = {};
-    InitData.pSysMem = vertices;
-    hr = m_pd3dDevice->CreateBuffer(&bd, &InitData, &m_pVertexBuffer);
-    if (FAILED(hr)) return false;
     // ワールド、ビュー、プロジェクション行列を初期化
     m_worldMatrix = XMMatrixIdentity();
     m_viewMatrix = XMMatrixIdentity();
@@ -146,15 +128,6 @@ bool Direct3D::Initialize(HWND hWnd, int screenWidth, int screenHeight)
         return false;
     }
 
-    // 描画パイプラインに頂点バッファ、インプットレイアウト、シェーダーをセット
-    UINT stride = sizeof(SimpleVertex);
-    UINT offset = 0;
-    m_pImmediateContext->IASetVertexBuffers(0, 1, &m_pVertexBuffer, &stride, &offset);
-    m_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    m_pImmediateContext->IASetInputLayout(m_pVertexLayout);
-    m_pImmediateContext->VSSetShader(m_pVertexShader, nullptr, 0);
-    m_pImmediateContext->PSSetShader(m_pPixelShader, nullptr, 0);
-
     return true;
 }
 
@@ -162,7 +135,6 @@ void Direct3D::Shutdown()
 {
     // 作成と逆の順序でリソースを解放
     if (m_pMatrixBuffer) { m_pMatrixBuffer->Release(); m_pMatrixBuffer = nullptr; }
-    if (m_pVertexBuffer) { m_pVertexBuffer->Release(); m_pVertexBuffer = nullptr; }
     if (m_pVertexLayout) { m_pVertexLayout->Release(); m_pVertexLayout = nullptr; }
     if (m_pPixelShader) { m_pPixelShader->Release(); m_pPixelShader = nullptr; }
     if (m_pVertexShader) { m_pVertexShader->Release(); m_pVertexShader = nullptr; }
@@ -229,7 +201,7 @@ bool Direct3D::UpdateMatrixBuffer()
 
 void Direct3D::EndScene()
 {
-    m_pSwapChain->Present(0, 0);
+    m_pSwapChain->Present(1, 0);
 }
 
 ID3D11Device* Direct3D::GetDevice()
