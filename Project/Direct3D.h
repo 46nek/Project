@@ -15,8 +15,8 @@ using namespace DirectX;
 
 struct SimpleVertex
 {
-    float Pos[3];
-    float Color[4];
+    XMFLOAT3 Pos;
+    XMFLOAT4 Color;
 };
 
 struct MatrixBufferType

@@ -127,7 +127,6 @@ bool Direct3D::Initialize(HWND hWnd, int screenWidth, int screenHeight)
     {
         return false;
     }
-
     return true;
 }
 

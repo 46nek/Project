@@ -67,7 +67,7 @@ bool Game::Initialize()
     if (!m_Model) return false;
 
     // Direct3Dデバイスを使ってModelを初期化
-    bool result = m_Model->Initialize(m_D3D->GetDevice());
+    result = m_Model->Initialize(m_D3D->GetDevice());
     if (!result)
     {
         MessageBox(m_hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
@@ -183,7 +183,6 @@ bool Game::Frame()
 
     // D3Dに行列をセット
     m_D3D->SetViewMatrix(m_Camera->GetViewMatrix());
-    // WorldとProjectionはDirect3Dクラスで初期化済みなのでここではセット不要
 
     // 行列バッファを更新
     m_D3D->UpdateMatrixBuffer();
@@ -191,9 +190,11 @@ bool Game::Frame()
     // 背景色を青でクリア
     m_D3D->BeginScene(0.39f, 0.58f, 0.93f, 1.0f);
 
-    // --- モデルの描画 ---
+        // モデルの頂点/インデックスバッファをセット
     m_Model->Render(m_D3D->GetDeviceContext());
-    m_D3D->GetDeviceContext()->DrawIndexed(m_Model->GetIndexCount(), 0, 0); // DrawではなくDrawIndexedを使う
+
+    // セットされたバッファを使ってインデックス描画
+    m_D3D->GetDeviceContext()->DrawIndexed(m_Model->GetIndexCount(), 0, 0);
 
     // バックバッファを画面に表示
     m_D3D->EndScene();

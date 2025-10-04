@@ -62,14 +62,14 @@ bool Model::InitializeBuffers(ID3D11Device* device)
     }
 
     // 立方体の8つの頂点データ (位置と色)
-    vertices[0].Pos = { -1.0f, -1.0f, -1.0f }; vertices[0].Color = { 1.0f, 0.0f, 0.0f, 1.0f }; // Red
-    vertices[1].Pos = { -1.0f,  1.0f, -1.0f }; vertices[1].Color = { 0.0f, 1.0f, 0.0f, 1.0f }; // Green
-    vertices[2].Pos = { 1.0f,  1.0f, -1.0f }; vertices[2].Color = { 0.0f, 0.0f, 1.0f, 1.0f }; // Blue
-    vertices[3].Pos = { 1.0f, -1.0f, -1.0f }; vertices[3].Color = { 1.0f, 1.0f, 0.0f, 1.0f }; // Yellow
-    vertices[4].Pos = { -1.0f, -1.0f,  1.0f }; vertices[4].Color = { 1.0f, 0.0f, 1.0f, 1.0f }; // Magenta
-    vertices[5].Pos = { -1.0f,  1.0f,  1.0f }; vertices[5].Color = { 0.0f, 1.0f, 1.0f, 1.0f }; // Cyan
-    vertices[6].Pos = { 1.0f,  1.0f,  1.0f }; vertices[6].Color = { 1.0f, 1.0f, 1.0f, 1.0f }; // White
-    vertices[7].Pos = { 1.0f, -1.0f,  1.0f }; vertices[7].Color = { 0.0f, 0.0f, 0.0f, 1.0f }; // Black
+    vertices[0].Pos = { -1.0f, -1.0f, -1.0f }; vertices[0].Color = { 1.0f, 0.0f, 0.0f, 1.0f };
+    vertices[1].Pos = { -1.0f,  1.0f, -1.0f }; vertices[1].Color = { 0.0f, 1.0f, 0.0f, 1.0f };
+    vertices[2].Pos = { 1.0f,  1.0f, -1.0f }; vertices[2].Color = { 0.0f, 0.0f, 1.0f, 1.0f };
+    vertices[3].Pos = { 1.0f, -1.0f, -1.0f }; vertices[3].Color = { 1.0f, 1.0f, 0.0f, 1.0f };
+    vertices[4].Pos = { -1.0f, -1.0f,  1.0f }; vertices[4].Color = { 1.0f, 0.0f, 1.0f, 1.0f };
+    vertices[5].Pos = { -1.0f,  1.0f,  1.0f }; vertices[5].Color = { 0.0f, 1.0f, 1.0f, 1.0f };
+    vertices[6].Pos = { 1.0f,  1.0f,  1.0f }; vertices[6].Color = { 1.0f, 1.0f, 1.0f, 1.0f };
+    vertices[7].Pos = { 1.0f, -1.0f,  1.0f }; vertices[7].Color = { 0.0f, 0.0f, 0.0f, 1.0f };
 
     // 立方体の12の三角形を定義するインデックスデータ
     // 前面
