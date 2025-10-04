@@ -85,32 +85,32 @@ void Game::Shutdown()
 void Game::Run()
 {
     MSG msg;
-    bool done, result;
+    bool result;
 
     ZeroMemory(&msg, sizeof(MSG));
 
-    done = false;
-    while (!done)
+    // メインループ
+    while (true)
     {
-        // ウィンドウメッセージを処理
+        // ウィンドウメッセージがある場合、それを処理
         if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
         {
+            // WM_QUITメッセージを受け取ったらループを抜ける
+            if (msg.message == WM_QUIT)
+            {
+                break;
+            }
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-
-        // 終了メッセージ
-        if (msg.message == WM_QUIT)
-        {
-            done = true;
-        }
         else
         {
-            // 描画処理
+            // メッセージがなければ、ゲームのフレームを処理
             result = Frame();
             if (!result)
             {
-                done = true;
+                // Frame()がfalseを返した場合もループを抜ける
+                break;
             }
         }
     }
@@ -118,8 +118,6 @@ void Game::Run()
 
 bool Game::Frame()
 {
-    m_Input->Frame();
-
     int mouseX, mouseY;
     m_Input->GetMouseDelta(mouseX, mouseY);
     m_Camera->Turn(mouseX, mouseY);
@@ -159,12 +157,13 @@ bool Game::Frame()
     // 背景色を青でクリア
     m_D3D->BeginScene(0.39f, 0.58f, 0.93f, 1.0f);
 
-    // --- ここにゲームの描画処理を追加していく ---
     m_D3D->GetDeviceContext()->Draw(3, 0); // 三角形を描画
-    // -----------------------------------------
 
     // バックバッファを画面に表示
     m_D3D->EndScene();
+
+    // 次のフレームのために、フレームの最後にマウス移動量をリセット
+    m_Input->Frame();
 
     return true;
 }
@@ -231,14 +230,6 @@ void Game::InitializeWindows(int& screenWidth, int& screenHeight)
     wc.cbSize = sizeof(WNDCLASSEX);
 
     RegisterClassEx(&wc);
-
-    // 高精度マウス入力を登録
-    RAWINPUTDEVICE rid;
-    rid.usUsagePage = 0x01; // Generic Desktop
-    rid.usUsage = 0x02;     // Mouse
-    rid.dwFlags = RIDEV_INPUTSINK;
-    rid.hwndTarget = NULL;
-    RegisterRawInputDevices(&rid, 1, sizeof(rid));
     
     screenWidth = 1280;
     screenHeight = 720;
@@ -246,6 +237,14 @@ void Game::InitializeWindows(int& screenWidth, int& screenHeight)
     m_hwnd = CreateWindowEx(WS_EX_APPWINDOW, m_applicationName, m_applicationName,
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, screenWidth, screenHeight, NULL, NULL, m_hinstance, NULL);
+    
+    // 高精度マウス入力を登録 
+    RAWINPUTDEVICE rid;
+    rid.usUsagePage = 0x01; // Generic Desktop
+    rid.usUsage = 0x02;     // Mouse
+    rid.dwFlags = RIDEV_NOLEGACY;
+    rid.hwndTarget = m_hwnd; // 作成したウィンドウハンドルを指定
+    RegisterRawInputDevices(&rid, 1, sizeof(rid));
 
     ShowWindow(m_hwnd, SW_SHOW);
     SetForegroundWindow(m_hwnd);
