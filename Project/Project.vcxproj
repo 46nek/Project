@@ -139,7 +139,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="DirectX3D.cpp" />
+    <ClCompile Include="Direct3D.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="main.cpp" />

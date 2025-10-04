@@ -118,6 +118,12 @@ void Game::Run()
 
 bool Game::Frame()
 {
+    m_Input->Frame();
+
+    int mouseX, mouseY;
+    m_Input->GetMouseDelta(mouseX, mouseY);
+    m_Camera->Turn(mouseX, mouseY);
+
     // --- 入力処理 ---
     // Wキーで前進
     if (m_Input->IsKeyDown('W'))
@@ -167,6 +173,22 @@ LRESULT CALLBACK Game::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARA
 {
     switch (umsg)
     {
+        // 高精度マウス入力のメッセージ
+    case WM_INPUT:
+    {
+        UINT dwSize = sizeof(RAWINPUT);
+        static BYTE lpb[sizeof(RAWINPUT)];
+
+        GetRawInputData((HRAWINPUT)lparam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER));
+
+        RAWINPUT* raw = (RAWINPUT*)lpb;
+
+        if (raw->header.dwType == RIM_TYPEMOUSE)
+        {
+            m_Input->MouseMove(raw->data.mouse.lLastX, raw->data.mouse.lLastY);
+        }
+        return 0;
+    }
         // キーが押されたメッセージ
     case WM_KEYDOWN:
     {
@@ -210,6 +232,14 @@ void Game::InitializeWindows(int& screenWidth, int& screenHeight)
 
     RegisterClassEx(&wc);
 
+    // 高精度マウス入力を登録
+    RAWINPUTDEVICE rid;
+    rid.usUsagePage = 0x01; // Generic Desktop
+    rid.usUsage = 0x02;     // Mouse
+    rid.dwFlags = RIDEV_INPUTSINK;
+    rid.hwndTarget = NULL;
+    RegisterRawInputDevices(&rid, 1, sizeof(rid));
+    
     screenWidth = 1280;
     screenHeight = 720;
 

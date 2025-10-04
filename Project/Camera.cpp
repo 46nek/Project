@@ -124,3 +124,25 @@ void Camera::MoveRight()
     m_positionX += sinf(radians) * m_moveSpeed * m_frameTime;
     m_positionZ += cosf(radians) * m_moveSpeed * m_frameTime;
 }
+
+void Camera::Turn(int mouseX, int mouseY)
+{
+    float yaw = (float)mouseX * m_rotationSpeed * m_frameTime;
+    float pitch = (float)mouseY * m_rotationSpeed * m_frameTime;
+
+    // ヨー（左右の回転）を更新
+    m_rotationY += yaw;
+
+    // ピッチ（上下の回転）を更新
+    m_rotationX += pitch;
+
+    // ピッチが90度以上または-90度以下にならないように制限（カメラがひっくり返るのを防ぐ）
+    if (m_rotationX > 90.0f)
+    {
+        m_rotationX = 90.0f;
+    }
+    if (m_rotationX < -90.0f)
+    {
+        m_rotationX = -90.0f;
+    }
+}
