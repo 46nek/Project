@@ -1,23 +1,36 @@
-// 頂点シェーダーとピクセルシェーダーの間でデータを渡すための構造体
-struct VS_OUTPUT
+// VertexShader.hlsl
+
+// C++のMatrixBufferType構造体と一致させる
+cbuffer MatrixBuffer : register(b0)
 {
-    float4 Pos : SV_POSITION; // SV_POSITION は必須。頂点の最終的な座標
-    float4 Color : COLOR; // COLOR は任意。ピクセルシェーダーに渡す色
+    matrix WorldMatrix;
+    matrix ViewMatrix;
+    matrix ProjectionMatrix;
 };
 
-// 頂点シェーダー
-// C++から受け取った頂点データを処理し、ピクセルシェーダーに渡します
-VS_OUTPUT VS(float4 Pos : POSITION, float4 Color : COLOR)
+struct VS_INPUT
 {
-    VS_OUTPUT output = (VS_OUTPUT) 0;
-    output.Pos = Pos;
-    output.Color = Color;
-    return output;
-}
+    float4 Pos : POSITION;
+    float4 Color : COLOR;
+};
 
-// ピクセルシェーダー
-// 頂点シェーダーから受け取った情報をもとに、ピクセルの最終的な色を決定します
-float4 PS(VS_OUTPUT input) : SV_Target
+struct VS_OUTPUT
 {
-    return input.Color; // 頂点の色をそのまま出力
+    float4 Pos : SV_POSITION;
+    float4 Color : COLOR;
+};
+
+VS_OUTPUT VS(VS_INPUT input)
+{
+    VS_OUTPUT output;
+
+    // 頂点座標を行列で変換
+    output.Pos = mul(input.Pos, WorldMatrix);
+    output.Pos = mul(output.Pos, ViewMatrix);
+    output.Pos = mul(output.Pos, ProjectionMatrix);
+
+    // 色はそのまま渡す
+    output.Color = input.Color;
+
+    return output;
 }
