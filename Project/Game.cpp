@@ -164,7 +164,6 @@ bool Game::Frame()
     {
         m_Camera->MoveForward(deltaTime); 
     }
-    // (S, A, Dキーも同様にdeltaTimeを渡す)
     if (m_Input->IsKeyDown('S'))
     {
         m_Camera->MoveBackward(deltaTime);
@@ -190,11 +189,18 @@ bool Game::Frame()
     // 背景色を青でクリア
     m_D3D->BeginScene(0.39f, 0.58f, 0.93f, 1.0f);
 
-        // モデルの頂点/インデックスバッファをセット
-    m_Model->Render(m_D3D->GetDeviceContext());
+    ID3D11DeviceContext* deviceContext = m_D3D->GetDeviceContext();
+
+    // これから描画で使うシェーダーとインプットレイアウトを設定
+    deviceContext->IASetInputLayout(m_D3D->GetInputLayout());
+    deviceContext->VSSetShader(m_D3D->GetVertexShader(), nullptr, 0);
+    deviceContext->PSSetShader(m_D3D->GetPixelShader(), nullptr, 0);
+
+    // モデルの頂点/インデックスバッファをセット
+    m_Model->Render(deviceContext);
 
     // セットされたバッファを使ってインデックス描画
-    m_D3D->GetDeviceContext()->DrawIndexed(m_Model->GetIndexCount(), 0, 0);
+    deviceContext->DrawIndexed(m_Model->GetIndexCount(), 0, 0);
 
     // バックバッファを画面に表示
     m_D3D->EndScene();

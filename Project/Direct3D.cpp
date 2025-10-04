@@ -212,3 +212,18 @@ ID3D11DeviceContext* Direct3D::GetDeviceContext()
 {
     return m_pImmediateContext;
 }
+
+ID3D11InputLayout* Direct3D::GetInputLayout()
+{
+    return m_pVertexLayout;
+}
+
+ID3D11VertexShader* Direct3D::GetVertexShader()
+{
+    return m_pVertexShader;
+}
+
+ID3D11PixelShader* Direct3D::GetPixelShader()
+{
+    return m_pPixelShader;
+}

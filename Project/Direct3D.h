@@ -43,6 +43,9 @@ public:
 
     ID3D11Device* GetDevice();
     ID3D11DeviceContext* GetDeviceContext();
+    ID3D11InputLayout* GetInputLayout();
+    ID3D11VertexShader* GetVertexShader();
+    ID3D11PixelShader* GetPixelShader();
 
     void SetWorldMatrix(const XMMATRIX& world);
     void SetViewMatrix(const XMMATRIX& view);
