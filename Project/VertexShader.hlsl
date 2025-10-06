@@ -12,12 +12,14 @@ struct VS_INPUT
 {
     float4 Pos : POSITION;
     float4 Color : COLOR;
+    float2 Tex : TEXCOORD0;
 };
 
 struct VS_OUTPUT
 {
     float4 Pos : SV_POSITION;
     float4 Color : COLOR;
+    float2 Tex : TEXCOORD0;
 };
 
 VS_OUTPUT VS(VS_INPUT input)
@@ -32,6 +34,7 @@ VS_OUTPUT VS(VS_INPUT input)
 
     // êFÇÕÇªÇÃÇ‹Ç‹ìnÇ∑
     output.Color = input.Color;
+    output.Tex = input.Tex;
 
     return output;
 }

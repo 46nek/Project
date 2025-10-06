@@ -17,6 +17,7 @@ struct SimpleVertex
 {
     XMFLOAT3 Pos;
     XMFLOAT4 Color;
+    XMFLOAT2 Tex;
 };
 
 struct MatrixBufferType
@@ -46,6 +47,7 @@ public:
     ID3D11InputLayout* GetInputLayout();
     ID3D11VertexShader* GetVertexShader();
     ID3D11PixelShader* GetPixelShader();
+    ID3D11SamplerState* GetSamplerState();
 
     void SetWorldMatrix(const XMMATRIX& world);
     void SetViewMatrix(const XMMATRIX& view);
@@ -58,6 +60,7 @@ private:
     ID3D11Device* m_pd3dDevice;
     ID3D11DeviceContext* m_pImmediateContext;
     ID3D11RenderTargetView* m_pRenderTargetView;
+    ID3D11SamplerState* m_pSamplerState;
 
     // シェーダーと頂点データ関連
     ID3D11VertexShader* m_pVertexShader;

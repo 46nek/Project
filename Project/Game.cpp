@@ -66,7 +66,11 @@ bool Game::Initialize()
     // Direct3Dを初期化
     bool result = m_D3D->Initialize(m_hwnd, m_screenWidth, m_screenHeight);
 
-    if (!m_D3D) return false;
+    if (!result)
+    {
+        MessageBox(m_hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
+        return false;
+    }
 
     // Modelオブジェクトを作成
     m_Model = new Model;
@@ -219,6 +223,9 @@ bool Game::Frame()
     deviceContext->IASetInputLayout(m_D3D->GetInputLayout());
     deviceContext->VSSetShader(m_D3D->GetVertexShader(), nullptr, 0);
     deviceContext->PSSetShader(m_D3D->GetPixelShader(), nullptr, 0);
+
+    ID3D11SamplerState* samplerState = m_D3D->GetSamplerState();
+    deviceContext->PSSetSamplers(0, 1, &samplerState);
 
     // モデルの頂点/インデックスバッファをセット
     m_Model->Render(deviceContext);

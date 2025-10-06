@@ -1,4 +1,3 @@
-// Direct3D.cpp
 #include "Direct3D.h"
 
 Direct3D::Direct3D()
@@ -12,6 +11,7 @@ Direct3D::Direct3D()
     m_pPixelShader = nullptr;
     m_pVertexLayout = nullptr;
     m_pMatrixBuffer = nullptr;
+    m_pSamplerState = nullptr;
 }
 
 Direct3D::~Direct3D()
@@ -104,12 +104,35 @@ bool Direct3D::Initialize(HWND hWnd, int screenWidth, int screenHeight)
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+          { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
     UINT numElements = ARRAYSIZE(layout);
     hr = m_pd3dDevice->CreateInputLayout(layout, numElements, pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), &m_pVertexLayout);
     pVSBlob->Release();
     pPSBlob->Release();
     if (FAILED(hr)) return false;
+
+    D3D11_SAMPLER_DESC samplerDesc;
+    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.MipLODBias = 0.0f;
+    samplerDesc.MaxAnisotropy = 1;
+    samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+    samplerDesc.BorderColor[0] = 0;
+    samplerDesc.BorderColor[1] = 0;
+    samplerDesc.BorderColor[2] = 0;
+    samplerDesc.BorderColor[3] = 0;
+    samplerDesc.MinLOD = 0;
+    samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+    // サンプラーステートを作成
+    hr = m_pd3dDevice->CreateSamplerState(&samplerDesc, &m_pSamplerState);
+    if (FAILED(hr))
+    {
+        return false;
+    }
 
     // ワールド、ビュー、プロジェクション行列を初期化
     m_worldMatrix = XMMatrixIdentity();
@@ -140,6 +163,10 @@ bool Direct3D::Initialize(HWND hWnd, int screenWidth, int screenHeight)
 
 void Direct3D::Shutdown()
 {
+
+    if (m_pSamplerState) { m_pSamplerState->Release(); m_pSamplerState = nullptr; }
+    if (m_pMatrixBuffer) { m_pMatrixBuffer->Release(); m_pMatrixBuffer = nullptr; }
+
     // 作成と逆の順序でリソースを解放
     if (m_pMatrixBuffer) { m_pMatrixBuffer->Release(); m_pMatrixBuffer = nullptr; }
     if (m_pVertexLayout) { m_pVertexLayout->Release(); m_pVertexLayout = nullptr; }
@@ -234,4 +261,8 @@ ID3D11VertexShader* Direct3D::GetVertexShader()
 ID3D11PixelShader* Direct3D::GetPixelShader()
 {
     return m_pPixelShader;
+}
+ID3D11SamplerState* Direct3D::GetSamplerState()
+{
+    return m_pSamplerState;
 }

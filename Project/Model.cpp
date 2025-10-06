@@ -4,6 +4,7 @@ Model::Model()
 {
     m_vertexBuffer = nullptr;
     m_indexBuffer = nullptr;
+    m_Texture = nullptr;
 }
 
 Model::~Model()
@@ -13,17 +14,44 @@ Model::~Model()
 bool Model::Initialize(ID3D11Device* device)
 {
     // 頂点バッファとインデックスバッファを初期化
-    return InitializeBuffers(device);
+    if (!InitializeBuffers(device))
+    {
+        return false;
+    }
+
+    // Textureオブジェクトを作成して初期化
+    m_Texture = new Texture;
+    if (!m_Texture)
+    {
+        return false;
+    }
+
+    // テクスチャを読み込む
+    if (!m_Texture->Initialize(device, L"crate.jpg"))
+    {
+        return false;
+    }
+
+    return true;
 }
 
 void Model::Shutdown()
 {
+    if (m_Texture)
+    {
+        m_Texture->Shutdown();
+        delete m_Texture;
+        m_Texture = nullptr;
+    }
+
     // バッファを解放
     ShutdownBuffers();
 }
 
 void Model::Render(ID3D11DeviceContext* deviceContext)
 {
+    ID3D11ShaderResourceView* texture = m_Texture->GetTexture();
+    deviceContext->PSSetShaderResources(0, 1, &texture);
     // 描画のためにバッファをパイプラインに設定
     RenderBuffers(deviceContext);
 }
@@ -60,24 +88,26 @@ bool Model::InitializeBuffers(ID3D11Device* device)
     {
         return false;
     }
+    // 頂点データにテクスチャ座標を追加 (色は白で統一)
+   // 前面
+    vertices[0].Pos = { -1.0f, -1.0f, -1.0f }; vertices[0].Tex = { 0.0f, 1.0f }; vertices[0].Color = { 1,1,1,1 };
+    vertices[1].Pos = { -1.0f,  1.0f, -1.0f }; vertices[1].Tex = { 0.0f, 0.0f }; vertices[1].Color = { 1,1,1,1 };
+    vertices[2].Pos = { 1.0f,  1.0f, -1.0f }; vertices[2].Tex = { 1.0f, 0.0f }; vertices[2].Color = { 1,1,1,1 };
+    vertices[3].Pos = { 1.0f, -1.0f, -1.0f }; vertices[3].Tex = { 1.0f, 1.0f }; vertices[3].Color = { 1,1,1,1 };
 
-    // 立方体の8つの頂点データ (位置と色)
-    vertices[0].Pos = { -1.0f, -1.0f, -1.0f }; vertices[0].Color = { 1.0f, 0.0f, 0.0f, 1.0f };
-    vertices[1].Pos = { -1.0f,  1.0f, -1.0f }; vertices[1].Color = { 0.0f, 1.0f, 0.0f, 1.0f };
-    vertices[2].Pos = { 1.0f,  1.0f, -1.0f }; vertices[2].Color = { 0.0f, 0.0f, 1.0f, 1.0f };
-    vertices[3].Pos = { 1.0f, -1.0f, -1.0f }; vertices[3].Color = { 1.0f, 1.0f, 0.0f, 1.0f };
-    vertices[4].Pos = { -1.0f, -1.0f,  1.0f }; vertices[4].Color = { 1.0f, 0.0f, 1.0f, 1.0f };
-    vertices[5].Pos = { -1.0f,  1.0f,  1.0f }; vertices[5].Color = { 0.0f, 1.0f, 1.0f, 1.0f };
-    vertices[6].Pos = { 1.0f,  1.0f,  1.0f }; vertices[6].Color = { 1.0f, 1.0f, 1.0f, 1.0f };
-    vertices[7].Pos = { 1.0f, -1.0f,  1.0f }; vertices[7].Color = { 0.0f, 0.0f, 0.0f, 1.0f };
+    // 背面
+    vertices[4].Pos = { -1.0f, -1.0f,  1.0f }; vertices[4].Tex = { 1.0f, 1.0f }; vertices[4].Color = { 1,1,1,1 };
+    vertices[5].Pos = { -1.0f,  1.0f,  1.0f }; vertices[5].Tex = { 1.0f, 0.0f }; vertices[5].Color = { 1,1,1,1 };
+    vertices[6].Pos = { 1.0f,  1.0f,  1.0f }; vertices[6].Tex = { 0.0f, 0.0f }; vertices[6].Color = { 1,1,1,1 };
+    vertices[7].Pos = { 1.0f, -1.0f,  1.0f }; vertices[7].Tex = { 0.0f, 1.0f }; vertices[7].Color = { 1,1,1,1 };
 
-    // 立方体の12の三角形を定義するインデックスデータ
+    // テクスチャが正しく貼られるようにインデックスデータを更新
     // 前面
     indices[0] = 0; indices[1] = 1; indices[2] = 2;
     indices[3] = 0; indices[4] = 2; indices[5] = 3;
     // 背面
-    indices[6] = 4; indices[7] = 6; indices[8] = 5;
-    indices[9] = 4; indices[10] = 7; indices[11] = 6;
+    indices[6] = 7; indices[7] = 6; indices[8] = 5;
+    indices[9] = 7; indices[10] = 5; indices[11] = 4;
     // 左側面
     indices[12] = 4; indices[13] = 5; indices[14] = 1;
     indices[15] = 4; indices[16] = 1; indices[17] = 0;

@@ -1,13 +1,18 @@
-// 頂点シェーダーとピクセルシェーダーの間でデータを渡すための構造体
+// テクスチャとサンプラーを定義
+Texture2D shaderTexture : register(t0);
+SamplerState SampleType : register(s0);
+
+// 頂点シェーダーから渡されるデータの構造体
 struct VS_OUTPUT
 {
-    float4 Pos : SV_POSITION; // SV_POSITION は必須。頂点の最終的な座標
-    float4 Color : COLOR; // COLOR は任意。ピクセルシェーダーに渡す色
+    float4 Pos : SV_POSITION;
+    float4 Color : COLOR;
+    float2 Tex : TEXCOORD0;
 };
 
-// ピクセルシェーダー
-// 頂点シェーダーから受け取った情報をもとに、ピクセルの最終的な色を決定します
+// ピクセルシェーダー本体
 float4 PS(VS_OUTPUT input) : SV_Target
 {
-    return input.Color; // 頂点の色をそのまま出力
+    //  サンプラーを使ってテクスチャからピクセルの色を取得する
+    return shaderTexture.Sample(SampleType, input.Tex);
 }
