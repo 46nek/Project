@@ -152,14 +152,24 @@ bool Game::Frame()
     m_Timer->Frame();
     float deltaTime = m_Timer->GetTime();
 
+    // ESCキーが押されたら終了確認
+    if (m_Input->IsKeyDown(VK_ESCAPE))
+    {
+        if (MessageBox(m_hwnd, L"ゲームを終了しますか？", L"終了確認", MB_YESNO | MB_ICONQUESTION) == IDYES)
+        {
+            PostQuitMessage(0);
+        }
+        // 確認ウィンドウが繰り返し表示されるのを防ぐため、キーの状態をリセット
+        m_Input->KeyUp(VK_ESCAPE);
+    }
 
     int mouseX, mouseY;
     m_Input->GetMouseDelta(mouseX, mouseY);
-    m_Camera->Turn(mouseX, mouseY, deltaTime); 
+    m_Camera->Turn(mouseX, mouseY, deltaTime);
 
     if (m_Input->IsKeyDown('W'))
     {
-        m_Camera->MoveForward(deltaTime); 
+        m_Camera->MoveForward(deltaTime);
     }
     if (m_Input->IsKeyDown('S'))
     {
@@ -231,7 +241,7 @@ LRESULT CALLBACK Game::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARA
         }
         return 0;
     }
-        // キーが押されたメッセージ
+    // キーが押されたメッセージ
     case WM_KEYDOWN:
     {
         m_Input->KeyDown((unsigned int)wparam);
@@ -246,6 +256,9 @@ LRESULT CALLBACK Game::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARA
     }
 
     case WM_SETCURSOR:
+        // カーソルを常に非表示にする
+        ShowCursor(false);
+        return true;
     case WM_MOUSEACTIVATE:
     {
         // デフォルトのウィンドウプロシージャに処理を任せる
@@ -280,14 +293,14 @@ void Game::InitializeWindows(int& screenWidth, int& screenHeight)
     wc.cbSize = sizeof(WNDCLASSEX);
 
     RegisterClassEx(&wc);
-    
+
     screenWidth = 1280;
     screenHeight = 720;
 
     m_hwnd = CreateWindowEx(WS_EX_APPWINDOW, m_applicationName, m_applicationName,
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, screenWidth, screenHeight, NULL, NULL, m_hinstance, NULL);
-    
+
     // 高精度マウス入力を登録 
     RAWINPUTDEVICE rid;
     rid.usUsagePage = 0x01; // Generic Desktop
@@ -299,10 +312,16 @@ void Game::InitializeWindows(int& screenWidth, int& screenHeight)
     ShowWindow(m_hwnd, SW_SHOW);
     SetForegroundWindow(m_hwnd);
     SetFocus(m_hwnd);
+
+    // カーソルを非表示にする
+    ShowCursor(false);
 }
 
 void Game::ShutdownWindows()
 {
+    // カーソルを再表示
+    ShowCursor(true);
+
     DestroyWindow(m_hwnd);
     m_hwnd = NULL;
 
