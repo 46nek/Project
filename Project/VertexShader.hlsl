@@ -23,11 +23,12 @@ struct VS_OUTPUT
 VS_OUTPUT VS(VS_INPUT input)
 {
     VS_OUTPUT output;
-
-    // 頂点座標を行列で変換
-    output.Pos = mul(input.Pos, WorldMatrix);
-    output.Pos = mul(output.Pos, ViewMatrix);
-    output.Pos = mul(output.Pos, ProjectionMatrix);
+    
+    // 変換結果を一時変数に格納し、順番に乗算していく
+    float4 pos = mul(input.Pos, WorldMatrix);
+    pos = mul(pos, ViewMatrix);
+    pos = mul(pos, ProjectionMatrix);
+    output.Pos = pos;
 
     // 色はそのまま渡す
     output.Color = input.Color;

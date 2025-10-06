@@ -67,7 +67,11 @@ bool Direct3D::Initialize(HWND hWnd, int screenWidth, int screenHeight)
     hr = D3DCompileFromFile(L"VertexShader.hlsl", nullptr, nullptr, "VS", "vs_5_0", 0, 0, &pVSBlob, &pErrorBlob);
     if (FAILED(hr))
     {
-        if (pErrorBlob) pErrorBlob->Release();
+        if (pErrorBlob)
+        {
+            OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
+            pErrorBlob->Release();
+        }
         return false;
     }
     hr = m_pd3dDevice->CreateVertexShader(pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), nullptr, &m_pVertexShader);
@@ -81,7 +85,11 @@ bool Direct3D::Initialize(HWND hWnd, int screenWidth, int screenHeight)
     hr = D3DCompileFromFile(L"PixelShader.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &pPSBlob, &pErrorBlob);
     if (FAILED(hr))
     {
-        if (pErrorBlob) pErrorBlob->Release();
+        if (pErrorBlob)
+        {
+            OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
+            pErrorBlob->Release();
+        }
         return false;
     }
     hr = m_pd3dDevice->CreatePixelShader(pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize(), nullptr, &m_pPixelShader);

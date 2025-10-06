@@ -74,9 +74,6 @@ bool Game::Initialize()
         return false;
     }
 
-    // Direct3Dを初期化
-    result = m_D3D->Initialize(m_hwnd, m_screenWidth, m_screenHeight);
-
     return true;
 }
 
@@ -181,7 +178,8 @@ bool Game::Frame()
     m_Camera->Update();
 
     // D3Dに行列をセット
-    m_D3D->SetViewMatrix(m_Camera->GetViewMatrix());
+    XMMATRIX worldMatrix = XMMatrixIdentity();
+    m_D3D->SetWorldMatrix(worldMatrix);
 
     // 行列バッファを更新
     m_D3D->UpdateMatrixBuffer();
