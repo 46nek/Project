@@ -3,6 +3,12 @@
 
 Game::Game()
 {
+    m_applicationName = nullptr;
+    m_hinstance = nullptr;
+    m_hwnd = nullptr;
+    m_screenWidth = 0;
+    m_screenHeight = 0;
+
     m_D3D = nullptr;
     m_Camera = nullptr;
     m_Input = nullptr;
@@ -155,9 +161,17 @@ bool Game::Frame()
     // ESCキーが押されたら終了確認
     if (m_Input->IsKeyDown(VK_ESCAPE))
     {
+        // カーソルを表示する
+        ShowCursor(true);
+
         if (MessageBox(m_hwnd, L"ゲームを終了しますか？", L"終了確認", MB_YESNO | MB_ICONQUESTION) == IDYES)
         {
             PostQuitMessage(0);
+        }
+        else
+        {
+            // 「いいえ」が押されたらカーソルを非表示に戻す
+            ShowCursor(false);
         }
         // 確認ウィンドウが繰り返し表示されるのを防ぐため、キーの状態をリセット
         m_Input->KeyUp(VK_ESCAPE);

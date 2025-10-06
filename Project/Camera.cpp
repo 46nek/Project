@@ -11,8 +11,10 @@ Camera::Camera()
     m_rotationY = 0.0f;
     m_rotationZ = 0.0f;
 
+    m_viewMatrix = XMMatrixIdentity();
+
     m_moveSpeed = 5.0f;
-    m_rotationSpeed = 1.0f;
+    m_rotationSpeed = 5.0f;
 }
 
 Camera::~Camera()
