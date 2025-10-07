@@ -60,13 +60,6 @@ void GameScene::Update(float deltaTime)
 	m_Timer->Frame();
 	float dt = m_Timer->GetTime();
 
-	// ESCキーが押されたらタイトルシーンに戻る
-	if (m_Input->IsKeyDown(VK_ESCAPE))
-	{
-		m_nextScene = SceneState::Title;
-		return;
-	}
-
 	int mouseX, mouseY;
 	m_Input->GetMouseDelta(mouseX, mouseY);
 	m_Camera->Turn(mouseX, mouseY, dt);

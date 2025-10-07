@@ -34,6 +34,7 @@ private:
 	SceneManager* m_SceneManager; 
 
 	int m_screenWidth, m_screenHeight;
+	bool m_isMessageBoxActive;
 };
 
 // Windowsプロシージャのための静的ポインタ

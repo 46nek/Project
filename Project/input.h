@@ -14,9 +14,11 @@ public:
     void MouseMove(int x, int y);
 
     bool IsKeyDown(unsigned int);
+    bool IsKeyPressed(unsigned int);
     void GetMouseDelta(int& x, int& y);
 
 private:
     bool m_keys[256];
+    bool m_previousKeys[256];
     int m_mouseX, m_mouseY;
 };

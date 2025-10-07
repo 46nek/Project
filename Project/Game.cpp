@@ -7,6 +7,7 @@ Game::Game()
     m_hwnd = nullptr;
     m_screenWidth = 0;
     m_screenHeight = 0;
+    m_isMessageBoxActive = false;
 
     m_D3D = nullptr;
     m_Input = nullptr;
@@ -54,6 +55,8 @@ bool Game::Initialize()
 
 void Game::Shutdown()
 {
+    // ウィンドウを閉じる
+    ShutdownWindows();
     // SceneManagerオブジェクトを解放
     if (m_SceneManager)
     {
@@ -75,9 +78,6 @@ void Game::Shutdown()
         delete m_D3D;
         m_D3D = nullptr;
     }
-
-    // ウィンドウを閉じる
-    ShutdownWindows();
 }
 
 void Game::Run()
@@ -112,6 +112,27 @@ void Game::Run()
 
 bool Game::Frame()
 {
+    // ESCキーが押された瞬間を検知
+    if (m_Input->IsKeyPressed(VK_ESCAPE))
+    {
+        m_isMessageBoxActive = true;
+        // メッセージボックスの前にカーソルを表示する
+        ShowCursor(true);
+
+        // 確認メッセージボックスを表示
+        int result = MessageBox(m_hwnd, L"ゲームを終了しますか？", L"終了の確認", MB_YESNO | MB_ICONQUESTION);
+
+        // メッセージボックスが閉じたら、すぐにカーソルを非表示に戻す
+        ShowCursor(false);
+        m_isMessageBoxActive = false;
+
+        // ユーザーが「はい」を選んだ場合
+        if (result == IDYES)
+        {
+            return false; // ループを抜けてゲームを終了
+        }
+    }
+
     // 毎フレームの処理をSceneManagerに委譲
     m_SceneManager->Update(0.0f); // deltaTimeは各シーンのタイマーで管理
     m_SceneManager->Render();
@@ -159,9 +180,15 @@ LRESULT CALLBACK Game::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARA
     }
 
     case WM_SETCURSOR:
-        // カーソルを常に非表示にする
-        ShowCursor(false);
-        return true;
+        // メッセージボックスが表示中でなければ、カーソルを非表示にする
+        if (!m_isMessageBoxActive)
+        {
+            ShowCursor(false);
+            return true;
+        }
+        // メッセージボックス表示中は、OSの標準カーソル処理に完全に任せる
+        return DefWindowProc(hwnd, umsg, wparam, lparam);
+
     case WM_MOUSEACTIVATE:
     {
         // デフォルトのウィンドウプロシージャに処理を任せる
