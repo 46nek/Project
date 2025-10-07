@@ -4,40 +4,36 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include "Direct3D.h"
-#include "Camera.h"
 #include "Input.h"
-#include "Timer.h"
-#include "Model.h" 
+#include "SceneManager.h" 
 
 class Game
 {
 public:
-    Game();
-    ~Game();
+	Game();
+	~Game();
 
-    bool Initialize();
-    void Run();
-    void Shutdown();
+	bool Initialize();
+	void Run();
+	void Shutdown();
 
-    LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
-
-private:
-    bool Frame();
-    void InitializeWindows(int&, int&);
-    void ShutdownWindows();
+	LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
 
 private:
-    LPCWSTR m_applicationName;
-    HINSTANCE m_hinstance;
-    HWND m_hwnd;
+	bool Frame();
+	void InitializeWindows(int&, int&);
+	void ShutdownWindows();
 
-    Direct3D* m_D3D; // Direct3Dクラスのインスタンス
-    Camera* m_Camera;
-    Input* m_Input;
-    Timer* m_Timer;
-    Model* m_Model;
+private:
+	LPCWSTR m_applicationName;
+	HINSTANCE m_hinstance;
+	HWND m_hwnd;
 
-    int m_screenWidth, m_screenHeight;
+	Direct3D* m_D3D;
+	Input* m_Input;
+	SceneManager* m_SceneManager; 
+
+	int m_screenWidth, m_screenHeight;
 };
 
 // Windowsプロシージャのための静的ポインタ

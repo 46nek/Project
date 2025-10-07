@@ -1,4 +1,3 @@
-// Game.cpp
 #include "Game.h"
 
 Game::Game()
@@ -10,10 +9,8 @@ Game::Game()
     m_screenHeight = 0;
 
     m_D3D = nullptr;
-    m_Camera = nullptr;
     m_Input = nullptr;
-    m_Timer = nullptr;
-    m_Model = nullptr;
+    m_SceneManager = nullptr; // 追加
     ApplicationHandle = this;
 }
 
@@ -30,85 +27,45 @@ bool Game::Initialize()
     // Windows APIを初期化
     InitializeWindows(m_screenWidth, m_screenHeight);
 
-    // Timerオブジェクトを作成して初期化
-    m_Timer = new Timer;
-    if (!m_Timer) return false;
-    if (!m_Timer->Initialize())
-    {
-        MessageBox(m_hwnd, L"Could not initialize the Timer object.", L"Error", MB_OK);
-        return false;
-    }
-
     // Inputオブジェクトを作成して初期化
     m_Input = new Input;
-    if (!m_Input)
-    {
-        return false;
-    }
+    if (!m_Input) return false;
     m_Input->Initialize();
-
-    // カメラオブジェクトを作成
-    m_Camera = new Camera;
-    if (!m_Camera)
-    {
-        return false;
-    }
-    // カメラの初期位置を設定 (少し後ろに下げる)
-    m_Camera->SetPosition(0.0f, 0.0f, -5.0f);
 
     // Direct3Dオブジェクトを作成
     m_D3D = new Direct3D;
-    if (!m_D3D)
-    {
-        return false;
-    }
+    if (!m_D3D) return false;
 
     // Direct3Dを初期化
-    bool result = m_D3D->Initialize(m_hwnd, m_screenWidth, m_screenHeight);
-
-    if (!result)
+    if (!m_D3D->Initialize(m_hwnd, m_screenWidth, m_screenHeight))
     {
         MessageBox(m_hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
         return false;
     }
 
-    // Modelオブジェクトを作成
-    m_Model = new Model;
-    if (!m_Model) return false;
+    // SceneManagerオブジェクトを作成して初期化
+    m_SceneManager = new SceneManager;
+    if (!m_SceneManager) return false;
+    if (!m_SceneManager->Initialize(m_D3D, m_Input)) return false;
 
-    // Direct3Dデバイスを使ってModelを初期化
-    result = m_Model->Initialize(m_D3D->GetDevice());
-    if (!result)
-    {
-        MessageBox(m_hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
-        return false;
-    }
 
     return true;
 }
 
 void Game::Shutdown()
 {
-    if (m_Model)
+    // SceneManagerオブジェクトを解放
+    if (m_SceneManager)
     {
-        m_Model->Shutdown();
-        delete m_Model;
-        m_Model = nullptr;
+        m_SceneManager->Shutdown();
+        delete m_SceneManager;
+        m_SceneManager = nullptr;
     }
-    if (m_Timer)
-    {
-        delete m_Timer;
-        m_Timer = nullptr;
-    }
+
     if (m_Input)
     {
         delete m_Input;
         m_Input = nullptr;
-    }
-    if (m_Camera)
-    {
-        delete m_Camera;
-        m_Camera = nullptr;
     }
 
     // Direct3Dオブジェクトを解放
@@ -133,10 +90,8 @@ void Game::Run()
     // メインループ
     while (true)
     {
-        // ウィンドウメッセージがある場合、それを処理
         if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
         {
-            // WM_QUITメッセージを受け取ったらループを抜ける
             if (msg.message == WM_QUIT)
             {
                 break;
@@ -146,11 +101,9 @@ void Game::Run()
         }
         else
         {
-            // メッセージがなければ、ゲームのフレームを処理
             result = Frame();
             if (!result)
             {
-                // Frame()がfalseを返した場合もループを抜ける
                 break;
             }
         }
@@ -159,82 +112,9 @@ void Game::Run()
 
 bool Game::Frame()
 {
-    m_Timer->Frame();
-    float deltaTime = m_Timer->GetTime();
-
-    // ESCキーが押されたら終了確認
-    if (m_Input->IsKeyDown(VK_ESCAPE))
-    {
-        // カーソルを表示する
-        ShowCursor(true);
-
-        if (MessageBox(m_hwnd, L"ゲームを終了しますか？", L"終了確認", MB_YESNO | MB_ICONQUESTION) == IDYES)
-        {
-            PostQuitMessage(0);
-        }
-        else
-        {
-            // 「いいえ」が押されたらカーソルを非表示に戻す
-            ShowCursor(false);
-        }
-        // 確認ウィンドウが繰り返し表示されるのを防ぐため、キーの状態をリセット
-        m_Input->KeyUp(VK_ESCAPE);
-    }
-
-    int mouseX, mouseY;
-    m_Input->GetMouseDelta(mouseX, mouseY);
-    m_Camera->Turn(mouseX, mouseY, deltaTime);
-
-    if (m_Input->IsKeyDown('W'))
-    {
-        m_Camera->MoveForward(deltaTime);
-    }
-    if (m_Input->IsKeyDown('S'))
-    {
-        m_Camera->MoveBackward(deltaTime);
-    }
-    if (m_Input->IsKeyDown('A'))
-    {
-        m_Camera->MoveLeft(deltaTime);
-    }
-    if (m_Input->IsKeyDown('D'))
-    {
-        m_Camera->MoveRight(deltaTime);
-    }
-
-    // カメラを更新
-    m_Camera->Update();
-
-    // D3Dに行列をセット
-    XMMATRIX worldMatrix = XMMatrixIdentity();
-    m_D3D->SetWorldMatrix(worldMatrix);
-
-    m_D3D->SetViewMatrix(m_Camera->GetViewMatrix());
-
-    // 行列バッファを更新
-    m_D3D->UpdateMatrixBuffer();
-
-    // 背景色を青でクリア
-    m_D3D->BeginScene(0.39f, 0.58f, 0.93f, 1.0f);
-
-    ID3D11DeviceContext* deviceContext = m_D3D->GetDeviceContext();
-
-    // これから描画で使うシェーダーとインプットレイアウトを設定
-    deviceContext->IASetInputLayout(m_D3D->GetInputLayout());
-    deviceContext->VSSetShader(m_D3D->GetVertexShader(), nullptr, 0);
-    deviceContext->PSSetShader(m_D3D->GetPixelShader(), nullptr, 0);
-
-    ID3D11SamplerState* samplerState = m_D3D->GetSamplerState();
-    deviceContext->PSSetSamplers(0, 1, &samplerState);
-
-    // モデルの頂点/インデックスバッファをセット
-    m_Model->Render(deviceContext);
-
-    // セットされたバッファを使ってインデックス描画
-    deviceContext->DrawIndexed(m_Model->GetIndexCount(), 0, 0);
-
-    // バックバッファを画面に表示
-    m_D3D->EndScene();
+    // 毎フレームの処理をSceneManagerに委譲
+    m_SceneManager->Update(0.0f); // deltaTimeは各シーンのタイマーで管理
+    m_SceneManager->Render();
 
     // 次のフレームのために、フレームの最後にマウス移動量をリセット
     m_Input->Frame();
@@ -242,6 +122,8 @@ bool Game::Frame()
     return true;
 }
 
+// MessageHandler, InitializeWindows, ShutdownWindows, WndProc は変更なし
+// (ただし、Game::Frame()内の終了確認ロジックはGameSceneに移動したので削除)
 LRESULT CALLBACK Game::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
     switch (umsg)
@@ -285,7 +167,10 @@ LRESULT CALLBACK Game::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARA
         // デフォルトのウィンドウプロシージャに処理を任せる
         return DefWindowProc(hwnd, umsg, wparam, lparam);
     }
-
+    // アプリケーションがフォーカスを失った時にキー入力がリセットされるようにする
+    case WM_KILLFOCUS:
+        m_Input->Initialize();
+        return 0;
     default:
     {
         return DefWindowProc(hwnd, umsg, wparam, lparam);
