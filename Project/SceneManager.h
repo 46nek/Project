@@ -17,7 +17,7 @@ public:
 	void Render();
 
 private:
-	void ChangeScene(SceneState nextState);
+	bool ChangeScene(SceneState nextState);
 
 private:
 	std::unique_ptr<Scene> m_currentScene; // Œ»İ‚ÌƒV[ƒ“‚ğ•Û

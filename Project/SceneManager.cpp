@@ -18,8 +18,7 @@ bool SceneManager::Initialize(Direct3D* d3d, Input* input)
 	m_D3D = d3d;
 	m_Input = input;
 	// 最初のシーンとしてタイトルシーンを設定
-	ChangeScene(SceneState::Title);
-	return true;
+	return ChangeScene(SceneState::Title);
 }
 
 void SceneManager::Shutdown()
@@ -54,7 +53,7 @@ void SceneManager::Render()
 	}
 }
 
-void SceneManager::ChangeScene(SceneState nextState)
+bool SceneManager::ChangeScene(SceneState nextState)
 {
 	// 現在のシーンを解放
 	if (m_currentScene)
@@ -73,13 +72,21 @@ void SceneManager::ChangeScene(SceneState nextState)
 		m_currentScene = std::make_unique<GameScene>();
 		break;
 	default:
-		// 未知のシーン状態
-		return;
+		return false; // 未知のシーン状態なら失敗
 	}
 
-	// 新しいシーンを初期化
+	// 新しいシーンを初期化し、その結果を返す
 	if (m_currentScene)
 	{
-		m_currentScene->Initialize(m_D3D, m_Input);
+		if (!m_currentScene->Initialize(m_D3D, m_Input))
+		{
+			return false; // 初期化に失敗したらfalseを返す
+		}
 	}
+	else
+	{
+		return false; // シーンの作成に失敗
+	}
+
+	return true; // すべて成功したらtrueを返す
 }

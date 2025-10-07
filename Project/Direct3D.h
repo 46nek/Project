@@ -1,4 +1,3 @@
-// Direct3D.h
 #pragma once
 
 #include <windows.h>
@@ -6,6 +5,8 @@
 #include <dxgi.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h> 
+#include <memory> 
+#include "SpriteBatch.h" 
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -40,6 +41,8 @@ public:
 
     // 描画処理
     void BeginScene(float r, float g, float b, float a);
+    void Begin2D();
+    void End2D();
     void EndScene();
 
     ID3D11Device* GetDevice();
@@ -53,7 +56,7 @@ public:
     void SetViewMatrix(const XMMATRIX& view);
     void SetProjectionMatrix(const XMMATRIX& projection);
     bool UpdateMatrixBuffer();
-
+    DirectX::SpriteBatch* GetSpriteBatch();
 private:
     // DirectX11の主要なインターフェース
     IDXGISwapChain* m_pSwapChain;
@@ -71,4 +74,7 @@ private:
     XMMATRIX m_worldMatrix;
     XMMATRIX m_viewMatrix;
     XMMATRIX m_projectionMatrix;
+    XMMATRIX m_orthoMatrix;
+
+    std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
 };

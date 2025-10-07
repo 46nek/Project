@@ -1,4 +1,5 @@
 #include "Direct3D.h"
+#include "SpriteBatch.h" 
 
 Direct3D::Direct3D()
 {
@@ -158,11 +159,17 @@ bool Direct3D::Initialize(HWND hWnd, int screenWidth, int screenHeight)
     {
         return false;
     }
+    // SpriteBatchÇÃçÏê¨
+    m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_pImmediateContext); 
+    // ê≥éÀâeçsóÒÇçÏê¨
+    m_orthoMatrix = XMMatrixOrthographicLH((float)screenWidth, (float)screenHeight, 0.1f, 1000.0f); 
+
     return true;
 }
 
 void Direct3D::Shutdown()
 {
+    m_spriteBatch.reset();
 
     if (m_pSamplerState) { m_pSamplerState->Release(); m_pSamplerState = nullptr; }
     if (m_pMatrixBuffer) { m_pMatrixBuffer->Release(); m_pMatrixBuffer = nullptr; }
@@ -182,6 +189,20 @@ void Direct3D::BeginScene(float r, float g, float b, float a)
 {
     float color[4] = { r, g, b, a };
     m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView, color);
+}
+void Direct3D::Begin2D()
+{
+    m_spriteBatch->Begin();
+}
+
+void Direct3D::End2D()
+{
+    m_spriteBatch->End();
+}
+
+DirectX::SpriteBatch* Direct3D::GetSpriteBatch()
+{
+    return m_spriteBatch.get();
 }
 void Direct3D::SetWorldMatrix(const XMMATRIX& world)
 {
