@@ -17,7 +17,7 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 	m_Camera->SetPosition(0.0f, 0.0f, -5.0f);
 
 	m_Model = std::make_unique<Model>();
-	if (!m_Model->Initialize(m_D3D->GetDevice(), "Assets/test.obj"))
+	if (!m_Model->Initialize(m_D3D->GetDevice(), "Assets/test.fbx"))
 	{
 		return false;
 	}
