@@ -79,6 +79,7 @@
     <ClInclude Include="Window.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
+    <ClInclude Include="MazeGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -120,6 +121,7 @@
     <ClCompile Include="Window.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
+    <ClCompile Include="MazeGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Project.rc">

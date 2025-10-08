@@ -15,6 +15,11 @@ public:
     void Shutdown();
     void Render(ID3D11DeviceContext*);
 
+    void SetPosition(float x, float y, float z);
+    void SetRotation(float x, float y, float z);
+    void SetScale(float x, float y, float z);
+    DirectX::XMMATRIX GetWorldMatrix();
+
 private:
     // メッシュを表す構造体
     struct Mesh {
@@ -35,4 +40,7 @@ private:
 
 private:
     std::vector<Mesh> m_meshes; // モデル内のメッシュを保持するベクター
+    DirectX::XMFLOAT3 m_position;
+    DirectX::XMFLOAT3 m_rotation;
+    DirectX::XMFLOAT3 m_scale;
 };

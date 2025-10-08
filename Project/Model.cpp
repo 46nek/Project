@@ -5,7 +5,10 @@
 
 Model::Model()
 {
-    // コンストラクタは空でOK
+
+    m_position = { 0.0f, 0.0f, 0.0f };
+    m_rotation = { 0.0f, 0.0f, 0.0f };
+    m_scale = { 1.0f, 1.0f, 1.0f };
 }
 
 Model::~Model()
@@ -192,4 +195,14 @@ Model::Mesh Model::ProcessMesh(ID3D11Device* device, aiMesh* mesh, const aiScene
     }
 
     return newMesh;
+}
+void Model::SetPosition(float x, float y, float z) { m_position = { x, y, z }; }
+void Model::SetRotation(float x, float y, float z) { m_rotation = { x, y, z }; }
+void Model::SetScale(float x, float y, float z) { m_scale = { x, y, z }; }
+DirectX::XMMATRIX Model::GetWorldMatrix()
+{
+    DirectX::XMMATRIX scaleMatrix = DirectX::XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
+    DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(m_rotation.x, m_rotation.y, m_rotation.z);
+    DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
+    return scaleMatrix * rotationMatrix * translationMatrix;
 }
