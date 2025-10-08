@@ -73,20 +73,20 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>C:\DirectXTK-main\Inc;$(IncludePath)</IncludePath>
     <LibraryPath>C:\DirectXTK-main\Bin\Desktop_2022\x64\Debug;$(LibraryPath)</LibraryPath>
-    <ReferencePath>C:\Users\nishi\OneDrive\デスクトップ\就職作品\Project\Project\Assets;$(ReferencePath)</ReferencePath>
+    <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>C:\DirectXTK-main\Inc;$(IncludePath)</IncludePath>
-    <ReferencePath>C:\Users\nishi\OneDrive\デスクトップ\就職作品\Project\Project\Assets;$(ReferencePath)</ReferencePath>
+    <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>C:\DirectXTK-main\Inc;$(IncludePath)</IncludePath>
     <LibraryPath>C:\DirectXTK-main\Bin\Desktop_2022\x64\Debug;$(LibraryPath)</LibraryPath>
-    <ReferencePath>C:\Users\nishi\OneDrive\デスクトップ\就職作品\Project\Project\Assets;$(ReferencePath)</ReferencePath>
+    <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>C:\DirectXTK-main\Inc;$(IncludePath)</IncludePath>
-    <ReferencePath>C:\Users\nishi\OneDrive\デスクトップ\就職作品\Project\Project\Assets;$(ReferencePath)</ReferencePath>
+    <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
