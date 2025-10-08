@@ -1,4 +1,5 @@
 #include "GameScene.h"
+#include <windows.h>
 
 GameScene::GameScene()
 {
@@ -10,29 +11,50 @@ GameScene::~GameScene()
 
 bool GameScene::Initialize(Direct3D* d3d, Input* input)
 {
+	OutputDebugStringA("GameScene Initialize started...\n");
+
 	m_D3D = d3d;
 	m_Input = input;
 
+	OutputDebugStringA("--> Creating Camera...\n");
 	m_Camera = std::make_unique<Camera>();
 
-	// 迷路生成
+	OutputDebugStringA("--> Creating MazeGenerator...\n");
 	m_mazeGenerator = std::make_unique<MazeGenerator>();
-	m_mazeGenerator->Generate(2, 2); // 21x21の大きさの迷路を生成
+	OutputDebugStringA("--> Generating Maze (21x21)...\n");
+	m_mazeGenerator->Generate(21, 21);
+	OutputDebugStringA("--> Maze Generation complete.\n");
 
 	const auto& mazeData = m_mazeGenerator->GetMazeData();
 	const int mazeHeight = static_cast<int>(mazeData.size());
 	const int mazeWidth = static_cast<int>(mazeData[0].size());
 
-	// スタート地点にカメラを配置
-	// カメラの初期位置を迷路の道の上に調整
-	m_Camera->SetPosition(1.0f * 2.0f, 1.0f, 0.0f * 2.0f);
+	OutputDebugStringA("--> Setting Camera position...\n");
+	// カメラの初期位置を迷路の道の上に調整 (以前の修正を適用)
+	bool startFound = false;
+	for (int y = 0; y < mazeHeight && !startFound; ++y) {
+		for (int x = 0; x < mazeWidth && !startFound; ++x) {
+			if (mazeData[y][x] == MazeGenerator::Path) {
+				m_Camera->SetPosition(static_cast<float>(x) * 2.0f, 10.0f, static_cast<float>(y) * 2.0f);
+				startFound = true;
+			}
+		}
+	}
+	if (!startFound) {
+		m_Camera->SetPosition(1.0f * 2.0f, 1.0f, 1.0f * 2.0f); // フォールバック
+	}
 
+
+	OutputDebugStringA("--> Initializing wall model...\n");
 	// 壁モデルを1度だけ読み込む
 	m_wallModel = std::make_unique<Model>();
-	if (!m_wallModel->Initialize(m_D3D->GetDevice(), "Assets/wall.obj"))
-		{
+	if (!m_wallModel->Initialize(m_D3D->GetDevice(), "Assets/cube.fbx"))
+	{
+		OutputDebugStringA("!!!!!! FAILED to initialize wall model.\n");
 		return false;
-		}
+	}
+	m_wallModel->SetScale(1.0f, 2.0f, 1.0f);
+	OutputDebugStringA("--> Wall model initialized successfully.\n");
 
 	// 壁の位置情報を格納
 	for (int y = 0; y < mazeHeight; ++y)
@@ -45,17 +67,25 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 			}
 		}
 	}
+	OutputDebugStringA("--> Wall positions stored.\n");
 
+	OutputDebugStringA("--> Initializing floor model...\n");
 	// 床モデルの読み込みと配置
 	m_floorModel = std::make_unique<Model>();
-	if (!m_floorModel->Initialize(m_D3D->GetDevice(), "Assets/floor.obj")) 
+	if (!m_floorModel->Initialize(m_D3D->GetDevice(), "Assets/cube.fbx"))
 	{
+		OutputDebugStringA("!!!!!! FAILED to initialize floor model.\n");
 		return false;
 	}
-	// 床を迷路の中央に配置し、迷路全体を覆うように拡大
-	m_floorModel->SetPosition(static_cast<float>(mazeWidth - 1), 0.0f, static_cast<float>(mazeHeight - 1)); 
-	m_floorModel->SetScale(static_cast<float>(mazeWidth), 1.0f, static_cast<float>(mazeHeight));
+	OutputDebugStringA("--> Floor model initialized successfully.\n");
 
+	// 床を迷路の中央に配置し、迷路全体を覆うように拡大
+	m_floorModel->SetPosition(static_cast<float>(mazeWidth - 1), 0.0f, static_cast<float>(mazeHeight - 1));
+	m_floorModel->SetScale(static_cast<float>(mazeWidth), 1.0f, static_cast<float>(mazeHeight));
+	OutputDebugStringA("--> Floor model position and scale set.\n");
+
+
+	OutputDebugStringA("GameScene Initialize finished successfully.\n");
 	return true;
 }
 

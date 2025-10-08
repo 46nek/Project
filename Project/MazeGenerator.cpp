@@ -45,19 +45,17 @@ void MazeGenerator::Generate(int width, int height)
     m_maze[startY][startX] = Path;
 
     // ゴール地点をランダムに決める（スタート地点から遠い場所）
-    // ここでは簡単化のため、スタートと対角線上のどこかに設定
+    // do-whileループを削除し、ゴールを直接設定します。
     int endX, endY;
-    do {
-        if (gen() % 2 == 0) {
-            endX = (gen() % (m_width / 2)) * 2 + 1;
-            endY = (startY == 0) ? m_height - 1 : 0;
-        }
-        else {
-            endX = (startX == 0) ? m_width - 1 : 0;
-            endY = (gen() % (m_height / 2)) * 2 + 1;
-        }
-    } while (m_maze[endY][endX] == Wall); // 必ず道の上にゴールを設定
-    m_maze[endY][endX] = Path;
+    if (gen() % 2 == 0) {
+        endX = (gen() % (m_width / 2)) * 2 + 1;
+        endY = (startY == 0) ? m_height - 1 : 0;
+    }
+    else {
+        endX = (startX == 0) ? m_width - 1 : 0;
+        endY = (gen() % (m_height / 2)) * 2 + 1;
+    }
+    m_maze[endY][endX] = Path; // ゴール地点を道にする
 }
 
 const std::vector<std::vector<MazeGenerator::CellType>>& MazeGenerator::GetMazeData() const

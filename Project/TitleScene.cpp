@@ -1,4 +1,5 @@
 #include "TitleScene.h"
+#include <windows.h>
 
 TitleScene::TitleScene()
 {
@@ -55,9 +56,11 @@ void TitleScene::Shutdown()
 
 void TitleScene::Update(float deltaTime)
 {
+	OutputDebugStringA("TitleScene Update is running...\n");
 	// Enterキーが押されたらゲームシーンに遷移
-	if (m_Input->IsKeyDown(VK_RETURN))
+	if (m_Input->IsKeyPressed(VK_RETURN))
 	{
+		OutputDebugStringA("Enter key pressed! Changing to GameScene...\n");
 		m_nextScene = SceneState::Game;
 	}
 }
