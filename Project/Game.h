@@ -1,45 +1,31 @@
-// Game.h
+// Source/Core/Game.h
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include "Window.h"
 #include "Direct3D.h"
 #include "Input.h"
-#include "SceneManager.h" 
+#include "SceneManager.h"
+#include <memory>
 
 class Game
 {
 public:
-	static constexpr int SCREEN_WIDTH = 1280;
-	static constexpr int SCREEN_HEIGHT = 720;
+    static constexpr int SCREEN_WIDTH = 1280;
+    static constexpr int SCREEN_HEIGHT = 720;
 
-	Game();
-	~Game();
+    Game();
+    ~Game();
 
-	bool Initialize();
-	void Run();
-	void Shutdown();
-
-	LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
+    bool Initialize(HINSTANCE hInstance);
+    void Run();
+    void Shutdown();
 
 private:
-	bool Frame();
-	void InitializeWindows(int&, int&);
-	void ShutdownWindows();
+    bool Frame();
 
-private:
-	LPCWSTR m_applicationName;
-	HINSTANCE m_hinstance;
-	HWND m_hwnd;
-
-	std::unique_ptr<Direct3D> m_D3D;
-	std::unique_ptr<Input> m_Input;
-	std::unique_ptr<SceneManager> m_SceneManager;
-
-	int m_screenWidth, m_screenHeight;
-	bool m_isMessageBoxActive;
+    std::unique_ptr<Window> m_window;
+    std::unique_ptr<Input> m_input;
+    std::unique_ptr<Direct3D> m_direct3D;
+    std::unique_ptr<SceneManager> m_sceneManager;
+    bool m_isMessageBoxActive;
 };
-
-// Windowsプロシージャのための静的ポインタ
-static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-static Game* ApplicationHandle = 0;

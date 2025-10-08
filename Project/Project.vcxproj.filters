@@ -1,144 +1,124 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="ソース ファイル">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="ヘッダー ファイル">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
     <Filter Include="リソース ファイル">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="シェーダー">
-      <UniqueIdentifier>{e390a009-5510-4a04-a7af-8efe4c8cd6de}</UniqueIdentifier>
+    <Filter Include="Source">
+      <UniqueIdentifier>{abc46e0d-5c93-4b5c-bdab-9a43f99a74b3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Core">
+    <Filter Include="Source\Core">
       <UniqueIdentifier>{6c64e0e4-f7eb-4d37-af47-5fd4006700fb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\DirectX">
+    <Filter Include="Source\DirectX">
       <UniqueIdentifier>{f9e50b3d-0be7-4b29-ac39-a50e9d5714fb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Game">
-      <UniqueIdentifier>{31e61019-33b9-465b-b467-4f015dfc82c7}</UniqueIdentifier>
+    <Filter Include="Source\Graphics">
+      <UniqueIdentifier>{d14a872f-1719-4669-80a3-b29e97d98446}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\input">
-      <UniqueIdentifier>{7023eb13-6aaf-41bd-9dd7-6c45ed858e99}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ソース ファイル\Scenes">
+    <Filter Include="Source\Scenes">
       <UniqueIdentifier>{229d7e91-2cca-4934-8107-67d45d9d5049}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Utility">
-      <UniqueIdentifier>{8323f3fb-1262-4d6f-9912-4f1df86789ef}</UniqueIdentifier>
+    <Filter Include="Source\System">
+      <UniqueIdentifier>{2df6848f-98f1-44ea-a39d-5e2eaa906a90}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\Core">
-      <UniqueIdentifier>{08944987-6f9f-45a4-8b91-d6c2fe2bad62}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\DirectX">
-      <UniqueIdentifier>{03258f2a-856e-4a16-9ab7-ce4a8458f21e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Game">
-      <UniqueIdentifier>{da1b8d25-afec-4874-920e-8febf86e6868}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Input">
-      <UniqueIdentifier>{2ed4f298-3977-4c2f-8f37-975530c7805d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Scenes">
-      <UniqueIdentifier>{293a2a3d-284c-4337-b60e-9c67eaed9097}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\Utility">
-      <UniqueIdentifier>{ff3d7fbf-536b-49e8-8197-96c3dc78e529}</UniqueIdentifier>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{e390a009-5510-4a04-a7af-8efe4c8cd6de}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h">
-      <Filter>ヘッダー ファイル\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>ヘッダー ファイル\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Project.h">
-      <Filter>ヘッダー ファイル\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Game.h">
-      <Filter>ヘッダー ファイル\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>ヘッダー ファイル\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D.h">
-      <Filter>ヘッダー ファイル\DirectX</Filter>
-    </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>ヘッダー ファイル\Game</Filter>
+      <Filter>Source\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Model.h">
-      <Filter>ヘッダー ファイル\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture.h">
-      <Filter>ヘッダー ファイル\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="input.h">
-      <Filter>ヘッダー ファイル\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="GameScene.h">
-      <Filter>ヘッダー ファイル\Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>ヘッダー ファイル\Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="TitleScene.h">
-      <Filter>ヘッダー ファイル\Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneManager.h">
-      <Filter>ヘッダー ファイル\Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>ヘッダー ファイル\Utility</Filter>
+      <Filter>Source\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Sprite.h">
-      <Filter>ヘッダー ファイル\Game</Filter>
+      <Filter>Source\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Source\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Project.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D.h">
+      <Filter>Source\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="GameScene.h">
+      <Filter>Source\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Source\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>Source\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="TitleScene.h">
+      <Filter>Source\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="input.h">
+      <Filter>Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Window.h">
+      <Filter>Source\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
-      <Filter>ソース ファイル\Core</Filter>
+      <Filter>Source\Core</Filter>
     </ClCompile>
     <ClCompile Include="Game.cpp">
-      <Filter>ソース ファイル\Core</Filter>
+      <Filter>Source\Core</Filter>
     </ClCompile>
     <ClCompile Include="Direct3D.cpp">
-      <Filter>ソース ファイル\DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>ソース ファイル\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>ソース ファイル\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>ソース ファイル\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="input.cpp">
-      <Filter>ソース ファイル\input</Filter>
+      <Filter>Source\DirectX</Filter>
     </ClCompile>
     <ClCompile Include="GameScene.cpp">
-      <Filter>ソース ファイル\Scenes</Filter>
+      <Filter>Source\Scenes</Filter>
     </ClCompile>
     <ClCompile Include="SceneManager.cpp">
-      <Filter>ソース ファイル\Scenes</Filter>
+      <Filter>Source\Scenes</Filter>
     </ClCompile>
     <ClCompile Include="TitleScene.cpp">
-      <Filter>ソース ファイル\Scenes</Filter>
+      <Filter>Source\Scenes</Filter>
     </ClCompile>
-    <ClCompile Include="Timer.cpp">
-      <Filter>ソース ファイル\Utility</Filter>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Source\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Sprite.cpp">
-      <Filter>ソース ファイル\Game</Filter>
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="input.cpp">
+      <Filter>Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Window.cpp">
+      <Filter>Source\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -156,10 +136,10 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">
-      <Filter>シェーダー</Filter>
+      <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="VertexShader.hlsl">
-      <Filter>シェーダー</Filter>
+      <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

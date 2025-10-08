@@ -1,29 +1,15 @@
 ﻿// main.cpp
 #include "Game.h"
+#include <windows.h>
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline, int iCmdshow)
+int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ PSTR pScmdline, _In_ int iCmdshow)
 {
-    Game* game;
-    bool result;
-
-    // Gameオブジェクトを作成
-    game = new Game;
-    if (!game)
-    {
-        return 0;
-    }
-
-    // 初期化して実行
-    result = game->Initialize();
-    if (result)
+    auto game = std::make_unique<Game>();
+    if (game->Initialize(hInstance))
     {
         game->Run();
     }
-
-    // 終了処理
     game->Shutdown();
-    delete game;
-    game = nullptr;
 
     return 0;
 }
