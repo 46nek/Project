@@ -7,7 +7,7 @@ public:
     ~Input();
 
     void Initialize();
-    void Frame();
+    void EndFrame();
 
     void KeyDown(unsigned int);
     void KeyUp(unsigned int);

@@ -3,7 +3,6 @@
 #include "Scene.h"
 #include "Camera.h"
 #include "Model.h"
-#include "Timer.h"
 
 class GameScene : public Scene
 {
@@ -17,7 +16,9 @@ public:
 	void Render() override;
 
 private:
-	std::unique_ptr < Camera> m_Camera;
-	std::unique_ptr < Model> m_Model;
-	std::unique_ptr<Timer> m_Timer;
+	void HandleInput(float deltaTime);
+	void UpdateCamera(float deltaTime);
+
+	std::unique_ptr<Camera> m_Camera;
+	std::unique_ptr<Model> m_Model;
 };

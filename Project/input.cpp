@@ -21,7 +21,7 @@ void Input::Initialize()
     m_mouseY = 0;
 }
 
-void Input::Frame()
+void Input::EndFrame()
 {
     // 現在のキー入力を前のフレームの入力としてコピー
     for (int i = 0; i < 256; i++) // <<< 追加

@@ -1,6 +1,6 @@
 #include "Game.h"
 
-Game::Game() : m_isMessageBoxActive(false)
+Game::Game()
 {
 }
 
@@ -32,6 +32,12 @@ bool Game::Initialize(HINSTANCE hInstance)
         return false;
     }
 
+    m_timer = std::make_unique<Timer>();
+    if (!m_timer->Initialize())
+    {
+        return false;
+    }
+
     return true;
 }
 
@@ -54,33 +60,38 @@ void Game::Run()
         }
         else
         {
-            if (!Frame())
+            if (!Update())
             {
                 break;
             }
+            Render();
         }
     }
 }
 
-bool Game::Frame()
+bool Game::Update()
 {
+    m_timer->Tick();
+
     if (m_input->IsKeyPressed(VK_ESCAPE))
     {
-        m_isMessageBoxActive = true;
-        ShowCursor(true);
         int result = MessageBox(m_window->GetHwnd(), L"ゲームを終了しますか？", L"終了の確認", MB_YESNO | MB_ICONQUESTION);
-        ShowCursor(false);
-        m_isMessageBoxActive = false;
-
         if (result == IDYES)
         {
-            return false;
+            return false; // ゲーム終了
         }
     }
 
-    m_sceneManager->Update(0.0f);
-    m_sceneManager->Render();
-    m_input->Frame();
+    // 先にシーンの更新を行う
+    m_sceneManager->Update(m_timer->GetDeltaTime());
+
+    // シーン更新後にInputの状態を次のフレームのためにリセットする
+    m_input->EndFrame();
 
     return true;
+}
+
+void Game::Render()
+{
+    m_sceneManager->Render();
 }

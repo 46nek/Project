@@ -8,13 +8,14 @@ public:
     ~Timer();
 
     bool Initialize();
-    void Frame();
+    void Tick();
 
-    float GetTime();
+    // デルタタイムを秒単位で返す (例: 0.016秒)
+    float GetDeltaTime() const;
 
 private:
     INT64 m_frequency;
-    float m_ticksPerMs;
+    float m_ticksPerMillisecond;
     INT64 m_startTime;
-    float m_frameTime;
+    float m_deltaTime;
 };
