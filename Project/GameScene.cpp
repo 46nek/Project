@@ -20,8 +20,8 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 	m_mazeGenerator->Generate(21, 21); // 21x21の大きさの迷路を生成
 
 	const auto& mazeData = m_mazeGenerator->GetMazeData();
-	const int mazeHeight = mazeData.size();
-	const int mazeWidth = mazeData[0].size();
+	const int mazeHeight = static_cast<int>(mazeData.size());
+	const int mazeWidth = static_cast<int>(mazeData[0].size());
 
 	// スタート地点にカメラを配置
 	// カメラの初期位置を迷路の道の上に調整
@@ -55,8 +55,8 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 		return false;
 	}
 	// 床を迷路の中央に配置し、迷路全体を覆うように拡大
-	m_floorModel->SetPosition((mazeWidth - 1), 0.0f, (mazeHeight - 1));
-	m_floorModel->SetScale((float)mazeWidth, 1.0f, (float)mazeHeight);
+	m_floorModel->SetPosition(static_cast<float>(mazeWidth - 1), 0.0f, static_cast<float>(mazeHeight - 1)); 
+	m_floorModel->SetScale(static_cast<float>(mazeWidth), 1.0f, static_cast<float>(mazeHeight));
 
 	return true;
 }

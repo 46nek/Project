@@ -15,21 +15,21 @@ bool TitleScene::Initialize(Direct3D* d3d, Input* input)
 
 	// 背景の初期化
 	m_background = std::make_unique<Sprite>();
-	if (!m_background->Initialize(d3d->GetDevice(), L"Assets/background.png")) // 仮のファイル名
+	if (!m_background->Initialize(d3d->GetDevice(), L"Assets/background.png")) 
 	{
 		return false;
 	}
 
 	// タイトルロゴの初期化
 	m_titleLogo = std::make_unique<Sprite>();
-	if (!m_titleLogo->Initialize(d3d->GetDevice(), L"Assets/title.png")) // 仮のファイル名
+	if (!m_titleLogo->Initialize(d3d->GetDevice(), L"Assets/title.png"))
 	{
 		return false;
 	}
 
 	// Press Enterテキストの初期化
 	m_pressEnter = std::make_unique<Sprite>();
-	if (!m_pressEnter->Initialize(d3d->GetDevice(), L"Assets/button.png")) // 仮のファイル名
+	if (!m_pressEnter->Initialize(d3d->GetDevice(), L"Assets/button.png")) 
 	{
 		return false;
 	}

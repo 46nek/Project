@@ -15,6 +15,7 @@ enum class SceneState
 class Scene
 {
 public:
+	Scene() : m_D3D(nullptr), m_Input(nullptr), m_nextScene(SceneState::None) {}
 	virtual ~Scene() = default;
 
 	// 各シーンで実装する仮想関数

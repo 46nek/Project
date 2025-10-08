@@ -86,7 +86,22 @@ bool Model::LoadModel(ID3D11Device* device, const std::string& filename)
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
-        // エラーログなどを出力するとデバッグが楽になります
+        // Assimpからのエラーメッセージを取得
+        const char* errorString = importer.GetErrorString();
+        // エラーメッセージをワイド文字列に変換
+        std::wstring wErrorString;
+        if (errorString)
+        {
+            int len = MultiByteToWideChar(CP_ACP, 0, errorString, -1, NULL, 0);
+            wErrorString.resize(len);
+            MultiByteToWideChar(CP_ACP, 0, errorString, -1, &wErrorString[0], len);
+        }
+        else
+        {
+            wErrorString = L"Unknown error.";
+        }
+        // エラーメッセージをMessageBoxで表示
+        MessageBox(NULL, wErrorString.c_str(), L"Model Load Error", MB_OK);
         return false;
     }
 
@@ -155,7 +170,7 @@ Model::Mesh Model::ProcessMesh(ID3D11Device* device, aiMesh* mesh, const aiScene
     HRESULT result;
 
     vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    vertexBufferDesc.ByteWidth = sizeof(SimpleVertex) * vertices.size();
+    vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(SimpleVertex) * vertices.size());
     vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     vertexBufferDesc.CPUAccessFlags = 0;
     vertexBufferDesc.MiscFlags = 0;
@@ -164,7 +179,7 @@ Model::Mesh Model::ProcessMesh(ID3D11Device* device, aiMesh* mesh, const aiScene
     // TODO: resultのエラーチェック
 
     indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    indexBufferDesc.ByteWidth = sizeof(unsigned long) * indices.size();
+    indexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(unsigned long) * indices.size());
     indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
     indexBufferDesc.CPUAccessFlags = 0;
     indexBufferDesc.MiscFlags = 0;
@@ -172,7 +187,7 @@ Model::Mesh Model::ProcessMesh(ID3D11Device* device, aiMesh* mesh, const aiScene
     result = device->CreateBuffer(&indexBufferDesc, &indexData, &newMesh.indexBuffer);
     // TODO: resultのエラーチェック
 
-    newMesh.indexCount = indices.size();
+    newMesh.indexCount = static_cast<int>(indices.size());
 
     // マテリアルとテクスチャの読み込み
     if (mesh->mMaterialIndex >= 0)
