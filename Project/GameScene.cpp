@@ -29,7 +29,7 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 	// Modelオブジェクトを作成
 	m_Model = new Model;
 	if (!m_Model) return false;
-	if (!m_Model->Initialize(m_D3D->GetDevice())) return false;
+	if (!m_Model->Initialize(m_D3D->GetDevice(), "Assets/test.obj")) return false;
 
 	return true;
 }
@@ -95,7 +95,6 @@ void GameScene::Render()
 
 	// モデルを描画
 	m_Model->Render(deviceContext);
-	deviceContext->DrawIndexed(m_Model->GetIndexCount(), 0, 0);
 
 	m_D3D->EndScene();
 }

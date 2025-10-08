@@ -71,22 +71,24 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\DirectXTK-main\Inc;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\DirectXTK-main\Bin\Desktop_2022\x64\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\DirectXTK-main\Inc;C:\Assimp\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\DirectXTK-main\Bin\Desktop_2022\x64\Debug;$(LibraryPath);C:\Assimp\lib\x64</LibraryPath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\DirectXTK-main\Inc;$(IncludePath)</IncludePath>
+    <IncludePath>C:\DirectXTK-main\Inc;C:\Assimp\include;$(IncludePath)</IncludePath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);C:\Assimp\lib\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\DirectXTK-main\Inc;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\DirectXTK-main\Bin\Desktop_2022\x64\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\DirectXTK-main\Inc;C:\Assimp\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\DirectXTK-main\Bin\Desktop_2022\x64\Debug;$(LibraryPath);C:\Assimp\lib\x64</LibraryPath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\DirectXTK-main\Inc;$(IncludePath)</IncludePath>
+    <IncludePath>C:\DirectXTK-main\Inc;C:\Assimp\include;$(IncludePath)</IncludePath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);C:\Assimp\lib\x64;C:\DirectXTK-main\Bin\Desktop_2022\x64\Release</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -99,7 +101,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>d3d11.lib;dxgi.lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);DirectXTK.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);DirectXTK.libassimp-vc143-mtd.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -114,7 +116,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);DirectXTK.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);DirectXTK.libassimp-vc143-mt.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -128,7 +130,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;dxgi.lib;%(AdditionalDependencies);DirectXTK.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;%(AdditionalDependencies);DirectXTK.lib;assimp-vc143-mtd.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -144,7 +146,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;dxgi.lib;%(AdditionalDependencies);DirectXTK.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;%(AdditionalDependencies);DirectXTK.lib;assimp-vc143-mt.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

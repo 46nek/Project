@@ -1,178 +1,195 @@
 #include "Model.h"
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 Model::Model()
 {
-    m_vertexBuffer = nullptr;
-    m_indexBuffer = nullptr;
-    m_Texture = nullptr;
+    // コンストラクタは空でOK
 }
 
 Model::~Model()
 {
+    // デストラクタでShutdownを呼ぶと、オブジェクトがスコープを抜けた時に自動でリソースが解放されるので安全です。
+    Shutdown();
 }
 
-bool Model::Initialize(ID3D11Device* device)
+bool Model::Initialize(ID3D11Device* device, const char* modelFilename)
 {
-    // 頂点バッファとインデックスバッファを初期化
-    if (!InitializeBuffers(device))
-    {
-        return false;
-    }
-
-    // Textureオブジェクトを作成して初期化
-    m_Texture = new Texture;
-    if (!m_Texture)
-    {
-        return false;
-    }
-
-    // テクスチャを読み込む
-    if (!m_Texture->Initialize(device, L"crate.jpg"))
-    {
-        return false;
-    }
-
-    return true;
+    return LoadModel(device, modelFilename);
 }
 
 void Model::Shutdown()
 {
-    if (m_Texture)
+    // 全てのメッシュのリソースを解放
+    for (auto& mesh : m_meshes)
     {
-        m_Texture->Shutdown();
-        delete m_Texture;
-        m_Texture = nullptr;
+        if (mesh.vertexBuffer)
+        {
+            mesh.vertexBuffer->Release();
+            mesh.vertexBuffer = nullptr;
+        }
+        if (mesh.indexBuffer)
+        {
+            mesh.indexBuffer->Release();
+            mesh.indexBuffer = nullptr;
+        }
+        if (mesh.texture)
+        {
+            mesh.texture->Shutdown();
+            delete mesh.texture;
+            mesh.texture = nullptr;
+        }
     }
-
-    // バッファを解放
-    ShutdownBuffers();
+    m_meshes.clear(); // ベクターをクリア
 }
 
 void Model::Render(ID3D11DeviceContext* deviceContext)
 {
-    ID3D11ShaderResourceView* texture = m_Texture->GetTexture();
-    deviceContext->PSSetShaderResources(0, 1, &texture);
-    // 描画のためにバッファをパイプラインに設定
-    RenderBuffers(deviceContext);
-}
-
-int Model::GetIndexCount()
-{
-    return m_indexCount;
-}
-
-bool Model::InitializeBuffers(ID3D11Device* device)
-{
-    SimpleVertex* vertices;
-    unsigned long* indices;
-    D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
-    D3D11_SUBRESOURCE_DATA vertexData, indexData;
-    HRESULT result;
-
-    // 立方体は8つの頂点で構成される
-    m_vertexCount = 8;
-
-    // 立方体は12の三角形（36のインデックス）で構成される
-    m_indexCount = 36;
-
-    // 頂点配列を作成
-    vertices = new SimpleVertex[m_vertexCount];
-    if (!vertices)
+    // すべてのメッシュを描画
+    for (auto& mesh : m_meshes)
     {
-        return false;
-    }
+        // メッシュ固有のテクスチャをセット
+        if (mesh.texture)
+        {
+            ID3D11ShaderResourceView* textureView = mesh.texture->GetTexture();
+            deviceContext->PSSetShaderResources(0, 1, &textureView);
+        }
 
-    // インデックス配列を作成
-    indices = new unsigned long[m_indexCount];
-    if (!indices)
-    {
-        return false;
-    }
-    // 頂点データにテクスチャ座標を追加 (色は白で統一)
-   // 前面
-    vertices[0].Pos = { -1.0f, -1.0f, -1.0f }; vertices[0].Tex = { 0.0f, 1.0f }; vertices[0].Color = { 1,1,1,1 };
-    vertices[1].Pos = { -1.0f,  1.0f, -1.0f }; vertices[1].Tex = { 0.0f, 0.0f }; vertices[1].Color = { 1,1,1,1 };
-    vertices[2].Pos = { 1.0f,  1.0f, -1.0f }; vertices[2].Tex = { 1.0f, 0.0f }; vertices[2].Color = { 1,1,1,1 };
-    vertices[3].Pos = { 1.0f, -1.0f, -1.0f }; vertices[3].Tex = { 1.0f, 1.0f }; vertices[3].Color = { 1,1,1,1 };
-
-    // 背面
-    vertices[4].Pos = { -1.0f, -1.0f,  1.0f }; vertices[4].Tex = { 1.0f, 1.0f }; vertices[4].Color = { 1,1,1,1 };
-    vertices[5].Pos = { -1.0f,  1.0f,  1.0f }; vertices[5].Tex = { 1.0f, 0.0f }; vertices[5].Color = { 1,1,1,1 };
-    vertices[6].Pos = { 1.0f,  1.0f,  1.0f }; vertices[6].Tex = { 0.0f, 0.0f }; vertices[6].Color = { 1,1,1,1 };
-    vertices[7].Pos = { 1.0f, -1.0f,  1.0f }; vertices[7].Tex = { 0.0f, 1.0f }; vertices[7].Color = { 1,1,1,1 };
-
-    // テクスチャが正しく貼られるようにインデックスデータを更新
-    // 前面
-    indices[0] = 0; indices[1] = 1; indices[2] = 2;
-    indices[3] = 0; indices[4] = 2; indices[5] = 3;
-    // 背面
-    indices[6] = 7; indices[7] = 6; indices[8] = 5;
-    indices[9] = 7; indices[10] = 5; indices[11] = 4;
-    // 左側面
-    indices[12] = 4; indices[13] = 5; indices[14] = 1;
-    indices[15] = 4; indices[16] = 1; indices[17] = 0;
-    // 右側面
-    indices[18] = 3; indices[19] = 2; indices[20] = 6;
-    indices[21] = 3; indices[22] = 6; indices[23] = 7;
-    // 上面
-    indices[24] = 1; indices[25] = 5; indices[26] = 6;
-    indices[27] = 1; indices[28] = 6; indices[29] = 2;
-    // 底面
-    indices[30] = 4; indices[31] = 0; indices[32] = 3;
-    indices[33] = 4; indices[34] = 3; indices[35] = 7;
-
-    // 頂点バッファの設定
-    vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    vertexBufferDesc.ByteWidth = sizeof(SimpleVertex) * m_vertexCount;
-    vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    vertexBufferDesc.CPUAccessFlags = 0;
-    vertexBufferDesc.MiscFlags = 0;
-    vertexData.pSysMem = vertices;
-    result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
-    if (FAILED(result)) return false;
-
-    // インデックスバッファの設定
-    indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
-    indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    indexBufferDesc.CPUAccessFlags = 0;
-    indexBufferDesc.MiscFlags = 0;
-    indexData.pSysMem = indices;
-    result = device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
-    if (FAILED(result)) return false;
-
-    // 作成後は配列を解放
-    delete[] vertices;
-    vertices = nullptr;
-    delete[] indices;
-    indices = nullptr;
-
-    return true;
-}
-
-void Model::ShutdownBuffers()
-{
-    if (m_indexBuffer)
-    {
-        m_indexBuffer->Release();
-        m_indexBuffer = nullptr;
-    }
-    if (m_vertexBuffer)
-    {
-        m_vertexBuffer->Release();
-        m_vertexBuffer = nullptr;
+        // メッシュのバッファをセットして描画
+        RenderBuffers(deviceContext, mesh);
+        deviceContext->DrawIndexed(mesh.indexCount, 0, 0);
     }
 }
 
-void Model::RenderBuffers(ID3D11DeviceContext* deviceContext)
+void Model::RenderBuffers(ID3D11DeviceContext* deviceContext, const Mesh& mesh)
 {
     unsigned int stride = sizeof(SimpleVertex);
     unsigned int offset = 0;
 
     // 頂点バッファをセット
-    deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
+    deviceContext->IASetVertexBuffers(0, 1, &mesh.vertexBuffer, &stride, &offset);
     // インデックスバッファをセット
-    deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+    deviceContext->IASetIndexBuffer(mesh.indexBuffer, DXGI_FORMAT_R32_UINT, 0);
     // プリミティブタイプをセット
     deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
+bool Model::LoadModel(ID3D11Device* device, const std::string& filename)
+{
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(filename,
+        aiProcess_Triangulate | aiProcess_ConvertToLeftHanded);
+
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+    {
+        // エラーログなどを出力するとデバッグが楽になります
+        return false;
+    }
+
+    // モデルファイルのディレクトリパスを取得
+    std::string directory = filename.substr(0, filename.find_last_of('/'));
+
+    ProcessNode(device, scene->mRootNode, scene, directory);
+    return true;
+}
+
+void Model::ProcessNode(ID3D11Device* device, aiNode* node, const aiScene* scene, const std::string& directory)
+{
+    // ノードに含まれるすべてのメッシュを処理
+    for (UINT i = 0; i < node->mNumMeshes; i++)
+    {
+        aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+        m_meshes.push_back(ProcessMesh(device, mesh, scene, directory));
+    }
+    // 子ノードも再帰的に処理
+    for (UINT i = 0; i < node->mNumChildren; i++)
+    {
+        ProcessNode(device, node->mChildren[i], scene, directory);
+    }
+}
+
+Model::Mesh Model::ProcessMesh(ID3D11Device* device, aiMesh* mesh, const aiScene* scene, const std::string& directory)
+{
+    std::vector<SimpleVertex> vertices;
+    std::vector<unsigned long> indices;
+    Mesh newMesh = {}; // 新しいメッシュを初期化
+
+    // 頂点データを処理
+    for (UINT i = 0; i < mesh->mNumVertices; i++)
+    {
+        SimpleVertex vertex;
+        vertex.Pos.x = mesh->mVertices[i].x;
+        vertex.Pos.y = mesh->mVertices[i].y;
+        vertex.Pos.z = mesh->mVertices[i].z;
+
+        if (mesh->HasTextureCoords(0)) // テクスチャ座標がある場合
+        {
+            vertex.Tex.x = mesh->mTextureCoords[0][i].x;
+            vertex.Tex.y = mesh->mTextureCoords[0][i].y;
+        }
+        else
+        {
+            vertex.Tex = { 0.0f, 0.0f };
+        }
+        vertex.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
+        vertices.push_back(vertex);
+    }
+
+    // インデックスデータを処理
+    for (UINT i = 0; i < mesh->mNumFaces; i++)
+    {
+        aiFace face = mesh->mFaces[i];
+        for (UINT j = 0; j < face.mNumIndices; j++)
+        {
+            indices.push_back(face.mIndices[j]);
+        }
+    }
+
+    // --- ここから頂点バッファとインデックスバッファの作成 ---
+    D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+    D3D11_SUBRESOURCE_DATA vertexData, indexData;
+    HRESULT result;
+
+    vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    vertexBufferDesc.ByteWidth = sizeof(SimpleVertex) * vertices.size();
+    vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    vertexBufferDesc.CPUAccessFlags = 0;
+    vertexBufferDesc.MiscFlags = 0;
+    vertexData.pSysMem = &vertices[0];
+    result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &newMesh.vertexBuffer);
+    // TODO: resultのエラーチェック
+
+    indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    indexBufferDesc.ByteWidth = sizeof(unsigned long) * indices.size();
+    indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    indexBufferDesc.CPUAccessFlags = 0;
+    indexBufferDesc.MiscFlags = 0;
+    indexData.pSysMem = &indices[0];
+    result = device->CreateBuffer(&indexBufferDesc, &indexData, &newMesh.indexBuffer);
+    // TODO: resultのエラーチェック
+
+    newMesh.indexCount = indices.size();
+
+    // マテリアルとテクスチャの読み込み
+    if (mesh->mMaterialIndex >= 0)
+    {
+        aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+        aiString texturePath;
+        if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS)
+        {
+            newMesh.texture = new Texture();
+            std::string fullPath = directory + "/" + texturePath.C_Str();
+            // ワイド文字列に変換
+            std::wstring wFullPath(fullPath.begin(), fullPath.end());
+            if (!newMesh.texture->Initialize(device, wFullPath.c_str()))
+            {
+                // テクスチャ読み込み失敗時の処理
+                delete newMesh.texture;
+                newMesh.texture = nullptr;
+            }
+        }
+    }
+
+    return newMesh;
 }
