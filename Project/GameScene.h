@@ -23,6 +23,7 @@ private:
 
     std::unique_ptr<Camera> m_Camera;
     std::unique_ptr<MazeGenerator> m_mazeGenerator; // MazeGeneratorのインスタンス
-    std::vector<std::unique_ptr<Model>> m_wallModels; // 壁モデルを複数保持する
+    std::unique_ptr<Model> m_wallModel; // 壁モデルを1つだけ保持する
+    std::vector<DirectX::XMFLOAT3> m_wallPositions; // 壁の位置情報を保持する
     std::unique_ptr<Model> m_floorModel; // 床モデル
 };

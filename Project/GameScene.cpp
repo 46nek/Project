@@ -17,7 +17,7 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 
 	// 迷路生成
 	m_mazeGenerator = std::make_unique<MazeGenerator>();
-	m_mazeGenerator->Generate(21, 21); // 21x21の大きさの迷路を生成
+	m_mazeGenerator->Generate(2, 2); // 21x21の大きさの迷路を生成
 
 	const auto& mazeData = m_mazeGenerator->GetMazeData();
 	const int mazeHeight = static_cast<int>(mazeData.size());
@@ -27,23 +27,21 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 	// カメラの初期位置を迷路の道の上に調整
 	m_Camera->SetPosition(1.0f * 2.0f, 1.0f, 0.0f * 2.0f);
 
+	// 壁モデルを1度だけ読み込む
+	m_wallModel = std::make_unique<Model>();
+	if (!m_wallModel->Initialize(m_D3D->GetDevice(), "Assets/wall.obj"))
+		{
+		return false;
+		}
 
-	// 壁モデルの読み込みと配置
+	// 壁の位置情報を格納
 	for (int y = 0; y < mazeHeight; ++y)
 	{
 		for (int x = 0; x < mazeWidth; ++x)
 		{
 			if (mazeData[y][x] == MazeGenerator::Wall)
 			{
-				auto wall = std::make_unique<Model>();
-				if (!wall->Initialize(m_D3D->GetDevice(), "Assets/wall.obj")) 
-				{
-					return false;
-				}
-				// 壁の位置を設定（モデルのサイズに合わせて調整してください）
-				// ここでは1つの壁が (2.0f, 2.0f, 2.0f) のサイズだと仮定
-				wall->SetPosition(x * 2.0f, 1.0f, y * 2.0f);
-				m_wallModels.push_back(std::move(wall));
+				m_wallPositions.emplace_back(x * 2.0f, 1.0f, y * 2.0f);
 			}
 		}
 	}
@@ -63,14 +61,11 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 
 void GameScene::Shutdown()
 {
-	for (auto& wall : m_wallModels)
+	if (m_wallModel)
 	{
-		if (wall)
-		{
-			wall->Shutdown();
-		}
+		m_wallModel->Shutdown();
 	}
-	m_wallModels.clear();
+	m_wallPositions.clear();
 
 	if (m_floorModel)
 	{
@@ -117,14 +112,15 @@ void GameScene::Render()
 	deviceContext->PSSetSamplers(0, 1, &samplerState);
 
 	// 全ての壁を描画
-	for (const auto& wall : m_wallModels)
+	if (m_wallModel)
 	{
-		if (wall)
+		for (const auto& position : m_wallPositions)
 		{
-			XMMATRIX worldMatrix = wall->GetWorldMatrix();
+			m_wallModel->SetPosition(position.x, position.y, position.z);
+			XMMATRIX worldMatrix = m_wallModel->GetWorldMatrix();
 			m_D3D->SetWorldMatrix(worldMatrix);
 			m_D3D->UpdateMatrixBuffer();
-			wall->Render(deviceContext);
+			m_wallModel->Render(deviceContext);
 		}
 	}
 
