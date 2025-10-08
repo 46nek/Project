@@ -2,9 +2,6 @@
 
 GameScene::GameScene()
 {
-	m_Camera = nullptr;
-	m_Model = nullptr;
-	m_Timer = nullptr;
 }
 
 GameScene::~GameScene()
@@ -17,40 +14,30 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 	m_Input = input;
 
 	// Timerオブジェクトを作成して初期化
-	m_Timer = new Timer;
-	if (!m_Timer) return false;
-	if (!m_Timer->Initialize()) return false;
+	m_Timer = std::make_unique<Timer>();
+	if (!m_Timer->Initialize())
+	{
+		return false;
+	}
 
 	// カメラオブジェクトを作成
-	m_Camera = new Camera;
-	if (!m_Camera) return false;
+	m_Camera = std::make_unique<Camera>();
 	m_Camera->SetPosition(0.0f, 0.0f, -5.0f);
 
 	// Modelオブジェクトを作成
-	m_Model = new Model;
-	if (!m_Model) return false;
-	if (!m_Model->Initialize(m_D3D->GetDevice(), "Assets/test.obj")) return false;
+	m_Model = std::make_unique<Model>();
+	if (!m_Model->Initialize(m_D3D->GetDevice(), "Assets/test.obj"))
+	{
+		return false;
+	}
 
 	return true;
 }
 
 void GameScene::Shutdown()
 {
-	if (m_Model)
 	{
 		m_Model->Shutdown();
-		delete m_Model;
-		m_Model = nullptr;
-	}
-	if (m_Timer)
-	{
-		delete m_Timer;
-		m_Timer = nullptr;
-	}
-	if (m_Camera)
-	{
-		delete m_Camera;
-		m_Camera = nullptr;
 	}
 }
 

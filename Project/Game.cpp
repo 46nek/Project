@@ -1,4 +1,5 @@
 #include "Game.h"
+#include <utility>
 
 Game::Game()
 {
@@ -21,63 +22,30 @@ Game::~Game()
 
 bool Game::Initialize()
 {
-    // ウィンドウサイズを初期化
-    m_screenWidth = 0;
-    m_screenHeight = 0;
-
-    // Windows APIを初期化
     InitializeWindows(m_screenWidth, m_screenHeight);
 
-    // Inputオブジェクトを作成して初期化
-    m_Input = new Input;
-    if (!m_Input) return false;
+    m_Input = std::make_unique<Input>();
     m_Input->Initialize();
 
-    // Direct3Dオブジェクトを作成
-    m_D3D = new Direct3D;
-    if (!m_D3D) return false;
-
-    // Direct3Dを初期化
+    m_D3D = std::make_unique<Direct3D>();
     if (!m_D3D->Initialize(m_hwnd, m_screenWidth, m_screenHeight))
     {
         MessageBox(m_hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
         return false;
     }
 
-    // SceneManagerオブジェクトを作成して初期化
-    m_SceneManager = new SceneManager;
-    if (!m_SceneManager) return false;
-    if (!m_SceneManager->Initialize(m_D3D, m_Input)) return false;
-
+    m_SceneManager = std::make_unique<SceneManager>();
+    if (!m_SceneManager->Initialize(m_D3D.get(), m_Input.get())) return false;
 
     return true;
 }
 
 void Game::Shutdown()
 {
-    // ウィンドウを閉じる
+    if (m_SceneManager) m_SceneManager->Shutdown();
+    if (m_D3D) m_D3D->Shutdown();
+
     ShutdownWindows();
-    // SceneManagerオブジェクトを解放
-    if (m_SceneManager)
-    {
-        m_SceneManager->Shutdown();
-        delete m_SceneManager;
-        m_SceneManager = nullptr;
-    }
-
-    if (m_Input)
-    {
-        delete m_Input;
-        m_Input = nullptr;
-    }
-
-    // Direct3Dオブジェクトを解放
-    if (m_D3D)
-    {
-        m_D3D->Shutdown();
-        delete m_D3D;
-        m_D3D = nullptr;
-    }
 }
 
 void Game::Run()
@@ -227,8 +195,8 @@ void Game::InitializeWindows(int& screenWidth, int& screenHeight)
 
     RegisterClassEx(&wc);
 
-    screenWidth = 1280;
-    screenHeight = 720;
+    screenWidth = SCREEN_WIDTH;
+    screenHeight = SCREEN_HEIGHT;
 
     m_hwnd = CreateWindowEx(WS_EX_APPWINDOW, m_applicationName, m_applicationName,
         WS_OVERLAPPEDWINDOW,

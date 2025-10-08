@@ -70,9 +70,9 @@ void Camera::Update()
     lookAt.z = 1.0f;
 
     // 回転をラジアンに変換
-    pitch = m_rotationX * 0.0174532925f;
-    yaw = m_rotationY * 0.0174532925f;
-    roll = m_rotationZ * 0.0174532925f;
+    pitch = m_rotationX * (XM_PI / 180.0f);
+    yaw = m_rotationY * (XM_PI / 180.0f);
+    roll = m_rotationZ * (XM_PI / 180.0f);
 
     // ヨー、ピッチ、ロールから回転行列を作成
     rotationMatrix = XMMatrixRotationRollPitchYaw(pitch, yaw, roll);

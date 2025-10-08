@@ -10,6 +10,9 @@
 class Game
 {
 public:
+	static constexpr int SCREEN_WIDTH = 1280;
+	static constexpr int SCREEN_HEIGHT = 720;
+
 	Game();
 	~Game();
 
@@ -29,9 +32,9 @@ private:
 	HINSTANCE m_hinstance;
 	HWND m_hwnd;
 
-	Direct3D* m_D3D;
-	Input* m_Input;
-	SceneManager* m_SceneManager; 
+	std::unique_ptr<Direct3D> m_D3D;
+	std::unique_ptr<Input> m_Input;
+	std::unique_ptr<SceneManager> m_SceneManager;
 
 	int m_screenWidth, m_screenHeight;
 	bool m_isMessageBoxActive;

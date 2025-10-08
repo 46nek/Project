@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include "Scene.h"
 #include "Camera.h"
 #include "Model.h"
@@ -16,7 +17,7 @@ public:
 	void Render() override;
 
 private:
-	Camera* m_Camera;
-	Model* m_Model;
-	Timer* m_Timer;
+	std::unique_ptr < Camera> m_Camera;
+	std::unique_ptr < Model> m_Model;
+	std::unique_ptr<Timer> m_Timer;
 };
