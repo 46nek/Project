@@ -67,6 +67,8 @@ void TitleScene::Render()
 	// 背景を黒でクリア
 	m_D3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
 
+	m_D3D->TurnZBufferOff(); // 2D描画のためにZバッファをオフにする
+
 	m_D3D->Begin2D(); // 2D描画開始
 
 	// 各スプライトが有効な場合のみ描画する
@@ -84,6 +86,8 @@ void TitleScene::Render()
 	}
 
 	m_D3D->End2D(); // 2D描画終了
+
+	m_D3D->TurnZBufferOn(); // 他のシーンのためにZバッファをオンに戻す
 
 	m_D3D->EndScene();
 }

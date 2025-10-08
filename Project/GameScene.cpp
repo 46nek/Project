@@ -1,4 +1,3 @@
-// Project/GameScene.cpp
 #include "GameScene.h"
 
 GameScene::GameScene()
@@ -76,6 +75,7 @@ void GameScene::Render()
 {
 	// 背景色を青でクリア
 	m_D3D->BeginScene(0.39f, 0.58f, 0.93f, 1.0f);
+	m_D3D->TurnZBufferOn(); // 3D描画のためにZバッファをオンにする
 
 	// D3Dに行列をセット
 	XMMATRIX worldMatrix = XMMatrixIdentity();

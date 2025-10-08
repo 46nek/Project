@@ -13,6 +13,10 @@ Direct3D::Direct3D()
     m_pVertexLayout = nullptr;
     m_pMatrixBuffer = nullptr;
     m_pSamplerState = nullptr;
+    m_pDepthStencilBuffer = nullptr;
+    m_pDepthStencilState = nullptr;
+    m_pDepthDisabledStencilState = nullptr;
+    m_pDepthStencilView = nullptr;
 }
 
 Direct3D::~Direct3D()
@@ -49,7 +53,52 @@ bool Direct3D::Initialize(HWND hWnd, int screenWidth, int screenHeight)
     pBackBuffer->Release();
     if (FAILED(hr)) return false;
 
-    m_pImmediateContext->OMSetRenderTargets(1, &m_pRenderTargetView, nullptr);
+    // デプスバッファのデスクリプタを設定
+    D3D11_TEXTURE2D_DESC depthBufferDesc = {};
+    depthBufferDesc.Width = screenWidth;
+    depthBufferDesc.Height = screenHeight;
+    depthBufferDesc.MipLevels = 1;
+    depthBufferDesc.ArraySize = 1;
+    depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    depthBufferDesc.SampleDesc.Count = 1;
+    depthBufferDesc.SampleDesc.Quality = 0;
+    depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    hr = m_pd3dDevice->CreateTexture2D(&depthBufferDesc, NULL, &m_pDepthStencilBuffer);
+    if (FAILED(hr)) return false;
+
+    // デプスステンシルステートのデスクリプタを設定 (Zバッファ有効)
+    D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
+    depthStencilDesc.DepthEnable = true;
+    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+    depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+    depthStencilDesc.StencilEnable = true;
+    depthStencilDesc.StencilReadMask = 0xFF;
+    depthStencilDesc.StencilWriteMask = 0xFF;
+    depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+    depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+    depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+    depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+    hr = m_pd3dDevice->CreateDepthStencilState(&depthStencilDesc, &m_pDepthStencilState);
+    if (FAILED(hr)) return false;
+
+    // Zバッファ無効のステートを作成
+    depthStencilDesc.DepthEnable = false;
+    hr = m_pd3dDevice->CreateDepthStencilState(&depthStencilDesc, &m_pDepthDisabledStencilState);
+    if (FAILED(hr)) return false;
+
+    // デプスステンシルビューの作成
+    hr = m_pd3dDevice->CreateDepthStencilView(m_pDepthStencilBuffer, NULL, &m_pDepthStencilView);
+    if (FAILED(hr)) return false;
+
+    m_pImmediateContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
+    m_pImmediateContext->OMSetDepthStencilState(m_pDepthStencilState, 1);
+
 
     // ビューポートの設定
     D3D11_VIEWPORT vp;
@@ -160,9 +209,9 @@ bool Direct3D::Initialize(HWND hWnd, int screenWidth, int screenHeight)
         return false;
     }
     // SpriteBatchの作成
-    m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_pImmediateContext); 
+    m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_pImmediateContext);
     // 正射影行列を作成
-    m_orthoMatrix = XMMatrixOrthographicLH((float)screenWidth, (float)screenHeight, 0.1f, 1000.0f); 
+    m_orthoMatrix = XMMatrixOrthographicLH((float)screenWidth, (float)screenHeight, 0.1f, 1000.0f);
 
     return true;
 }
@@ -173,6 +222,10 @@ void Direct3D::Shutdown()
 
     if (m_pSamplerState) { m_pSamplerState->Release(); m_pSamplerState = nullptr; }
     if (m_pMatrixBuffer) { m_pMatrixBuffer->Release(); m_pMatrixBuffer = nullptr; }
+    if (m_pDepthDisabledStencilState) { m_pDepthDisabledStencilState->Release(); m_pDepthDisabledStencilState = nullptr; }
+    if (m_pDepthStencilState) { m_pDepthStencilState->Release(); m_pDepthStencilState = nullptr; }
+    if (m_pDepthStencilView) { m_pDepthStencilView->Release(); m_pDepthStencilView = nullptr; }
+    if (m_pDepthStencilBuffer) { m_pDepthStencilBuffer->Release(); m_pDepthStencilBuffer = nullptr; }
 
     // 作成と逆の順序でリソースを解放
     if (m_pMatrixBuffer) { m_pMatrixBuffer->Release(); m_pMatrixBuffer = nullptr; }
@@ -189,6 +242,7 @@ void Direct3D::BeginScene(float r, float g, float b, float a)
 {
     float color[4] = { r, g, b, a };
     m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView, color);
+    m_pImmediateContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 void Direct3D::Begin2D()
 {
@@ -286,4 +340,19 @@ ID3D11PixelShader* Direct3D::GetPixelShader()
 ID3D11SamplerState* Direct3D::GetSamplerState()
 {
     return m_pSamplerState;
+}
+
+void Direct3D::TurnZBufferOn()
+{
+    m_pImmediateContext->OMSetDepthStencilState(m_pDepthStencilState, 1);
+}
+
+void Direct3D::TurnZBufferOff()
+{
+    m_pImmediateContext->OMSetDepthStencilState(m_pDepthDisabledStencilState, 1);
+}
+
+XMMATRIX Direct3D::GetOrthoMatrix()
+{
+    return m_orthoMatrix;
 }
