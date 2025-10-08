@@ -13,3 +13,14 @@
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
+
+// デバッグ用のログ出力マクロ
+#if defined(_DEBUG)
+#include <string>
+inline void DbgPrint(const std::wstring& msg)
+{
+    OutputDebugStringW((msg + L"\n").c_str()); // メッセージの末尾に改行を追加
+}
+#else
+#define DbgPrint(msg)
+#endif
