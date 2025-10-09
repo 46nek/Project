@@ -53,7 +53,6 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 		DbgPrint(L"!!!!!! FAILED to initialize wall model.");
 		return false;
 	}
-	m_wallModel->SetScale(1.0f, 2.0f, 1.0f);
 	DbgPrint(L"--> Wall model initialized successfully.");
 
 	// ï«ÇÃà íuèÓïÒÇäiî[
@@ -63,7 +62,7 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 		{
 			if (mazeData[y][x] == MazeGenerator::Wall)
 			{
-				m_wallPositions.emplace_back(x * 2.0f, 1.0f, y * 2.0f);
+				m_wallPositions.emplace_back(x * 2.0f, 2.0f, y * 2.0f);
 			}
 		}
 	}
