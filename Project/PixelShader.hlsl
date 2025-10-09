@@ -37,7 +37,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
     lightIntensity = saturate(dot(input.Normal, lightDir));
 
     // 環境光（Ambient Light）を少しだけ加える
-    float4 ambientColor = float4(0.15f, 0.15f, 0.15f, 1.0f);
+    float4 ambientColor = float4(0.65f, 0.65f, 0.65f, 1.0f);
     
     // 光の強度と色を最終的な色に乗算し、環境光を加算
     color = saturate((textureColor * DiffuseColor * lightIntensity) + (textureColor * ambientColor));

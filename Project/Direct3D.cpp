@@ -214,6 +214,23 @@ bool Direct3D::Initialize(HWND hWnd, int screenWidth, int screenHeight)
     {
         return false;
     }
+
+    // ライトバッファのデスクリプタを設定
+    D3D11_BUFFER_DESC lightBufferDesc;
+    lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    lightBufferDesc.ByteWidth = sizeof(LightBufferType);
+    lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    lightBufferDesc.MiscFlags = 0;
+    lightBufferDesc.StructureByteStride = 0;
+
+    // ライトバッファを作成
+    hr = m_pd3dDevice->CreateBuffer(&lightBufferDesc, NULL, &m_pLightBuffer);
+    if (FAILED(hr))
+    {
+        return false;
+    }
+
     // SpriteBatchの作成
     m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_pImmediateContext);
     // 正射影行列を作成
@@ -321,16 +338,22 @@ bool Direct3D::UpdateLightBuffer(const XMFLOAT3& lightDirection, const XMFLOAT4&
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     LightBufferType* dataPtr;
 
+    // ライトバッファをロックして書き込めるようにする
     result = m_pImmediateContext->Map(m_pLightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
     if (FAILED(result))
     {
         return false;
     }
 
+    // データポインタを取得
     dataPtr = (LightBufferType*)mappedResource.pData;
-    dataPtr->LightDirection = lightDirection;
-    dataPtr->DiffuseColor = diffuseColor;
 
+    // ライトの情報をコンスタントバッファにコピー
+    dataPtr->DiffuseColor = diffuseColor;
+    dataPtr->LightDirection = lightDirection;
+    dataPtr->padding = 0.0f; // パディングを明示的にセット
+
+    // コンスタントバッファをアンロック
     m_pImmediateContext->Unmap(m_pLightBuffer, 0);
 
     // ピクセルシェーダーにライトバッファをセット (スロット1)

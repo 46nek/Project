@@ -52,7 +52,7 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 		DbgPrint(L"!!!!!! FAILED to initialize wall model.");
 		return false;
 	}
-	if (!m_wallModel->LoadTexture(m_D3D->GetDevice(), L"Assets/wall.jpg"))
+	if (!m_wallModel->LoadTexture(m_D3D->GetDevice(), L"Assets/wall.png"))
 	{
 		DbgPrint(L"!!!!!! FAILED to load wall texture.");
 		// テクスチャがなくても続行する場合はreturnしない
@@ -134,7 +134,7 @@ void GameScene::UpdateCamera(float deltaTime)
 
 void GameScene::Render()
 {
-	m_D3D->BeginScene(0.1f, 0.1f, 0.1f, 1.0f); // 背景を少し暗く変更
+	m_D3D->BeginScene(0.5f, 0.8f, 1.0f, 1.0f);
 	m_D3D->TurnZBufferOn();
 
 	m_D3D->SetViewMatrix(m_Camera->GetViewMatrix());
