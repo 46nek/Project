@@ -35,7 +35,7 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 	for (int y = 0; y < mazeHeight && !startFound; ++y) {
 		for (int x = 0; x < mazeWidth && !startFound; ++x) {
 			if (mazeData[y][x] == MazeGenerator::Path) {
-				m_Camera->SetPosition(static_cast<float>(x) * 2.0f, 10.0f, static_cast<float>(y) * 2.0f);
+				m_Camera->SetPosition(static_cast<float>(x) * 2.0f, 2.0f, static_cast<float>(y) * 2.0f);
 				startFound = true;
 			}
 		}
@@ -46,12 +46,16 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 
 
 	DbgPrint(L"--> Initializing wall model...");
-	// 壁モデルを1度だけ読み込む
 	m_wallModel = std::make_unique<Model>();
-	if (!m_wallModel->Initialize(m_D3D->GetDevice(), "Assets/cube.fbx"))
+	if (!m_wallModel->Initialize(m_D3D->GetDevice(), "Assets/cube.obj"))
 	{
 		DbgPrint(L"!!!!!! FAILED to initialize wall model.");
 		return false;
+	}
+	if (!m_wallModel->LoadTexture(m_D3D->GetDevice(), L"Assets/wall.jpg"))
+	{
+		DbgPrint(L"!!!!!! FAILED to load wall texture.");
+		// テクスチャがなくても続行する場合はreturnしない
 	}
 	DbgPrint(L"--> Wall model initialized successfully.");
 
@@ -71,10 +75,14 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 	DbgPrint(L"--> Initializing floor model...");
 	// 床モデルの読み込みと配置
 	m_floorModel = std::make_unique<Model>();
-	if (!m_floorModel->Initialize(m_D3D->GetDevice(), "Assets/cube.fbx"))
+	if (!m_floorModel->Initialize(m_D3D->GetDevice(), "Assets/cube.obj"))
 	{
 		DbgPrint(L"!!!!!! FAILED to initialize floor model.");
 		return false;
+	}
+	if (!m_floorModel->LoadTexture(m_D3D->GetDevice(), L"Assets/floor.png"))
+	{
+		DbgPrint(L"!!!!!! FAILED to load floor texture.");
 	}
 	DbgPrint(L"--> Floor model initialized successfully.");
 

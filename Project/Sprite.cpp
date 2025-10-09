@@ -12,14 +12,14 @@ Sprite::~Sprite()
 
 bool Sprite::Initialize(ID3D11Device* device, const wchar_t* textureFilename)
 {
-    Microsoft::WRL::ComPtr<ID3D11Resource> resource; // ComPtrを明確化
+    Microsoft::WRL::ComPtr<ID3D11Resource> resource;
     HRESULT hr = DirectX::CreateWICTextureFromFile(device, textureFilename, resource.GetAddressOf(), m_textureView.GetAddressOf());
     if (FAILED(hr))
     {
         return false;
     }
 
-    Microsoft::WRL::ComPtr<ID3D11Texture2D> texture2D; // ComPtrを明確化
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> texture2D;
     hr = resource.As(&texture2D);
     if (SUCCEEDED(hr))
     {
@@ -32,12 +32,22 @@ bool Sprite::Initialize(ID3D11Device* device, const wchar_t* textureFilename)
     return true;
 }
 
+// ロゴ・ボタン用のRender関数の実装
 void Sprite::Render(DirectX::SpriteBatch* spriteBatch, const DirectX::XMFLOAT2& position, float scale, float rotation, const DirectX::XMFLOAT4& color)
 {
     if (spriteBatch && m_textureView)
     {
-        DirectX::XMFLOAT2 origin(m_textureWidth / 2.0f, m_textureHeight / 2.0f); 
-        spriteBatch->Draw(m_textureView.Get(), position, nullptr, DirectX::XMLoadFloat4(&color), rotation, origin, scale); 
+        DirectX::XMFLOAT2 origin(m_textureWidth / 2.0f, m_textureHeight / 2.0f);
+        spriteBatch->Draw(m_textureView.Get(), position, nullptr, DirectX::XMLoadFloat4(&color), rotation, origin, scale);
+    }
+}
+
+// 背景用のRender関数の実装
+void Sprite::RenderFill(DirectX::SpriteBatch* spriteBatch, const RECT& destinationRectangle)
+{
+    if (spriteBatch && m_textureView)
+    {
+        spriteBatch->Draw(m_textureView.Get(), destinationRectangle);
     }
 }
 

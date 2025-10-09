@@ -5,7 +5,6 @@
 
 Model::Model()
 {
-
     m_position = { 0.0f, 0.0f, 0.0f };
     m_rotation = { 0.0f, 0.0f, 0.0f };
     m_scale = { 1.0f, 1.0f, 1.0f };
@@ -13,7 +12,6 @@ Model::Model()
 
 Model::~Model()
 {
-    // デストラクタでShutdownを呼ぶと、オブジェクトがスコープを抜けた時に自動でリソースが解放されるので安全です。
     Shutdown();
 }
 
@@ -22,8 +20,36 @@ bool Model::Initialize(ID3D11Device* device, const char* modelFilename)
     return LoadModel(device, modelFilename);
 }
 
+// ↓ 新しく追加したLoadTexture関数の実装
+bool Model::LoadTexture(ID3D11Device* device, const wchar_t* textureFilename)
+{
+    // 既にテクスチャがあれば解放
+    if (m_texture)
+    {
+        m_texture->Shutdown();
+        m_texture.reset();
+    }
+
+    // 新しいテクスチャを作成して読み込む
+    m_texture = std::make_unique<Texture>();
+    if (!m_texture->Initialize(device, textureFilename))
+    {
+        m_texture.reset(); // 失敗したらポインタを空にする
+        return false;
+    }
+    return true;
+}
+
+
 void Model::Shutdown()
 {
+    // テクスチャを解放
+    if (m_texture)
+    {
+        m_texture->Shutdown();
+        m_texture.reset();
+    }
+
     // 全てのメッシュのリソースを解放
     for (auto& mesh : m_meshes)
     {
@@ -37,33 +63,28 @@ void Model::Shutdown()
             mesh.indexBuffer->Release();
             mesh.indexBuffer = nullptr;
         }
-        if (mesh.texture)
-        {
-            mesh.texture->Shutdown();
-            delete mesh.texture;
-            mesh.texture = nullptr;
-        }
     }
-    m_meshes.clear(); // ベクターをクリア
+    m_meshes.clear();
 }
 
 void Model::Render(ID3D11DeviceContext* deviceContext)
 {
+    // ↓ モデルのテクスチャをセットする
+    if (m_texture)
+    {
+        ID3D11ShaderResourceView* textureView = m_texture->GetTexture();
+        deviceContext->PSSetShaderResources(0, 1, &textureView);
+    }
+
     // すべてのメッシュを描画
     for (auto& mesh : m_meshes)
     {
-        // メッシュ固有のテクスチャをセット
-        if (mesh.texture)
-        {
-            ID3D11ShaderResourceView* textureView = mesh.texture->GetTexture();
-            deviceContext->PSSetShaderResources(0, 1, &textureView);
-        }
-
-        // メッシュのバッファをセットして描画
         RenderBuffers(deviceContext, mesh);
         deviceContext->DrawIndexed(mesh.indexCount, 0, 0);
     }
 }
+
+// ... (RenderBuffers, LoadModel, ProcessNode は変更なし) ...
 
 void Model::RenderBuffers(ID3D11DeviceContext* deviceContext, const Mesh& mesh)
 {
@@ -86,9 +107,7 @@ bool Model::LoadModel(ID3D11Device* device, const std::string& filename)
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
-        // Assimpからのエラーメッセージを取得
         const char* errorString = importer.GetErrorString();
-        // エラーメッセージをワイド文字列に変換
         std::wstring wErrorString;
         if (errorString)
         {
@@ -100,15 +119,26 @@ bool Model::LoadModel(ID3D11Device* device, const std::string& filename)
         {
             wErrorString = L"Unknown error.";
         }
-        // エラーメッセージをMessageBoxで表示
         MessageBox(NULL, wErrorString.c_str(), L"Model Load Error", MB_OK);
         return false;
     }
 
-    // モデルファイルのディレクトリパスを取得
     std::string directory = filename.substr(0, filename.find_last_of('/'));
 
     ProcessNode(device, scene->mRootNode, scene, directory);
+
+    // FBXにテクスチャが含まれている場合、それをデフォルトとして読み込む試み
+    if (scene->HasMaterials() && scene->mMaterials[0]->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+    {
+        aiString texturePath;
+        if (scene->mMaterials[0]->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS)
+        {
+            std::string fullPath = directory + "/" + texturePath.C_Str();
+            std::wstring wFullPath(fullPath.begin(), fullPath.end());
+            LoadTexture(device, wFullPath.c_str());
+        }
+    }
+
     return true;
 }
 
@@ -127,13 +157,13 @@ void Model::ProcessNode(ID3D11Device* device, aiNode* node, const aiScene* scene
     }
 }
 
+
 Model::Mesh Model::ProcessMesh(ID3D11Device* device, aiMesh* mesh, const aiScene* scene, const std::string& directory)
 {
     std::vector<SimpleVertex> vertices;
     std::vector<unsigned long> indices;
-    Mesh newMesh = {}; // 新しいメッシュを初期化
+    Mesh newMesh = {};
 
-    // 頂点データを処理
     for (UINT i = 0; i < mesh->mNumVertices; i++)
     {
         SimpleVertex vertex;
@@ -141,7 +171,7 @@ Model::Mesh Model::ProcessMesh(ID3D11Device* device, aiMesh* mesh, const aiScene
         vertex.Pos.y = mesh->mVertices[i].y;
         vertex.Pos.z = mesh->mVertices[i].z;
 
-        if (mesh->HasTextureCoords(0)) // テクスチャ座標がある場合
+        if (mesh->HasTextureCoords(0))
         {
             vertex.Tex.x = mesh->mTextureCoords[0][i].x;
             vertex.Tex.y = mesh->mTextureCoords[0][i].y;
@@ -154,7 +184,6 @@ Model::Mesh Model::ProcessMesh(ID3D11Device* device, aiMesh* mesh, const aiScene
         vertices.push_back(vertex);
     }
 
-    // インデックスデータを処理
     for (UINT i = 0; i < mesh->mNumFaces; i++)
     {
         aiFace face = mesh->mFaces[i];
@@ -164,7 +193,6 @@ Model::Mesh Model::ProcessMesh(ID3D11Device* device, aiMesh* mesh, const aiScene
         }
     }
 
-    // --- ここから頂点バッファとインデックスバッファの作成 ---
     D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
     D3D11_SUBRESOURCE_DATA vertexData, indexData;
     HRESULT result;
@@ -176,7 +204,6 @@ Model::Mesh Model::ProcessMesh(ID3D11Device* device, aiMesh* mesh, const aiScene
     vertexBufferDesc.MiscFlags = 0;
     vertexData.pSysMem = &vertices[0];
     result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &newMesh.vertexBuffer);
-    // TODO: resultのエラーチェック
 
     indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
     indexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(unsigned long) * indices.size());
@@ -185,29 +212,8 @@ Model::Mesh Model::ProcessMesh(ID3D11Device* device, aiMesh* mesh, const aiScene
     indexBufferDesc.MiscFlags = 0;
     indexData.pSysMem = &indices[0];
     result = device->CreateBuffer(&indexBufferDesc, &indexData, &newMesh.indexBuffer);
-    // TODO: resultのエラーチェック
 
     newMesh.indexCount = static_cast<int>(indices.size());
-
-    // マテリアルとテクスチャの読み込み
-    if (mesh->mMaterialIndex >= 0)
-    {
-        aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        aiString texturePath;
-        if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS)
-        {
-            newMesh.texture = new Texture();
-            std::string fullPath = directory + "/" + texturePath.C_Str();
-            // ワイド文字列に変換
-            std::wstring wFullPath(fullPath.begin(), fullPath.end());
-            if (!newMesh.texture->Initialize(device, wFullPath.c_str()))
-            {
-                // テクスチャ読み込み失敗時の処理
-                delete newMesh.texture;
-                newMesh.texture = nullptr;
-            }
-        }
-    }
 
     return newMesh;
 }

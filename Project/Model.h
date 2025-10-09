@@ -4,6 +4,7 @@
 #include <assimp/scene.h>
 #include <vector>
 #include <string>
+#include <memory> 
 
 class Model
 {
@@ -12,6 +13,7 @@ public:
     ~Model();
 
     bool Initialize(ID3D11Device* device, const char* modelFilename);
+    bool LoadTexture(ID3D11Device* device, const wchar_t* textureFilename);
     void Shutdown();
     void Render(ID3D11DeviceContext*);
 
@@ -26,7 +28,6 @@ private:
         ID3D11Buffer* vertexBuffer = nullptr; 
         ID3D11Buffer* indexBuffer = nullptr;  
         int indexCount = 0;
-        Texture* texture = nullptr;        
     };
 
     // Assimpを使ってモデルを読み込む
@@ -40,6 +41,7 @@ private:
 
 private:
     std::vector<Mesh> m_meshes; // モデル内のメッシュを保持するベクター
+    std::unique_ptr<Texture> m_texture;
     DirectX::XMFLOAT3 m_position;
     DirectX::XMFLOAT3 m_rotation;
     DirectX::XMFLOAT3 m_scale;

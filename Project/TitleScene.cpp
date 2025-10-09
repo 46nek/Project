@@ -1,5 +1,6 @@
 #include "TitleScene.h"
 #include "framework.h"
+#include "Game.h"
 
 TitleScene::TitleScene()
 {
@@ -77,7 +78,9 @@ void TitleScene::Render()
 	// ŠeƒXƒvƒ‰ƒCƒg‚ª—LŒø‚Èê‡‚Ì‚Ý•`‰æ‚·‚é
 	if (m_background)
 	{
-		m_background->Render(m_D3D->GetSpriteBatch(), { 1280.0f / 2.0f, 720.0f / 2.0f });
+		// ‰æ–Ê‘S‘Ì‚É”wŒi‚ð•`‰æ
+		RECT screenRect = { 0, 0, Game::SCREEN_WIDTH, Game::SCREEN_HEIGHT };
+		m_background->RenderFill(m_D3D->GetSpriteBatch(), screenRect);
 	}
 	if (m_titleLogo)
 	{
