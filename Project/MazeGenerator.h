@@ -23,6 +23,8 @@ public:
 private:
     // [‚³—Dæ’Tõ‚Å–À˜H‚ğŒ@‚èi‚ß‚éÄ‹AŠÖ”
     void CarvePath(int x, int y);
+    void RemoveDeadEnds();
+    void CreateMoreLoops(int count);
 
     int m_width;  // –À˜H‚Ì•
     int m_height; // –À˜H‚Ì‚‚³

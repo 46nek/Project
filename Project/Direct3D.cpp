@@ -2,21 +2,25 @@
 #include "SpriteBatch.h" 
 
 Direct3D::Direct3D()
+    : m_pSwapChain(nullptr),
+    m_pd3dDevice(nullptr),
+    m_pImmediateContext(nullptr),
+    m_pRenderTargetView(nullptr),
+    m_pVertexShader(nullptr),
+    m_pPixelShader(nullptr),
+    m_pVertexLayout(nullptr),
+    m_pMatrixBuffer(nullptr),
+    m_pSamplerState(nullptr),
+    m_pDepthStencilBuffer(nullptr),
+    m_pDepthStencilState(nullptr),
+    m_pDepthDisabledStencilState(nullptr),
+    m_pDepthStencilView(nullptr),
+    m_worldMatrix(DirectX::XMMatrixIdentity()),  
+    m_viewMatrix(DirectX::XMMatrixIdentity()),
+    m_projectionMatrix(DirectX::XMMatrixIdentity()),
+    m_orthoMatrix(DirectX::XMMatrixIdentity())
 {
-    // ポインタをNULLで初期化
-    m_pSwapChain = nullptr;
-    m_pd3dDevice = nullptr;
-    m_pImmediateContext = nullptr;
-    m_pRenderTargetView = nullptr;
-    m_pVertexShader = nullptr;
-    m_pPixelShader = nullptr;
-    m_pVertexLayout = nullptr;
-    m_pMatrixBuffer = nullptr;
-    m_pSamplerState = nullptr;
-    m_pDepthStencilBuffer = nullptr;
-    m_pDepthStencilState = nullptr;
-    m_pDepthDisabledStencilState = nullptr;
-    m_pDepthStencilView = nullptr;
+    // コンストラクタの処理は空になります
 }
 
 Direct3D::~Direct3D()
