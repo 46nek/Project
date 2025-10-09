@@ -10,6 +10,7 @@ Direct3D::Direct3D()
     m_pPixelShader(nullptr),
     m_pVertexLayout(nullptr),
     m_pMatrixBuffer(nullptr),
+    m_pLightBuffer(nullptr),
     m_pSamplerState(nullptr),
     m_pDepthStencilBuffer(nullptr),
     m_pDepthStencilState(nullptr),
@@ -158,7 +159,8 @@ bool Direct3D::Initialize(HWND hWnd, int screenWidth, int screenHeight)
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-          { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }, // <--- 追加
     };
     UINT numElements = ARRAYSIZE(layout);
     hr = m_pd3dDevice->CreateInputLayout(layout, numElements, pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), &m_pVertexLayout);
@@ -232,6 +234,7 @@ void Direct3D::Shutdown()
     if (m_pDepthStencilBuffer) { m_pDepthStencilBuffer->Release(); m_pDepthStencilBuffer = nullptr; }
 
     // 作成と逆の順序でリソースを解放
+    if (m_pLightBuffer) { m_pLightBuffer->Release(); m_pLightBuffer = nullptr; }
     if (m_pMatrixBuffer) { m_pMatrixBuffer->Release(); m_pMatrixBuffer = nullptr; }
     if (m_pVertexLayout) { m_pVertexLayout->Release(); m_pVertexLayout = nullptr; }
     if (m_pPixelShader) { m_pPixelShader->Release(); m_pPixelShader = nullptr; }
@@ -308,6 +311,30 @@ bool Direct3D::UpdateMatrixBuffer()
 
     // 頂点シェーダーにコンスタントバッファをセット
     m_pImmediateContext->VSSetConstantBuffers(0, 1, &m_pMatrixBuffer);
+
+    return true;
+}
+
+bool Direct3D::UpdateLightBuffer(const XMFLOAT3& lightDirection, const XMFLOAT4& diffuseColor)
+{
+    HRESULT result;
+    D3D11_MAPPED_SUBRESOURCE mappedResource;
+    LightBufferType* dataPtr;
+
+    result = m_pImmediateContext->Map(m_pLightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+    if (FAILED(result))
+    {
+        return false;
+    }
+
+    dataPtr = (LightBufferType*)mappedResource.pData;
+    dataPtr->LightDirection = lightDirection;
+    dataPtr->DiffuseColor = diffuseColor;
+
+    m_pImmediateContext->Unmap(m_pLightBuffer, 0);
+
+    // ピクセルシェーダーにライトバッファをセット (スロット1)
+    m_pImmediateContext->PSSetConstantBuffers(1, 1, &m_pLightBuffer);
 
     return true;
 }

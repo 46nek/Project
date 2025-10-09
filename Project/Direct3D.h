@@ -19,6 +19,7 @@ struct SimpleVertex
     XMFLOAT3 Pos;
     XMFLOAT4 Color;
     XMFLOAT2 Tex;
+    XMFLOAT3 Normal;
 };
 
 struct MatrixBufferType
@@ -26,6 +27,13 @@ struct MatrixBufferType
     XMMATRIX world;
     XMMATRIX view;
     XMMATRIX projection;
+};
+
+struct LightBufferType
+{
+    XMFLOAT4 DiffuseColor;
+    XMFLOAT3 LightDirection;
+    float padding; // メモリ境界を16バイトに合わせるためのパディング
 };
 
 class Direct3D
@@ -56,6 +64,7 @@ public:
     void SetViewMatrix(const XMMATRIX& view);
     void SetProjectionMatrix(const XMMATRIX& projection);
     bool UpdateMatrixBuffer();
+    bool UpdateLightBuffer(const XMFLOAT3& lightDirection, const XMFLOAT4& diffuseColor); // <--- 追加
     DirectX::SpriteBatch* GetSpriteBatch();
 
     void TurnZBufferOn();
@@ -79,6 +88,7 @@ private:
     ID3D11PixelShader* m_pPixelShader;
     ID3D11InputLayout* m_pVertexLayout;
     ID3D11Buffer* m_pMatrixBuffer;
+    ID3D11Buffer* m_pLightBuffer;
 
     XMMATRIX m_worldMatrix;
     XMMATRIX m_viewMatrix;

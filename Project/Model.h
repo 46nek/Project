@@ -25,8 +25,8 @@ public:
 private:
     // メッシュを表す構造体
     struct Mesh {
-        ID3D11Buffer* vertexBuffer = nullptr; 
-        ID3D11Buffer* indexBuffer = nullptr;  
+        ID3D11Buffer* vertexBuffer = nullptr;
+        ID3D11Buffer* indexBuffer = nullptr;
         int indexCount = 0;
     };
 

@@ -180,6 +180,18 @@ Model::Mesh Model::ProcessMesh(ID3D11Device* device, aiMesh* mesh, const aiScene
         {
             vertex.Tex = { 0.0f, 0.0f };
         }
+
+        if (mesh->HasNormals())
+        {
+            vertex.Normal.x = mesh->mNormals[i].x;
+            vertex.Normal.y = mesh->mNormals[i].y;
+            vertex.Normal.z = mesh->mNormals[i].z;
+        }
+        else
+        {
+            vertex.Normal = { 0.0f, 0.0f, 0.0f };
+        }
+
         vertex.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
         vertices.push_back(vertex);
     }
@@ -193,6 +205,11 @@ Model::Mesh Model::ProcessMesh(ID3D11Device* device, aiMesh* mesh, const aiScene
         }
     }
 
+    if (vertices.empty() || indices.empty())
+    {
+        return {}; // データがなければ空のメッシュを返す
+    }
+
     D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
     D3D11_SUBRESOURCE_DATA vertexData, indexData;
     HRESULT result;
@@ -204,6 +221,11 @@ Model::Mesh Model::ProcessMesh(ID3D11Device* device, aiMesh* mesh, const aiScene
     vertexBufferDesc.MiscFlags = 0;
     vertexData.pSysMem = &vertices[0];
     result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &newMesh.vertexBuffer);
+    if (FAILED(result))
+    {
+        MessageBox(NULL, L"Failed to create vertex buffer.", L"Model Error", MB_OK);
+        return {}; // 失敗したら空のメッシュを返す
+    }
 
     indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
     indexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(unsigned long) * indices.size());
@@ -212,14 +234,22 @@ Model::Mesh Model::ProcessMesh(ID3D11Device* device, aiMesh* mesh, const aiScene
     indexBufferDesc.MiscFlags = 0;
     indexData.pSysMem = &indices[0];
     result = device->CreateBuffer(&indexBufferDesc, &indexData, &newMesh.indexBuffer);
+    if (FAILED(result))
+    {
+        newMesh.vertexBuffer->Release(); // 先に作成したバッファを解放
+        MessageBox(NULL, L"Failed to create index buffer.", L"Model Error", MB_OK);
+        return {}; // 失敗したら空のメッシュを返す
+    }
 
     newMesh.indexCount = static_cast<int>(indices.size());
 
     return newMesh;
 }
+
 void Model::SetPosition(float x, float y, float z) { m_position = { x, y, z }; }
 void Model::SetRotation(float x, float y, float z) { m_rotation = { x, y, z }; }
 void Model::SetScale(float x, float y, float z) { m_scale = { x, y, z }; }
+
 DirectX::XMMATRIX Model::GetWorldMatrix()
 {
     DirectX::XMMATRIX scaleMatrix = DirectX::XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);

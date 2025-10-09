@@ -141,6 +141,11 @@ void GameScene::Render()
 
 	ID3D11DeviceContext* deviceContext = m_D3D->GetDeviceContext();
 
+	// ライトの情報を設定 (右上から照らす)
+	XMFLOAT3 lightDirection = { -0.5f, -1.0f, -0.5f };
+	XMFLOAT4 diffuseColor = { 1.0f, 1.0f, 1.0f, 1.0f }; // 白色のライト
+	m_D3D->UpdateLightBuffer(lightDirection, diffuseColor);
+
 	deviceContext->IASetInputLayout(m_D3D->GetInputLayout());
 	deviceContext->VSSetShader(m_D3D->GetVertexShader(), nullptr, 0);
 	deviceContext->PSSetShader(m_D3D->GetPixelShader(), nullptr, 0);
