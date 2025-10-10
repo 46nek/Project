@@ -1,10 +1,12 @@
 #pragma once
 #include <d3d11.h>
+#include <DirectXMath.h> 
 #include <memory>
 #include "SwapChain.h"
 #include "ShaderManager.h"
 #include "ShadowMapper.h"
 
+// 構造体の定義をヘッダーに移動
 struct MatrixBufferType
 {
     DirectX::XMMATRIX world;
@@ -29,6 +31,7 @@ public:
     void BeginScene(float r, float g, float b, float a);
     void EndScene();
 
+    // UpdateMatrixBuffer の引数を修正
     bool UpdateMatrixBuffer(const DirectX::XMMATRIX& world, const DirectX::XMMATRIX& view, const DirectX::XMMATRIX& projection, const DirectX::XMMATRIX& lightView, const DirectX::XMMATRIX& lightProjection);
     bool UpdateLightBuffer(const LightBufferType& lightBuffer);
 

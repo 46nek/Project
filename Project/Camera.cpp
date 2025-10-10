@@ -1,5 +1,5 @@
-// Camera.cpp
 #include "Camera.h"
+#include <cmath> 
 
 Camera::Camera()
 {
@@ -11,7 +11,7 @@ Camera::Camera()
     m_rotationY = 0.0f;
     m_rotationZ = 0.0f;
 
-    m_viewMatrix = XMMatrixIdentity();
+    m_viewMatrix = DirectX::XMMatrixIdentity();
 
     m_moveSpeed = 5.0f;
     m_rotationSpeed = 5.0f;
@@ -35,60 +35,46 @@ void Camera::SetRotation(float x, float y, float z)
     m_rotationZ = z;
 }
 
-XMFLOAT3 Camera::GetPosition()
+DirectX::XMFLOAT3 Camera::GetPosition() const
 {
-    return XMFLOAT3(m_positionX, m_positionY, m_positionZ);
+    return DirectX::XMFLOAT3(m_positionX, m_positionY, m_positionZ);
 }
 
-XMFLOAT3 Camera::GetRotation()
+DirectX::XMFLOAT3 Camera::GetRotation() const
 {
-    return XMFLOAT3(m_rotationX, m_rotationY, m_rotationZ);
+    return DirectX::XMFLOAT3(m_rotationX, m_rotationY, m_rotationZ);
 }
 
 void Camera::Update()
 {
-    XMFLOAT3 up, position, lookAt;
-    XMVECTOR upVector, positionVector, lookAtVector;
+    DirectX::XMFLOAT3 up, position, lookAt;
+    DirectX::XMVECTOR upVector, positionVector, lookAtVector;
     float yaw, pitch, roll;
-    XMMATRIX rotationMatrix;
+    DirectX::XMMATRIX rotationMatrix;
 
-    // 上方向ベクトル
-    up.x = 0.0f;
-    up.y = 1.0f;
-    up.z = 0.0f;
-    upVector = XMLoadFloat3(&up);
+    up = { 0.0f, 1.0f, 0.0f };
+    upVector = DirectX::XMLoadFloat3(&up);
 
-    // カメラの位置
-    position.x = m_positionX;
-    position.y = m_positionY;
-    position.z = m_positionZ;
-    positionVector = XMLoadFloat3(&position);
+    position = { m_positionX, m_positionY, m_positionZ };
+    positionVector = DirectX::XMLoadFloat3(&position);
 
-    // カメラの注視点（最初はZ軸の正方向）
-    lookAt.x = 0.0f;
-    lookAt.y = 0.0f;
-    lookAt.z = 1.0f;
+    lookAt = { 0.0f, 0.0f, 1.0f };
 
-    // 回転をラジアンに変換
-    pitch = m_rotationX * (XM_PI / 180.0f);
-    yaw = m_rotationY * (XM_PI / 180.0f);
-    roll = m_rotationZ * (XM_PI / 180.0f);
+    pitch = m_rotationX * (DirectX::XM_PI / 180.0f);
+    yaw = m_rotationY * (DirectX::XM_PI / 180.0f);
+    roll = m_rotationZ * (DirectX::XM_PI / 180.0f);
 
-    // ヨー、ピッチ、ロールから回転行列を作成
-    rotationMatrix = XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
+    rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
 
-    // 注視点と上方向ベクトルを回転
-    lookAtVector = XMVector3TransformCoord(XMLoadFloat3(&lookAt), rotationMatrix);
-    upVector = XMVector3TransformCoord(upVector, rotationMatrix);
+    lookAtVector = DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&lookAt), rotationMatrix);
+    upVector = DirectX::XMVector3TransformCoord(upVector, rotationMatrix);
 
-    // 注視点の最終的な位置を計算
-    lookAtVector = XMVectorAdd(positionVector, lookAtVector);
+    lookAtVector = DirectX::XMVectorAdd(positionVector, lookAtVector);
 
-    // ビュー行列を作成
-    m_viewMatrix = XMMatrixLookAtLH(positionVector, lookAtVector, upVector);
+    m_viewMatrix = DirectX::XMMatrixLookAtLH(positionVector, lookAtVector, upVector);
 }
 
-XMMATRIX Camera::GetViewMatrix()
+DirectX::XMMATRIX Camera::GetViewMatrix() const
 {
     return m_viewMatrix;
 }
@@ -96,49 +82,39 @@ XMMATRIX Camera::GetViewMatrix()
 void Camera::MoveForward(float deltaTime)
 {
     float radians = m_rotationY * 0.0174532925f;
-    m_positionX += sinf(radians) * m_moveSpeed * deltaTime; 
+    m_positionX += sinf(radians) * m_moveSpeed * deltaTime;
     m_positionZ += cosf(radians) * m_moveSpeed * deltaTime;
 }
 
 void Camera::MoveBackward(float deltaTime)
 {
     float radians = m_rotationY * 0.0174532925f;
-    m_positionX -= sinf(radians) * m_moveSpeed * deltaTime; 
-    m_positionZ -= cosf(radians) * m_moveSpeed * deltaTime; 
+    m_positionX -= sinf(radians) * m_moveSpeed * deltaTime;
+    m_positionZ -= cosf(radians) * m_moveSpeed * deltaTime;
 }
 
 void Camera::MoveLeft(float deltaTime)
 {
     float radians = (m_rotationY - 90.0f) * 0.0174532925f;
-    m_positionX += sinf(radians) * m_moveSpeed * deltaTime; 
-    m_positionZ += cosf(radians) * m_moveSpeed * deltaTime; 
+    m_positionX += sinf(radians) * m_moveSpeed * deltaTime;
+    m_positionZ += cosf(radians) * m_moveSpeed * deltaTime;
 }
 
 void Camera::MoveRight(float deltaTime)
 {
     float radians = (m_rotationY + 90.0f) * 0.0174532925f;
     m_positionX += sinf(radians) * m_moveSpeed * deltaTime;
-    m_positionZ += cosf(radians) * m_moveSpeed * deltaTime; 
+    m_positionZ += cosf(radians) * m_moveSpeed * deltaTime;
 }
 
 void Camera::Turn(int mouseX, int mouseY, float deltaTime)
 {
-    float yaw = (float)mouseX * m_rotationSpeed * deltaTime;   
-    float pitch = (float)mouseY * m_rotationSpeed * deltaTime; 
+    float yaw = (float)mouseX * m_rotationSpeed * deltaTime;
+    float pitch = (float)mouseY * m_rotationSpeed * deltaTime;
 
-    // ヨー（左右の回転）を更新
     m_rotationY += yaw;
-
-    // ピッチ（上下の回転）を更新
     m_rotationX += pitch;
 
-    // ピッチが90度以上または-90度以下にならないように制限（カメラがひっくり返るのを防ぐ）
-    if (m_rotationX > 90.0f)
-    {
-        m_rotationX = 90.0f;
-    }
-    if (m_rotationX < -90.0f)
-    {
-        m_rotationX = -90.0f;
-    }
+    if (m_rotationX > 90.0f) m_rotationX = 90.0f;
+    if (m_rotationX < -90.0f) m_rotationX = -90.0f;
 }

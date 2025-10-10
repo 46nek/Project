@@ -1,99 +1,60 @@
 #include "TitleScene.h"
 #include "framework.h"
 #include "Game.h"
+#include "AssetLoader.h"
 
-TitleScene::TitleScene()
+TitleScene::TitleScene() {}
+TitleScene::~TitleScene() {}
+
+bool TitleScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
 {
-}
+    m_graphicsDevice = graphicsDevice;
+    m_input = input;
 
-TitleScene::~TitleScene()
-{
-}
+    ID3D11Device* device = m_graphicsDevice->GetDevice();
 
-bool TitleScene::Initialize(Direct3D* d3d, Input* input)
-{
-	m_D3D = d3d;
-	m_Input = input;
+    m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_graphicsDevice->GetDeviceContext());
 
-	// 背景の初期化
-	m_background = std::make_unique<Sprite>();
-	if (!m_background->Initialize(d3d->GetDevice(), L"Assets/background.png")) 
-	{
-		return false;
-	}
+    m_background = std::make_unique<Sprite>();
+    if (!m_background->Initialize(device, L"../Assets/background.png")) return false;
 
-	// タイトルロゴの初期化
-	m_titleLogo = std::make_unique<Sprite>();
-	if (!m_titleLogo->Initialize(d3d->GetDevice(), L"Assets/title.png"))
-	{
-		return false;
-	}
+    m_titleLogo = std::make_unique<Sprite>();
+    if (!m_titleLogo->Initialize(device, L"../Assets/title.png")) return false;
 
-	// Press Enterテキストの初期化
-	m_pressEnter = std::make_unique<Sprite>();
-	if (!m_pressEnter->Initialize(d3d->GetDevice(), L"Assets/button.png")) 
-	{
-		return false;
-	}
+    m_pressEnter = std::make_unique<Sprite>();
+    if (!m_pressEnter->Initialize(device, L"../Assets/button.png")) return false;
 
-	return true;
+    return true;
 }
 
 void TitleScene::Shutdown()
 {
-	if (m_background)
-	{
-		m_background->Shutdown();
-	}
-	if (m_titleLogo)
-	{
-		m_titleLogo->Shutdown();
-	}
-	if (m_pressEnter)
-	{
-		m_pressEnter->Shutdown();
-	}
+    m_background->Shutdown();
+    m_titleLogo->Shutdown();
+    m_pressEnter->Shutdown();
 }
 
 void TitleScene::Update(float deltaTime)
 {
-	DbgPrint(L"TitleScene Update is running...");
-	// Enterキーが押されたらゲームシーンに遷移
-	if (m_Input->IsKeyPressed(VK_RETURN))
-	{
-		DbgPrint(L"Enter key pressed! Changing to GameScene...");
-		m_nextScene = SceneState::Game;
-	}
+    if (m_input->IsKeyPressed(VK_RETURN)) {
+        m_nextScene = SceneState::Game;
+    }
 }
 
 void TitleScene::Render()
 {
-	// 背景を黒でクリア
-	m_D3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+    m_graphicsDevice->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+    m_graphicsDevice->GetSwapChain()->TurnZBufferOff(m_graphicsDevice->GetDeviceContext());
 
-	m_D3D->TurnZBufferOff(); // 2D描画のためにZバッファをオフにする
+    m_spriteBatch->Begin();
 
-	m_D3D->Begin2D(); // 2D描画開始
+    RECT screenRect = { 0, 0, Game::SCREEN_WIDTH, Game::SCREEN_HEIGHT };
+    m_background->RenderFill(m_spriteBatch.get(), screenRect);
+    m_titleLogo->Render(m_spriteBatch.get(), { Game::SCREEN_WIDTH / 2.0f, 200.0f });
+    m_pressEnter->Render(m_spriteBatch.get(), { Game::SCREEN_WIDTH / 2.0f, 600.0f });
 
-	// 各スプライトが有効な場合のみ描画する
-	if (m_background)
-	{
-		// 画面全体に背景を描画
-		RECT screenRect = { 0, 0, Game::SCREEN_WIDTH, Game::SCREEN_HEIGHT };
-		m_background->RenderFill(m_D3D->GetSpriteBatch(), screenRect);
-	}
-	if (m_titleLogo)
-	{
-		m_titleLogo->Render(m_D3D->GetSpriteBatch(), { 1280.0f / 2.0f, 200.0f });
-	}
-	if (m_pressEnter)
-	{
-		m_pressEnter->Render(m_D3D->GetSpriteBatch(), { 1280.0f / 2.0f, 600.0f });
-	}
+    m_spriteBatch->End();
 
-	m_D3D->End2D(); // 2D描画終了
-
-	m_D3D->TurnZBufferOn(); // 他のシーンのためにZバッファをオンに戻す
-
-	m_D3D->EndScene();
+    m_graphicsDevice->GetSwapChain()->TurnZBufferOn(m_graphicsDevice->GetDeviceContext());
+    m_graphicsDevice->EndScene();
 }

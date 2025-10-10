@@ -18,7 +18,7 @@ struct Light
     float               Range;
     DirectX::XMFLOAT3   Attenuation;
     int                 Type;
-    BOOL                Enabled;
+    bool                Enabled; // <--- BOOL‚©‚çbool‚É•ÏX
     float               Intensity;
     DirectX::XMFLOAT2   Padding;
 };

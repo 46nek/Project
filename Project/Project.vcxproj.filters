@@ -58,9 +58,6 @@
     <ClInclude Include="targetver.h">
       <Filter>Source\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Direct3D.h">
-      <Filter>Source\DirectX</Filter>
-    </ClInclude>
     <ClInclude Include="GameScene.h">
       <Filter>Source\Scenes</Filter>
     </ClInclude>
@@ -123,9 +120,6 @@
     <ClCompile Include="Game.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Direct3D.cpp">
-      <Filter>Source\DirectX</Filter>
-    </ClCompile>
     <ClCompile Include="GameScene.cpp">
       <Filter>Source\Scenes</Filter>
     </ClCompile>
@@ -147,7 +141,7 @@
     <ClCompile Include="Window.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicDevice.cpp">
+    <ClCompile Include="GraphicsDevice.cpp">
       <Filter>Source\DirectX</Filter>
     </ClCompile>
     <ClCompile Include="SwapChain.cpp">

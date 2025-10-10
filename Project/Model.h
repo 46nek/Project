@@ -4,7 +4,8 @@
 #include <memory>
 #include <d3d11.h>
 #include <DirectXMath.h>
-#include "Texture.h"
+
+class Texture; // ‘O•ûéŒ¾
 
 struct SimpleVertex
 {
@@ -17,6 +18,13 @@ struct SimpleVertex
 class Model
 {
 public:
+    // Mesh\‘¢‘Ì‚ğpublic‚ÉˆÚ“®
+    struct Mesh {
+        ID3D11Buffer* vertexBuffer = nullptr;
+        ID3D11Buffer* indexBuffer = nullptr;
+        int indexCount = 0;
+    };
+
     Model();
     ~Model();
 
@@ -28,14 +36,10 @@ public:
     void SetPosition(float x, float y, float z);
     void SetRotation(float x, float y, float z);
     void SetScale(float x, float y, float z);
-    DirectX::XMMATRIX GetWorldMatrix() const;
+    DirectX::XMMATRIX GetWorldMatrix() const; // const ‚ğ’Ç‰Á
 
 private:
-    struct Mesh {
-        ID3D11Buffer* vertexBuffer = nullptr;
-        ID3D11Buffer* indexBuffer = nullptr;
-        int indexCount = 0;
-    };
+    void RenderBuffers(ID3D11DeviceContext*, const Mesh& mesh);
 
     std::vector<Mesh> m_meshes;
     std::unique_ptr<Texture> m_texture;

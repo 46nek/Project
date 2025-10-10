@@ -2,7 +2,7 @@
 
 #include <memory>
 #include "Scene.h"
-#include "Direct3D.h"
+#include "GraphicsDevice.h"
 #include "Input.h"
 
 class SceneManager
@@ -11,7 +11,7 @@ public:
 	SceneManager();
 	~SceneManager();
 
-	bool Initialize(Direct3D* d3d, Input* input);
+	bool Initialize(GraphicsDevice* graphicsDevice, Input* input);
 	void Shutdown();
 	void Update(float deltaTime);
 	void Render();
@@ -20,7 +20,7 @@ private:
 	bool ChangeScene(SceneState nextState);
 
 private:
-	std::unique_ptr<Scene> m_currentScene; // åªç›ÇÃÉVÅ[ÉìÇï€éù
-	Direct3D* m_D3D;
+	std::unique_ptr<Scene> m_currentScene;
+	GraphicsDevice* m_graphicsDevice;
 	Input* m_Input;
 };

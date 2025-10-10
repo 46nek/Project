@@ -8,7 +8,7 @@ GameScene::~GameScene() {}
 bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
 {
     m_graphicsDevice = graphicsDevice;
-    m_input = input;
+    m_input = input; 
 
     m_camera = std::make_unique<Camera>();
     m_lightManager = std::make_unique<LightManager>();
@@ -19,9 +19,9 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
     m_mazeGenerator = std::make_unique<MazeGenerator>();
     m_mazeGenerator->Generate(21, 21);
 
-    // AssetLoaderを使ってモデルを生成
     auto wallModel = AssetLoader::CreateWallModelFromMaze(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), 2.0f, 2.0f);
     if (!wallModel) return false;
+    // wallModel->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"../Assets/wall.png")); // 必要であれば壁のテクスチャを設定
     m_models.push_back(std::move(wallModel));
 
     auto floorModel = AssetLoader::LoadModelFromFile(m_graphicsDevice->GetDevice(), "../Assets/cube.fbx");
@@ -31,7 +31,6 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
     floorModel->SetScale(21.0f, 1.0f, 21.0f);
     m_models.push_back(std::move(floorModel));
 
-    // カメラの初期位置を設定
     m_camera->SetPosition(2.0f, 1.5f, 2.0f);
 
     return true;
@@ -40,7 +39,7 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
 void GameScene::Shutdown()
 {
     for (auto& model : m_models) {
-        model->Shutdown();
+        if (model) model->Shutdown();
     }
     m_models.clear();
 }

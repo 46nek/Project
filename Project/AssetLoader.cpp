@@ -1,9 +1,10 @@
 #include "AssetLoader.h"
 #include "MeshGenerator.h"
+#include "Texture.h" // Textureの完全な定義のためにインクルード
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include <windows.h> // MessageBoxのため
+#include <windows.h>
 
 std::unique_ptr<Model> AssetLoader::LoadModelFromFile(ID3D11Device* device, const std::string& filename)
 {
@@ -15,7 +16,6 @@ std::unique_ptr<Model> AssetLoader::LoadModelFromFile(ID3D11Device* device, cons
         return nullptr;
     }
 
-    // 最初のメッシュのみを読み込む簡易的な実装
     if (scene->mNumMeshes > 0)
     {
         aiMesh* mesh = scene->mMeshes[0];
@@ -23,7 +23,7 @@ std::unique_ptr<Model> AssetLoader::LoadModelFromFile(ID3D11Device* device, cons
         std::vector<unsigned long> indices;
 
         for (UINT i = 0; i < mesh->mNumVertices; i++) {
-            SimpleVertex vertex;
+            SimpleVertex vertex{}; // C++11以降の推奨される初期化
             vertex.Pos = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
             if (mesh->HasNormals()) {
                 vertex.Normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
