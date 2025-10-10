@@ -57,7 +57,7 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 	m_D3D = d3d;
 	m_Input = input;
 
-	constexpr float pathWidth = 3.0f;
+	constexpr float pathWidth = 2.0f;
 
 	DbgPrint(L"--> Creating Camera...");
 	m_Camera = std::make_unique<Camera>();
@@ -78,7 +78,7 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 		for (int x = 0; x < mazeWidth && !startFound; ++x) {
 			if (mazeData[y][x] == MazeGenerator::Path) {
 				// ƒJƒƒ‰‚Ì‚‚³‚ð’²®
-				m_Camera->SetPosition(static_cast<float>(x) * pathWidth, 15.0f, static_cast<float>(y) * pathWidth);
+				m_Camera->SetPosition(static_cast<float>(x) * pathWidth, 1.5f, static_cast<float>(y) * pathWidth);
 				startFound = true;
 			}
 		}
@@ -92,7 +92,7 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 	std::vector<SimpleVertex> wallVertices;
 	std::vector<unsigned long> wallIndices;
 
-	constexpr float wallHeight = 3.0f; 
+	constexpr float wallHeight = 2.0f; 
 	if (MeshGenerator::CreateWallFromMaze(mazeData, pathWidth, wallHeight, wallVertices, wallIndices))
 	{
 		m_wallModel = std::make_unique<Model>();
@@ -120,6 +120,7 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 	}
 	if (!m_floorModel->LoadTexture(m_D3D->GetDevice(), L"Assets/floor.png"))
 	{
+		DbgPrint(L"!!!!!! FAILED to load floor texture.");
 		DbgPrint(L"!!!!!! FAILED to load floor texture.");
 	}
 	m_floorModel->SetPosition(static_cast<float>(mazeWidth - 1) / 2.0f * pathWidth, -1.0f, static_cast<float>(mazeHeight - 1) / 2.0f * pathWidth);
