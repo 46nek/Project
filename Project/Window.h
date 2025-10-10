@@ -2,7 +2,7 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include "input.h"
+#include "Input.h"
 
 class Window
 {
@@ -19,10 +19,10 @@ private:
     static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
     LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
 
-
     LPCWSTR m_applicationName;
     HINSTANCE m_hinstance;
     HWND m_hwnd;
     Input* m_input;
-    int m_screenWidth, m_screenHeight;
+    int m_screenWidth;
+    int m_screenHeight;
 };

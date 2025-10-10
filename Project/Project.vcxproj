@@ -150,6 +150,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AssetLoader.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Direct3D.h" />
     <ClInclude Include="framework.h" />
@@ -157,32 +158,45 @@
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="LightManager.h" />
     <ClInclude Include="MazeGenerator.h" />
     <ClInclude Include="MeshGenerator.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Project.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="ShaderManager.h" />
+    <ClInclude Include="ShadowMapper.h" />
     <ClInclude Include="Sprite.h" />
+    <ClInclude Include="SwapChain.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TitleScene.h" />
     <ClInclude Include="Window.h" />
+    <ClInclude Include="GraphicsDevice.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AssetLoader.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Direct3D.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameScene.cpp" />
+    <ClCompile Include="GraphicDevice.cpp" />
     <ClCompile Include="input.cpp" />
+    <ClCompile Include="LightManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MazeGenerator.cpp" />
     <ClCompile Include="MeshGenerator.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="ShaderManager.cpp" />
+    <ClCompile Include="ShadowMapper.cpp" />
     <ClCompile Include="Sprite.cpp" />
+    <ClCompile Include="SwapChain.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TitleScene.cpp" />

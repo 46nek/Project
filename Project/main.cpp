@@ -1,9 +1,8 @@
-﻿// main.cpp
-#include "Game.h"
+﻿#include "Game.h"
 #include <windows.h>
-#include <iostream> 
-#include <fcntl.h>  
-#include <io.h>  
+#include <iostream>
+#include <fcntl.h>
+#include <io.h>
 
 // コンソールを作成して標準出力をリダイレクトする関数
 void CreateConsole()

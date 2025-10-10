@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Window.h"
-#include "Direct3D.h"
+#include "GraphicsDevice.h"
 #include "Input.h"
 #include "SceneManager.h"
-#include "Timer.h" // Timer‚ð’Ç‰Á
+#include "Timer.h"
 #include <memory>
 
 class Game
@@ -26,7 +26,7 @@ private:
 
     std::unique_ptr<Window> m_window;
     std::unique_ptr<Input> m_input;
-    std::unique_ptr<Direct3D> m_direct3D;
+    std::unique_ptr<GraphicsDevice> m_graphicsDevice;
     std::unique_ptr<SceneManager> m_sceneManager;
-    std::unique_ptr<Timer> m_timer; // Timer‚ð’Ç‰Á
+    std::unique_ptr<Timer> m_timer;
 };

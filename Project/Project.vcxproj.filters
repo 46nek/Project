@@ -20,20 +20,20 @@
     <Filter Include="Source\Scenes">
       <UniqueIdentifier>{229d7e91-2cca-4934-8107-67d45d9d5049}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\System">
-      <UniqueIdentifier>{2df6848f-98f1-44ea-a39d-5e2eaa906a90}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders">
       <UniqueIdentifier>{e390a009-5510-4a04-a7af-8efe4c8cd6de}</UniqueIdentifier>
     </Filter>
     <Filter Include="Assets">
       <UniqueIdentifier>{d68cbf2e-48b3-4056-a66b-c5428c428370}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utilities">
+      <UniqueIdentifier>{cdd1634e-797f-4979-ad14-2fa8fa57108d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GamePlay">
+      <UniqueIdentifier>{f54cd52b-d12a-4551-ac41-71cad1f45a73}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Camera.h">
-      <Filter>Source\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Model.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
@@ -73,23 +73,47 @@
     <ClInclude Include="TitleScene.h">
       <Filter>Source\Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="input.h">
-      <Filter>Source\System</Filter>
-    </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>Source\System</Filter>
-    </ClInclude>
     <ClInclude Include="Window.h">
       <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="MazeGenerator.h">
-      <Filter>Source\System</Filter>
     </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="GraphicsDevice.h">
+      <Filter>Source\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="SwapChain.h">
+      <Filter>Source\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Source\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetLoader.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
     <ClInclude Include="MeshGenerator.h">
-      <Filter>Source\Graphics</Filter>
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="MazeGenerator.h">
+      <Filter>GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="input.h">
+      <Filter>GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="LightManager.h">
+      <Filter>GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderManager.h">
+      <Filter>Source\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowMapper.h">
+      <Filter>Source\DirectX</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -111,9 +135,6 @@
     <ClCompile Include="TitleScene.cpp">
       <Filter>Source\Scenes</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Source\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="Model.cpp">
       <Filter>Source\Graphics</Filter>
     </ClCompile>
@@ -123,20 +144,44 @@
     <ClCompile Include="Texture.cpp">
       <Filter>Source\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="input.cpp">
-      <Filter>Source\System</Filter>
-    </ClCompile>
-    <ClCompile Include="Timer.cpp">
-      <Filter>Source\System</Filter>
-    </ClCompile>
     <ClCompile Include="Window.cpp">
       <Filter>Source\Core</Filter>
     </ClCompile>
-    <ClCompile Include="MazeGenerator.cpp">
-      <Filter>Source\System</Filter>
+    <ClCompile Include="GraphicDevice.cpp">
+      <Filter>Source\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="SwapChain.cpp">
+      <Filter>Source\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Source\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetLoader.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>Utilities</Filter>
     </ClCompile>
     <ClCompile Include="MeshGenerator.cpp">
-      <Filter>Source\Graphics</Filter>
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="MazeGenerator.cpp">
+      <Filter>GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="input.cpp">
+      <Filter>GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="LightManager.cpp">
+      <Filter>GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderManager.cpp">
+      <Filter>Source\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowMapper.cpp">
+      <Filter>Source\DirectX</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

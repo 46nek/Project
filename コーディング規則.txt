@@ -1,0 +1,68 @@
+1. 命名規則
+一貫した命名規則は、コードの可読性を大幅に向上させます。
+
+クラス名・構造体名: PascalCase (例: GameScene, PlayerData)
+
+関数名・メソッド名: PascalCase (例: Initialize, UpdatePlayer)
+
+変数名:
+
+メンバー変数: m_camelCase (例: m_playerHealth, m_d3d)
+
+ローカル変数: camelCase (例: deltaTime, enemyCount)
+
+グローバル変数: g_camelCase (例: g_windowHandle)
+
+定数・constexpr: UPPER_CASE_WITH_UNDERSCORES (例: SCREEN_WIDTH, MAX_ENEMIES)
+
+列挙型(enum):
+
+型名: PascalCase (例: SceneState)
+
+列挙子: PascalCase (例: Title, Game)
+
+2. 書式
+インデント: 半角スペース4つ
+
+括弧 ({}): クラス、関数、if文などのブロックの開始括弧は、キーワードと同じ行に記述します。
+
+C++
+
+class MyClass {
+public:
+    void MyFunction(bool condition) {
+        if (condition) {
+            // do something
+        }
+    }
+};
+
+#includeの順序: 以下の順序で整理すると、依存関係が明確になります。
+
+関連するヘッダーファイル (例: MyClass.cpp なら "MyClass.h")
+
+プロジェクト内の他のヘッダーファイル
+
+ライブラリのヘッダーファイル (DirectX, Assimpなど)
+
+標準ライブラリのヘッダーファイル
+
+3. コメント
+単行コメント: // を使用します。
+
+ドキュメンテーション: クラスや関数の説明には、Doxygenなどのツールと互換性のある形式を推奨します。
+
+C++
+
+/**
+ * @brief プレイヤーのカメラを管理するクラス
+ */
+class Camera {
+    // ...
+};
+4. モダンC++の活用
+スマートポインタ: メモリ管理を簡素化し、メモリリークを防ぐため、std::unique_ptr や std::shared_ptr を積極的に使用します。
+
+constの徹底: 変更されるべきでない変数やメソッドには const を付け、コードの安全性を高めます。
+
+nullptr: NULL の代わりに nullptr を使用します。

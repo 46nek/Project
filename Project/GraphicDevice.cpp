@@ -1,0 +1,111 @@
+#include "GraphicsDevice.h"
+#include "LightManager.h" 
+
+GraphicsDevice::GraphicsDevice()
+    : m_d3dDevice(nullptr), m_immediateContext(nullptr),
+    m_matrixBuffer(nullptr), m_lightBuffer(nullptr), m_samplerState(nullptr)
+{
+}
+
+GraphicsDevice::~GraphicsDevice() {}
+
+bool GraphicsDevice::Initialize(HWND hWnd, int screenWidth, int screenHeight)
+{
+    UINT createDeviceFlags = 0;
+#ifdef _DEBUG
+    createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
+    D3D_FEATURE_LEVEL featureLevels[] = { D3D_FEATURE_LEVEL_11_0 };
+    HRESULT hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, createDeviceFlags,
+        featureLevels, ARRAYSIZE(featureLevels), D3D11_SDK_VERSION,
+        &m_d3dDevice, nullptr, &m_immediateContext);
+    if (FAILED(hr)) return false;
+
+    m_swapChain = std::make_unique<SwapChain>();
+    if (!m_swapChain->Initialize(m_d3dDevice, hWnd, screenWidth, screenHeight)) return false;
+
+    m_shaderManager = std::make_unique<ShaderManager>();
+    if (!m_shaderManager->Initialize(m_d3dDevice)) return false;
+
+    m_shadowMapper = std::make_unique<ShadowMapper>();
+    if (!m_shadowMapper->Initialize(m_d3dDevice)) return false;
+
+    // (以前Direct3Dにあったバッファ作成処理をここに移動)
+    D3D11_BUFFER_DESC matrixBufferDesc = {};
+    matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+    matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    hr = m_d3dDevice->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
+    if (FAILED(hr)) return false;
+
+    D3D11_BUFFER_DESC lightBufferDesc = {};
+    lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    lightBufferDesc.ByteWidth = sizeof(LightBufferType);
+    lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    hr = m_d3dDevice->CreateBuffer(&lightBufferDesc, NULL, &m_lightBuffer);
+    if (FAILED(hr)) return false;
+
+    D3D11_SAMPLER_DESC samplerDesc = {};
+    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+    samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+    hr = m_d3dDevice->CreateSamplerState(&samplerDesc, &m_samplerState);
+    if (FAILED(hr)) return false;
+
+    return true;
+}
+
+void GraphicsDevice::Shutdown()
+{
+    if (m_samplerState) m_samplerState->Release();
+    if (m_lightBuffer) m_lightBuffer->Release();
+    if (m_matrixBuffer) m_matrixBuffer->Release();
+    m_shadowMapper->Shutdown();
+    m_shaderManager->Shutdown();
+    m_swapChain->Shutdown();
+    if (m_immediateContext) m_immediateContext->Release();
+    if (m_d3dDevice) m_d3dDevice->Release();
+}
+
+void GraphicsDevice::BeginScene(float r, float g, float b, float a)
+{
+    m_swapChain->BeginScene(m_immediateContext, r, g, b, a);
+}
+
+void GraphicsDevice::EndScene()
+{
+    m_swapChain->EndScene();
+}
+
+bool GraphicsDevice::UpdateMatrixBuffer(const DirectX::XMMATRIX& world, const DirectX::XMMATRIX& view, const DirectX::XMMATRIX& projection, const DirectX::XMMATRIX& lightView, const DirectX::XMMATRIX& lightProjection)
+{
+    D3D11_MAPPED_SUBRESOURCE mappedResource;
+    if (FAILED(m_immediateContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) return false;
+    MatrixBufferType* dataPtr = (MatrixBufferType*)mappedResource.pData;
+    dataPtr->world = DirectX::XMMatrixTranspose(world);
+    dataPtr->view = DirectX::XMMatrixTranspose(view);
+    dataPtr->projection = DirectX::XMMatrixTranspose(projection);
+    dataPtr->worldInverseTranspose = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, world));
+    dataPtr->lightView = DirectX::XMMatrixTranspose(lightView);
+    dataPtr->lightProjection = DirectX::XMMatrixTranspose(lightProjection);
+    m_immediateContext->Unmap(m_matrixBuffer, 0);
+    m_immediateContext->VSSetConstantBuffers(0, 1, &m_matrixBuffer);
+    return true;
+}
+
+bool GraphicsDevice::UpdateLightBuffer(const LightBufferType& lightBuffer)
+{
+    D3D11_MAPPED_SUBRESOURCE mappedResource;
+    if (FAILED(m_immediateContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) return false;
+    LightBufferType* dataPtr = (LightBufferType*)mappedResource.pData;
+    *dataPtr = lightBuffer;
+    m_immediateContext->Unmap(m_lightBuffer, 0);
+    m_immediateContext->PSSetConstantBuffers(1, 1, &m_lightBuffer);
+    return true;
+}

@@ -1,10 +1,12 @@
 #pragma once
 #include <memory>
-#include <vector> 
+#include <vector>
 #include "Scene.h"
 #include "Camera.h"
+#include "MazeGenerator.h"
+#include "LightManager.h"
 #include "Model.h"
-#include "MazeGenerator.h" 
+#include "Renderer.h"
 
 class GameScene : public Scene
 {
@@ -12,29 +14,18 @@ public:
     GameScene();
     ~GameScene();
 
-    bool Initialize(Direct3D* d3d, Input* input) override;
+    bool Initialize(GraphicsDevice* graphicsDevice, Input* input) override;
     void Shutdown() override;
     void Update(float deltaTime) override;
     void Render() override;
 
 private:
-    void RenderDepthPass();  
-    void RenderMainPass();   
-    void RenderScene();
-
     void HandleInput(float deltaTime);
-    void UpdateCamera(float deltaTime);
-    void InitializeLights();
 
-    std::unique_ptr<Camera> m_Camera;
+    std::unique_ptr<Camera> m_camera;
     std::unique_ptr<MazeGenerator> m_mazeGenerator;
-    // •Çƒ‚ƒfƒ‹‚Íˆê‚Â‚É
-    std::unique_ptr<Model> m_wallModel;
-    std::unique_ptr<Model> m_floorModel;
+    std::unique_ptr<LightManager> m_lightManager;
+    std::unique_ptr<Renderer> m_renderer;
 
-    std::vector<Light> m_lights;
-    float m_flickerTimer;
-
-    DirectX::XMMATRIX m_lightViewMatrix;
-    DirectX::XMMATRIX m_lightProjectionMatrix;
+    std::vector<std::unique_ptr<Model>> m_models;
 };

@@ -9,13 +9,10 @@ Window::Window(LPCWSTR applicationName, int screenWidth, int screenHeight)
     m_screenHeight(screenHeight),
     m_hinstance(nullptr),
     m_hwnd(nullptr),
-    m_input(nullptr)
-{
+    m_input(nullptr) {
 }
 
-Window::~Window()
-{
-}
+Window::~Window() {}
 
 bool Window::Initialize(HINSTANCE hInstance, Input* input)
 {
@@ -37,8 +34,7 @@ bool Window::Initialize(HINSTANCE hInstance, Input* input)
     wc.lpszClassName = m_applicationName;
     wc.cbSize = sizeof(WNDCLASSEX);
 
-    if (!RegisterClassEx(&wc))
-    {
+    if (!RegisterClassEx(&wc)) {
         return false;
     }
 
@@ -46,8 +42,7 @@ bool Window::Initialize(HINSTANCE hInstance, Input* input)
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, m_screenWidth, m_screenHeight, NULL, NULL, m_hinstance, NULL);
 
-    if (!m_hwnd)
-    {
+    if (!m_hwnd) {
         return false;
     }
 
@@ -69,13 +64,11 @@ bool Window::Initialize(HINSTANCE hInstance, Input* input)
 void Window::Shutdown()
 {
     ShowCursor(true);
-    if (m_hwnd)
-    {
+    if (m_hwnd) {
         DestroyWindow(m_hwnd);
         m_hwnd = nullptr;
     }
-    if (m_hinstance)
-    {
+    if (m_hinstance) {
         UnregisterClass(m_applicationName, m_hinstance);
         m_hinstance = nullptr;
     }
@@ -89,19 +82,16 @@ HWND Window::GetHwnd() const
 
 LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 {
-    switch (umessage)
-    {
+    switch (umessage) {
     case WM_DESTROY:
     case WM_CLOSE:
         PostQuitMessage(0);
         return 0;
     default:
-        if (g_windowHandle)
-        {
+        if (g_windowHandle) {
             return g_windowHandle->MessageHandler(hwnd, umessage, wparam, lparam);
         }
-        else
-        {
+        else {
             return DefWindowProc(hwnd, umessage, wparam, lparam);
         }
     }
@@ -109,8 +99,7 @@ LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM
 
 LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
-    switch (umsg)
-    {
+    switch (umsg) {
     case WM_INPUT:
     {
         UINT dwSize = sizeof(RAWINPUT);
@@ -118,8 +107,7 @@ LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPA
         GetRawInputData((HRAWINPUT)lparam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER));
         RAWINPUT* raw = (RAWINPUT*)lpb;
 
-        if (raw->header.dwType == RIM_TYPEMOUSE)
-        {
+        if (raw->header.dwType == RIM_TYPEMOUSE) {
             m_input->MouseMove(raw->data.mouse.lLastX, raw->data.mouse.lLastY);
         }
         return 0;
