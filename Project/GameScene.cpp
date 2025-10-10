@@ -18,23 +18,29 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
     m_mazeGenerator = std::make_unique<MazeGenerator>();
     m_mazeGenerator->Generate(21, 21);
 
-    auto wallModel = AssetLoader::CreateWallModelFromMaze(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), 2.0f, 2.0f);
+    // 壁モデルの生成とテクスチャ設定
+    auto wallModel = AssetLoader::CreateMazeModel(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), 2.0f, 2.0f, MeshGenerator::MeshType::Wall);
     if (!wallModel) return false;
-    wallModel->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/test.png")); 
+    wallModel->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall.png"));
     m_models.push_back(std::move(wallModel));
 
-    auto floorModel = AssetLoader::LoadModelFromFile(m_graphicsDevice->GetDevice(), "Assets/cube.fbx");
+    // 天井モデルの生成とテクスチャ設定
+    auto ceilingModel = AssetLoader::CreateMazeModel(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), 2.0f, 2.0f, MeshGenerator::MeshType::Ceiling);
+    if (!ceilingModel) return false;
+    ceilingModel->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/test.png"));
+    m_models.push_back(std::move(ceilingModel));
+
+    // 床モデルの生成とテクスチャ設定 
+    auto floorModel = AssetLoader::CreateMazeModel(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), 2.0f, 2.0f, MeshGenerator::MeshType::Floor);
     if (!floorModel) return false;
     floorModel->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/floor.png"));
-    floorModel->SetPosition(20.0f, -1.0f, 20.0f);
-    floorModel->SetScale(21.0f, 1.0f, 21.0f);
+
     m_models.push_back(std::move(floorModel));
 
     m_camera->SetPosition(2.0f, 1.5f, 2.0f);
 
     return true;
 }
-
 void GameScene::Shutdown()
 {
     for (auto& model : m_models) {

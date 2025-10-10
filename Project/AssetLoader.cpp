@@ -1,5 +1,4 @@
 #include "AssetLoader.h"
-#include "MeshGenerator.h"
 #include "Texture.h" 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -49,11 +48,12 @@ std::unique_ptr<Model> AssetLoader::LoadModelFromFile(ID3D11Device* device, cons
     return nullptr;
 }
 
-std::unique_ptr<Model> AssetLoader::CreateWallModelFromMaze(ID3D11Device* device, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth, float wallHeight)
+std::unique_ptr<Model> AssetLoader::CreateMazeModel(ID3D11Device* device, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth, float wallHeight, MeshGenerator::MeshType type)
 {
     std::vector<SimpleVertex> vertices;
     std::vector<unsigned long> indices;
-    if (!MeshGenerator::CreateWallFromMaze(mazeData, pathWidth, wallHeight, vertices, indices)) {
+    // åƒÇ—èoÇ∑ä÷êîÇïœçX
+    if (!MeshGenerator::CreateMazeMesh(mazeData, pathWidth, wallHeight, type, vertices, indices)) {
         return nullptr;
     }
 
