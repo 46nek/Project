@@ -1,6 +1,6 @@
 #pragma once
 #include "MazeGenerator.h"
-#include "Direct3D.h" 
+#include "Model.h"
 #include <vector>
 
 enum class FaceDirection {

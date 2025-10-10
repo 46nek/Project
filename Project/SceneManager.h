@@ -22,5 +22,5 @@ private:
 private:
 	std::unique_ptr<Scene> m_currentScene;
 	GraphicsDevice* m_graphicsDevice;
-	Input* m_Input;
+	Input* m_input;
 };

@@ -1,92 +1,56 @@
-#include "SceneManager.h"
-#include "TitleScene.h"
-#include "GameScene.h"
+#include "ShaderManager.h"
 
-// コンストラクタの初期化子リストを修正します
-SceneManager::SceneManager() : m_currentScene(nullptr), m_graphicsDevice(nullptr), m_input(nullptr)
+ShaderManager::ShaderManager()
+    : m_vertexShader(nullptr), m_pixelShader(nullptr), m_depthVertexShader(nullptr), m_inputLayout(nullptr)
 {
 }
+ShaderManager::~ShaderManager() {}
 
-SceneManager::~SceneManager()
+bool ShaderManager::Initialize(ID3D11Device* device)
 {
+    ID3DBlob* vsBlob = nullptr;
+    ID3DBlob* psBlob = nullptr;
+    ID3DBlob* depthVsBlob = nullptr;
+    ID3DBlob* errorBlob = nullptr;
+    HRESULT hr;
+
+    // シェーダーへのパスを修正
+    hr = D3DCompileFromFile(L"../Shaders/VertexShader.hlsl", nullptr, nullptr, "VS", "vs_5_0", 0, 0, &vsBlob, &errorBlob);
+    if (FAILED(hr)) { if (errorBlob) errorBlob->Release(); return false; }
+    hr = device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &m_vertexShader);
+    if (FAILED(hr)) { vsBlob->Release(); return false; }
+
+    hr = D3DCompileFromFile(L"../Shaders/PixelShader.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &psBlob, &errorBlob);
+    if (FAILED(hr)) { vsBlob->Release(); if (errorBlob) errorBlob->Release(); return false; }
+    hr = device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &m_pixelShader);
+    if (FAILED(hr)) { vsBlob->Release(); psBlob->Release(); return false; }
+
+    hr = D3DCompileFromFile(L"../Shaders/DepthVertexShader.hlsl", nullptr, nullptr, "main", "vs_5_0", 0, 0, &depthVsBlob, &errorBlob);
+    if (FAILED(hr)) { vsBlob->Release(); psBlob->Release(); if (errorBlob) errorBlob->Release(); return false; }
+    hr = device->CreateVertexShader(depthVsBlob->GetBufferPointer(), depthVsBlob->GetBufferSize(), nullptr, &m_depthVertexShader);
+    if (FAILED(hr)) { vsBlob->Release(); psBlob->Release(); depthVsBlob->Release(); return false; }
+
+    // インプットレイアウトの作成
+    D3D11_INPUT_ELEMENT_DESC layout[] = {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    };
+    hr = device->CreateInputLayout(layout, ARRAYSIZE(layout), vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), &m_inputLayout);
+
+    vsBlob->Release();
+    psBlob->Release();
+    depthVsBlob->Release();
+    if (errorBlob) errorBlob->Release();
+
+    return SUCCEEDED(hr);
 }
 
-// Initializeの引数を GraphicsDevice* に統一します
-bool SceneManager::Initialize(GraphicsDevice* graphicsDevice, Input* input)
+void ShaderManager::Shutdown()
 {
-    m_graphicsDevice = graphicsDevice;
-    m_input = input; // メンバー変数を正しく設定します
-    // 最初のシーンとしてタイトルシーンを設定
-    return ChangeScene(SceneState::Title);
-}
-
-void SceneManager::Shutdown()
-{
-    if (m_currentScene)
-    {
-        m_currentScene->Shutdown();
-        m_currentScene.reset();
-    }
-}
-
-void SceneManager::Update(float deltaTime)
-{
-    if (m_currentScene)
-    {
-        m_currentScene->Update(deltaTime);
-
-        // シーンの切り替えチェック
-        SceneState nextScene = m_currentScene->GetNextScene();
-        if (nextScene != SceneState::None)
-        {
-            ChangeScene(nextScene);
-        }
-    }
-}
-
-void SceneManager::Render()
-{
-    if (m_currentScene)
-    {
-        m_currentScene->Render();
-    }
-}
-
-bool SceneManager::ChangeScene(SceneState nextState)
-{
-    // 現在のシーンを解放
-    if (m_currentScene)
-    {
-        m_currentScene->Shutdown();
-        m_currentScene.reset();
-    }
-
-    // 新しいシーンを作成
-    switch (nextState)
-    {
-    case SceneState::Title:
-        m_currentScene = std::make_unique<TitleScene>();
-        break;
-    case SceneState::Game:
-        m_currentScene = std::make_unique<GameScene>();
-        break;
-    default:
-        return false;
-    }
-
-    // 新しいシーンを初期化
-    if (m_currentScene)
-    {
-        // Initializeの引数を m_graphicsDevice と m_input に修正します
-        if (!m_currentScene->Initialize(m_graphicsDevice, m_input))
-        {
-            return false;
-        }
-    }
-    else
-    {
-        return false;
-    }
-
-    return true;
+    if (m_inputLayout) { m_inputLayout->Release(); m_inputLayout = nullptr; }
+    if (m_depthVertexShader) { m_depthVertexShader->Release(); m_depthVertexShader = nullptr; }
+    if (m_pixelShader) { m_pixelShader->Release(); m_pixelShader = nullptr; }
+    if (m_vertexShader) { m_vertexShader->Release(); m_vertexShader = nullptr; }
 }
