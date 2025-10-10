@@ -15,7 +15,7 @@ public:
 
     // 頂点とインデックスのリストからモデルを初期化するメソッドを追加
     bool Initialize(ID3D11Device* device, const char* modelFilename);
-    static Model* CreateModelFromMaze(ID3D11Device* device, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth);
+    bool Initialize(ID3D11Device* device, const std::vector<SimpleVertex>& vertices, const std::vector<unsigned long>& indices);
     bool LoadTexture(ID3D11Device* device, const wchar_t* textureFilename);
     void Shutdown();
     void Render(ID3D11DeviceContext*);
@@ -26,9 +26,7 @@ public:
     DirectX::XMMATRIX GetWorldMatrix();
 
 private: 
-    
-    bool Initialize(ID3D11Device* device, const std::vector<SimpleVertex>& vertices, const std::vector<unsigned long>& indices);
-    
+ 
     struct Mesh {
         ID3D11Buffer* vertexBuffer = nullptr;
         ID3D11Buffer* indexBuffer = nullptr;

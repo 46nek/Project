@@ -1,5 +1,6 @@
 #include "GameScene.h"
 #include "framework.h"
+#include "MeshGenerator.h" 
 #include <cmath>
 
 GameScene::GameScene()
@@ -86,16 +87,26 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 	}
 
 	DbgPrint(L"--> Initializing wall model...");
-	// Modelクラスの静的メソッドを使って壁モデルを生成
-	m_wallModel.reset(Model::CreateModelFromMaze(m_D3D->GetDevice(), mazeData, pathWidth));
-	if (!m_wallModel)
+
+	std::vector<SimpleVertex> wallVertices;
+	std::vector<unsigned long> wallIndices;
+
+	// MeshGeneratorを使って頂点とインデックスを生成
+	if (MeshGenerator::CreateWallFromMaze(mazeData, pathWidth, wallVertices, wallIndices))
 	{
-		DbgPrint(L"!!!!!! FAILED to initialize wall model.");
-		return false;
+		m_wallModel = std::make_unique<Model>();
+		// 生成したデータでModelを初期化
+		if (!m_wallModel->Initialize(m_D3D->GetDevice(), wallVertices, wallIndices))
+		{
+			DbgPrint(L"!!!!!! FAILED to initialize wall model with generated mesh.");
+			m_wallModel.reset();
+			return false;
+		}
 	}
-	if (!m_wallModel->LoadTexture(m_D3D->GetDevice(), L"Assets/wall.png"))
+	else
 	{
-		DbgPrint(L"!!!!!! FAILED to load wall texture.");
+		DbgPrint(L"!!!!!! FAILED to generate wall mesh data.");
+		return false;
 	}
 	DbgPrint(L"--> Wall model initialized successfully.");
 
@@ -155,7 +166,6 @@ void GameScene::Update(float deltaTime)
 	}
 }
 
-
 void GameScene::HandleInput(float deltaTime)
 {
 	if (m_Input->IsKeyDown('W')) m_Camera->MoveForward(deltaTime);
@@ -181,7 +191,17 @@ void GameScene::Render()
 
 	ID3D11DeviceContext* deviceContext = m_D3D->GetDeviceContext();
 
-	m_D3D->UpdateLightBuffer(m_lights.data(), static_cast<int>(m_lights.size()), m_Camera->GetPosition());
+	LightBufferType lightBuffer;
+	// ライトの数を設定
+	lightBuffer.NumLights = static_cast<int>(m_lights.size());
+	// カメラ位置を設定
+	lightBuffer.CameraPosition = m_Camera->GetPosition();
+	// ライトのデータをコピー
+	for (int i = 0; i < lightBuffer.NumLights; ++i)
+	{
+		lightBuffer.Lights[i] = m_lights[i];
+	}
+	m_D3D->UpdateLightBuffer(lightBuffer);
 
 	deviceContext->IASetInputLayout(m_D3D->GetInputLayout());
 	deviceContext->VSSetShader(m_D3D->GetVertexShader(), nullptr, 0);
