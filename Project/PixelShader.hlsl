@@ -1,5 +1,7 @@
 Texture2D shaderTexture : register(t0);
+Texture2D shadowMapTexture : register(t1);
 SamplerState SampleType : register(s0);
+SamplerComparisonState ShadowSampleType : register(s1);
 
 // ライトの種類
 #define DIRECTIONAL_LIGHT 0
@@ -37,6 +39,7 @@ struct VS_OUTPUT
     float2 Tex : TEXCOORD0;
     float3 Normal : NORMAL;
     float3 WorldPos : WORLDPOS;
+    float4 LightViewPos : TEXCOORD1;
 };
 
 
@@ -54,7 +57,22 @@ float4 PS(VS_OUTPUT input) : SV_Target
 
     // カメラへの視線ベクトルを計算
     float3 viewDir = normalize(CameraPosition - input.WorldPos);
+    
+    float shadowFactor = 1.0; // 影の影響係数 (1.0 = 光が当たる, 0.0 = 影)
+    
+    // 1. 光源視点での座標を正規化デバイス座標(-1~+1)からテクスチャ座標(0~1)に変換
+    float2 projectTexCoord;
+    projectTexCoord.x = input.LightViewPos.x / input.LightViewPos.w / 2.0f + 0.5f;
+    projectTexCoord.y = -input.LightViewPos.y / input.LightViewPos.w / 2.0f + 0.5f;
 
+    // 2. テクスチャ座標が0~1の範囲内にある場合のみ影の計算を行う
+    if ((saturate(projectTexCoord.x) == projectTexCoord.x) && (saturate(projectTexCoord.y) == projectTexCoord.y))
+    {
+        // 3. シャドウマップから深度値を取得し、現在のピクセルの深度と比較する
+        // SampleCmpLevelZeroは、ハードウェアの機能を使って比較を行い、影なら0.0、そうでなければ1.0を返す
+        shadowFactor = shadowMapTexture.SampleCmpLevelZero(ShadowSampleType, projectTexCoord, input.LightViewPos.z / input.LightViewPos.w);
+    }
+    
     // シーン内のすべてのライトをループ処理
     for (int i = 0; i < NumLights; ++i)
     {
@@ -112,11 +130,9 @@ float4 PS(VS_OUTPUT input) : SV_Target
         float specular = pow(specAngle, 32.0f); // 光沢の強さ
         totalSpecular += float4(1.0f, 1.0f, 1.0f, 1.0f) * specular * Lights[i].Intensity * attenuation * spotFactor;
     }
-
-    // --- 最終的な色を合成 ---
-    // (テクスチャ色 x 拡散光) + 鏡面反射光 + 環境光
-    float4 finalColor = (textureColor * totalDiffuse) + totalSpecular + ambient;
-    finalColor.a = textureColor.a; // 元のアルファ値を保持
+    
+    float4 finalColor = (textureColor * totalDiffuse * shadowFactor) + (totalSpecular * shadowFactor) + ambient;
+    finalColor.a = textureColor.a;
 
     return finalColor;
 }

@@ -32,6 +32,8 @@ struct MatrixBufferType
     XMMATRIX view;
     XMMATRIX projection;
     XMMATRIX worldInverseTranspose;
+    XMMATRIX lightView;
+    XMMATRIX lightProjection;
 };
 
 class Direct3D
@@ -58,20 +60,23 @@ public:
     ID3D11PixelShader* GetPixelShader();
     ID3D11SamplerState* GetSamplerState();
 
+    ID3D11VertexShader* GetDepthVertexShader();
+    ID3D11SamplerState* GetShadowSampleState();
+    void SetShadowMapRenderTarget();
+    void ResetMainRenderTarget(int screenWidth, int screenHeight);
+
+    ID3D11ShaderResourceView* GetShadowMapSRV();
+
     void SetWorldMatrix(const XMMATRIX& world);
     void SetViewMatrix(const XMMATRIX& view);
     void SetProjectionMatrix(const XMMATRIX& projection);
     bool UpdateMatrixBuffer();
-    bool UpdateLightBuffer(const LightBufferType& lightBuffer);
+    bool UpdateLightBuffer(const LightBufferType& lightBuffer, const XMMATRIX& lightView, const XMMATRIX& lightProjection);
     DirectX::SpriteBatch* GetSpriteBatch();
 
     void TurnZBufferOn();
     void TurnZBufferOff();
     XMMATRIX GetOrthoMatrix();
-
-    void SetShadowMapRenderTarget();
-    void ResetMainRenderTarget(int screenWidth, int screenHeight);
-    ID3D11ShaderResourceView* GetShadowMapSRV();
 
 private:
     // DirectX11の主要なインターフェース
@@ -91,6 +96,8 @@ private:
     ID3D11InputLayout* m_pVertexLayout;
     ID3D11Buffer* m_pMatrixBuffer;
     ID3D11Buffer* m_pLightBuffer;
+    ID3D11VertexShader* m_pDepthVertexShader;
+    ID3D11SamplerState* m_pShadowSampleState;
 
     XMMATRIX m_worldMatrix;
     XMMATRIX m_viewMatrix;

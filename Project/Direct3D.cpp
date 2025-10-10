@@ -196,6 +196,24 @@ bool Direct3D::Initialize(HWND hWnd, int screenWidth, int screenHeight)
         pPSBlob->Release();
         return false;
     }
+    //DepthVertexShaderのコンパイルと作成
+        ID3DBlob* pDepthVSBlob = nullptr;
+    hr = D3DCompileFromFile(L"DepthVertexShader.hlsl", nullptr, nullptr, "main", "vs_5_0", 0, 0, &pDepthVSBlob, &pErrorBlob);
+    if (FAILED(hr))
+    {
+        if (pErrorBlob)
+        {
+            OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
+            pErrorBlob->Release();
+        }
+        return false;
+    }
+    hr = m_pd3dDevice->CreateVertexShader(pDepthVSBlob->GetBufferPointer(), pDepthVSBlob->GetBufferSize(), nullptr, &m_pDepthVertexShader);
+    pDepthVSBlob->Release();
+    if (FAILED(hr))
+    {
+        return false;
+    }
 
     // インプットレイアウトの作成
     D3D11_INPUT_ELEMENT_DESC layout[] =
@@ -210,6 +228,28 @@ bool Direct3D::Initialize(HWND hWnd, int screenWidth, int screenHeight)
     pVSBlob->Release();
     pPSBlob->Release();
     if (FAILED(hr)) return false;
+
+    //シャドウマップ比較用のサンプラーステートを作成
+    D3D11_SAMPLER_DESC shadowSamplerDesc;
+    shadowSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+    shadowSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+    shadowSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+    shadowSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+    shadowSamplerDesc.BorderColor[0] = 1.0f;
+    shadowSamplerDesc.BorderColor[1] = 1.0f;
+    shadowSamplerDesc.BorderColor[2] = 1.0f;
+    shadowSamplerDesc.BorderColor[3] = 1.0f;
+    shadowSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS;
+    shadowSamplerDesc.MipLODBias = 0.0f;
+    shadowSamplerDesc.MaxAnisotropy = 1;
+    shadowSamplerDesc.MinLOD = 0;
+    shadowSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+    hr = m_pd3dDevice->CreateSamplerState(&shadowSamplerDesc, &m_pShadowSampleState);
+    if (FAILED(hr))
+    {
+        return false;
+    }
 
     D3D11_SAMPLER_DESC samplerDesc;
     samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -292,6 +332,8 @@ void Direct3D::Shutdown()
     if (m_pDepthStencilState) { m_pDepthStencilState->Release(); m_pDepthStencilState = nullptr; }
     if (m_pDepthStencilView) { m_pDepthStencilView->Release(); m_pDepthStencilView = nullptr; }
     if (m_pDepthStencilBuffer) { m_pDepthStencilBuffer->Release(); m_pDepthStencilBuffer = nullptr; }
+    if (m_pDepthVertexShader) { m_pDepthVertexShader->Release(); m_pDepthVertexShader = nullptr; }
+    if (m_pShadowSampleState) { m_pShadowSampleState->Release(); m_pShadowSampleState = nullptr; }
 
     // 作成と逆の順序でリソースを解放
     if (m_pLightBuffer) { m_pLightBuffer->Release(); m_pLightBuffer = nullptr; }
@@ -307,49 +349,6 @@ void Direct3D::Shutdown()
     if (m_pShadowMapSRV) { m_pShadowMapSRV->Release(); m_pShadowMapSRV = nullptr; }
     if (m_pShadowMapDSV) { m_pShadowMapDSV->Release(); m_pShadowMapDSV = nullptr; }
     if (m_pShadowMapTexture) { m_pShadowMapTexture->Release(); m_pShadowMapTexture = nullptr; }
-}
-void Direct3D::SetShadowMapRenderTarget()
-{
-    // ビューポートをシャドウマップのサイズに設定
-    D3D11_VIEWPORT vp;
-    vp.Width = (FLOAT)SHADOWMAP_WIDTH;
-    vp.Height = (FLOAT)SHADOWMAP_HEIGHT;
-    vp.MinDepth = 0.0f;
-    vp.MaxDepth = 1.0f;
-    vp.TopLeftX = 0;
-    vp.TopLeftY = 0;
-    m_pImmediateContext->RSSetViewports(1, &vp);
-
-    // 描画先をシャドウマップのデプスビューに設定（カラーバッファは使わない）
-    m_pImmediateContext->OMSetRenderTargets(0, nullptr, m_pShadowMapDSV);
-    // シャドウアクネ対策のラスタライザステートを設定
-    m_pImmediateContext->RSSetState(m_pRasterState);
-
-    // 深度バッファをクリア
-    m_pImmediateContext->ClearDepthStencilView(m_pShadowMapDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
-}
-
-void Direct3D::ResetMainRenderTarget(int screenWidth, int screenHeight)
-{
-    // ビューポートを元の画面サイズに戻す
-    D3D11_VIEWPORT vp;
-    vp.Width = (FLOAT)screenWidth;
-    vp.Height = (FLOAT)screenHeight;
-    vp.MinDepth = 0.0f;
-    vp.MaxDepth = 1.0f;
-    vp.TopLeftX = 0;
-    vp.TopLeftY = 0;
-    m_pImmediateContext->RSSetViewports(1, &vp);
-
-    // 描画先を通常のバックバッファに戻す
-    m_pImmediateContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
-    // ラスタライザステートをデフォルトに戻す
-    m_pImmediateContext->RSSetState(nullptr);
-}
-
-ID3D11ShaderResourceView* Direct3D::GetShadowMapSRV()
-{
-    return m_pShadowMapSRV;
 }
 
 void Direct3D::BeginScene(float r, float g, float b, float a)
@@ -424,28 +423,36 @@ bool Direct3D::UpdateMatrixBuffer()
     return true;
 }
 
-bool Direct3D::UpdateLightBuffer(const LightBufferType& lightBuffer)
-{
+bool Direct3D::UpdateLightBuffer(const LightBufferType& lightBuffer, const XMMATRIX& lightView, const XMMATRIX& lightProjection){
+    // --- ライト情報の更新 ---
     HRESULT result;
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     LightBufferType* dataPtr;
 
-    // ライトバッファをロックして書き込めるようにする
     result = m_pImmediateContext->Map(m_pLightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-    if (FAILED(result))
-    {
-        return false;
-    }
+    if (FAILED(result)) return false;
 
-    // データポインタを取得し、構造体を丸ごとコピー
     dataPtr = (LightBufferType*)mappedResource.pData;
     *dataPtr = lightBuffer;
 
-    // コンスタントバッファをアンロック
     m_pImmediateContext->Unmap(m_pLightBuffer, 0);
-
-    // ピクセルシェーダーにライトバッファをセット (スロット1)
     m_pImmediateContext->PSSetConstantBuffers(1, 1, &m_pLightBuffer);
+
+    // --- 行列情報の更新 ---
+    MatrixBufferType* matrixDataPtr;
+    result = m_pImmediateContext->Map(m_pMatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+    if (FAILED(result)) return false;
+
+    matrixDataPtr = (MatrixBufferType*)mappedResource.pData;
+    matrixDataPtr->world = XMMatrixTranspose(m_worldMatrix);
+    matrixDataPtr->view = XMMatrixTranspose(m_viewMatrix);
+    matrixDataPtr->projection = XMMatrixTranspose(m_projectionMatrix);
+    matrixDataPtr->worldInverseTranspose = XMMatrixTranspose(XMMatrixInverse(nullptr, m_worldMatrix));
+    matrixDataPtr->lightView = XMMatrixTranspose(lightView);
+    matrixDataPtr->lightProjection = XMMatrixTranspose(lightProjection);
+
+    m_pImmediateContext->Unmap(m_pMatrixBuffer, 0);
+    m_pImmediateContext->VSSetConstantBuffers(0, 1, &m_pMatrixBuffer);
 
     return true;
 }
@@ -498,4 +505,48 @@ void Direct3D::TurnZBufferOff()
 XMMATRIX Direct3D::GetOrthoMatrix()
 {
     return m_orthoMatrix;
+}
+
+void Direct3D::SetShadowMapRenderTarget()
+{
+    D3D11_VIEWPORT vp;
+    vp.Width = (FLOAT)SHADOWMAP_WIDTH;
+    vp.Height = (FLOAT)SHADOWMAP_HEIGHT;
+    vp.MinDepth = 0.0f;
+    vp.MaxDepth = 1.0f;
+    vp.TopLeftX = 0;
+    vp.TopLeftY = 0;
+    m_pImmediateContext->RSSetViewports(1, &vp);
+    m_pImmediateContext->OMSetRenderTargets(0, nullptr, m_pShadowMapDSV);
+    m_pImmediateContext->RSSetState(m_pRasterState);
+    m_pImmediateContext->ClearDepthStencilView(m_pShadowMapDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
+}
+
+void Direct3D::ResetMainRenderTarget(int screenWidth, int screenHeight)
+{
+    D3D11_VIEWPORT vp;
+    vp.Width = (FLOAT)screenWidth;
+    vp.Height = (FLOAT)screenHeight;
+    vp.MinDepth = 0.0f;
+    vp.MaxDepth = 1.0f;
+    vp.TopLeftX = 0;
+    vp.TopLeftY = 0;
+    m_pImmediateContext->RSSetViewports(1, &vp);
+    m_pImmediateContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
+    m_pImmediateContext->RSSetState(nullptr);
+}
+
+ID3D11ShaderResourceView* Direct3D::GetShadowMapSRV()
+{
+    return m_pShadowMapSRV;
+}
+
+ID3D11VertexShader* Direct3D::GetDepthVertexShader()
+{
+    return m_pDepthVertexShader;
+}
+
+ID3D11SamplerState* Direct3D::GetShadowSampleState()
+{
+    return m_pShadowSampleState;
 }

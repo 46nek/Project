@@ -1,4 +1,5 @@
 #include "GameScene.h"
+#include "Game.h" 
 #include "framework.h"
 #include "MeshGenerator.h" 
 #include <cmath>
@@ -163,7 +164,11 @@ void GameScene::Update(float deltaTime)
 				m_lights[2].Enabled = !m_lights[2].Enabled;
 			}
 		}
-	}
+	}XMVECTOR lightPosition = XMLoadFloat3(&m_lights[1].Position);
+	XMVECTOR lightLookAt = XMVectorSet(15.0f, 0.0f, 15.0f, 1.0f); // 迷路の中心を見る
+	XMVECTOR lightUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	m_lightViewMatrix = XMMatrixLookAtLH(lightPosition, lightLookAt, lightUp);
+	m_lightProjectionMatrix = XMMatrixPerspectiveFovLH(XM_PIDIV2, 1.0f, 0.1f, 100.0f);
 }
 
 void GameScene::HandleInput(float deltaTime)
@@ -182,26 +187,52 @@ void GameScene::UpdateCamera(float deltaTime)
 	m_Camera->Update();
 }
 
+
 void GameScene::Render()
 {
+	// パス1: ライト視点からのデプスマップ生成
+	RenderDepthPass();
+
+	// パス2: カメラ視点からの通常描画
+	RenderMainPass();
+}
+void GameScene::RenderDepthPass()
+{
+	m_D3D->SetShadowMapRenderTarget();
+
+	// ライトのビュー・プロジェクション行列を設定
+	m_D3D->SetViewMatrix(m_lightViewMatrix);
+	m_D3D->SetProjectionMatrix(m_lightProjectionMatrix);
+
+	ID3D11DeviceContext* deviceContext = m_D3D->GetDeviceContext();
+	deviceContext->IASetInputLayout(m_D3D->GetInputLayout());
+	deviceContext->VSSetShader(m_D3D->GetDepthVertexShader(), nullptr, 0);
+	deviceContext->PSSetShader(nullptr, nullptr, 0); // ピクセルシェーダーは不要
+
+	RenderScene(); // 実際のオブジェクト描画
+}
+void GameScene::RenderMainPass()
+{
+	m_D3D->ResetMainRenderTarget(Game::SCREEN_WIDTH, Game::SCREEN_HEIGHT);
 	m_D3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
 	m_D3D->TurnZBufferOn();
-
 	m_D3D->SetViewMatrix(m_Camera->GetViewMatrix());
+
+	float fieldOfView = 3.141592654f / 4.0f;
+	float screenAspect = (float)Game::SCREEN_WIDTH / (float)Game::SCREEN_HEIGHT;
+	m_D3D->SetProjectionMatrix(XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, 0.1f, 1000.0f));
 
 	ID3D11DeviceContext* deviceContext = m_D3D->GetDeviceContext();
 
 	LightBufferType lightBuffer;
-	// ライトの数を設定
 	lightBuffer.NumLights = static_cast<int>(m_lights.size());
-	// カメラ位置を設定
 	lightBuffer.CameraPosition = m_Camera->GetPosition();
-	// ライトのデータをコピー
 	for (int i = 0; i < lightBuffer.NumLights; ++i)
 	{
 		lightBuffer.Lights[i] = m_lights[i];
 	}
-	m_D3D->UpdateLightBuffer(lightBuffer);
+	// ★ UpdateLightBufferに関数を渡すように修正
+	m_D3D->UpdateLightBuffer(lightBuffer, m_lightViewMatrix, m_lightProjectionMatrix);
 
 	deviceContext->IASetInputLayout(m_D3D->GetInputLayout());
 	deviceContext->VSSetShader(m_D3D->GetVertexShader(), nullptr, 0);
@@ -210,16 +241,28 @@ void GameScene::Render()
 	ID3D11SamplerState* samplerState = m_D3D->GetSamplerState();
 	deviceContext->PSSetSamplers(0, 1, &samplerState);
 
-	// 壁モデルを描画
+	// ★ シャドウマップとサンプラーをピクセルシェーダーにセット
+	ID3D11ShaderResourceView* shadowMapSRV = m_D3D->GetShadowMapSRV();
+	deviceContext->PSSetShaderResources(1, 1, &shadowMapSRV);
+	ID3D11SamplerState* shadowSampler = m_D3D->GetShadowSampleState();
+	deviceContext->PSSetSamplers(1, 1, &shadowSampler);
+
+	RenderScene(); // 実際のオブジェクト描画
+
+	m_D3D->EndScene();
+}
+
+void GameScene::RenderScene()
+{
+	ID3D11DeviceContext* deviceContext = m_D3D->GetDeviceContext();
+
 	if (m_wallModel)
 	{
-		// 壁モデルは原点に配置されているので、ワールド行列は単位行列で良い
 		m_D3D->SetWorldMatrix(DirectX::XMMatrixIdentity());
 		m_D3D->UpdateMatrixBuffer();
 		m_wallModel->Render(deviceContext);
 	}
 
-	// 床を描画
 	if (m_floorModel)
 	{
 		XMMATRIX worldMatrix = m_floorModel->GetWorldMatrix();
@@ -227,6 +270,4 @@ void GameScene::Render()
 		m_D3D->UpdateMatrixBuffer();
 		m_floorModel->Render(deviceContext);
 	}
-
-	m_D3D->EndScene();
 }

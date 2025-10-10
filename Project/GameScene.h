@@ -18,6 +18,10 @@ public:
     void Render() override;
 
 private:
+    void RenderDepthPass();  
+    void RenderMainPass();   
+    void RenderScene();
+
     void HandleInput(float deltaTime);
     void UpdateCamera(float deltaTime);
     void InitializeLights();
@@ -30,4 +34,7 @@ private:
 
     std::vector<Light> m_lights;
     float m_flickerTimer;
+
+    DirectX::XMMATRIX m_lightViewMatrix;
+    DirectX::XMMATRIX m_lightProjectionMatrix;
 };
