@@ -42,6 +42,10 @@ bool MeshGenerator::CreateWallFromMaze(
                     XMMATRIX translation = XMMatrixTranslation(x * pathWidth, height, y * pathWidth);
                     XMMATRIX transform = scale * translation;
 
+                    // ★ 修正箇所(1/2): 法線変換用の行列を計算
+                    // オブジェクトに不均一なスケーリングがかかっている場合、法線は逆転置行列で変換する必要があります。
+                    XMMATRIX inverseTranspose = XMMatrixTranspose(XMMatrixInverse(nullptr, transform));
+
                     for (unsigned int v = 0; v < cubeMesh->mNumVertices; ++v)
                     {
                         SimpleVertex vertex;
@@ -51,9 +55,10 @@ bool MeshGenerator::CreateWallFromMaze(
 
                         if (cubeMesh->HasNormals())
                         {
+                            // ★ 修正箇所(2/2): 法線を逆転置行列で正しく変換
                             XMVECTOR normal = XMVectorSet(cubeMesh->mNormals[v].x, cubeMesh->mNormals[v].y, cubeMesh->mNormals[v].z, 0.0f);
-                            XMMATRIX rotationMatrix = XMMatrixIdentity();
-                            normal = XMVector3TransformNormal(normal, rotationMatrix);
+                            normal = XMVector3TransformNormal(normal, inverseTranspose);
+                            normal = XMVector3Normalize(normal); // 正規化して長さを1に
                             XMStoreFloat3(&vertex.Normal, normal);
                         }
 

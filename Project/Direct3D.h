@@ -15,6 +15,9 @@
 
 using namespace DirectX;
 
+constexpr int SHADOWMAP_WIDTH = 2048;
+constexpr int SHADOWMAP_HEIGHT = 2048;
+
 struct SimpleVertex
 {
     XMFLOAT3 Pos;
@@ -28,6 +31,7 @@ struct MatrixBufferType
     XMMATRIX world;
     XMMATRIX view;
     XMMATRIX projection;
+    XMMATRIX worldInverseTranspose;
 };
 
 class Direct3D
@@ -65,6 +69,10 @@ public:
     void TurnZBufferOff();
     XMMATRIX GetOrthoMatrix();
 
+    void SetShadowMapRenderTarget();
+    void ResetMainRenderTarget(int screenWidth, int screenHeight);
+    ID3D11ShaderResourceView* GetShadowMapSRV();
+
 private:
     // DirectX11の主要なインターフェース
     IDXGISwapChain* m_pSwapChain;
@@ -90,4 +98,9 @@ private:
     XMMATRIX m_orthoMatrix;
 
     std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
+
+    ID3D11Texture2D* m_pShadowMapTexture;
+    ID3D11DepthStencilView* m_pShadowMapDSV;
+    ID3D11ShaderResourceView* m_pShadowMapSRV;
+    ID3D11RasterizerState* m_pRasterState;
 };
