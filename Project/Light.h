@@ -19,15 +19,7 @@ struct Light
     float               Range;
     DirectX::XMFLOAT3   Attenuation;
     int                 Type;
-    BOOL                Enabled;
+    bool                Enabled;
     float               Intensity;
     DirectX::XMFLOAT2   Padding;
-};
-
-// シェーダーに渡すライトの情報をまとめた構造体
-struct LightBufferType
-{
-    Light Lights[16]; // シーン内で最大16個のライトを扱える
-    int  NumLights;
-    DirectX::XMFLOAT3 CameraPosition;
 };

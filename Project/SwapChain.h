@@ -24,4 +24,7 @@ private:
     ID3D11DepthStencilState* m_depthStencilState;
     ID3D11DepthStencilState* m_depthDisabledStencilState;
     ID3D11DepthStencilView* m_depthStencilView;
+
+    int m_screenWidth;
+    int m_screenHeight;
 };

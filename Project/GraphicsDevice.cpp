@@ -66,9 +66,12 @@ void GraphicsDevice::Shutdown()
     if (m_samplerState) m_samplerState->Release();
     if (m_lightBuffer) m_lightBuffer->Release();
     if (m_matrixBuffer) m_matrixBuffer->Release();
-    m_shadowMapper->Shutdown();
-    m_shaderManager->Shutdown();
-    m_swapChain->Shutdown();
+
+    // unique_ptrがnullptrでないことを確認してからメソッドを呼び出す
+    if (m_shadowMapper) m_shadowMapper->Shutdown();
+    if (m_shaderManager) m_shaderManager->Shutdown();
+    if (m_swapChain) m_swapChain->Shutdown();
+
     if (m_immediateContext) m_immediateContext->Release();
     if (m_d3dDevice) m_d3dDevice->Release();
 }

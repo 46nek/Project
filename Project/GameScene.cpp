@@ -1,6 +1,5 @@
 #include "GameScene.h"
 #include "AssetLoader.h"
-#include "framework.h"
 
 GameScene::GameScene() {}
 GameScene::~GameScene() {}
@@ -8,7 +7,7 @@ GameScene::~GameScene() {}
 bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
 {
     m_graphicsDevice = graphicsDevice;
-    m_input = input; 
+    m_input = input;
 
     m_camera = std::make_unique<Camera>();
     m_lightManager = std::make_unique<LightManager>();
@@ -21,12 +20,12 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
 
     auto wallModel = AssetLoader::CreateWallModelFromMaze(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), 2.0f, 2.0f);
     if (!wallModel) return false;
-    // wallModel->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"../Assets/wall.png")); // 必要であれば壁のテクスチャを設定
+    // wallModel->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall.png")); // 必要であれば壁のテクスチャを設定
     m_models.push_back(std::move(wallModel));
 
-    auto floorModel = AssetLoader::LoadModelFromFile(m_graphicsDevice->GetDevice(), "../Assets/cube.fbx");
+    auto floorModel = AssetLoader::LoadModelFromFile(m_graphicsDevice->GetDevice(), "Assets/cube.fbx");
     if (!floorModel) return false;
-    floorModel->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"../Assets/floor.png"));
+    floorModel->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/floor.png"));
     floorModel->SetPosition(20.0f, -1.0f, 20.0f);
     floorModel->SetScale(21.0f, 1.0f, 21.0f);
     m_models.push_back(std::move(floorModel));

@@ -4,8 +4,7 @@
 #include <memory>
 #include <d3d11.h>
 #include <DirectXMath.h>
-
-class Texture; // ‘O•ûéŒ¾
+#include "Texture.h"
 
 struct SimpleVertex
 {
@@ -36,7 +35,7 @@ public:
     void SetPosition(float x, float y, float z);
     void SetRotation(float x, float y, float z);
     void SetScale(float x, float y, float z);
-    DirectX::XMMATRIX GetWorldMatrix() const; // const ‚ğ’Ç‰Á
+    DirectX::XMMATRIX GetWorldMatrix() const; 
 
 private:
     void RenderBuffers(ID3D11DeviceContext*, const Mesh& mesh);

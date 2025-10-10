@@ -1,6 +1,6 @@
 #include "AssetLoader.h"
 #include "MeshGenerator.h"
-#include "Texture.h" // Textureの完全な定義のためにインクルード
+#include "Texture.h" 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>

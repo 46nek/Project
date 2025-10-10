@@ -15,17 +15,17 @@ bool ShaderManager::Initialize(ID3D11Device* device)
     HRESULT hr;
 
     // シェーダーへのパスを修正
-    hr = D3DCompileFromFile(L"../Shaders/VertexShader.hlsl", nullptr, nullptr, "VS", "vs_5_0", 0, 0, &vsBlob, &errorBlob);
+    hr = D3DCompileFromFile(L"VertexShader.hlsl", nullptr, nullptr, "VS", "vs_5_0", 0, 0, &vsBlob, &errorBlob);
     if (FAILED(hr)) { if (errorBlob) errorBlob->Release(); return false; }
     hr = device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &m_vertexShader);
     if (FAILED(hr)) { vsBlob->Release(); return false; }
 
-    hr = D3DCompileFromFile(L"../Shaders/PixelShader.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &psBlob, &errorBlob);
+    hr = D3DCompileFromFile(L"PixelShader.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &psBlob, &errorBlob);
     if (FAILED(hr)) { vsBlob->Release(); if (errorBlob) errorBlob->Release(); return false; }
     hr = device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &m_pixelShader);
     if (FAILED(hr)) { vsBlob->Release(); psBlob->Release(); return false; }
 
-    hr = D3DCompileFromFile(L"../Shaders/DepthVertexShader.hlsl", nullptr, nullptr, "main", "vs_5_0", 0, 0, &depthVsBlob, &errorBlob);
+    hr = D3DCompileFromFile(L"DepthVertexShader.hlsl", nullptr, nullptr, "main", "vs_5_0", 0, 0, &depthVsBlob, &errorBlob);
     if (FAILED(hr)) { vsBlob->Release(); psBlob->Release(); if (errorBlob) errorBlob->Release(); return false; }
     hr = device->CreateVertexShader(depthVsBlob->GetBufferPointer(), depthVsBlob->GetBufferSize(), nullptr, &m_depthVertexShader);
     if (FAILED(hr)) { vsBlob->Release(); psBlob->Release(); depthVsBlob->Release(); return false; }

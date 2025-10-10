@@ -2,7 +2,9 @@
 
 SwapChain::SwapChain()
     : m_swapChain(nullptr), m_renderTargetView(nullptr), m_depthStencilBuffer(nullptr),
-    m_depthStencilState(nullptr), m_depthDisabledStencilState(nullptr), m_depthStencilView(nullptr)
+    m_depthStencilState(nullptr), m_depthDisabledStencilState(nullptr), m_depthStencilView(nullptr),
+    // メンバ変数を初期化
+    m_screenWidth(0), m_screenHeight(0)
 {
 }
 
@@ -10,6 +12,10 @@ SwapChain::~SwapChain() {}
 
 bool SwapChain::Initialize(ID3D11Device* device, HWND hWnd, int screenWidth, int screenHeight)
 {
+    // 画面サイズをメンバ変数に保存
+    m_screenWidth = screenWidth;
+    m_screenHeight = screenHeight;
+
     // スワップチェインの作成
     DXGI_SWAP_CHAIN_DESC sd = {};
     sd.BufferCount = 1;
@@ -92,6 +98,16 @@ void SwapChain::Shutdown()
 
 void SwapChain::BeginScene(ID3D11DeviceContext* deviceContext, float r, float g, float b, float a)
 {
+    // ビューポートを設定する処理を追加
+    D3D11_VIEWPORT viewport = {};
+    viewport.Width = (FLOAT)m_screenWidth;
+    viewport.Height = (FLOAT)m_screenHeight;
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+    viewport.TopLeftX = 0.0f;
+    viewport.TopLeftY = 0.0f;
+    deviceContext->RSSetViewports(1, &viewport);
+
     float color[4] = { r, g, b, a };
     deviceContext->ClearRenderTargetView(m_renderTargetView, color);
     deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);

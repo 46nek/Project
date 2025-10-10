@@ -16,13 +16,13 @@ bool TitleScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
     m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_graphicsDevice->GetDeviceContext());
 
     m_background = std::make_unique<Sprite>();
-    if (!m_background->Initialize(device, L"../Assets/background.png")) return false;
+    if (!m_background->Initialize(device, L"Assets/background.png")) return false;
 
     m_titleLogo = std::make_unique<Sprite>();
-    if (!m_titleLogo->Initialize(device, L"../Assets/title.png")) return false;
+    if (!m_titleLogo->Initialize(device, L"Assets/title.png")) return false;
 
     m_pressEnter = std::make_unique<Sprite>();
-    if (!m_pressEnter->Initialize(device, L"../Assets/button.png")) return false;
+    if (!m_pressEnter->Initialize(device, L"Assets/button.png")) return false;
 
     return true;
 }

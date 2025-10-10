@@ -25,7 +25,6 @@ bool Texture::Initialize(ID3D11Device* device, const wchar_t* filename)
 
 void Texture::Shutdown()
 {
-    // ComPtrが自動的にテクスチャを解放してくれます
 }
 
 ID3D11ShaderResourceView* Texture::GetTexture()
