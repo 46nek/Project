@@ -20,7 +20,7 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
 
     auto wallModel = AssetLoader::CreateWallModelFromMaze(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), 2.0f, 2.0f);
     if (!wallModel) return false;
-    // wallModel->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall.png")); // 必要であれば壁のテクスチャを設定
+    wallModel->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/test.png")); 
     m_models.push_back(std::move(wallModel));
 
     auto floorModel = AssetLoader::LoadModelFromFile(m_graphicsDevice->GetDevice(), "Assets/cube.fbx");

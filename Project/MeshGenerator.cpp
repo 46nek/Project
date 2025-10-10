@@ -156,9 +156,6 @@ bool MeshGenerator::CreateWallFromMaze(
                 (y + h / 2.0f) * pathWidth
             };
 
-            // è∞
-            centerPos.y = 0.0f;
-            AddFace(FaceDirection::Top, centerPos, rectWidth, rectHeight, outVertices, outIndices);
             // ìVà‰
             centerPos.y = wallHeight;
             AddFace(FaceDirection::Bottom, centerPos, rectWidth, rectHeight, outVertices, outIndices);

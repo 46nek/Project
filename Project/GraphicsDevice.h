@@ -1,6 +1,6 @@
 #pragma once
 #include <d3d11.h>
-#include <DirectXMath.h> 
+#include <DirectXMath.h>
 #include <memory>
 #include "SwapChain.h"
 #include "ShaderManager.h"
@@ -40,6 +40,7 @@ public:
     SwapChain* GetSwapChain() const { return m_swapChain.get(); }
     ShaderManager* GetShaderManager() const { return m_shaderManager.get(); }
     ShadowMapper* GetShadowMapper() const { return m_shadowMapper.get(); }
+    ID3D11SamplerState* GetSamplerState() const { return m_samplerState; }
 
 private:
     ID3D11Device* m_d3dDevice;

@@ -62,6 +62,10 @@ void Renderer::RenderMainPass(const std::vector<std::unique_ptr<Model>>& models,
     // Update light buffer
     m_graphicsDevice->UpdateLightBuffer(lightManager->GetLightBuffer());
 
+    // Set texture sampler
+    ID3D11SamplerState* samplerState = m_graphicsDevice->GetSamplerState();
+    deviceContext->PSSetSamplers(0, 1, &samplerState);
+
     // Set shadow map resources
     ID3D11ShaderResourceView* shadowSrv = shadowMapper->GetShadowMapSRV();
     deviceContext->PSSetShaderResources(1, 1, &shadowSrv);
