@@ -78,7 +78,7 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 		for (int x = 0; x < mazeWidth && !startFound; ++x) {
 			if (mazeData[y][x] == MazeGenerator::Path) {
 				// カメラの高さを調整
-				m_Camera->SetPosition(static_cast<float>(x) * pathWidth, 1.5f, static_cast<float>(y) * pathWidth);
+				m_Camera->SetPosition(static_cast<float>(x) * pathWidth, 15.0f, static_cast<float>(y) * pathWidth);
 				startFound = true;
 			}
 		}
@@ -92,8 +92,8 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 	std::vector<SimpleVertex> wallVertices;
 	std::vector<unsigned long> wallIndices;
 
-	// MeshGeneratorを使って頂点とインデックスを生成
-	if (MeshGenerator::CreateWallFromMaze(mazeData, pathWidth, wallVertices, wallIndices))
+	constexpr float wallHeight = 3.0f; 
+	if (MeshGenerator::CreateWallFromMaze(mazeData, pathWidth, wallHeight, wallVertices, wallIndices))
 	{
 		m_wallModel = std::make_unique<Model>();
 		// 生成したデータでModelを初期化
@@ -264,15 +264,10 @@ void GameScene::RenderScene()
 	if (m_wallModel)
 	{
 		m_D3D->SetWorldMatrix(DirectX::XMMatrixIdentity());
-		m_D3D->UpdateMatrixBuffer();
+		if (!m_D3D->UpdateMatrixBuffer())
+		{
+			// エラー処理
+		}
 		m_wallModel->Render(deviceContext);
-	}
-
-	if (m_floorModel)
-	{
-		XMMATRIX worldMatrix = m_floorModel->GetWorldMatrix();
-		m_D3D->SetWorldMatrix(worldMatrix);
-		m_D3D->UpdateMatrixBuffer();
-		m_floorModel->Render(deviceContext);
 	}
 }
