@@ -29,12 +29,37 @@ struct MatrixBufferType
     XMMATRIX projection;
 };
 
+// ライトの種類を定義
+enum LightType
+{
+    DirectionalLight = 0,
+    PointLight = 1,
+    SpotLight = 2
+};
+
+// 個々のライトの情報を保持する構造体
+struct Light
+{
+    XMFLOAT4   Color;          // ライトの色
+    XMFLOAT3   Direction;      // ライトの向き（ディレクショナルライト、スポットライト用）
+    float      SpotAngle;      // スポットライトの角度
+    XMFLOAT3   Position;       // ライトの位置（ポイントライト、スポットライト用）
+    float      Range;          // ライトの届く距離
+    XMFLOAT3   Attenuation;    // 距離による光の減衰パラメータ (定数、線形、二次)
+    int        Type;           // ライトの種類 (LightType)
+    BOOL       Enabled;        // ライトが有効か
+    float      Intensity;      // ライトの強度
+    XMFLOAT2   Padding;        // パディング
+};
+
+// シェーダーに渡すライトの情報をまとめた構造体
 struct LightBufferType
 {
-    XMFLOAT4 DiffuseColor;
-    XMFLOAT3 LightDirection;
-    float padding; // メモリ境界を16バイトに合わせるためのパディング
+    Light Lights[16]; // シーン内で最大16個のライトを扱えるようにする
+    int  NumLights;   // 現在有効なライトの数
+    XMFLOAT3 CameraPosition; // カメラの位置
 };
+
 
 class Direct3D
 {
@@ -64,7 +89,7 @@ public:
     void SetViewMatrix(const XMMATRIX& view);
     void SetProjectionMatrix(const XMMATRIX& projection);
     bool UpdateMatrixBuffer();
-    bool UpdateLightBuffer(const XMFLOAT3& lightDirection, const XMFLOAT4& diffuseColor); // <--- 追加
+    bool UpdateLightBuffer(const Light* lights, int numLights, const XMFLOAT3& cameraPosition);
     DirectX::SpriteBatch* GetSpriteBatch();
 
     void TurnZBufferOn();

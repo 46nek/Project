@@ -28,6 +28,7 @@ private:
         ID3D11Buffer* vertexBuffer = nullptr;
         ID3D11Buffer* indexBuffer = nullptr;
         int indexCount = 0;
+        std::vector<SimpleVertex> vertices;
     };
 
     // Assimp‚ğg‚Á‚Äƒ‚ƒfƒ‹‚ğ“Ç‚İ‚Ş

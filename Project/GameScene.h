@@ -20,10 +20,14 @@ public:
 private:
     void HandleInput(float deltaTime);
     void UpdateCamera(float deltaTime);
+    void InitializeLights(); // ライトを初期化する関数
 
     std::unique_ptr<Camera> m_Camera;
     std::unique_ptr<MazeGenerator> m_mazeGenerator; // MazeGeneratorのインスタンス
     std::unique_ptr<Model> m_wallModel; // 壁モデルを1つだけ保持する
     std::vector<DirectX::XMFLOAT3> m_wallPositions; // 壁の位置情報を保持する
     std::unique_ptr<Model> m_floorModel; // 床モデル
+
+    std::vector<Light> m_lights; // シーンのライトを保持するベクター
+    float m_flickerTimer;        // ライトの点滅を制御するタイマー
 };

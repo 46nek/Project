@@ -2,6 +2,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <assimp/config.h> 
 
 Model::Model()
 {
@@ -84,8 +85,6 @@ void Model::Render(ID3D11DeviceContext* deviceContext)
     }
 }
 
-// ... (RenderBuffers, LoadModel, ProcessNode ‚Í•ÏX‚È‚µ) ...
-
 void Model::RenderBuffers(ID3D11DeviceContext* deviceContext, const Mesh& mesh)
 {
     unsigned int stride = sizeof(SimpleVertex);
@@ -102,8 +101,14 @@ void Model::RenderBuffers(ID3D11DeviceContext* deviceContext, const Mesh& mesh)
 bool Model::LoadModel(ID3D11Device* device, const std::string& filename)
 {
     Assimp::Importer importer;
+
+    importer.SetPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, 180.0f);
+    
     const aiScene* scene = importer.ReadFile(filename,
-        aiProcess_Triangulate | aiProcess_ConvertToLeftHanded);
+        aiProcess_Triangulate |
+        aiProcess_ConvertToLeftHanded |
+        aiProcess_GenSmoothNormals |
+        aiProcess_JoinIdenticalVertices);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {

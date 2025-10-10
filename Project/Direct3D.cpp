@@ -332,7 +332,7 @@ bool Direct3D::UpdateMatrixBuffer()
     return true;
 }
 
-bool Direct3D::UpdateLightBuffer(const XMFLOAT3& lightDirection, const XMFLOAT4& diffuseColor)
+bool Direct3D::UpdateLightBuffer(const Light* lights, int numLights, const XMFLOAT3& cameraPosition)
 {
     HRESULT result;
     D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -349,9 +349,9 @@ bool Direct3D::UpdateLightBuffer(const XMFLOAT3& lightDirection, const XMFLOAT4&
     dataPtr = (LightBufferType*)mappedResource.pData;
 
     // ライトの情報をコンスタントバッファにコピー
-    dataPtr->DiffuseColor = diffuseColor;
-    dataPtr->LightDirection = lightDirection;
-    dataPtr->padding = 0.0f; // パディングを明示的にセット
+    memcpy(dataPtr->Lights, lights, sizeof(Light) * numLights);
+    dataPtr->NumLights = numLights;
+    dataPtr->CameraPosition = cameraPosition;
 
     // コンスタントバッファをアンロック
     m_pImmediateContext->Unmap(m_pLightBuffer, 0);
