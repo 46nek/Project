@@ -231,8 +231,13 @@ void GameScene::RenderMainPass()
 	{
 		lightBuffer.Lights[i] = m_lights[i];
 	}
-	// ★ UpdateLightBufferに関数を渡すように修正
-	m_D3D->UpdateLightBuffer(lightBuffer, m_lightViewMatrix, m_lightProjectionMatrix);
+	// ライトの情報と、シャドウマッピング用のライト行列をシェーダーに渡す
+	if (!m_D3D->UpdateLightBuffer(lightBuffer, m_lightViewMatrix, m_lightProjectionMatrix))
+	{
+		// エラー処理（必要に応じて）
+		DbgPrint(L"Failed to update light buffer.");
+		return;
+	}
 
 	deviceContext->IASetInputLayout(m_D3D->GetInputLayout());
 	deviceContext->VSSetShader(m_D3D->GetVertexShader(), nullptr, 0);
