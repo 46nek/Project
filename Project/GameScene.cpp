@@ -71,23 +71,24 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 	const int mazeWidth = static_cast<int>(mazeData[0].size());
 
 	DbgPrint(L"--> Setting Camera position...");
-	// カメラの初期位置を迷路の道の上に調整 (以前の修正を適用)
 	bool startFound = false;
 	for (int y = 0; y < mazeHeight && !startFound; ++y) {
 		for (int x = 0; x < mazeWidth && !startFound; ++x) {
 			if (mazeData[y][x] == MazeGenerator::Path) {
-				m_Camera->SetPosition(static_cast<float>(x) * pathWidth, 16.0f, static_cast<float>(y) * pathWidth);
+				// カメラの高さを調整
+				m_Camera->SetPosition(static_cast<float>(x) * pathWidth, 1.5f, static_cast<float>(y) * pathWidth);
 				startFound = true;
 			}
 		}
 	}
 	if (!startFound) {
-		m_Camera->SetPosition(1.0f * pathWidth, 1.0f, 1.0f * pathWidth); // フォールバック
+		m_Camera->SetPosition(1.0f * pathWidth, 1.5f, 1.0f * pathWidth); // フォールバック
 	}
 
 	DbgPrint(L"--> Initializing wall model...");
-	m_wallModel = std::make_unique<Model>();
-	if (!m_wallModel->Initialize(m_D3D->GetDevice(), "Assets/cube.obj"))
+	// Modelクラスの静的メソッドを使って壁モデルを生成
+	m_wallModel.reset(Model::CreateModelFromMaze(m_D3D->GetDevice(), mazeData, pathWidth));
+	if (!m_wallModel)
 	{
 		DbgPrint(L"!!!!!! FAILED to initialize wall model.");
 		return false;
@@ -95,28 +96,10 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 	if (!m_wallModel->LoadTexture(m_D3D->GetDevice(), L"Assets/wall.png"))
 	{
 		DbgPrint(L"!!!!!! FAILED to load wall texture.");
-		// テクスチャがなくても続行する場合はreturnしない
 	}
-	m_wallModel->SetScale(pathWidth / 2.0f, 1.0f, pathWidth / 2.0f);
-
 	DbgPrint(L"--> Wall model initialized successfully.");
 
-	// 壁の位置情報を格納
-	for (int y = 0; y < mazeHeight; ++y)
-	{
-		for (int x = 0; x < mazeWidth; ++x)
-		{
-			if (mazeData[y][x] == MazeGenerator::Wall)
-			{
-				m_wallPositions.emplace_back(x * pathWidth, 2.0f, y * pathWidth);
-				m_wallPositions.emplace_back(x * pathWidth, 4.0f, y * pathWidth);
-			}
-		}
-	}
-	DbgPrint(L"--> Wall positions stored.");
-
 	DbgPrint(L"--> Initializing floor model...");
-	// 床モデルの読み込みと配置
 	m_floorModel = std::make_unique<Model>();
 	if (!m_floorModel->Initialize(m_D3D->GetDevice(), "Assets/cube.obj"))
 	{
@@ -127,12 +110,9 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 	{
 		DbgPrint(L"!!!!!! FAILED to load floor texture.");
 	}
+	m_floorModel->SetPosition(static_cast<float>(mazeWidth - 1) / 2.0f * pathWidth, -1.0f, static_cast<float>(mazeHeight - 1) / 2.0f * pathWidth);
+	m_floorModel->SetScale(static_cast<float>(mazeWidth) / 2.0f * pathWidth, 1.0f, static_cast<float>(mazeHeight) / 2.0f * pathWidth);
 	DbgPrint(L"--> Floor model initialized successfully.");
-
-	// 床を迷路の中央に配置し、迷路全体を覆うように拡大
-	m_floorModel->SetPosition(static_cast<float>(mazeWidth - 1) / 2.0f * pathWidth, 0.0f, static_cast<float>(mazeHeight - 1) / 2.0f * pathWidth);
-	m_floorModel->SetScale(static_cast<float>(mazeWidth) * pathWidth, 1.0f, static_cast<float>(mazeHeight) * pathWidth);
-	DbgPrint(L"--> Floor model position and scale set.");
 
 	InitializeLights();
 
@@ -142,16 +122,6 @@ bool GameScene::Initialize(Direct3D* d3d, Input* input)
 
 void GameScene::Shutdown()
 {
-	if (m_wallModel)
-	{
-		m_wallModel->Shutdown();
-	}
-	m_wallPositions.clear();
-
-	if (m_floorModel)
-	{
-		m_floorModel->Shutdown();
-	}
 }
 
 void GameScene::Update(float deltaTime)
@@ -204,17 +174,14 @@ void GameScene::UpdateCamera(float deltaTime)
 
 void GameScene::Render()
 {
-
-	m_D3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f); // 背景をより暗く
+	m_D3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
 	m_D3D->TurnZBufferOn();
 
 	m_D3D->SetViewMatrix(m_Camera->GetViewMatrix());
 
 	ID3D11DeviceContext* deviceContext = m_D3D->GetDeviceContext();
 
-	// ライトの情報をシェーダーに渡す
 	m_D3D->UpdateLightBuffer(m_lights.data(), static_cast<int>(m_lights.size()), m_Camera->GetPosition());
-
 
 	deviceContext->IASetInputLayout(m_D3D->GetInputLayout());
 	deviceContext->VSSetShader(m_D3D->GetVertexShader(), nullptr, 0);
@@ -223,17 +190,13 @@ void GameScene::Render()
 	ID3D11SamplerState* samplerState = m_D3D->GetSamplerState();
 	deviceContext->PSSetSamplers(0, 1, &samplerState);
 
-	// 全ての壁を描画
+	// 壁モデルを描画
 	if (m_wallModel)
 	{
-		for (const auto& position : m_wallPositions)
-		{
-			m_wallModel->SetPosition(position.x, position.y, position.z);
-			XMMATRIX worldMatrix = m_wallModel->GetWorldMatrix();
-			m_D3D->SetWorldMatrix(worldMatrix);
-			m_D3D->UpdateMatrixBuffer();
-			m_wallModel->Render(deviceContext);
-		}
+		// 壁モデルは原点に配置されているので、ワールド行列は単位行列で良い
+		m_D3D->SetWorldMatrix(DirectX::XMMatrixIdentity());
+		m_D3D->UpdateMatrixBuffer();
+		m_wallModel->Render(deviceContext);
 	}
 
 	// 床を描画

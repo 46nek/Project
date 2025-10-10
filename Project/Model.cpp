@@ -15,13 +15,134 @@ Model::~Model()
 {
     Shutdown();
 }
+bool Model::Initialize(ID3D11Device* device, const std::vector<SimpleVertex>& vertices, const std::vector<unsigned long>& indices)
+{
+    Mesh newMesh = {};
+
+    if (vertices.empty() || indices.empty())
+    {
+        return false;
+    }
+
+    D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+    D3D11_SUBRESOURCE_DATA vertexData, indexData;
+    HRESULT result;
+
+    vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(SimpleVertex) * vertices.size());
+    vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    vertexBufferDesc.CPUAccessFlags = 0;
+    vertexBufferDesc.MiscFlags = 0;
+    vertexData.pSysMem = vertices.data();
+    result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &newMesh.vertexBuffer);
+    if (FAILED(result))
+    {
+        return false;
+    }
+
+    indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    indexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(unsigned long) * indices.size());
+    indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    indexBufferDesc.CPUAccessFlags = 0;
+    indexBufferDesc.MiscFlags = 0;
+    indexData.pSysMem = indices.data();
+    result = device->CreateBuffer(&indexBufferDesc, &indexData, &newMesh.indexBuffer);
+    if (FAILED(result))
+    {
+        newMesh.vertexBuffer->Release();
+        return false;
+    }
+
+    newMesh.indexCount = static_cast<int>(indices.size());
+    m_meshes.push_back(newMesh);
+
+    return true;
+}
 
 bool Model::Initialize(ID3D11Device* device, const char* modelFilename)
 {
     return LoadModel(device, modelFilename);
 }
 
-// ↓ 新しく追加したLoadTexture関数の実装
+Model* Model::CreateModelFromMaze(ID3D11Device* device, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth)
+{
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile("Assets/cube.obj", aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_GenSmoothNormals);
+    if (!scene || !scene->mRootNode || !scene->HasMeshes())
+    {
+        return nullptr;
+    }
+    aiMesh* cubeMesh = scene->mMeshes[0];
+
+    std::vector<SimpleVertex> allVertices;
+    std::vector<unsigned long> allIndices;
+    unsigned long vertexOffset = 0;
+
+    const int mazeHeight = static_cast<int>(mazeData.size());
+    const int mazeWidth = static_cast<int>(mazeData[0].size());
+
+    for (int y = 0; y < mazeHeight; ++y)
+    {
+        for (int x = 0; x < mazeWidth; ++x)
+        {
+            if (mazeData[y][x] == MazeGenerator::Wall)
+            {
+                // 壁を2段重ねる
+                for (int i = 0; i < 2; ++i)
+                {
+                    float height = (i == 0) ? 1.0f : 3.0f; // 高さを調整
+                    XMMATRIX scale = XMMatrixScaling(pathWidth / 2.0f, 1.0f, pathWidth / 2.0f);
+                    XMMATRIX translation = XMMatrixTranslation(x * pathWidth, height, y * pathWidth);
+                    XMMATRIX transform = scale * translation;
+
+                    for (unsigned int v = 0; v < cubeMesh->mNumVertices; ++v)
+                    {
+                        SimpleVertex vertex;
+                        XMVECTOR pos = XMVectorSet(cubeMesh->mVertices[v].x, cubeMesh->mVertices[v].y, cubeMesh->mVertices[v].z, 1.0f);
+                        pos = XMVector3TransformCoord(pos, transform);
+                        XMStoreFloat3(&vertex.Pos, pos);
+
+                        if (cubeMesh->HasNormals())
+                        {
+                            XMVECTOR normal = XMVectorSet(cubeMesh->mNormals[v].x, cubeMesh->mNormals[v].y, cubeMesh->mNormals[v].z, 0.0f);
+                            // 法線は回転のみ影響させる（スケールや平行移動は影響させない）
+                            XMMATRIX rotationMatrix = XMMatrixIdentity(); // 今回は回転しない
+                            normal = XMVector3TransformNormal(normal, rotationMatrix);
+                            XMStoreFloat3(&vertex.Normal, normal);
+                        }
+
+                        if (cubeMesh->HasTextureCoords(0))
+                        {
+                            vertex.Tex.x = cubeMesh->mTextureCoords[0][v].x;
+                            vertex.Tex.y = cubeMesh->mTextureCoords[0][v].y;
+                        }
+                        vertex.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
+                        allVertices.push_back(vertex);
+                    }
+
+                    for (unsigned int f = 0; f < cubeMesh->mNumFaces; ++f)
+                    {
+                        aiFace face = cubeMesh->mFaces[f];
+                        for (unsigned int j = 0; j < face.mNumIndices; ++j)
+                        {
+                            allIndices.push_back(face.mIndices[j] + vertexOffset);
+                        }
+                    }
+                    vertexOffset += cubeMesh->mNumVertices;
+                }
+            }
+        }
+    }
+
+    Model* wallModel = new Model();
+    if (!wallModel->Initialize(device, allVertices, allIndices))
+    {
+        delete wallModel;
+        return nullptr;
+    }
+    return wallModel;
+}
+
 bool Model::LoadTexture(ID3D11Device* device, const wchar_t* textureFilename)
 {
     // 既にテクスチャがあれば解放
