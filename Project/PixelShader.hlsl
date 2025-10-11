@@ -131,7 +131,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
         totalSpecular += float4(1.0f, 1.0f, 1.0f, 1.0f) * specular * Lights[i].Intensity * attenuation * spotFactor;
     }
 
-    float4 finalColor = (textureColor * totalDiffuse * shadowFactor) + (totalSpecular * shadowFactor) + ambient;
+    float4 finalColor = (textureColor * (totalDiffuse + ambient)) * shadowFactor + (totalSpecular * shadowFactor);
     finalColor.a = textureColor.a;
 
     return finalColor;

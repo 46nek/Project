@@ -52,7 +52,6 @@ std::unique_ptr<Model> AssetLoader::CreateMazeModel(ID3D11Device* device, const 
 {
     std::vector<SimpleVertex> vertices;
     std::vector<unsigned long> indices;
-    // ŒÄ‚Ño‚·ŠÖ”‚ğ•ÏX
     if (!MeshGenerator::CreateMazeMesh(mazeData, pathWidth, wallHeight, type, vertices, indices)) {
         return nullptr;
     }

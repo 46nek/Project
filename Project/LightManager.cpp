@@ -45,7 +45,6 @@ void LightManager::Update(float deltaTime, const DirectX::XMFLOAT3& playerPositi
     DirectX::XMVECTOR lookAt = DirectX::XMVector3TransformCoord({ 0, 0, 1 }, rotationMatrix);
     DirectX::XMStoreFloat3(&m_lights[0].Direction, lookAt);
 
-    // ▼▼▼ 以下を追加（ちらつき処理） ▼▼▼
     m_flickerTimer += deltaTime;
     // 0.05秒ごとにちらつくかどうかを判定
     if (m_flickerTimer > 0.05f)
@@ -63,7 +62,6 @@ void LightManager::Update(float deltaTime, const DirectX::XMFLOAT3& playerPositi
 
         m_flickerTimer = 0.0f; // タイマーをリセット
     }
-    // ▲▲▲ ここまで ▲▲▲
 
     // シェーダーに渡すバッファを更新
     m_lightBuffer.NumLights = static_cast<int>(m_lights.size());
