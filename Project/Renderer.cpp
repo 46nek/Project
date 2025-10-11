@@ -43,6 +43,12 @@ void Renderer::RenderMainPass(const std::vector<std::unique_ptr<Model>>& models,
     ShaderManager* shaderManager = m_graphicsDevice->GetShaderManager();
     ShadowMapper* shadowMapper = m_graphicsDevice->GetShadowMapper();
 
+    // ▼▼▼ 以下3行を追加 ▼▼▼
+    // シャドウマップの描画からメインのレンダーターゲットに戻す
+    ID3D11RenderTargetView* rtv = m_graphicsDevice->GetSwapChain()->GetRenderTargetView();
+    deviceContext->OMSetRenderTargets(1, &rtv, m_graphicsDevice->GetSwapChain()->GetDepthStencilView());
+    // ▲▲▲ ここまで ▲▲▲
+
     // Reset render target
     D3D11_VIEWPORT vp = {};
     vp.Width = Game::SCREEN_WIDTH;
@@ -51,7 +57,6 @@ void Renderer::RenderMainPass(const std::vector<std::unique_ptr<Model>>& models,
     deviceContext->RSSetViewports(1, &vp);
     deviceContext->RSSetState(nullptr);
 
-    m_graphicsDevice->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
     m_graphicsDevice->GetSwapChain()->TurnZBufferOn(deviceContext);
 
     // Set shaders
@@ -85,6 +90,4 @@ void Renderer::RenderMainPass(const std::vector<std::unique_ptr<Model>>& models,
             model->Render(deviceContext);
         }
     }
-
-    m_graphicsDevice->EndScene();
 }

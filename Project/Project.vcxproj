@@ -160,6 +160,7 @@
     <ClInclude Include="LightManager.h" />
     <ClInclude Include="MazeGenerator.h" />
     <ClInclude Include="MeshGenerator.h" />
+    <ClInclude Include="minimap.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Project.h" />
     <ClInclude Include="Renderer.h" />
@@ -188,6 +189,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MazeGenerator.cpp" />
     <ClCompile Include="MeshGenerator.cpp" />
+    <ClCompile Include="minimap.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="SceneManager.cpp" />

@@ -16,6 +16,9 @@ public:
 
     void TurnZBufferOn(ID3D11DeviceContext* deviceContext);
     void TurnZBufferOff(ID3D11DeviceContext* deviceContext);
+    
+    ID3D11RenderTargetView* GetRenderTargetView() const { return m_renderTargetView; }
+    ID3D11DepthStencilView* GetDepthStencilView() const { return m_depthStencilView; }
 
 private:
     IDXGISwapChain* m_swapChain;

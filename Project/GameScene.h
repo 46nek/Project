@@ -7,6 +7,7 @@
 #include "LightManager.h"
 #include "Model.h"
 #include "Renderer.h"
+#include "Minimap.h" 
 
 class GameScene : public Scene
 {
@@ -26,6 +27,7 @@ private:
     std::unique_ptr<MazeGenerator> m_mazeGenerator;
     std::unique_ptr<LightManager> m_lightManager;
     std::unique_ptr<Renderer> m_renderer;
+    std::unique_ptr<Minimap> m_minimap;
 
     std::vector<std::unique_ptr<Model>> m_models;
 };

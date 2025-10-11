@@ -45,21 +45,24 @@ float4 PS(VS_OUTPUT input) : SV_Target
 {
     // テクスチャからオブジェクトの基本色を取得
     float4 textureColor = shaderTexture.Sample(SampleType, input.Tex);
+
     // 環境光を計算 (テクスチャ色を反映)
     float4 ambient = textureColor * float4(0.3f, 0.3f, 0.3f, 1.0f);
+
     // これから計算する拡散光と鏡面反射光を初期化
     float4 totalDiffuse = float4(0, 0, 0, 0);
     float4 totalSpecular = float4(0, 0, 0, 0);
+
     // カメラへの視線ベクトルを計算
     float3 viewDir = normalize(CameraPosition - input.WorldPos);
 
-    float shadowFactor = 1.0;
-    // 影の影響係数 (1.0 = 光が当たる, 0.0 = 影)
+    float shadowFactor = 1.0; // 影の影響係数 (1.0 = 光が当たる, 0.0 = 影)
 
     // 1. 光源視点での座標を正規化デバイス座標(-1~+1)からテクスチャ座標(0~1)に変換
     float2 projectTexCoord;
     projectTexCoord.x = input.LightViewPos.x / input.LightViewPos.w / 2.0f + 0.5f;
     projectTexCoord.y = -input.LightViewPos.y / input.LightViewPos.w / 2.0f + 0.5f;
+
     // 2. テクスチャ座標が0~1の範囲内にある場合のみ影の計算を行う
     if ((saturate(projectTexCoord.x) == projectTexCoord.x) && (saturate(projectTexCoord.y) == projectTexCoord.y))
     {
@@ -111,9 +114,12 @@ float4 PS(VS_OUTPUT input) : SV_Target
 
             // 外側のコーンの角度（コサイン）
             float outerConeCos = Lights[i].SpotAngle;
+
+            // ▼▼▼ 以下1行を修正 ▼▼▼
             // 内側のコーンの角度（コサイン）。光が完全に当たる部分。
             // コサイン値は角度が小さいほど大きくなるので、少し値を足します。
-            float innerConeCos = min(1.0f, outerConeCos + 0.05f);
+            float innerConeCos = min(1.0f, outerConeCos + 0.15f); // 境界のぼかし幅をさらに広げる (0.1f -> 0.15f)
+            // ▲▲▲ ここまで ▲▲▲
 
             // smoothstepを使って、内側と外側の間で滑らかに光の強さを変化させる
             // これにより、ピクセルがコーンの外側ならspotFactorは0になります。
@@ -123,11 +129,11 @@ float4 PS(VS_OUTPUT input) : SV_Target
         // --- 拡散光(Diffuse)を計算 ---
         float diffuseIntensity = saturate(dot(input.Normal, lightDir));
         totalDiffuse += Lights[i].Color * diffuseIntensity * Lights[i].Intensity * attenuation * spotFactor;
+
         // --- 鏡面反射光(Specular)を計算 ---
         float3 halfwayDir = normalize(lightDir + viewDir);
         float specAngle = saturate(dot(input.Normal, halfwayDir));
-        float specular = pow(specAngle, 32.0f);
-        // 光沢の強さ
+        float specular = pow(specAngle, 32.0f); // 光沢の強さ
         totalSpecular += float4(1.0f, 1.0f, 1.0f, 1.0f) * specular * Lights[i].Intensity * attenuation * spotFactor;
     }
 

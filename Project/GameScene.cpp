@@ -18,6 +18,12 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
     m_mazeGenerator = std::make_unique<MazeGenerator>();
     m_mazeGenerator->Generate(21, 21);
 
+    m_minimap = std::make_unique<Minimap>();
+    if (!m_minimap->Initialize(graphicsDevice, m_mazeGenerator->GetMazeData()))
+    {
+        return false;
+    }
+
     // 壁モデルの生成とテクスチャ設定
     auto wallModel = AssetLoader::CreateMazeModel(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), 2.0f, 2.0f, MeshGenerator::MeshType::Wall);
     if (!wallModel) return false;
@@ -43,6 +49,7 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
 }
 void GameScene::Shutdown()
 {
+    if (m_minimap) m_minimap->Shutdown();
     for (auto& model : m_models) {
         if (model) model->Shutdown();
     }
@@ -70,5 +77,16 @@ void GameScene::HandleInput(float deltaTime)
 
 void GameScene::Render()
 {
+
+    // 描画開始
+    m_graphicsDevice->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+    // 3Dシーンの描画
     m_renderer->RenderScene(m_models, m_camera.get(), m_lightManager.get());
+
+    // 2D（ミニマップ）の描画
+    m_minimap->Render(m_camera.get());
+
+    // 描画終了
+    m_graphicsDevice->EndScene();
 }

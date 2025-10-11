@@ -16,10 +16,12 @@ void LightManager::Initialize()
     playerLight.Enabled = true;
     playerLight.Type = SpotLight;
     playerLight.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
-    playerLight.Intensity = 1.8f;
+    playerLight.Intensity = 1.5f;
     playerLight.Range = 20.0f;
-    playerLight.SpotAngle = 0.95f;
-    playerLight.Attenuation = { 0.2f, 0.4f, 0.1f };
+    playerLight.SpotAngle = 0.90f;
+    // ¥¥¥ ˆÈ‰º1s‚ğC³ ¥¥¥
+    playerLight.Attenuation = { 0.05f, 0.4f, 0.2f }; // ‹——£‚É‚æ‚éŒ¸Š‚ğ‚æ‚è©‘R‚É
+    // £££ ‚±‚±‚Ü‚Å £££
     m_lights.push_back(playerLight);
 
     m_originalIntensity = playerLight.Intensity;
