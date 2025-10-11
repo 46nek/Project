@@ -17,7 +17,7 @@ public:
     ~LightManager();
 
     void Initialize();
-    void Update(float deltaTime, const DirectX::XMFLOAT3& playerPosition);
+    void Update(float deltaTime, const DirectX::XMFLOAT3& playerPosition, const DirectX::XMFLOAT3& cameraRotation);
 
     const LightBufferType& GetLightBuffer() const { return m_lightBuffer; }
     DirectX::XMMATRIX GetLightViewMatrix() const { return m_lightViewMatrix; }
@@ -26,7 +26,10 @@ public:
 private:
     std::vector<Light> m_lights;
     LightBufferType m_lightBuffer;
+
     float m_flickerTimer;
+    float m_originalIntensity;
+
     DirectX::XMMATRIX m_lightViewMatrix;
     DirectX::XMMATRIX m_lightProjectionMatrix;
 };

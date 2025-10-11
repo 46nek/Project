@@ -1,72 +1,73 @@
 #include "LightManager.h"
+#include <cstdlib> // rand() のために追加
+#include <ctime>   // time() のために追加
 
-LightManager::LightManager() : m_flickerTimer(0.0f) {}
+LightManager::LightManager() : m_flickerTimer(0.0f), m_originalIntensity(0.0f)
+{
+    // 乱数のシードを初期化
+    srand(static_cast<unsigned int>(time(NULL)));
+}
+
 LightManager::~LightManager() {}
 
 void LightManager::Initialize()
 {
-    // プレイヤー追従ライト
     Light playerLight = {};
     playerLight.Enabled = true;
-    playerLight.Type = PointLight;
+    playerLight.Type = SpotLight;
     playerLight.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
-    playerLight.Intensity = 1.0f;
-    playerLight.Range = 10.0f;
-    playerLight.Attenuation = { 0.5f, 0.2f, 0.0f };
+    playerLight.Intensity = 1.8f;
+    playerLight.Range = 12.0f;
+    playerLight.SpotAngle = 0.95f;
+    playerLight.Attenuation = { 0.2f, 0.4f, 0.1f };
     m_lights.push_back(playerLight);
 
-    // 巡回ライト
-    Light patrolLight = {};
-    patrolLight.Enabled = true;
-    patrolLight.Type = PointLight;
-    patrolLight.Color = { 1.0f, 0.2f, 0.2f, 1.0f };
-    patrolLight.Intensity = 1.5f;
-    patrolLight.Range = 15.0f;
-    patrolLight.Attenuation = { 0.5f, 0.1f, 0.0f };
-    m_lights.push_back(patrolLight);
+    // 元の明るさを保存しておく
+    m_originalIntensity = playerLight.Intensity;
 
-    // 点滅スポットライト
-    Light spotLight = {};
-    spotLight.Enabled = true;
-    spotLight.Type = SpotLight;
-    spotLight.Color = { 1.0f, 1.0f, 0.5f, 1.0f };
-    spotLight.Position = { 10.0f, 5.0f, 10.0f };
-    spotLight.Direction = { 0.0f, -1.0f, 0.0f };
-    spotLight.Intensity = 2.5f;
-    spotLight.Range = 20.0f;
-    spotLight.SpotAngle = 0.95f;
-    spotLight.Attenuation = { 0.2f, 0.2f, 0.0f };
-    m_lights.push_back(spotLight);
-
-    // シャドウマッピング用のライトビュー・プロジェクション行列
-    DirectX::XMVECTOR lightPos = DirectX::XMLoadFloat3(&m_lights[1].Position);
+    DirectX::XMVECTOR lightPos = DirectX::XMVectorSet(15.0f, 20.0f, 15.0f, 1.0f);
     DirectX::XMVECTOR lightLookAt = DirectX::XMVectorSet(15.0f, 0.0f, 15.0f, 1.0f);
     DirectX::XMVECTOR lightUp = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     m_lightViewMatrix = DirectX::XMMatrixLookAtLH(lightPos, lightLookAt, lightUp);
     m_lightProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, 1.0f, 0.1f, 100.0f);
 }
 
-void LightManager::Update(float deltaTime, const DirectX::XMFLOAT3& playerPosition)
+void LightManager::Update(float deltaTime, const DirectX::XMFLOAT3& playerPosition, const DirectX::XMFLOAT3& cameraRotation)
 {
-    static float totalTime = 0;
-    totalTime += deltaTime;
-
-    // ライトの位置や状態を更新
+    // プレイヤーライトの位置と向きの更新
     m_lights[0].Position = playerPosition;
-    m_lights[1].Position.x = sin(totalTime) * 15.0f + 15.0f;
-    m_lights[1].Position.z = cos(totalTime) * 15.0f + 15.0f;
 
+    DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(
+        cameraRotation.x * (DirectX::XM_PI / 180.0f),
+        cameraRotation.y * (DirectX::XM_PI / 180.0f),
+        cameraRotation.z * (DirectX::XM_PI / 180.0f)
+    );
+    DirectX::XMVECTOR lookAt = DirectX::XMVector3TransformCoord({ 0, 0, 1 }, rotationMatrix);
+    DirectX::XMStoreFloat3(&m_lights[0].Direction, lookAt);
+
+    // ▼▼▼ 以下を追加（ちらつき処理） ▼▼▼
     m_flickerTimer += deltaTime;
-    if (m_flickerTimer > 0.1f) {
-        m_flickerTimer = 0.0f;
-        if ((rand() % 100) < 30) {
-            m_lights[2].Enabled = !m_lights[2].Enabled;
+    // 0.05秒ごとにちらつくかどうかを判定
+    if (m_flickerTimer > 0.05f)
+    {
+        // 普段は元の明るさに戻す
+        m_lights[0].Intensity = m_originalIntensity;
+
+        // 5%の確率でちらつかせる
+        if ((rand() % 100) < 5)
+        {
+            // 明るさをランダムに元の0%～50%の間の値にする
+            float randomDim = static_cast<float>(rand() % 50) / 100.0f;
+            m_lights[0].Intensity = m_originalIntensity * randomDim;
         }
+
+        m_flickerTimer = 0.0f; // タイマーをリセット
     }
+    // ▲▲▲ ここまで ▲▲▲
 
     // シェーダーに渡すバッファを更新
     m_lightBuffer.NumLights = static_cast<int>(m_lights.size());
-    m_lightBuffer.CameraPosition = playerPosition; // カメラ位置も更新
+    m_lightBuffer.CameraPosition = playerPosition;
     for (int i = 0; i < m_lightBuffer.NumLights; ++i) {
         m_lightBuffer.Lights[i] = m_lights[i];
     }

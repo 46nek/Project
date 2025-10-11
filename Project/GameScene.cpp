@@ -27,7 +27,7 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
     // 天井モデルの生成とテクスチャ設定
     auto ceilingModel = AssetLoader::CreateMazeModel(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), 2.0f, 2.0f, MeshGenerator::MeshType::Ceiling);
     if (!ceilingModel) return false;
-    ceilingModel->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/test.png"));
+    ceilingModel->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/ceiling.png"));
     m_models.push_back(std::move(ceilingModel));
 
     // 床モデルの生成とテクスチャ設定 
@@ -56,7 +56,8 @@ void GameScene::Update(float deltaTime)
     m_input->GetMouseDelta(mouseX, mouseY);
     m_camera->Turn(mouseX, mouseY, deltaTime);
     m_camera->Update();
-    m_lightManager->Update(deltaTime, m_camera->GetPosition());
+
+    m_lightManager->Update(deltaTime, m_camera->GetPosition(), m_camera->GetRotation());
 }
 
 void GameScene::HandleInput(float deltaTime)
