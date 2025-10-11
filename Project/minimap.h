@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <memory>
+#include <wrl/client.h>
 #include "GraphicsDevice.h"
 #include "MazeGenerator.h"
 #include "Sprite.h"
@@ -22,14 +23,18 @@ private:
     std::unique_ptr<Sprite> m_wallSprite;
     std::unique_ptr<Sprite> m_pathSprite;
     std::unique_ptr<Sprite> m_playerSprite;
+    std::unique_ptr<Sprite> m_frameSprite;
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_scissorRasterizerState;
 
     // MazeGeneratorからconst参照として受け取る
     const std::vector<std::vector<MazeGenerator::CellType>>* m_mazeData;
 
     // ミニマップのプロパティ
-    DirectX::XMFLOAT2 m_position; // 画面上の左上座標
-    float m_cellSize;             // 1マスのピクセルサイズ
-    float m_spriteScale;          // スプライトの拡縮率
-    float m_mapWidth;             // マップ全体の幅
-    float m_mapHeight;            // マップ全体の高さ
+    DirectX::XMFLOAT2 m_position;
+    DirectX::XMFLOAT2 m_viewSize;
+    float m_cellSize;
+    float m_zoomFactor;
+    float m_wallSpriteScale;     // 壁用のスケール
+    float m_pathSpriteScale;     // 通路用のスケール
+    float m_playerSpriteScale;   // プレイヤー用のスケール
 };
