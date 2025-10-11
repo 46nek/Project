@@ -102,69 +102,64 @@ LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM
 
 LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
-    switch (umsg) {
-    case WM_LBUTTONDOWN: // マウスの左クリックを検知
+    switch (umsg)
+    {
+    case WM_ACTIVATEAPP: // アプリケーションのフォーカスが切り替わった
+        if (wparam == FALSE) // 非アクティブになった
+        {
+            if (g_game && !g_game->IsPaused())
+            {
+                // ゲーム中だったら、自動的にポーズする
+                g_game->SetPaused(true);
+            }
+        }
+        break; // breakに変更し、デフォルト処理も通す
+
+    case WM_LBUTTONDOWN: // マウスの左クリック
         if (g_game && g_game->IsPaused())
         {
-            // カーソル座標を取得
-            POINT p;
-            p.x = LOWORD(lparam);
-            p.y = HIWORD(lparam);
-
-            // ウィンドウのクライアント領域を取得
+            POINT p = { LOWORD(lparam), HIWORD(lparam) };
             RECT clientRect;
             GetClientRect(hwnd, &clientRect);
-
-            // クリックがクライアント領域内で行われたかチェック
             if (PtInRect(&clientRect, p))
             {
-                // ポーズを解除
+                // ポーズ中に画面内をクリックしたら、ポーズ解除
                 g_game->SetPaused(false);
             }
         }
         return 0;
+
     case WM_INPUT:
     {
         UINT dwSize = sizeof(RAWINPUT);
         static BYTE lpb[sizeof(RAWINPUT)];
         GetRawInputData((HRAWINPUT)lparam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER));
         RAWINPUT* raw = (RAWINPUT*)lpb;
-
         if (raw->header.dwType == RIM_TYPEMOUSE) {
             m_input->MouseMove(raw->data.mouse.lLastX, raw->data.mouse.lLastY);
         }
         return 0;
     }
+
     case WM_KEYDOWN:
         m_input->KeyDown((unsigned int)wparam);
         return 0;
+
     case WM_KEYUP:
         m_input->KeyUp((unsigned int)wparam);
         return 0;
+
     case WM_SETCURSOR:
-        // ゲームがポーズ中でない場合のみ、カーソルを非表示にする
+        // ポーズ中でなければOSにカーソルを描画させない(NULLを設定)
         if (g_game && !g_game->IsPaused())
         {
             SetCursor(NULL);
             return true;
         }
-        // ポーズ中の場合は、デフォルトの処理に任せて矢印カーソルを表示します
+        // ポーズ中なら、OSのデフォルト処理に任せて矢印カーソルを描画させる
         break;
-    case WM_SETFOCUS: // ウィンドウがフォーカスを得た時に呼ばれます
-        if (g_game && !g_game->IsPaused())
-        {
-            // ポーズ中でなければカーソルを非表示にします。
-            ShowCursor(false);
-        }
-        return 0;
-    case WM_KILLFOCUS: // ウィンドウがフォーカスを失った時に呼ばれます
-        // カーソルを再表示します。
-        ShowCursor(true);
-        m_input->Initialize();
-        return 0;
-    default:
-        return DefWindowProc(hwnd, umsg, wparam, lparam);
     }
-    // breakで抜けてきた場合のデフォルト処理
+
+    // 上記で処理されなかったメッセージは、OSの標準処理に任せる
     return DefWindowProc(hwnd, umsg, wparam, lparam);
 }

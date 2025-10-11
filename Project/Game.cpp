@@ -1,13 +1,26 @@
 #include "Game.h"
 
-Game::Game() {}
+// Gameのコンストラクタで、ゲーム開始時にポーズ状態にする
+Game::Game() : m_isPaused(true)
+{
+}
+
 Game::~Game() {}
 
+// SetPaused関数を、カーソル表示を確実に行うように修正
 void Game::SetPaused(bool isPaused)
 {
     m_isPaused = isPaused;
-    // isPausedがtrueならカーソル表示、falseなら非表示になります
-    ShowCursor(m_isPaused);
+    if (m_isPaused)
+    {
+        // カーソルが表示されるまで ShowCursor(true) を呼び出し続ける
+        while (ShowCursor(true) < 0);
+    }
+    else
+    {
+        // カーソルが非表示になるまで ShowCursor(false) を呼び出し続ける
+        while (ShowCursor(false) >= 0);
+    }
 }
 
 bool Game::IsPaused() const
@@ -24,6 +37,8 @@ bool Game::Initialize(HINSTANCE hInstance)
     if (!m_window->Initialize(hInstance, m_input.get())) {
         return false;
     }
+    // SetPausedを呼び出して初期カーソル状態を確定させる
+    SetPaused(m_isPaused);
 
     m_graphicsDevice = std::make_unique<GraphicsDevice>();
     if (!m_graphicsDevice->Initialize(m_window->GetHwnd(), SCREEN_WIDTH, SCREEN_HEIGHT)) {
@@ -68,23 +83,19 @@ void Game::Run()
     }
 }
 
+// Update関数を修正
 bool Game::Update()
 {
     m_timer->Tick();
 
-
-    // ESCキーでポーズ状態を切り替える
     if (m_input->IsKeyPressed(VK_ESCAPE)) {
-        // 現在の状態を反転させてSetPausedを呼び出します
         SetPaused(!m_isPaused);
     }
 
-    // ポーズ中でなければ、ゲームのロジックを更新する
     if (!m_isPaused)
     {
         m_sceneManager->Update(m_timer->GetDeltaTime());
 
-        // ウィンドウがアクティブな場合のみカーソルを中央に固定する
         HWND hwnd = m_window->GetHwnd();
         if (GetFocus() == hwnd)
         {
