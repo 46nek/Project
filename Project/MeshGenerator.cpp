@@ -4,7 +4,7 @@
 static void AddFace(
     FaceDirection direction,
     const DirectX::XMFLOAT3& position, // 四角形の中心位置
-    float width, float height,         // 四角形の幅と高さ
+    float width, float height,      // 四角形の幅と高さ
     std::vector<SimpleVertex>& vertices,
     std::vector<unsigned long>& indices)
 {
@@ -101,42 +101,32 @@ bool MeshGenerator::CreateMazeMesh(
 
     if (type == MeshType::Ceiling || type == MeshType::Floor)
     {
-        // 床と天井の生成ロジックは変更なし
-        std::vector<std::vector<bool>> visited(mazeHeight, std::vector<bool>(mazeWidth, false));
-        for (int y = 0; y < mazeHeight; ++y) {
-            for (int x = 0; x < mazeWidth; ++x) {
-                if (mazeData[y][x] == MazeGenerator::Wall || visited[y][x]) continue;
-                int w = 1;
-                while (x + w < mazeWidth && !visited[y][x + w] && mazeData[y][x + w] == MazeGenerator::Path) w++;
-                int h = 1;
-                bool canExtend = true;
-                while (y + h < mazeHeight && canExtend) {
-                    for (int i = 0; i < w; ++i) {
-                        if (visited[y + h][x + i] || mazeData[y + h][x + i] == MazeGenerator::Wall) {
-                            canExtend = false;
-                            break;
-                        }
-                    }
-                    if (canExtend) h++;
-                }
-                for (int i = 0; i < h; ++i) for (int j = 0; j < w; ++j) visited[y + i][x + j] = true;
-                float rectWidth = w * pathWidth;
-                float rectHeight = h * pathWidth;
-                DirectX::XMFLOAT3 centerPos = { (x + w / 2.0f) * pathWidth, 0.0f, (y + h / 2.0f) * pathWidth };
+        // ▼▼▼ 床・天井の生成ロジックを修正 ▼▼▼
+        for (int y = 0; y < mazeHeight; ++y)
+        {
+            for (int x = 0; x < mazeWidth; ++x)
+            {
+                // 壁セルならスキップ
+                if (mazeData[y][x] == MazeGenerator::Wall) continue;
+
+                // 通路セルの中心位置を計算
+                DirectX::XMFLOAT3 centerPos = { (x + 0.5f) * pathWidth, 0.0f, (y + 0.5f) * pathWidth };
+
                 if (type == MeshType::Ceiling) {
                     centerPos.y = wallHeight;
-                    AddFace(FaceDirection::Bottom, centerPos, rectWidth, rectHeight, outVertices, outIndices);
+                    // 天井の面を追加（下向き）
+                    AddFace(FaceDirection::Bottom, centerPos, pathWidth, pathWidth, outVertices, outIndices);
                 }
-                else {
-                    centerPos.y = 0.0f;
-                    AddFace(FaceDirection::Top, centerPos, rectWidth, rectHeight, outVertices, outIndices);
+                else { // type == MeshType::Floor
+                    // 床の面を追加（上向き）
+                    AddFace(FaceDirection::Top, centerPos, pathWidth, pathWidth, outVertices, outIndices);
                 }
             }
         }
     }
     else if (type == MeshType::Wall)
     {
-        // ▼▼▼ 壁生成ロジックを修正 ▼▼▼
+        // 壁生成ロジックは変更なし
         for (int y = 0; y < mazeHeight; ++y)
         {
             for (int x = 0; x < mazeWidth; ++x)

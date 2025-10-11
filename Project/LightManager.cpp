@@ -17,12 +17,11 @@ void LightManager::Initialize()
     playerLight.Type = SpotLight;
     playerLight.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
     playerLight.Intensity = 1.8f;
-    playerLight.Range = 12.0f;
+    playerLight.Range = 20.0f;
     playerLight.SpotAngle = 0.95f;
     playerLight.Attenuation = { 0.2f, 0.4f, 0.1f };
     m_lights.push_back(playerLight);
 
-    // Œ³‚Ì–¾‚é‚³‚ð•Û‘¶‚µ‚Ä‚¨‚­
     m_originalIntensity = playerLight.Intensity;
 
     DirectX::XMVECTOR lightPos = DirectX::XMVectorSet(15.0f, 20.0f, 15.0f, 1.0f);
