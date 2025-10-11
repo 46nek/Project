@@ -1,12 +1,18 @@
 #pragma once
+#include <DirectXMath.h>
+#include <wrl/client.h>
 #include <vector>
 #include <memory>
-#include <wrl/client.h>
 #include "GraphicsDevice.h"
 #include "MazeGenerator.h"
 #include "Sprite.h"
 #include "Camera.h"
+#include "SpriteBatch.h"
 
+/**
+ * @class Minimap
+ * @brief 画面上に2Dのミニマップを描画
+ */
 class Minimap
 {
 public:
@@ -25,7 +31,6 @@ private:
     std::unique_ptr<Sprite> m_frameSprite;
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_scissorRasterizerState;
 
-    // MazeGeneratorからconst参照として受け取る
     const std::vector<std::vector<MazeGenerator::CellType>>* m_mazeData;
 
     // ミニマップのプロパティ
@@ -33,6 +38,6 @@ private:
     DirectX::XMFLOAT2 m_viewSize;
     float m_cellSize;
     float m_zoomFactor;
-    float m_pathSpriteScale;     // 通路用のスケール
-    float m_playerSpriteScale;   // プレイヤー用のスケール
+    float m_pathSpriteScale;
+    float m_playerSpriteScale;
 };

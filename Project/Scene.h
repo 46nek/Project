@@ -1,7 +1,8 @@
 #pragma once
 #include "GraphicsDevice.h"
-#include "input.h"
+#include "Input.h"
 
+// シーンの状態
 enum class SceneState
 {
     None,
@@ -9,10 +10,12 @@ enum class SceneState
     Game,
 };
 
+/**
+ * @brief 各シーンの基底となる抽象クラス
+ */
 class Scene
 {
 public:
-    // コンストラクタの初期化子リストを修正
     Scene() : m_graphicsDevice(nullptr), m_input(nullptr), m_nextScene(SceneState::None) {}
     virtual ~Scene() = default;
 

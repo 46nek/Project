@@ -1,6 +1,9 @@
 #pragma once
 #include <windows.h>
 
+/**
+ * @brief 時間計測を行い、デルタタイムを管理するクラス
+ */
 class Timer
 {
 public:
@@ -8,9 +11,15 @@ public:
     ~Timer();
 
     bool Initialize();
+    /**
+     * @brief 毎フレーム呼び出し、デルタタイムを計算
+     */
     void Tick();
 
-    // デルタタイムを秒単位で返す (例: 0.016秒)
+    /**
+     * @brief 前フレームからの経過時間を秒単位で取得
+     * @return float デルタタイム（秒）
+     */
     float GetDeltaTime() const;
 
 private:

@@ -6,7 +6,7 @@
 #include "ShaderManager.h"
 #include "ShadowMapper.h"
 
-// 構造体の定義をヘッダーに移動
+// 頂点シェーダー用の定数バッファ
 struct MatrixBufferType
 {
     DirectX::XMMATRIX world;
@@ -17,8 +17,12 @@ struct MatrixBufferType
     DirectX::XMMATRIX lightProjection;
 };
 
-struct LightBufferType; // 前方宣言
+// ピクセルシェーダー用のライトの定数バッファ(前方宣言)
+struct LightBufferType;
 
+/**
+ * @brief Direct3Dデバイスと関連リソースを管理するクラス
+ */
 class GraphicsDevice
 {
 public:
@@ -27,14 +31,12 @@ public:
 
     bool Initialize(HWND hWnd, int screenWidth, int screenHeight);
     void Shutdown();
-
     void BeginScene(float r, float g, float b, float a);
     void EndScene();
-
-    // UpdateMatrixBuffer の引数を修正
     bool UpdateMatrixBuffer(const DirectX::XMMATRIX& world, const DirectX::XMMATRIX& view, const DirectX::XMMATRIX& projection, const DirectX::XMMATRIX& lightView, const DirectX::XMMATRIX& lightProjection);
     bool UpdateLightBuffer(const LightBufferType& lightBuffer);
 
+    // ゲッター
     ID3D11Device* GetDevice() const { return m_d3dDevice; }
     ID3D11DeviceContext* GetDeviceContext() const { return m_immediateContext; }
     SwapChain* GetSwapChain() const { return m_swapChain.get(); }

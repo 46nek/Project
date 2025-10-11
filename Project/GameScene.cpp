@@ -16,7 +16,7 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
     m_renderer = std::make_unique<Renderer>(m_graphicsDevice);
 
     m_mazeGenerator = std::make_unique<MazeGenerator>();
-    m_mazeGenerator->Generate(21, 21);
+    m_mazeGenerator->Generate(MAZE_WIDTH, MAZE_HEIGHT);
 
     m_minimap = std::make_unique<Minimap>();
     if (!m_minimap->Initialize(graphicsDevice, m_mazeGenerator->GetMazeData()))
@@ -25,28 +25,29 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
     }
 
     // 壁モデルの生成とテクスチャ設定
-    auto wallModel = AssetLoader::CreateMazeModel(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), 2.0f, 2.0f, MeshGenerator::MeshType::Wall);
+    auto wallModel = AssetLoader::CreateMazeModel(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT, MeshGenerator::MeshType::Wall);
     if (!wallModel) return false;
     wallModel->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall.png"));
     m_models.push_back(std::move(wallModel));
 
     // 天井モデルの生成とテクスチャ設定
-    auto ceilingModel = AssetLoader::CreateMazeModel(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), 2.0f, 2.0f, MeshGenerator::MeshType::Ceiling);
+    auto ceilingModel = AssetLoader::CreateMazeModel(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT, MeshGenerator::MeshType::Ceiling);
     if (!ceilingModel) return false;
     ceilingModel->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall.png"));
     m_models.push_back(std::move(ceilingModel));
 
     // 床モデルの生成とテクスチャ設定 
-    auto floorModel = AssetLoader::CreateMazeModel(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), 2.0f, 2.0f, MeshGenerator::MeshType::Floor);
+    auto floorModel = AssetLoader::CreateMazeModel(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT, MeshGenerator::MeshType::Floor);
     if (!floorModel) return false;
     floorModel->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall.png"));
 
     m_models.push_back(std::move(floorModel));
 
-    m_camera->SetPosition(2.0f, 1.5f, 2.0f);
+    m_camera->SetPosition(PLAYER_START_POSITION.x, PLAYER_START_POSITION.y, PLAYER_START_POSITION.z);
 
     return true;
 }
+
 void GameScene::Shutdown()
 {
     if (m_minimap) m_minimap->Shutdown();
@@ -77,7 +78,6 @@ void GameScene::HandleInput(float deltaTime)
 
 void GameScene::Render()
 {
-
     // 描画開始
     m_graphicsDevice->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
 

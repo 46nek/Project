@@ -1,7 +1,7 @@
 #pragma once
 #include <DirectXMath.h>
 
-// ライトの種類を定義
+// ライトの種類
 enum LightType
 {
     DirectionalLight = 0,
@@ -9,7 +9,7 @@ enum LightType
     SpotLight = 2
 };
 
-// 個々のライトの情報を保持する構造体
+// シェーダーの定数バッファと一致させるためのライト構造体
 struct Light
 {
     DirectX::XMFLOAT4   Color;
@@ -21,5 +21,5 @@ struct Light
     int                 Type;
     bool                Enabled;
     float               Intensity;
-    DirectX::XMFLOAT2   Padding;
+    DirectX::XMFLOAT2   Padding; // 16バイトアラインメントのためのパディング
 };

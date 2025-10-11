@@ -1,9 +1,14 @@
 #pragma once
 #include <d3d11.h>
 
+/**
+ * @class ShadowMapper
+ * @brief シャドウマッピング用の深度テクスチャと関連リソースを管理
+ */
 class ShadowMapper
 {
 public:
+    // 定数
     static constexpr int SHADOWMAP_WIDTH = 2048;
     static constexpr int SHADOWMAP_HEIGHT = 2048;
 
@@ -13,8 +18,12 @@ public:
     bool Initialize(ID3D11Device* device);
     void Shutdown();
 
+    /**
+     * @brief 深度テクスチャをレンダーターゲットとして設定
+     */
     void SetRenderTarget(ID3D11DeviceContext* deviceContext);
 
+    // ゲッター
     ID3D11ShaderResourceView* GetShadowMapSRV() const { return m_shadowMapSRV; }
     ID3D11SamplerState* GetShadowSampleState() const { return m_shadowSampleState; }
 

@@ -1,11 +1,15 @@
 #pragma once
+#include <d3d11.h>
+#include <DirectXMath.h>
 #include <vector>
 #include <string>
 #include <memory>
-#include <d3d11.h>
-#include <DirectXMath.h>
 #include "Texture.h"
 
+/**
+ * @struct SimpleVertex
+ * @brief 頂点の構造を定義
+ */
 struct SimpleVertex
 {
     DirectX::XMFLOAT3 Pos;
@@ -14,10 +18,17 @@ struct SimpleVertex
     DirectX::XMFLOAT3 Normal;
 };
 
+/**
+ * @class Model
+ * @brief 3Dモデルのメッシュデータ、テクスチャ、およびトランスフォームを管理
+ */
 class Model
 {
 public:
-    // Mesh構造体をpublicに移動
+    /**
+     * @struct Mesh
+     * @brief モデルを構成する単一のメッシュを表す
+     */
     struct Mesh {
         ID3D11Buffer* vertexBuffer = nullptr;
         ID3D11Buffer* indexBuffer = nullptr;
@@ -35,7 +46,7 @@ public:
     void SetPosition(float x, float y, float z);
     void SetRotation(float x, float y, float z);
     void SetScale(float x, float y, float z);
-    DirectX::XMMATRIX GetWorldMatrix() const; 
+    DirectX::XMMATRIX GetWorldMatrix() const;
 
 private:
     void RenderBuffers(ID3D11DeviceContext*, const Mesh& mesh);

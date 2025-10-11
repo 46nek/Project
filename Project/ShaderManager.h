@@ -4,6 +4,10 @@
 
 #pragma comment(lib, "d3dcompiler.lib")
 
+/**
+ * @class ShaderManager
+ * @brief HLSLシェーダーファイルのコンパイルと管理
+ */
 class ShaderManager
 {
 public:
@@ -13,6 +17,7 @@ public:
     bool Initialize(ID3D11Device* device);
     void Shutdown();
 
+    // ゲッター
     ID3D11VertexShader* GetVertexShader() const { return m_vertexShader; }
     ID3D11PixelShader* GetPixelShader() const { return m_pixelShader; }
     ID3D11VertexShader* GetDepthVertexShader() const { return m_depthVertexShader; }

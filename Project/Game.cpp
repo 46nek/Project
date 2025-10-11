@@ -83,7 +83,6 @@ void Game::Run()
     }
 }
 
-// UpdateŠÖ”‚ðC³
 bool Game::Update()
 {
     m_timer->Tick();
