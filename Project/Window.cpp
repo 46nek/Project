@@ -1,4 +1,7 @@
 #include "Window.h"
+#include "Game.h"
+
+extern Game* g_game;
 
 // WndProcで使うための静的ポインタ
 static Window* g_windowHandle = nullptr;
@@ -49,7 +52,7 @@ bool Window::Initialize(HINSTANCE hInstance, Input* input)
     RAWINPUTDEVICE rid = {};
     rid.usUsagePage = 0x01; // Generic Desktop
     rid.usUsage = 0x02;     // Mouse
-    rid.dwFlags = RIDEV_NOLEGACY;
+    rid.dwFlags = 0; 
     rid.hwndTarget = m_hwnd;
     RegisterRawInputDevices(&rid, 1, sizeof(rid));
 
@@ -100,6 +103,26 @@ LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM
 LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
     switch (umsg) {
+    case WM_LBUTTONDOWN: // マウスの左クリックを検知
+        if (g_game && g_game->IsPaused())
+        {
+            // カーソル座標を取得
+            POINT p;
+            p.x = LOWORD(lparam);
+            p.y = HIWORD(lparam);
+
+            // ウィンドウのクライアント領域を取得
+            RECT clientRect;
+            GetClientRect(hwnd, &clientRect);
+
+            // クリックがクライアント領域内で行われたかチェック
+            if (PtInRect(&clientRect, p))
+            {
+                // ポーズを解除
+                g_game->SetPaused(false);
+            }
+        }
+        return 0;
     case WM_INPUT:
     {
         UINT dwSize = sizeof(RAWINPUT);
@@ -119,12 +142,29 @@ LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPA
         m_input->KeyUp((unsigned int)wparam);
         return 0;
     case WM_SETCURSOR:
-        ShowCursor(false);
-        return true;
-    case WM_KILLFOCUS:
+        // ゲームがポーズ中でない場合のみ、カーソルを非表示にする
+        if (g_game && !g_game->IsPaused())
+        {
+            SetCursor(NULL);
+            return true;
+        }
+        // ポーズ中の場合は、デフォルトの処理に任せて矢印カーソルを表示します
+        break;
+    case WM_SETFOCUS: // ウィンドウがフォーカスを得た時に呼ばれます
+        if (g_game && !g_game->IsPaused())
+        {
+            // ポーズ中でなければカーソルを非表示にします。
+            ShowCursor(false);
+        }
+        return 0;
+    case WM_KILLFOCUS: // ウィンドウがフォーカスを失った時に呼ばれます
+        // カーソルを再表示します。
+        ShowCursor(true);
         m_input->Initialize();
         return 0;
     default:
         return DefWindowProc(hwnd, umsg, wparam, lparam);
     }
+    // breakで抜けてきた場合のデフォルト処理
+    return DefWindowProc(hwnd, umsg, wparam, lparam);
 }

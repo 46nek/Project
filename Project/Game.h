@@ -20,6 +20,9 @@ public:
     void Run();
     void Shutdown();
 
+    void SetPaused(bool isPaused);
+    bool IsPaused() const;
+
 private:
     bool Update();
     void Render();
@@ -29,4 +32,6 @@ private:
     std::unique_ptr<GraphicsDevice> m_graphicsDevice;
     std::unique_ptr<SceneManager> m_sceneManager;
     std::unique_ptr<Timer> m_timer;
+
+    bool m_isPaused;
 };

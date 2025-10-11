@@ -3,6 +3,18 @@
 Game::Game() {}
 Game::~Game() {}
 
+void Game::SetPaused(bool isPaused)
+{
+    m_isPaused = isPaused;
+    // isPausedがtrueならカーソル表示、falseなら非表示になります
+    ShowCursor(m_isPaused);
+}
+
+bool Game::IsPaused() const
+{
+    return m_isPaused;
+}
+
 bool Game::Initialize(HINSTANCE hInstance)
 {
     m_input = std::make_unique<Input>();
@@ -60,14 +72,28 @@ bool Game::Update()
 {
     m_timer->Tick();
 
+
+    // ESCキーでポーズ状態を切り替える
     if (m_input->IsKeyPressed(VK_ESCAPE)) {
-        int result = MessageBox(m_window->GetHwnd(), L"ゲームを終了しますか？", L"終了の確認", MB_YESNO | MB_ICONQUESTION);
-        if (result == IDYES) {
-            return false;
+        // 現在の状態を反転させてSetPausedを呼び出します
+        SetPaused(!m_isPaused);
+    }
+
+    // ポーズ中でなければ、ゲームのロジックを更新する
+    if (!m_isPaused)
+    {
+        m_sceneManager->Update(m_timer->GetDeltaTime());
+
+        // ウィンドウがアクティブな場合のみカーソルを中央に固定する
+        HWND hwnd = m_window->GetHwnd();
+        if (GetFocus() == hwnd)
+        {
+            POINT centerPoint = { SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 };
+            ClientToScreen(hwnd, &centerPoint);
+            SetCursorPos(centerPoint.x, centerPoint.y);
         }
     }
 
-    m_sceneManager->Update(m_timer->GetDeltaTime());
     m_input->EndFrame();
     return true;
 }

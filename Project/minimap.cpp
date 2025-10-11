@@ -8,7 +8,6 @@ Minimap::Minimap()
     m_viewSize({ 200.0f, 200.0f }),
     m_cellSize(8.0f),
     m_zoomFactor(2.5f),
-    m_wallSpriteScale(1.0f),
     m_pathSpriteScale(1.0f),
     m_playerSpriteScale(1.0f)
 {
@@ -28,20 +27,16 @@ bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::
     m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_graphicsDevice->GetDeviceContext());
 
     // アセットの読み込み
-    m_wallSprite = std::make_unique<Sprite>();
-    if (!m_wallSprite->Initialize(device, L"Assets/minimap_wall.png")) return false;
-
     m_pathSprite = std::make_unique<Sprite>();
     if (!m_pathSprite->Initialize(device, L"Assets/minimap_path.png")) return false;
 
     m_playerSprite = std::make_unique<Sprite>();
     if (!m_playerSprite->Initialize(device, L"Assets/minimap_player.png")) return false;
-    
+
     m_frameSprite = std::make_unique<Sprite>();
     if (!m_frameSprite->Initialize(device, L"Assets/minimap_frame.png")) return false;
 
     // 各スプライトのスケールを個別に計算
-    m_wallSpriteScale = m_cellSize / m_wallSprite->GetWidth();
     m_pathSpriteScale = m_cellSize / m_pathSprite->GetWidth();
     m_playerSpriteScale = m_cellSize / m_playerSprite->GetWidth();
 
@@ -59,7 +54,6 @@ bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::
 
 void Minimap::Shutdown()
 {
-    if (m_wallSprite) m_wallSprite->Shutdown();
     if (m_pathSprite) m_pathSprite->Shutdown();
     if (m_playerSprite) m_playerSprite->Shutdown();
     m_scissorRasterizerState.Reset();
@@ -116,17 +110,12 @@ void Minimap::Render(const Camera* camera)
     {
         for (size_t x = 0; x < (*m_mazeData)[y].size(); ++x)
         {
-            DirectX::XMFLOAT2 cellPos = {
-                x * m_cellSize + m_cellSize * 0.5f,
-                (mapHeightInCells - y) * m_cellSize - m_cellSize * 0.5f
-            };
-
-            if ((*m_mazeData)[y][x] == MazeGenerator::CellType::Wall)
+            if ((*m_mazeData)[y][x] == MazeGenerator::CellType::Path)
             {
-                m_wallSprite->Render(m_spriteBatch.get(), cellPos, m_wallSpriteScale);
-            }
-            else
-            {
+                DirectX::XMFLOAT2 cellPos = {
+                    x * m_cellSize + m_cellSize * 0.5f,
+                    (mapHeightInCells - y) * m_cellSize - m_cellSize * 0.5f
+                };
                 m_pathSprite->Render(m_spriteBatch.get(), cellPos, m_pathSpriteScale);
             }
         }

@@ -20,7 +20,6 @@ public:
 private:
     GraphicsDevice* m_graphicsDevice;
     std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
-    std::unique_ptr<Sprite> m_wallSprite;
     std::unique_ptr<Sprite> m_pathSprite;
     std::unique_ptr<Sprite> m_playerSprite;
     std::unique_ptr<Sprite> m_frameSprite;
@@ -34,7 +33,6 @@ private:
     DirectX::XMFLOAT2 m_viewSize;
     float m_cellSize;
     float m_zoomFactor;
-    float m_wallSpriteScale;     // 壁用のスケール
     float m_pathSpriteScale;     // 通路用のスケール
     float m_playerSpriteScale;   // プレイヤー用のスケール
 };
