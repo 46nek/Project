@@ -28,9 +28,9 @@ private:
     // ’è”
     static constexpr int MAZE_WIDTH = 21;
     static constexpr int MAZE_HEIGHT = 21;
-    static constexpr float PATH_WIDTH = 2.0f;
-    static constexpr float WALL_HEIGHT = 2.0f;
-    static constexpr float PLAYER_HEIGHT = 1.5f;
+    static constexpr float PATH_WIDTH = 2.5f;
+    static constexpr float WALL_HEIGHT = 5.0f;
+    static constexpr float PLAYER_HEIGHT = 4.0f;
 
     // ƒƒ“ƒo[•Ï”
     std::unique_ptr<Camera> m_camera;

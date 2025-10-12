@@ -7,7 +7,7 @@ Minimap::Minimap()
     m_position({ 20.0f, 20.0f }),
     m_viewSize({ 200.0f, 200.0f }),
     m_cellSize(8.0f),
-    m_zoomFactor(2.5f),
+    m_zoomFactor(5.0f),
     m_pathSpriteScale(1.0f),
     m_playerSpriteScale(1.0f)
 {
@@ -67,7 +67,7 @@ void Minimap::Render(const Camera* camera)
 
     // --- À•WŒvŽZ ---
     DirectX::XMFLOAT3 playerWorldPos = camera->GetPosition();
-    const float pathWidth = 2.0f;
+    const float pathWidth = 2.5f;
     float playerRotation = camera->GetRotation().y * (DirectX::XM_PI / 180.0f);
 
     DirectX::XMFLOAT2 minimapCenter = {

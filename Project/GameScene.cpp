@@ -31,11 +31,19 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
         return false;
     }
 
-    // 壁モデルの生成とテクスチャ設定
-    auto wallModel = AssetLoader::CreateMazeModel(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT, MeshGenerator::MeshType::Wall);
-    if (!wallModel) return false;
-    wallModel->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall.png"));
-    m_models.push_back(std::move(wallModel));
+    // 壁モデルの生成とテクスチャ設定（1段目）
+    auto wallModel1 = AssetLoader::CreateMazeModel(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT / 2.0f, MeshGenerator::MeshType::Wall);
+    if (!wallModel1) return false;
+    wallModel1->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall.png"));
+    m_models.push_back(std::move(wallModel1));
+
+    // 壁モデルの生成とテクスチャ設定（2段目）
+    auto wallModel2 = AssetLoader::CreateMazeModel(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT / 2.0f, MeshGenerator::MeshType::Wall);
+    if (!wallModel2) return false;
+    wallModel2->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall.png"));
+    wallModel2->SetPosition(0.0f, WALL_HEIGHT / 2.0f, 0.0f); // 1段目の上に移動
+    m_models.push_back(std::move(wallModel2));
+
 
     // 天井モデルの生成とテクスチャ設定
     auto ceilingModel = AssetLoader::CreateMazeModel(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT, MeshGenerator::MeshType::Ceiling);
@@ -77,7 +85,7 @@ void GameScene::Update(float deltaTime)
     DirectX::XMFLOAT3 playerRot = m_player->GetRotation();
     m_camera->SetPosition(playerPos.x, playerPos.y, playerPos.z);
     m_camera->SetRotation(playerRot.x, playerRot.y, playerRot.z);
-    
+
     // カメラの揺れを更新
     m_camera->UpdateBobbing(deltaTime, m_player->IsMoving());
 
