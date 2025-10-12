@@ -19,7 +19,6 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
     m_mazeGenerator = std::make_unique<MazeGenerator>();
     m_mazeGenerator->Generate(MAZE_WIDTH, MAZE_HEIGHT);
 
-    // プレイヤーを迷路の入口に初期化
     std::pair<int, int> startPos = m_mazeGenerator->GetStartPosition();
     float startX = (static_cast<float>(startPos.first) + 0.5f) * PATH_WIDTH;
     float startZ = (static_cast<float>(startPos.second) + 0.5f) * PATH_WIDTH;
@@ -31,31 +30,82 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
         return false;
     }
 
-    // 壁モデルの生成とテクスチャ設定（1段目）
+    // --- テクスチャの事前読み込み ---
+    auto wallTexture = AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall.png");
+    if (!wallTexture) {
+        MessageBox(nullptr, L"Failed to load Assets/wall.png", L"Error", MB_OK);
+        return false;
+    }
+    auto wallNormalMap = AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall_normal.png");
+    if (!wallNormalMap) {
+        MessageBox(nullptr, L"Failed to load Assets/wall_normal.png.\nMake sure the file exists in the Assets folder.", L"Error", MB_OK);
+        return false;
+    }
+    auto ceilingTexture = AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall.png");
+    if (!ceilingTexture) {
+        MessageBox(nullptr, L"Failed to load Assets/ceiling.png", L"Error", MB_OK);
+        return false;
+    }
+    auto ceilingNormalMap = AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall_normal.png");
+    if (!ceilingNormalMap) {
+        MessageBox(nullptr, L"Failed to load Assets/ceiling_normal.png.\nMake sure the file exists in the Assets folder.", L"Error", MB_OK);
+        return false;
+    }
+    auto floorTexture = AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall.png");
+    if (!floorTexture) {
+        MessageBox(nullptr, L"Failed to load Assets/floor.png", L"Error", MB_OK);
+        return false;
+    }
+    auto floorNormalMap = AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall_normal.png");
+    if (!floorNormalMap) {
+        MessageBox(nullptr, L"Failed to load Assets/floor_normal.png.\nMake sure the file exists in the Assets folder.", L"Error", MB_OK);
+        return false;
+    }
+
+
+    // --- モデルの生成とテクスチャ設定 ---
+
+    // 壁モデル（1段目）
     auto wallModel1 = AssetLoader::CreateMazeModel(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT / 2.0f, MeshGenerator::MeshType::Wall);
-    if (!wallModel1) return false;
-    wallModel1->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall.png"));
+    if (!wallModel1) {
+        MessageBox(nullptr, L"Failed to create wall model 1.", L"Error", MB_OK);
+        return false;
+    }
+    wallModel1->SetTexture(std::move(wallTexture));
+    wallModel1->SetNormalMap(std::move(wallNormalMap));
     m_models.push_back(std::move(wallModel1));
 
-    // 壁モデルの生成とテクスチャ設定（2段目）
+    // 壁モデル（2段目） - テクスチャを再読み込み
+    wallTexture = AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall.png");
+    wallNormalMap = AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall_normal.png");
     auto wallModel2 = AssetLoader::CreateMazeModel(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT / 2.0f, MeshGenerator::MeshType::Wall);
-    if (!wallModel2) return false;
-    wallModel2->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall.png"));
-    wallModel2->SetPosition(0.0f, WALL_HEIGHT / 2.0f, 0.0f); // 1段目の上に移動
+    if (!wallModel2) {
+        MessageBox(nullptr, L"Failed to create wall model 2.", L"Error", MB_OK);
+        return false;
+    }
+    wallModel2->SetTexture(std::move(wallTexture));
+    wallModel2->SetNormalMap(std::move(wallNormalMap));
+    wallModel2->SetPosition(0.0f, WALL_HEIGHT / 2.0f, 0.0f);
     m_models.push_back(std::move(wallModel2));
 
-
-    // 天井モデルの生成とテクスチャ設定
+    // 天井モデル
     auto ceilingModel = AssetLoader::CreateMazeModel(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT, MeshGenerator::MeshType::Ceiling);
-    if (!ceilingModel) return false;
-    ceilingModel->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall.png"));
+    if (!ceilingModel) {
+        MessageBox(nullptr, L"Failed to create ceiling model.", L"Error", MB_OK);
+        return false;
+    }
+    ceilingModel->SetTexture(std::move(ceilingTexture));
+    ceilingModel->SetNormalMap(std::move(ceilingNormalMap)); // <--- ノーマルマップを設定
     m_models.push_back(std::move(ceilingModel));
 
-    // 床モデルの生成とテクスチャ設定 
+    // 床モデル
     auto floorModel = AssetLoader::CreateMazeModel(m_graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT, MeshGenerator::MeshType::Floor);
-    if (!floorModel) return false;
-    floorModel->SetTexture(AssetLoader::LoadTexture(m_graphicsDevice->GetDevice(), L"Assets/wall.png"));
-
+    if (!floorModel) {
+        MessageBox(nullptr, L"Failed to create floor model.", L"Error", MB_OK);
+        return false;
+    }
+    floorModel->SetTexture(std::move(floorTexture));
+    floorModel->SetNormalMap(std::move(floorNormalMap)); // <--- ノーマルマップを設定
     m_models.push_back(std::move(floorModel));
 
     return true;

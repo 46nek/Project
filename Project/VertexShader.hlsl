@@ -16,6 +16,8 @@ struct VS_INPUT
     float4 Color : COLOR; // 頂点カラー
     float2 Tex : TEXCOORD0; // テクスチャ座標
     float3 Normal : NORMAL; // 法線ベクトル
+    float3 Tangent : TANGENT; 
+    float3 Binormal : BINORMAL;
 };
 
 // 頂点シェーダーからピクセルシェーダーへの出力データ構造
@@ -27,6 +29,8 @@ struct VS_OUTPUT
     float3 Normal : NORMAL; // 法線ベクトル
     float3 WorldPos : WORLDPOS; // ワールド空間での座標
     float4 LightViewPos : TEXCOORD1; // ライトから見た座標
+    float3 Tangent : TANGENT; 
+    float3 Binormal : BINORMAL;
 };
 
 VS_OUTPUT VS(VS_INPUT input)
@@ -38,10 +42,11 @@ VS_OUTPUT VS(VS_INPUT input)
     output.WorldPos = worldPos.xyz;
     float4 viewPos = mul(worldPos, ViewMatrix);
     output.Pos = mul(viewPos, ProjectionMatrix);
-
-    // 法線ベクトルをワールド空間に変換
-    output.Normal = mul(input.Normal, (float3x3) WorldInverseTransposeMatrix);
-    output.Normal = normalize(output.Normal);
+    
+    // 法線、接線、従法線をワールド空間に変換
+    output.Normal = normalize(mul(input.Normal, (float3x3) WorldInverseTransposeMatrix));
+    output.Tangent = normalize(mul(input.Tangent, (float3x3) WorldInverseTransposeMatrix)); // <--- 追加
+    output.Binormal = normalize(mul(input.Binormal, (float3x3) WorldInverseTransposeMatrix)); // <--- 追加
 
     // シャドウマッピングのための座標変換
     output.LightViewPos = mul(worldPos, LightViewMatrix);

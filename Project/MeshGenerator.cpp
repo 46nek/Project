@@ -3,8 +3,8 @@
 // 指定された情報に基づいて、一つの四角い面（2つの三角形）を生成し、頂点とインデックスのリストに追加するヘルパー関数
 static void AddFace(
     FaceDirection direction,
-    const DirectX::XMFLOAT3& position, // 四角形の中心位置
-    float width, float height,      // 四角形の幅と高さ
+    const DirectX::XMFLOAT3& position,
+    float width, float height,
     std::vector<SimpleVertex>& vertices,
     std::vector<unsigned long>& indices)
 {
@@ -12,11 +12,11 @@ static void AddFace(
 
     SimpleVertex v[4];
     DirectX::XMFLOAT3 normal;
+    DirectX::XMFLOAT3 tangent;
+    DirectX::XMFLOAT3 binormal;
     float halfWidth = width / 2.0f;
     float halfHeight = height / 2.0f;
 
-    // DirectXの左手座標系では、ポリゴンの頂点を時計回りに定義すると表面になる。
-    // 法線は、その表面から外側（プレイヤー側）を向くように定義する。
     switch (direction)
     {
     case FaceDirection::Top: // Y+ (床)
@@ -25,6 +25,8 @@ static void AddFace(
         v[2].Pos = { position.x + halfWidth, position.y, position.z - halfHeight };
         v[3].Pos = { position.x - halfWidth, position.y, position.z - halfHeight };
         normal = { 0.0f, 1.0f, 0.0f };
+        tangent = { 1.0f, 0.0f, 0.0f };
+        binormal = { 0.0f, 0.0f, -1.0f };
         break;
     case FaceDirection::Bottom: // Y- (天井)
         v[0].Pos = { position.x - halfWidth, position.y, position.z - halfHeight };
@@ -32,45 +34,57 @@ static void AddFace(
         v[2].Pos = { position.x + halfWidth, position.y, position.z + halfHeight };
         v[3].Pos = { position.x - halfWidth, position.y, position.z + halfHeight };
         normal = { 0.0f, -1.0f, 0.0f };
+        tangent = { 1.0f, 0.0f, 0.0f };
+        binormal = { 0.0f, 0.0f, 1.0f };
         break;
-    case FaceDirection::Left: // X- (プレイヤーは+X側から見るので、法線は+X方向を向く)
+    case FaceDirection::Left: // X-
         v[0].Pos = { position.x, position.y + halfHeight, position.z - halfWidth };
         v[1].Pos = { position.x, position.y + halfHeight, position.z + halfWidth };
         v[2].Pos = { position.x, position.y - halfHeight, position.z + halfWidth };
         v[3].Pos = { position.x, position.y - halfHeight, position.z - halfWidth };
         normal = { 1.0f, 0.0f, 0.0f };
+        tangent = { 0.0f, 0.0f, 1.0f };
+        binormal = { 0.0f, -1.0f, 0.0f };
         break;
-    case FaceDirection::Right: // X+ (プレイヤーは-X側から見るので、法線は-X方向を向く)
+    case FaceDirection::Right: // X+
         v[0].Pos = { position.x, position.y + halfHeight, position.z + halfWidth };
         v[1].Pos = { position.x, position.y + halfHeight, position.z - halfWidth };
         v[2].Pos = { position.x, position.y - halfHeight, position.z - halfWidth };
         v[3].Pos = { position.x, position.y - halfHeight, position.z + halfWidth };
         normal = { -1.0f, 0.0f, 0.0f };
+        tangent = { 0.0f, 0.0f, -1.0f, };
+        binormal = { 0.0f, -1.0f, 0.0f };
         break;
-    case FaceDirection::Front: // Z+ (プレイヤーは-Z側から見るので、法線は-Z方向を向く)
+    case FaceDirection::Front: // Z+
         v[0].Pos = { position.x - halfWidth, position.y + halfHeight, position.z };
         v[1].Pos = { position.x + halfWidth, position.y + halfHeight, position.z };
         v[2].Pos = { position.x + halfWidth, position.y - halfHeight, position.z };
         v[3].Pos = { position.x - halfWidth, position.y - halfHeight, position.z };
         normal = { 0.0f, 0.0f, -1.0f };
+        tangent = { 1.0f, 0.0f, 0.0f };
+        binormal = { 0.0f, -1.0f, 0.0f };
         break;
-    case FaceDirection::Back: // Z- (プレイヤーは+Z側から見るので、法線は+Z方向を向く)
+    case FaceDirection::Back: // Z-
         v[0].Pos = { position.x + halfWidth, position.y + halfHeight, position.z };
         v[1].Pos = { position.x - halfWidth, position.y + halfHeight, position.z };
         v[2].Pos = { position.x - halfWidth, position.y - halfHeight, position.z };
         v[3].Pos = { position.x + halfWidth, position.y - halfHeight, position.z };
         normal = { 0.0f, 0.0f, 1.0f };
+        tangent = { -1.0f, 0.0f, 0.0f };
+        binormal = { 0.0f, -1.0f, 0.0f };
         break;
     }
 
     v[0].Tex = { 0.0f, 0.0f };
-    v[1].Tex = { 1.0f, 0.0f }; // UV座標を0~1の範囲に正規化
-    v[2].Tex = { 1.0f, 1.0f }; // UV座標を0~1の範囲に正規化
-    v[3].Tex = { 0.0f, 1.0f }; // UV座標を0~1の範囲に正規化
+    v[1].Tex = { 1.0f, 0.0f };
+    v[2].Tex = { 1.0f, 1.0f };
+    v[3].Tex = { 0.0f, 1.0f };
 
     for (int i = 0; i < 4; ++i)
     {
         v[i].Normal = normal;
+        v[i].Tangent = tangent;
+        v[i].Binormal = binormal;
         v[i].Color = { 1.0f, 1.0f, 1.0f, 1.0f };
         vertices.push_back(v[i]);
     }

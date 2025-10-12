@@ -8,7 +8,8 @@
 std::unique_ptr<Model> AssetLoader::LoadModelFromFile(ID3D11Device* device, const std::string& filename)
 {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_GenSmoothNormals);
+    // aiProcess_CalcTangentSpace フラグを追加
+    const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace); // <--- 変更
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         MessageBoxA(NULL, importer.GetErrorString(), "Assimp Error", MB_OK);
@@ -22,13 +23,17 @@ std::unique_ptr<Model> AssetLoader::LoadModelFromFile(ID3D11Device* device, cons
         std::vector<unsigned long> indices;
 
         for (UINT i = 0; i < mesh->mNumVertices; i++) {
-            SimpleVertex vertex{}; // C++11以降の推奨される初期化
+            SimpleVertex vertex{};
             vertex.Pos = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
             if (mesh->HasNormals()) {
                 vertex.Normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
             }
             if (mesh->HasTextureCoords(0)) {
                 vertex.Tex = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
+            }
+            if (mesh->HasTangentsAndBitangents()) { // 接線と従法線のデータを取得
+                vertex.Tangent = { mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z };
+                vertex.Binormal = { mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z };
             }
             vertex.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
             vertices.push_back(vertex);

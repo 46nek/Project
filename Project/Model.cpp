@@ -50,9 +50,15 @@ void Model::SetTexture(std::unique_ptr<Texture> texture)
     m_texture = std::move(texture);
 }
 
+void Model::SetNormalMap(std::unique_ptr<Texture> normalMap) 
+{
+    m_normalMap = std::move(normalMap);
+}
+
 void Model::Shutdown()
 {
     m_texture.reset();
+    m_normalMap.reset();
     for (auto& mesh : m_meshes) {
         if (mesh.vertexBuffer) mesh.vertexBuffer->Release();
         if (mesh.indexBuffer) mesh.indexBuffer->Release();
@@ -65,6 +71,10 @@ void Model::Render(ID3D11DeviceContext* deviceContext)
     if (m_texture) {
         ID3D11ShaderResourceView* textureView = m_texture->GetTexture();
         deviceContext->PSSetShaderResources(0, 1, &textureView);
+    }    
+    if (m_normalMap) {
+        ID3D11ShaderResourceView* normalMapView = m_normalMap->GetTexture();
+        deviceContext->PSSetShaderResources(2, 1, &normalMapView); // レジスタースロットを t2 に設定
     }
     for (auto& mesh : m_meshes) {
         RenderBuffers(deviceContext, mesh);

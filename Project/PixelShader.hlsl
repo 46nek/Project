@@ -1,8 +1,10 @@
 // テクスチャとサンプラーステート
 Texture2D shaderTexture : register(t0); // オブジェクトのテクスチャ
 Texture2D shadowMapTexture : register(t1); // シャドウマップ（深度テクスチャ）
+Texture2D normalMapTexture : register(t2);
 SamplerState SampleType : register(s0); // 通常のテクスチャ用サンプラー
 SamplerComparisonState ShadowSampleType : register(s1); // シャドウマップ比較用サンプラー
+
 
 // --- ライトの定義 ---
 #define DIRECTIONAL_LIGHT 0
@@ -40,12 +42,25 @@ struct VS_OUTPUT
     float3 Normal : NORMAL;
     float3 WorldPos : WORLDPOS;
     float4 LightViewPos : TEXCOORD1;
+    float3 Tangent : TANGENT; 
+    float3 Binormal : BINORMAL;
 };
 
 float4 PS(VS_OUTPUT input) : SV_Target
 {
     // テクスチャから基本色を取得
     float4 textureColor = shaderTexture.Sample(SampleType, input.Tex);
+
+    // --- ノーマルマッピング ---
+    // TBN行列を構築
+    float3x3 tbnMatrix = float3x3(normalize(input.Tangent), normalize(input.Binormal), normalize(input.Normal));
+    
+    // ノーマルマップから法線をサンプリングし、[-1, 1]の範囲に変換
+    float3 normalMapSample = normalMapTexture.Sample(SampleType, input.Tex).rgb;
+    float3 normalFromMap = (2.0f * normalMapSample) - 1.0f;
+
+    // ノーマルマップの法線を接線空間からワールド空間へ変換
+    float3 finalNormal = normalize(mul(normalFromMap, tbnMatrix));
 
     // 環境光
     float4 ambient = textureColor * float4(0.3f, 0.3f, 0.3f, 1.0f);
@@ -113,13 +128,13 @@ float4 PS(VS_OUTPUT input) : SV_Target
         }
 
         // 拡散光の計算
-        float diffuseIntensity = saturate(dot(input.Normal, lightDir));
+        float diffuseIntensity = saturate(dot(finalNormal, lightDir)); // <--- 変更
         totalDiffuse += Lights[i].Color * diffuseIntensity * Lights[i].Intensity * attenuation * spotFactor;
-
-        // 鏡面反射光の計算
+        
+        // 鏡面反射光の計算 
         float3 halfwayDir = normalize(lightDir + viewDir);
-        float specAngle = saturate(dot(input.Normal, halfwayDir));
-        float specular = pow(specAngle, 32.0f); // 光沢の強さ
+        float specAngle = saturate(dot(finalNormal, halfwayDir)); // <--- 変更
+        float specular = pow(specAngle, 32.0f);
         totalSpecular += float4(1.0f, 1.0f, 1.0f, 1.0f) * specular * Lights[i].Intensity * attenuation * spotFactor;
     }
 
