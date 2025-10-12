@@ -10,7 +10,7 @@ Minimap::Minimap()
     m_cellSize(8.0f),
     m_zoomFactor(5.0f),
     m_pathSpriteScale(1.0f),
-    m_playerSpriteScale(1.0f)
+    m_playerSpriteScale(0.0f)
 {
 }
 
@@ -23,7 +23,7 @@ bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::
 {
     m_graphicsDevice = graphicsDevice;
     m_mazeData = &mazeData;
-    m_pathWidth = pathWidth; // <<< 追加
+    m_pathWidth = pathWidth; 
 
     ID3D11Device* device = m_graphicsDevice->GetDevice();
     m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_graphicsDevice->GetDeviceContext());
@@ -69,7 +69,6 @@ void Minimap::Render(const Camera* camera)
 
     // --- 座標計算 ---
     DirectX::XMFLOAT3 playerWorldPos = camera->GetPosition();
-    // const float pathWidth = 2.5f; // <<< この行を削除
     float playerRotation = camera->GetRotation().y * (DirectX::XM_PI / 180.0f);
 
     DirectX::XMFLOAT2 minimapCenter = {
@@ -126,7 +125,7 @@ void Minimap::Render(const Camera* camera)
 
     // プレイヤーの描画
     m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, nullptr, nullptr, nullptr, m_scissorRasterizerState.Get());
-    m_playerSprite->Render(m_spriteBatch.get(), minimapCenter, m_playerSpriteScale, 0.0f);
+    m_playerSprite->Render(m_spriteBatch.get(), minimapCenter, m_playerSpriteScale * m_zoomFactor*0.3f, 0.0f);
     m_spriteBatch->End();
 
     // --- 後処理 ---
