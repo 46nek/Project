@@ -151,7 +151,10 @@ void GameScene::Render()
 
     // 3Dシーンの描画
     m_renderer->RenderScene(m_models, m_camera.get(), m_lightManager.get());
-
+    
+    // モーションブラー処理
+    m_graphicsDevice->GetPostProcess()->RenderMotionBlur(m_graphicsDevice->GetDeviceContext());
+    
     // 2D（ミニマップ）の描画
     m_minimap->Render(m_camera.get());
 

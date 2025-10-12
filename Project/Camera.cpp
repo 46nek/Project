@@ -14,6 +14,8 @@ Camera::Camera()
     m_basePosition = { 0.0f, 0.0f, 0.0f };
     
     m_viewMatrix = DirectX::XMMatrixIdentity();
+    m_projectionMatrix = DirectX::XMMatrixIdentity();
+    m_previousViewProjectionMatrix = DirectX::XMMatrixIdentity();
 
     m_moveSpeed = 5.0f;
     m_rotationSpeed = 5.0f;
@@ -55,6 +57,8 @@ DirectX::XMFLOAT3 Camera::GetRotation() const
 
 void Camera::Update()
 {
+    m_previousViewProjectionMatrix = m_viewMatrix * m_projectionMatrix;
+
     DirectX::XMFLOAT3 up, position, lookAt;
     DirectX::XMVECTOR upVector, positionVector, lookAtVector;
     float yaw, pitch, roll;
@@ -80,6 +84,7 @@ void Camera::Update()
     lookAtVector = DirectX::XMVectorAdd(positionVector, lookAtVector);
 
     m_viewMatrix = DirectX::XMMatrixLookAtLH(positionVector, lookAtVector, upVector);
+    m_projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, 1280.0f / 720.0f, 0.1f, 1000.0f);
 }
 
 DirectX::XMMATRIX Camera::GetViewMatrix() const
@@ -87,6 +92,10 @@ DirectX::XMMATRIX Camera::GetViewMatrix() const
     return m_viewMatrix;
 }
 
+DirectX::XMMATRIX Camera::GetPreviousViewProjectionMatrix() const
+{
+    return m_previousViewProjectionMatrix;
+}
 void Camera::MoveForward(float deltaTime)
 {
     float radians = m_rotationY * 0.0174532925f;

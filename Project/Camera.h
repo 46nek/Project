@@ -49,6 +49,12 @@ public:
     */
     DirectX::XMMATRIX GetViewMatrix() const;
 
+    /**
+    * @brief 計算済みの前フレームのビュープロジェクション行列を取得します。
+    * @return DirectX::XMMATRIX型のビュープロジェクション行列
+    */
+    DirectX::XMMATRIX GetPreviousViewProjectionMatrix() const;
+
     void MoveForward(float deltaTime);
     void MoveBackward(float deltaTime);
     void MoveLeft(float deltaTime);
@@ -64,6 +70,8 @@ private:
     float m_rotationX, m_rotationY, m_rotationZ;
     // ビュー行列
     DirectX::XMMATRIX m_viewMatrix;
+    DirectX::XMMATRIX m_projectionMatrix;
+    DirectX::XMMATRIX m_previousViewProjectionMatrix;
     // 速度
     float m_moveSpeed;
     float m_rotationSpeed;

@@ -9,6 +9,7 @@
 #include "Model.h"
 #include "Renderer.h"
 #include "Minimap.h"
+#include "PostProcess.h"
 
 class GameScene : public Scene
 {

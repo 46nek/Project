@@ -1,5 +1,6 @@
 #include "GraphicsDevice.h"
 #include "LightManager.h" 
+#include "PostProcess.h"
 
 GraphicsDevice::GraphicsDevice()
     : m_d3dDevice(nullptr), m_immediateContext(nullptr),
@@ -30,8 +31,10 @@ bool GraphicsDevice::Initialize(HWND hWnd, int screenWidth, int screenHeight)
 
     m_shadowMapper = std::make_unique<ShadowMapper>();
     if (!m_shadowMapper->Initialize(m_d3dDevice)) return false;
-
-    // (以前Direct3Dにあったバッファ作成処理をここに移動)
+    
+    m_postProcess = std::make_unique<PostProcess>();
+    if (!m_postProcess->Initialize(this, screenWidth, screenHeight)) return false;
+    
     D3D11_BUFFER_DESC matrixBufferDesc = {};
     matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
     matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
@@ -67,7 +70,8 @@ void GraphicsDevice::Shutdown()
     if (m_lightBuffer) m_lightBuffer->Release();
     if (m_matrixBuffer) m_matrixBuffer->Release();
 
-    // unique_ptrがnullptrでないことを確認してからメソッドを呼び出す
+    if (m_postProcess) m_postProcess->Shutdown();
+
     if (m_shadowMapper) m_shadowMapper->Shutdown();
     if (m_shaderManager) m_shaderManager->Shutdown();
     if (m_swapChain) m_swapChain->Shutdown();
@@ -86,7 +90,7 @@ void GraphicsDevice::EndScene()
     m_swapChain->EndScene();
 }
 
-bool GraphicsDevice::UpdateMatrixBuffer(const DirectX::XMMATRIX& world, const DirectX::XMMATRIX& view, const DirectX::XMMATRIX& projection, const DirectX::XMMATRIX& lightView, const DirectX::XMMATRIX& lightProjection)
+bool GraphicsDevice::UpdateMatrixBuffer(const DirectX::XMMATRIX& world, const DirectX::XMMATRIX& view, const DirectX::XMMATRIX& projection, const DirectX::XMMATRIX& lightView, const DirectX::XMMATRIX& lightProjection, const DirectX::XMMATRIX& previousViewProjection)
 {
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     if (FAILED(m_immediateContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) return false;
@@ -97,6 +101,7 @@ bool GraphicsDevice::UpdateMatrixBuffer(const DirectX::XMMATRIX& world, const Di
     dataPtr->worldInverseTranspose = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, world));
     dataPtr->lightView = DirectX::XMMatrixTranspose(lightView);
     dataPtr->lightProjection = DirectX::XMMatrixTranspose(lightProjection);
+    dataPtr->previousViewProjection = DirectX::XMMatrixTranspose(previousViewProjection);
     m_immediateContext->Unmap(m_matrixBuffer, 0);
     m_immediateContext->VSSetConstantBuffers(0, 1, &m_matrixBuffer);
     return true;
