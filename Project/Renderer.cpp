@@ -4,33 +4,28 @@
 Renderer::Renderer(GraphicsDevice* graphicsDevice) : m_graphicsDevice(graphicsDevice) {}
 Renderer::~Renderer() {}
 
-void Renderer::RenderScene(const std::vector<std::unique_ptr<Model>>& models, const Camera* camera, LightManager* lightManager)
-{
-    if (!m_graphicsDevice || !camera || !lightManager) return;
-
-    RenderDepthPass(models, lightManager);
-    RenderMainPass(models, camera, lightManager);
-}
-
 void Renderer::RenderDepthPass(const std::vector<std::unique_ptr<Model>>& models, LightManager* lightManager)
 {
     ID3D11DeviceContext* deviceContext = m_graphicsDevice->GetDeviceContext();
     ShaderManager* shaderManager = m_graphicsDevice->GetShaderManager();
 
+    // 描画先をシャドウマップに設定
     m_graphicsDevice->GetShadowMapper()->SetRenderTarget(deviceContext);
 
+    // 深度情報のみを書き出すシェーダーを設定
     deviceContext->IASetInputLayout(shaderManager->GetInputLayout());
     deviceContext->VSSetShader(shaderManager->GetDepthVertexShader(), nullptr, 0);
-    deviceContext->PSSetShader(nullptr, nullptr, 0);
+    deviceContext->PSSetShader(nullptr, nullptr, 0); // ピクセルシェーダーは不要
 
+    // 全てのモデルを描画
     for (const auto& model : models) {
         if (model) {
             m_graphicsDevice->UpdateMatrixBuffer(
                 model->GetWorldMatrix(),
                 lightManager->GetLightViewMatrix(),
                 lightManager->GetLightProjectionMatrix(),
-                lightManager->GetLightViewMatrix(),
-                lightManager->GetLightProjectionMatrix()
+                lightManager->GetLightViewMatrix(), // LightView
+                lightManager->GetLightProjectionMatrix() // LightProjection
             );
             model->Render(deviceContext);
         }
@@ -43,41 +38,41 @@ void Renderer::RenderMainPass(const std::vector<std::unique_ptr<Model>>& models,
     ShaderManager* shaderManager = m_graphicsDevice->GetShaderManager();
     ShadowMapper* shadowMapper = m_graphicsDevice->GetShadowMapper();
 
-    // ▼▼▼ 以下3行を追加 ▼▼▼
-    // シャドウマップの描画からメインのレンダーターゲットに戻す
-    ID3D11RenderTargetView* rtv = m_graphicsDevice->GetSwapChain()->GetRenderTargetView();
-    deviceContext->OMSetRenderTargets(1, &rtv, m_graphicsDevice->GetSwapChain()->GetDepthStencilView());
-    // ▲▲▲ ここまで ▲▲▲
-
-    // Reset render target
+    // ビューポートを画面サイズにリセット
     D3D11_VIEWPORT vp = {};
-    vp.Width = Game::SCREEN_WIDTH;
-    vp.Height = Game::SCREEN_HEIGHT;
+    vp.Width = static_cast<float>(Game::SCREEN_WIDTH);
+    vp.Height = static_cast<float>(Game::SCREEN_HEIGHT);
+    vp.MinDepth = 0.0f;
     vp.MaxDepth = 1.0f;
+    vp.TopLeftX = 0;
+    vp.TopLeftY = 0;
     deviceContext->RSSetViewports(1, &vp);
+
+    // ラスタライザーステートをデフォルトに戻す
     deviceContext->RSSetState(nullptr);
 
+    // Zバッファを有効にする
     m_graphicsDevice->GetSwapChain()->TurnZBufferOn(deviceContext);
 
-    // Set shaders
+    // 通常の3Dシーン用のシェーダーを設定
     deviceContext->IASetInputLayout(shaderManager->GetInputLayout());
     deviceContext->VSSetShader(shaderManager->GetVertexShader(), nullptr, 0);
     deviceContext->PSSetShader(shaderManager->GetPixelShader(), nullptr, 0);
 
-    // Update light buffer
+    // ライトの情報をシェーダーに渡す
     m_graphicsDevice->UpdateLightBuffer(lightManager->GetLightBuffer());
 
-    // Set texture sampler
+    // テクスチャサンプラーを設定
     ID3D11SamplerState* samplerState = m_graphicsDevice->GetSamplerState();
     deviceContext->PSSetSamplers(0, 1, &samplerState);
 
-    // Set shadow map resources
+    // シャドウマップをテクスチャとしてシェーダーに渡す
     ID3D11ShaderResourceView* shadowSrv = shadowMapper->GetShadowMapSRV();
     deviceContext->PSSetShaderResources(1, 1, &shadowSrv);
     ID3D11SamplerState* shadowSampler = shadowMapper->GetShadowSampleState();
     deviceContext->PSSetSamplers(1, 1, &shadowSampler);
 
-    // Draw each model
+    // 全てのモデルを描画
     for (const auto& model : models) {
         if (model) {
             m_graphicsDevice->UpdateMatrixBuffer(

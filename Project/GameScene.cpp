@@ -1,5 +1,6 @@
 #include "GameScene.h"
 #include "AssetLoader.h"
+#include "Game.h"
 
 GameScene::GameScene() {}
 GameScene::~GameScene() {}
@@ -15,6 +16,12 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
     m_lightManager->Initialize();
 
     m_renderer = std::make_unique<Renderer>(m_graphicsDevice);
+
+    m_postProcess = std::make_unique<PostProcess>();
+    if (!m_postProcess->Initialize(m_graphicsDevice, Game::SCREEN_WIDTH, Game::SCREEN_HEIGHT))
+    {
+        return false;
+    }
 
     m_mazeGenerator = std::make_unique<MazeGenerator>();
     m_mazeGenerator->Generate(MAZE_WIDTH, MAZE_HEIGHT);
@@ -146,15 +153,27 @@ void GameScene::Update(float deltaTime)
 
 void GameScene::Render()
 {
-    // 描画開始
-    m_graphicsDevice->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+    // --- ▼▼▼ 修正点 1/2 ▼▼▼ ---
+    // 描画を開始する前に、まずバックバッファ（最終的な画面）をクリアする
+    float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    ID3D11RenderTargetView* backBufferRTV = m_graphicsDevice->GetSwapChain()->GetRenderTargetView();
+    m_graphicsDevice->GetDeviceContext()->ClearRenderTargetView(backBufferRTV, clearColor);
 
-    // 3Dシーンの描画
-    m_renderer->RenderScene(m_models, m_camera.get(), m_lightManager.get());
+    // 1. シャドウマップを生成します
+    m_renderer->RenderDepthPass(m_models, m_lightManager.get());
 
-    // 2D（ミニマップ）の描画
+    // 2. 3Dシーンをオフスクリーンテクスチャに描画する準備をします
+    m_postProcess->SetRenderTarget(m_graphicsDevice->GetDeviceContext());
+
+    // 3. メインの3Dシーンを描画します
+    m_renderer->RenderMainPass(m_models, m_camera.get(), m_lightManager.get());
+
+    // 4. ポストプロセス（ブルーム）を適用し、結果をバックバッファに描画します
+    m_postProcess->Apply(m_graphicsDevice->GetDeviceContext());
+
+    // 5. 2D（ミニマップ）を最終的な画面の一番上に描画します
     m_minimap->Render(m_camera.get());
 
-    // 描画終了
+    // 6. 最終的な絵を画面に表示します
     m_graphicsDevice->EndScene();
 }
