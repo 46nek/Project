@@ -14,17 +14,20 @@ class Renderer
 public:
     Renderer(GraphicsDevice* graphicsDevice);
     ~Renderer();
-    /**
-        * @brief シャドウマップ生成パス
-        */
-    void RenderDepthPass(const std::vector<std::unique_ptr<Model>>& models, LightManager* lightManager);
 
     /**
-     * @brief 通常の描画パス
+     * @brief シーン全体を描画
+     * @param models 描画するモデルのリスト
+     * @param camera カメラ
+     * @param lightManager ライトマネージャー
      */
-    void RenderMainPass(const std::vector<std::unique_ptr<Model>>& models, const Camera* camera, LightManager* lightManager);
-    // --- ▲▲▲ ここまで修正 ▲▲▲ ---
+    void RenderScene(const std::vector<std::unique_ptr<Model>>& models, const Camera* camera, LightManager* lightManager);
 
 private:
+    // シャドウマップ生成パス
+    void RenderDepthPass(const std::vector<std::unique_ptr<Model>>& models, LightManager* lightManager);
+    // 通常の描画パス
+    void RenderMainPass(const std::vector<std::unique_ptr<Model>>& models, const Camera* camera, LightManager* lightManager);
+
     GraphicsDevice* m_graphicsDevice;
 };

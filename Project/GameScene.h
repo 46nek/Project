@@ -9,7 +9,6 @@
 #include "Model.h"
 #include "Renderer.h"
 #include "Minimap.h"
-#include "PostProcess.h" 
 
 class GameScene : public Scene
 {
@@ -24,6 +23,7 @@ public:
 
 private:
     void HandleInput(float deltaTime);
+    bool IsCollidingWithWall(const DirectX::XMFLOAT3& position, float radius);
 
     // íËêî
     static constexpr int MAZE_WIDTH = 21;
@@ -39,8 +39,6 @@ private:
     std::unique_ptr<Renderer> m_renderer;
     std::unique_ptr<Minimap> m_minimap;
     std::unique_ptr<Player> m_player;
-
-    std::unique_ptr<PostProcess> m_postProcess;
 
     std::vector<std::unique_ptr<Model>> m_models;
 };
