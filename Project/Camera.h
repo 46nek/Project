@@ -44,9 +44,9 @@ public:
     void Update();
 
     /**
-     * @brief 計算済みのビュー行列を取得します。
-     * @return DirectX::XMMATRIX型のビュー行列
-     */
+    * @brief 計算済みのビュー行列を取得します。
+    * @return DirectX::XMMATRIX型のビュー行列
+    */
     DirectX::XMMATRIX GetViewMatrix() const;
 
     void MoveForward(float deltaTime);
@@ -54,10 +54,12 @@ public:
     void MoveLeft(float deltaTime);
     void MoveRight(float deltaTime);
     void Turn(int mouseX, int mouseY, float deltaTime);
+    void UpdateBobbing(float deltaTime, bool isMoving);
 
 private:
     // 位置
     float m_positionX, m_positionY, m_positionZ;
+    DirectX::XMFLOAT3 m_basePosition; // ヘッドボブの基準位置
     // 回転
     float m_rotationX, m_rotationY, m_rotationZ;
     // ビュー行列
@@ -65,4 +67,13 @@ private:
     // 速度
     float m_moveSpeed;
     float m_rotationSpeed;
+
+    // ヘッドボブ用
+    float m_bobbingTimer;
+    float m_bobbingAmount;
+    float m_bobbingSpeed;
+    float m_swayAmount;
+    float m_swaySpeed;
+    float m_rollAmount;
+    float m_rollSpeed;
 };

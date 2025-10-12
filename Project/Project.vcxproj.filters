@@ -115,6 +115,9 @@
     <ClInclude Include="minimap.h">
       <Filter>Source\GamePlay</Filter>
     </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Source\GamePlay</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -181,6 +184,9 @@
       <Filter>Source\DirectX</Filter>
     </ClCompile>
     <ClCompile Include="minimap.cpp">
+      <Filter>Source\GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
       <Filter>Source\GamePlay</Filter>
     </ClCompile>
   </ItemGroup>

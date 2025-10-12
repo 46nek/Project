@@ -20,12 +20,16 @@ public:
 
     void Generate(int width, int height);
     const std::vector<std::vector<CellType>>& GetMazeData() const;
+    std::pair<int, int> GetStartPosition() const;
 
 private:
     void CarvePath(int x, int y);
     void RemoveDeadEnds();
     void CreateMoreLoops(int count);
 
+
+    int m_startX;
+    int m_startY;
     int m_width;
     int m_height;
     std::vector<std::vector<CellType>> m_maze;

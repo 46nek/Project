@@ -162,6 +162,7 @@
     <ClInclude Include="MeshGenerator.h" />
     <ClInclude Include="minimap.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Project.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Resource.h" />
@@ -191,6 +192,7 @@
     <ClCompile Include="MeshGenerator.cpp" />
     <ClCompile Include="minimap.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="ShaderManager.cpp" />

@@ -11,10 +11,20 @@ Camera::Camera()
     m_rotationY = 0.0f;
     m_rotationZ = 0.0f;
 
+    m_basePosition = { 0.0f, 0.0f, 0.0f };
+    
     m_viewMatrix = DirectX::XMMatrixIdentity();
 
     m_moveSpeed = 5.0f;
     m_rotationSpeed = 5.0f;
+
+    m_bobbingTimer = 0.0f;
+    m_bobbingAmount = 0.03f; // 縦揺れの大きさ
+    m_swayAmount = 0.05f;  // 横揺れの大きさ
+    m_rollAmount = 0.1f;   // 傾きの大きさ (角度)
+    m_bobbingSpeed = 14.0f;  // 縦揺れは速く
+    m_swaySpeed = 7.0f;   // 横揺れは縦の半分の速さ
+    m_rollSpeed = 7.0f;   // 傾きも横と同じ速さ
 }
 
 Camera::~Camera()
@@ -23,9 +33,7 @@ Camera::~Camera()
 
 void Camera::SetPosition(float x, float y, float z)
 {
-    m_positionX = x;
-    m_positionY = y;
-    m_positionZ = z;
+    m_basePosition = { x, y, z };
 }
 
 void Camera::SetRotation(float x, float y, float z)
@@ -117,4 +125,44 @@ void Camera::Turn(int mouseX, int mouseY, float deltaTime)
 
     if (m_rotationX > 90.0f) m_rotationX = 90.0f;
     if (m_rotationX < -90.0f) m_rotationX = -90.0f;
+}
+
+void Camera::UpdateBobbing(float deltaTime, bool isMoving)
+{
+    // カメラのヨー（Y軸回転）から回転行列を生成
+    DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationY(m_rotationY * (DirectX::XM_PI / 180.0f));
+
+    if (isMoving)
+        {
+        m_bobbingTimer += deltaTime;
+
+        // 縦揺れ（ボブ）：速い周期のSin波
+        float bobOffset = sinf(m_bobbingTimer * m_bobbingSpeed) * m_bobbingAmount;
+
+        // 横揺れ（スウェイ）：遅い周期のSin波
+        float swayOffset = sinf(m_bobbingTimer * m_swaySpeed) * m_swayAmount;
+
+        // 傾き（ロール）：横揺れと同じ周期のCos波（位相をずらすため）
+        m_rotationZ = cosf(m_bobbingTimer * m_rollSpeed) * m_rollAmount;
+
+        // 揺れのオフセットをローカル座標として定義
+        DirectX::XMVECTOR localOffset = DirectX::XMVectorSet(swayOffset, bobOffset, 0.0f, 0.0f);
+        
+        // オフセットをカメラの向きに合わせて回転させ、ワールド座標のオフセットに変換
+        DirectX::XMVECTOR worldOffset = DirectX::XMVector3Transform(localOffset, rotationMatrix);
+        
+        // 基準位置にワールド座標のオフセットを加算
+        m_positionX = m_basePosition.x + DirectX::XMVectorGetX(worldOffset);
+        m_positionY = m_basePosition.y + DirectX::XMVectorGetY(worldOffset);
+        m_positionZ = m_basePosition.z + DirectX::XMVectorGetZ(worldOffset);
+        }
+    else
+        {
+        // 移動していない場合は、ゆっくりと元の位置と角度に戻す
+        m_bobbingTimer = 0.0f;
+        m_positionX += (m_basePosition.x - m_positionX) * 0.1f;
+        m_positionY += (m_basePosition.y - m_positionY) * 0.1f;
+        m_positionZ += (m_basePosition.z - m_positionZ) * 0.1f;
+        m_rotationZ += (0.0f - m_rotationZ) * 0.1f;
+    }
 }

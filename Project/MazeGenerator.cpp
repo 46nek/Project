@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <vector>
 
-MazeGenerator::MazeGenerator() : m_width(0), m_height(0)
+MazeGenerator::MazeGenerator() : m_width(0), m_height(0), m_startX(0), m_startY(0)
 {
 }
 
@@ -25,33 +25,32 @@ void MazeGenerator::Generate(int width, int height)
     std::mt19937 gen(rd());
 
     // スタート地点をランダムに決める（外周のどこか）
-    int startX, startY;
     if (gen() % 2 == 0) { // 上下または左右
-        startX = (gen() % (m_width / 2)) * 2 + 1;
-        startY = (gen() % 2 == 0) ? 0 : m_height - 1;
+        m_startX = (gen() % (m_width / 2)) * 2 + 1;
+        m_startY = (gen() % 2 == 0) ? 0 : m_height - 1;
     }
     else {
-        startX = (gen() % 2 == 0) ? 0 : m_width - 1;
-        startY = (gen() % (m_height / 2)) * 2 + 1;
+        m_startX = (gen() % 2 == 0) ? 0 : m_width - 1;
+        m_startY = (gen() % (m_height / 2)) * 2 + 1;
     }
 
     // 壁の外から掘り始めるイメージ
-    if (startX == 0) CarvePath(1, startY);
-    else if (startX == m_width - 1) CarvePath(m_width - 2, startY);
-    else if (startY == 0) CarvePath(startX, 1);
-    else CarvePath(startX, m_height - 2);
+     if (m_startX == 0) CarvePath(1, m_startY);
+    else if (m_startX == m_width - 1) CarvePath(m_width - 2, m_startY);
+    else if (m_startY == 0) CarvePath(m_startX, 1);
+    else CarvePath(m_startX, m_height - 2);
 
     // スタート地点を道にする
-    m_maze[startY][startX] = Path;
+     m_maze[m_startY][m_startX] = Path;
 
     // ゴール地点をランダムに決める（スタート地点から遠い場所）
     int endX, endY;
     if (gen() % 2 == 0) {
         endX = (gen() % (m_width / 2)) * 2 + 1;
-        endY = (startY == 0) ? m_height - 1 : 0;
+        endY = (m_startY == 0) ? m_height - 1 : 0;
     }
     else {
-        endX = (startX == 0) ? m_width - 1 : 0;
+        endX = (m_startX == 0) ? m_width - 1 : 0;
         endY = (gen() % (m_height / 2)) * 2 + 1;
     }
     m_maze[endY][endX] = Path; // ゴール地点を道にする
@@ -64,6 +63,10 @@ void MazeGenerator::Generate(int width, int height)
 const std::vector<std::vector<MazeGenerator::CellType>>& MazeGenerator::GetMazeData() const
 {
     return m_maze;
+}
+std::pair<int, int> MazeGenerator::GetStartPosition() const
+{
+    return { m_startX, m_startY };
 }
 
 void MazeGenerator::CarvePath(int x, int y)

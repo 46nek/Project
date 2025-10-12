@@ -9,6 +9,7 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
     m_graphicsDevice = graphicsDevice;
     m_input = input;
 
+    m_player = std::make_unique<Player>();
     m_camera = std::make_unique<Camera>();
     m_lightManager = std::make_unique<LightManager>();
     m_lightManager->Initialize();
@@ -17,6 +18,12 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
 
     m_mazeGenerator = std::make_unique<MazeGenerator>();
     m_mazeGenerator->Generate(MAZE_WIDTH, MAZE_HEIGHT);
+
+    // プレイヤーを迷路の入口に初期化
+    std::pair<int, int> startPos = m_mazeGenerator->GetStartPosition();
+    float startX = (static_cast<float>(startPos.first) + 0.5f) * PATH_WIDTH;
+    float startZ = (static_cast<float>(startPos.second) + 0.5f) * PATH_WIDTH;
+    m_player->Initialize({ startX, PLAYER_HEIGHT, startZ });
 
     m_minimap = std::make_unique<Minimap>();
     if (!m_minimap->Initialize(graphicsDevice, m_mazeGenerator->GetMazeData()))
@@ -43,8 +50,6 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
 
     m_models.push_back(std::move(floorModel));
 
-    m_camera->SetPosition(PLAYER_START_POSITION.x, PLAYER_START_POSITION.y, PLAYER_START_POSITION.z);
-
     return true;
 }
 
@@ -59,21 +64,26 @@ void GameScene::Shutdown()
 
 void GameScene::Update(float deltaTime)
 {
-    HandleInput(deltaTime);
+    // プレイヤーの回転（マウス）
     int mouseX, mouseY;
     m_input->GetMouseDelta(mouseX, mouseY);
-    m_camera->Turn(mouseX, mouseY, deltaTime);
+    m_player->Turn(mouseX, mouseY, deltaTime);
+
+    // プレイヤーの移動（キーボード）と当たり判定
+    m_player->Update(deltaTime, m_input, m_mazeGenerator->GetMazeData(), PATH_WIDTH);
+
+    // カメラがプレイヤーに追従
+    DirectX::XMFLOAT3 playerPos = m_player->GetPosition();
+    DirectX::XMFLOAT3 playerRot = m_player->GetRotation();
+    m_camera->SetPosition(playerPos.x, playerPos.y, playerPos.z);
+    m_camera->SetRotation(playerRot.x, playerRot.y, playerRot.z);
+    
+    // カメラの揺れを更新
+    m_camera->UpdateBobbing(deltaTime, m_player->IsMoving());
+
     m_camera->Update();
 
     m_lightManager->Update(deltaTime, m_camera->GetPosition(), m_camera->GetRotation());
-}
-
-void GameScene::HandleInput(float deltaTime)
-{
-    if (m_input->IsKeyDown('W')) m_camera->MoveForward(deltaTime);
-    if (m_input->IsKeyDown('S')) m_camera->MoveBackward(deltaTime);
-    if (m_input->IsKeyDown('A')) m_camera->MoveLeft(deltaTime);
-    if (m_input->IsKeyDown('D')) m_camera->MoveRight(deltaTime);
 }
 
 void GameScene::Render()
