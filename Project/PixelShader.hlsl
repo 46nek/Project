@@ -142,5 +142,23 @@ float4 PS(VS_OUTPUT input) : SV_Target
     float4 finalColor = (textureColor * (totalDiffuse + ambient)) * shadowFactor + (totalSpecular * shadowFactor);
     finalColor.a = textureColor.a;
 
+// --- Vignette Effect ---
+    // 画面の中心からの距離を計算
+    float2 screenCenter = float2(0.5f, 0.5f);
+    float2 texCoord = input.Pos.xy / float2(1280, 720); // Game::SCREEN_WIDTH, Game::SCREEN_HEIGHT
+    float dist = distance(texCoord, screenCenter);
+
+    // ビネットの強度と滑らかさを設定
+    float vignetteIntensity = 1.0f; // 効果の強さ
+    float vignetteSmoothness = 0.1f; // 効果の滑らかさ
+
+    // ビネット係数を計算
+    float vignette = 1.0f - smoothstep(vignetteSmoothness, 1.0f, dist * vignetteIntensity);
+
+    // 最終的な色にビネット効果を適用
+    finalColor.rgb *= vignette;
+
+    finalColor.a = textureColor.a;
+
     return finalColor;
 }
