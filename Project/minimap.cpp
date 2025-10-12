@@ -4,6 +4,7 @@
 Minimap::Minimap()
     : m_graphicsDevice(nullptr),
     m_mazeData(nullptr),
+    m_pathWidth(0.0f),
     m_position({ 20.0f, 20.0f }),
     m_viewSize({ 200.0f, 200.0f }),
     m_cellSize(8.0f),
@@ -18,10 +19,11 @@ Minimap::~Minimap()
     Shutdown();
 }
 
-bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData)
+bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth)
 {
     m_graphicsDevice = graphicsDevice;
     m_mazeData = &mazeData;
+    m_pathWidth = pathWidth; // <<< 追加
 
     ID3D11Device* device = m_graphicsDevice->GetDevice();
     m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_graphicsDevice->GetDeviceContext());
@@ -67,7 +69,7 @@ void Minimap::Render(const Camera* camera)
 
     // --- 座標計算 ---
     DirectX::XMFLOAT3 playerWorldPos = camera->GetPosition();
-    const float pathWidth = 2.5f;
+    // const float pathWidth = 2.5f; // <<< この行を削除
     float playerRotation = camera->GetRotation().y * (DirectX::XM_PI / 180.0f);
 
     DirectX::XMFLOAT2 minimapCenter = {
@@ -77,8 +79,8 @@ void Minimap::Render(const Camera* camera)
 
     float mapHeightInCells = m_mazeData->size();
     DirectX::XMFLOAT2 playerMapPixelPos = {
-        (playerWorldPos.x / pathWidth) * m_cellSize,
-        (mapHeightInCells - (playerWorldPos.z / pathWidth)) * m_cellSize
+        (playerWorldPos.x / m_pathWidth) * m_cellSize, // <<< m_pathWidth を使用
+        (mapHeightInCells - (playerWorldPos.z / m_pathWidth)) * m_cellSize // <<< m_pathWidth を使用
     };
 
     DirectX::XMMATRIX transform =

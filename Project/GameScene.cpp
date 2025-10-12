@@ -26,7 +26,7 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
     m_player->Initialize({ startX, PLAYER_HEIGHT, startZ });
 
     m_minimap = std::make_unique<Minimap>();
-    if (!m_minimap->Initialize(graphicsDevice, m_mazeGenerator->GetMazeData()))
+    if (!m_minimap->Initialize(graphicsDevice, m_mazeGenerator->GetMazeData(), PATH_WIDTH))
     {
         return false;
     }

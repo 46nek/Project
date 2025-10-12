@@ -19,7 +19,7 @@ public:
     Minimap();
     ~Minimap();
 
-    bool Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData);
+    bool Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth);
     void Shutdown();
     void Render(const Camera* camera);
 
@@ -32,6 +32,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_scissorRasterizerState;
 
     const std::vector<std::vector<MazeGenerator::CellType>>* m_mazeData;
+    float m_pathWidth;
 
     // ミニマップのプロパティ
     DirectX::XMFLOAT2 m_position;
