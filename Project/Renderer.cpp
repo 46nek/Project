@@ -29,9 +29,8 @@ void Renderer::RenderDepthPass(const std::vector<std::unique_ptr<Model>>& models
                 model->GetWorldMatrix(),
                 lightManager->GetLightViewMatrix(),
                 lightManager->GetLightProjectionMatrix(),
-                lightManager->GetLightViewMatrix(),       
-                lightManager->GetLightProjectionMatrix(), 
-                DirectX::XMMatrixIdentity()
+                lightManager->GetLightViewMatrix(),
+                lightManager->GetLightProjectionMatrix()
             );
             model->Render(deviceContext);
         }
@@ -44,8 +43,11 @@ void Renderer::RenderMainPass(const std::vector<std::unique_ptr<Model>>& models,
     ShaderManager* shaderManager = m_graphicsDevice->GetShaderManager();
     ShadowMapper* shadowMapper = m_graphicsDevice->GetShadowMapper();
 
+    // ▼▼▼ 以下3行を追加 ▼▼▼
     // シャドウマップの描画からメインのレンダーターゲットに戻す
-    m_graphicsDevice->GetPostProcess()->Begin(deviceContext);
+    ID3D11RenderTargetView* rtv = m_graphicsDevice->GetSwapChain()->GetRenderTargetView();
+    deviceContext->OMSetRenderTargets(1, &rtv, m_graphicsDevice->GetSwapChain()->GetDepthStencilView());
+    // ▲▲▲ ここまで ▲▲▲
 
     // Reset render target
     D3D11_VIEWPORT vp = {};
@@ -70,7 +72,7 @@ void Renderer::RenderMainPass(const std::vector<std::unique_ptr<Model>>& models,
     deviceContext->PSSetSamplers(0, 1, &samplerState);
 
     // Set shadow map resources
-    ID3D11ShaderResourceView* shadowSrv = m_graphicsDevice->GetShadowMapper()->GetShadowMapSRV();
+    ID3D11ShaderResourceView* shadowSrv = shadowMapper->GetShadowMapSRV();
     deviceContext->PSSetShaderResources(1, 1, &shadowSrv);
     ID3D11SamplerState* shadowSampler = shadowMapper->GetShadowSampleState();
     deviceContext->PSSetSamplers(1, 1, &shadowSampler);
@@ -83,9 +85,7 @@ void Renderer::RenderMainPass(const std::vector<std::unique_ptr<Model>>& models,
                 camera->GetViewMatrix(),
                 DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f),
                 lightManager->GetLightViewMatrix(),
-                lightManager->GetLightProjectionMatrix(), 
-                camera->GetPreviousViewProjectionMatrix() 
-
+                lightManager->GetLightProjectionMatrix()
             );
             model->Render(deviceContext);
         }

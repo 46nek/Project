@@ -42,19 +42,11 @@ struct VS_OUTPUT
     float3 Normal : NORMAL;
     float3 WorldPos : WORLDPOS;
     float4 LightViewPos : TEXCOORD1;
-    float4 PrevPos : TEXCOORD2; // 1フレーム前のスクリーン座標
-    float3 Tangent : TANGENT;
+    float3 Tangent : TANGENT; 
     float3 Binormal : BINORMAL;
 };
 
-// MRT用にピクセルシェーダーの出力を変更
-struct PS_OUTPUT
-{
-    float4 Color : SV_Target0; // 0番目のレンダーターゲット（色）
-    float4 Velocity : SV_Target1; // 1番目のレンダーターゲット（速度）
-};
-
-PS_OUTPUT PS(VS_OUTPUT input)
+float4 PS(VS_OUTPUT input) : SV_Target
 {
     // テクスチャから基本色を取得
     float4 textureColor = shaderTexture.Sample(SampleType, input.Tex);
@@ -66,7 +58,7 @@ PS_OUTPUT PS(VS_OUTPUT input)
     // ノーマルマップから法線をサンプリングし、[-1, 1]の範囲に変換
     float3 normalMapSample = normalMapTexture.Sample(SampleType, input.Tex).rgb;
     float3 normalFromMap = (2.0f * normalMapSample) - 1.0f;
-    
+
     // ノーマルマップの法線を接線空間からワールド空間へ変換
     float3 finalNormal = normalize(mul(normalFromMap, tbnMatrix));
 
@@ -136,12 +128,12 @@ PS_OUTPUT PS(VS_OUTPUT input)
         }
 
         // 拡散光の計算
-        float diffuseIntensity = saturate(dot(finalNormal, lightDir));
+        float diffuseIntensity = saturate(dot(finalNormal, lightDir)); // <--- 変更
         totalDiffuse += Lights[i].Color * diffuseIntensity * Lights[i].Intensity * attenuation * spotFactor;
-
+        
         // 鏡面反射光の計算 
         float3 halfwayDir = normalize(lightDir + viewDir);
-        float specAngle = saturate(dot(finalNormal, halfwayDir));
+        float specAngle = saturate(dot(finalNormal, halfwayDir)); // <--- 変更
         float specular = pow(specAngle, 32.0f);
         totalSpecular += float4(1.0f, 1.0f, 1.0f, 1.0f) * specular * Lights[i].Intensity * attenuation * spotFactor;
     }
@@ -150,17 +142,23 @@ PS_OUTPUT PS(VS_OUTPUT input)
     float4 finalColor = (textureColor * (totalDiffuse + ambient)) * shadowFactor + (totalSpecular * shadowFactor);
     finalColor.a = textureColor.a;
 
-    // --- 速度ベクトルの計算 ---
-    // 現在と前の座標を-1~+1の範囲に正規化
-    float2 currentScreenPos = input.Pos.xy / input.Pos.w;
-    float2 prevScreenPos = input.PrevPos.xy / input.PrevPos.w;
-    // 速度ベクトルを計算
-    float2 velocity = (currentScreenPos - prevScreenPos) * 0.5f;
+// --- Vignette Effect ---
+    // 画面の中心からの距離を計算
+    float2 screenCenter = float2(0.5f, 0.5f);
+    float2 texCoord = input.Pos.xy / float2(1280, 720); // Game::SCREEN_WIDTH, Game::SCREEN_HEIGHT
+    float dist = distance(texCoord, screenCenter);
 
-    // 出力構造体に結果を詰める
-    PS_OUTPUT output; // <- ここのスペースが抜けていました！
-    output.Color = finalColor;
-    output.Velocity = float4(velocity, 0.0f, 1.0f);
+    // ビネットの強度と滑らかさを設定
+    float vignetteIntensity = 1.0f; // 効果の強さ
+    float vignetteSmoothness = 0.1f; // 効果の滑らかさ
 
-    return output;
+    // ビネット係数を計算
+    float vignette = 1.0f - smoothstep(vignetteSmoothness, 1.0f, dist * vignetteIntensity);
+
+    // 最終的な色にビネット効果を適用
+    finalColor.rgb *= vignette;
+
+    finalColor.a = textureColor.a;
+
+    return finalColor;
 }

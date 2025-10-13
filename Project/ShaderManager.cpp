@@ -1,8 +1,7 @@
 #include "ShaderManager.h"
 
 ShaderManager::ShaderManager()
-    : m_vertexShader(nullptr), m_pixelShader(nullptr), m_depthVertexShader(nullptr),
-    m_horizontalBlurPixelShader(nullptr), m_verticalBlurPixelShader(nullptr), m_inputLayout(nullptr)
+    : m_vertexShader(nullptr), m_pixelShader(nullptr), m_depthVertexShader(nullptr), m_inputLayout(nullptr)
 {
 }
 ShaderManager::~ShaderManager() {}
@@ -12,9 +11,6 @@ bool ShaderManager::Initialize(ID3D11Device* device)
     ID3DBlob* vsBlob = nullptr;
     ID3DBlob* psBlob = nullptr;
     ID3DBlob* depthVsBlob = nullptr;
-    ID3DBlob * horizontalBlurPsBlob = nullptr;
-    ID3DBlob * verticalBlurPsBlob = nullptr;
-    ID3DBlob * motionBlurPsBlob = nullptr;
     ID3DBlob* errorBlob = nullptr;
     HRESULT hr;
 
@@ -29,26 +25,11 @@ bool ShaderManager::Initialize(ID3D11Device* device)
     hr = device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &m_pixelShader);
     if (FAILED(hr)) { vsBlob->Release(); psBlob->Release(); return false; }
 
-    hr = D3DCompileFromFile(L"DepthVertexShader.hlsl", nullptr, nullptr, "DepthVS", "vs_5_0", 0, 0, &depthVsBlob, &errorBlob);
+    hr = D3DCompileFromFile(L"DepthVertexShader.hlsl", nullptr, nullptr, "main", "vs_5_0", 0, 0, &depthVsBlob, &errorBlob);
     if (FAILED(hr)) { vsBlob->Release(); psBlob->Release(); if (errorBlob) errorBlob->Release(); return false; }
     hr = device->CreateVertexShader(depthVsBlob->GetBufferPointer(), depthVsBlob->GetBufferSize(), nullptr, &m_depthVertexShader);
     if (FAILED(hr)) { vsBlob->Release(); psBlob->Release(); depthVsBlob->Release(); return false; }
-    
-    hr = D3DCompileFromFile(L"HorizontalBlur.hlsl", nullptr, nullptr, "HorizontalBlurPS", "ps_5_0", 0, 0, &horizontalBlurPsBlob, &errorBlob);
-    if (FAILED(hr)) { if (errorBlob) errorBlob->Release(); return false; }
-    hr = device->CreatePixelShader(horizontalBlurPsBlob->GetBufferPointer(), horizontalBlurPsBlob->GetBufferSize(), nullptr, &m_horizontalBlurPixelShader);
-    if (FAILED(hr)) { horizontalBlurPsBlob->Release(); return false; }
-    
-    hr = D3DCompileFromFile(L"VerticalBlur.hlsl", nullptr, nullptr, "VerticalBlurPS", "ps_5_0", 0, 0, &verticalBlurPsBlob, &errorBlob);
-    if (FAILED(hr)) { if (errorBlob) errorBlob->Release(); return false; }
-    hr = device->CreatePixelShader(verticalBlurPsBlob->GetBufferPointer(), verticalBlurPsBlob->GetBufferSize(), nullptr, &m_verticalBlurPixelShader);
-    if (FAILED(hr)) { verticalBlurPsBlob->Release(); return false; }
 
-    hr = D3DCompileFromFile(L"MotionBlur.hlsl", nullptr, nullptr, "MotionBlurPS", "ps_5_0", 0, 0, &motionBlurPsBlob, &errorBlob);
-    if (FAILED(hr)) { if (errorBlob) errorBlob->Release(); return false; }
-    hr = device->CreatePixelShader(motionBlurPsBlob->GetBufferPointer(), motionBlurPsBlob->GetBufferSize(), nullptr, &m_motionBlurPixelShader);
-    if (FAILED(hr)) { motionBlurPsBlob->Release(); return false; }
-    
     // インプットレイアウトの作成
     D3D11_INPUT_ELEMENT_DESC layout[] = {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -63,9 +44,6 @@ bool ShaderManager::Initialize(ID3D11Device* device)
     vsBlob->Release();
     psBlob->Release();
     depthVsBlob->Release();
-    horizontalBlurPsBlob->Release();
-    verticalBlurPsBlob->Release();
-    motionBlurPsBlob->Release();
     if (errorBlob) errorBlob->Release();
 
     return SUCCEEDED(hr);
@@ -77,7 +55,4 @@ void ShaderManager::Shutdown()
     if (m_depthVertexShader) { m_depthVertexShader->Release(); m_depthVertexShader = nullptr; }
     if (m_pixelShader) { m_pixelShader->Release(); m_pixelShader = nullptr; }
     if (m_vertexShader) { m_vertexShader->Release(); m_vertexShader = nullptr; }
-    if (m_horizontalBlurPixelShader) { m_horizontalBlurPixelShader->Release(); m_horizontalBlurPixelShader = nullptr; }
-    if (m_verticalBlurPixelShader) { m_verticalBlurPixelShader->Release(); m_verticalBlurPixelShader = nullptr; }
-    if (m_motionBlurPixelShader) { m_motionBlurPixelShader->Release(); m_motionBlurPixelShader = nullptr; }
 }

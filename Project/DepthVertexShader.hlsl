@@ -11,7 +11,7 @@ struct VS_INPUT
 };
 
 // ピクセルシェーダーにはSV_POSITION（スクリーン上の座標）のみを渡す
-float4 DepthVS(VS_INPUT input) : SV_POSITION
+float4 main(VS_INPUT input) : SV_POSITION
 {
     // 頂点座標をワールド、ライトビュー、ライトプロジェクションの順に変換する
     float4 worldPos = mul(input.Pos, worldMatrix);

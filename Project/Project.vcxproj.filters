@@ -118,9 +118,6 @@
     <ClInclude Include="Player.h">
       <Filter>Source\GamePlay</Filter>
     </ClInclude>
-    <ClInclude Include="PostProcess.h">
-      <Filter>Source\Graphics</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -192,9 +189,6 @@
     <ClCompile Include="Player.cpp">
       <Filter>Source\GamePlay</Filter>
     </ClCompile>
-    <ClCompile Include="PostProcess.cpp">
-      <Filter>Source\Graphics</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Project.rc">
@@ -226,15 +220,6 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="DepthVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="HorizontalBlur.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="VerticalBlur.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="MotionBlur.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
