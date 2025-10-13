@@ -3,7 +3,7 @@
 
 GraphicsDevice::GraphicsDevice()
     : m_d3dDevice(nullptr), m_immediateContext(nullptr),
-    m_matrixBuffer(nullptr), m_lightBuffer(nullptr), m_samplerState(nullptr)
+    m_matrixBuffer(nullptr), m_lightBuffer(nullptr), m_motionBlurBuffer(nullptr), m_samplerState(nullptr)
 {
 }
 
@@ -31,7 +31,12 @@ bool GraphicsDevice::Initialize(HWND hWnd, int screenWidth, int screenHeight)
     m_shadowMapper = std::make_unique<ShadowMapper>();
     if (!m_shadowMapper->Initialize(m_d3dDevice)) return false;
 
-    // (以前Direct3Dにあったバッファ作成処理をここに移動)
+    m_renderTarget = std::make_unique<RenderTarget>();
+    if (!m_renderTarget->Initialize(m_d3dDevice, screenWidth, screenHeight, true)) return false;
+
+    m_orthoWindow = std::make_unique<OrthoWindow>();
+    if (!m_orthoWindow->Initialize(m_d3dDevice, screenWidth, screenHeight)) return false;
+
     D3D11_BUFFER_DESC matrixBufferDesc = {};
     matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
     matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
@@ -46,6 +51,15 @@ bool GraphicsDevice::Initialize(HWND hWnd, int screenWidth, int screenHeight)
     lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     hr = m_d3dDevice->CreateBuffer(&lightBufferDesc, NULL, &m_lightBuffer);
+    if (FAILED(hr)) return false;
+
+    // <--- 以下をすべて追加 --->
+    D3D11_BUFFER_DESC motionBlurBufferDesc = {};
+    motionBlurBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    motionBlurBufferDesc.ByteWidth = sizeof(MotionBlurBufferType);
+    motionBlurBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    motionBlurBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    hr = m_d3dDevice->CreateBuffer(&motionBlurBufferDesc, NULL, &m_motionBlurBuffer);
     if (FAILED(hr)) return false;
 
     D3D11_SAMPLER_DESC samplerDesc = {};
@@ -66,8 +80,10 @@ void GraphicsDevice::Shutdown()
     if (m_samplerState) m_samplerState->Release();
     if (m_lightBuffer) m_lightBuffer->Release();
     if (m_matrixBuffer) m_matrixBuffer->Release();
+    if (m_motionBlurBuffer) m_motionBlurBuffer->Release();
 
-    // unique_ptrがnullptrでないことを確認してからメソッドを呼び出す
+    if (m_orthoWindow) m_orthoWindow->Shutdown();
+    if (m_renderTarget) m_renderTarget->Shutdown();
     if (m_shadowMapper) m_shadowMapper->Shutdown();
     if (m_shaderManager) m_shaderManager->Shutdown();
     if (m_swapChain) m_swapChain->Shutdown();
@@ -110,5 +126,19 @@ bool GraphicsDevice::UpdateLightBuffer(const LightBufferType& lightBuffer)
     *dataPtr = lightBuffer;
     m_immediateContext->Unmap(m_lightBuffer, 0);
     m_immediateContext->PSSetConstantBuffers(1, 1, &m_lightBuffer);
+    return true;
+}
+
+// <--- 以下をすべて追加 --->
+bool GraphicsDevice::UpdateMotionBlurBuffer(const DirectX::XMMATRIX& prevViewProj, const DirectX::XMMATRIX& currentViewProjInv, float blurAmount)
+{
+    D3D11_MAPPED_SUBRESOURCE mappedResource;
+    if (FAILED(m_immediateContext->Map(m_motionBlurBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) return false;
+    MotionBlurBufferType* dataPtr = (MotionBlurBufferType*)mappedResource.pData;
+    dataPtr->previousViewProjection = DirectX::XMMatrixTranspose(prevViewProj);
+    dataPtr->currentViewProjectionInverse = DirectX::XMMatrixTranspose(currentViewProjInv);
+    dataPtr->blurAmount = blurAmount;
+    m_immediateContext->Unmap(m_motionBlurBuffer, 0);
+    m_immediateContext->PSSetConstantBuffers(0, 1, &m_motionBlurBuffer);
     return true;
 }

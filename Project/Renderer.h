@@ -15,13 +15,11 @@ public:
     Renderer(GraphicsDevice* graphicsDevice);
     ~Renderer();
 
-    /**
-     * @brief シーン全体を描画
-     * @param models 描画するモデルのリスト
-     * @param camera カメラ
-     * @param lightManager ライトマネージャー
-     */
-    void RenderScene(const std::vector<std::unique_ptr<Model>>& models, const Camera* camera, LightManager* lightManager);
+       // --- 新しい描画フロー ---
+        // 1. シーンをテクスチャにレンダリングする
+        void RenderSceneToTexture(const std::vector<std::unique_ptr<Model>>&models, const Camera * camera, LightManager * lightManager);
+    // 2. レンダリングされたテクスチャにポストプロセスを適用し、画面に描画する
+    void RenderFinalPass(const Camera * camera);
 
 private:
     // シャドウマップ生成パス

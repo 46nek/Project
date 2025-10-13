@@ -146,11 +146,12 @@ void GameScene::Update(float deltaTime)
 
 void GameScene::Render()
 {
-    // 描画開始
-    m_graphicsDevice->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
-
-    // 3Dシーンの描画
-    m_renderer->RenderScene(m_models, m_camera.get(), m_lightManager.get());
+    // --- 新しい描画フロー ---
+    // 1. 3Dシーン（迷路など）をオフスクリーンのテクスチャに描画
+    m_renderer->RenderSceneToTexture(m_models, m_camera.get(), m_lightManager.get());
+    
+    // 2. 手順1で描画したテクスチャを画面に表示（この段階でポストプロセスを適用）
+    m_renderer->RenderFinalPass(m_camera.get());
 
     // 2D（ミニマップ）の描画
     m_minimap->Render(m_camera.get());

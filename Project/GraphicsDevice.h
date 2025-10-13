@@ -5,8 +5,9 @@
 #include "SwapChain.h"
 #include "ShaderManager.h"
 #include "ShadowMapper.h"
+#include "RenderTarget.h"
+#include "OrthoWindow.h"
 
-// 頂点シェーダー用の定数バッファ
 struct MatrixBufferType
 {
     DirectX::XMMATRIX world;
@@ -17,12 +18,17 @@ struct MatrixBufferType
     DirectX::XMMATRIX lightProjection;
 };
 
-// ピクセルシェーダー用のライトの定数バッファ(前方宣言)
+// <--- 以下をすべて追加 --->
+struct MotionBlurBufferType
+{
+    DirectX::XMMATRIX previousViewProjection;
+    DirectX::XMMATRIX currentViewProjectionInverse;
+    float blurAmount;
+    DirectX::XMFLOAT3 padding;
+};
+
 struct LightBufferType;
 
-/**
- * @brief Direct3Dデバイスと関連リソースを管理するクラス
- */
 class GraphicsDevice
 {
 public:
@@ -35,13 +41,15 @@ public:
     void EndScene();
     bool UpdateMatrixBuffer(const DirectX::XMMATRIX& world, const DirectX::XMMATRIX& view, const DirectX::XMMATRIX& projection, const DirectX::XMMATRIX& lightView, const DirectX::XMMATRIX& lightProjection);
     bool UpdateLightBuffer(const LightBufferType& lightBuffer);
+    bool UpdateMotionBlurBuffer(const DirectX::XMMATRIX& prevViewProj, const DirectX::XMMATRIX& currentViewProjInv, float blurAmount);
 
-    // ゲッター
     ID3D11Device* GetDevice() const { return m_d3dDevice; }
     ID3D11DeviceContext* GetDeviceContext() const { return m_immediateContext; }
     SwapChain* GetSwapChain() const { return m_swapChain.get(); }
     ShaderManager* GetShaderManager() const { return m_shaderManager.get(); }
     ShadowMapper* GetShadowMapper() const { return m_shadowMapper.get(); }
+    RenderTarget* GetRenderTarget() const { return m_renderTarget.get(); }
+    OrthoWindow* GetOrthoWindow() const { return m_orthoWindow.get(); }
     ID3D11SamplerState* GetSamplerState() const { return m_samplerState; }
 
 private:
@@ -49,9 +57,12 @@ private:
     ID3D11DeviceContext* m_immediateContext;
     ID3D11Buffer* m_matrixBuffer;
     ID3D11Buffer* m_lightBuffer;
+    ID3D11Buffer* m_motionBlurBuffer; // <--- 追加
     ID3D11SamplerState* m_samplerState;
 
     std::unique_ptr<SwapChain> m_swapChain;
     std::unique_ptr<ShaderManager> m_shaderManager;
     std::unique_ptr<ShadowMapper> m_shadowMapper;
+    std::unique_ptr<RenderTarget> m_renderTarget;
+    std::unique_ptr<OrthoWindow> m_orthoWindow;
 };
