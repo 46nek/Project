@@ -29,7 +29,7 @@ void LightManager::Initialize(const std::vector<std::vector<MazeGenerator::CellT
                 newLight.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
                 newLight.Intensity = 1.0f; // ライトの強度
                 newLight.Range = 10.0f;    // 照らす範囲
-                newLight.SpotAngle = 0.7f; // スポットライトの角度
+                newLight.SpotAngle = 0.5f; // スポットライトの角度
                 newLight.Attenuation = { 0.1f, 0.2f, 0.1f }; // 距離による減衰
 
                 // 天井から床向きに設定

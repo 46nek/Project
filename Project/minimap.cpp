@@ -23,7 +23,7 @@ bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::
 {
     m_graphicsDevice = graphicsDevice;
     m_mazeData = &mazeData;
-    m_pathWidth = pathWidth; 
+    m_pathWidth = pathWidth;
 
     ID3D11Device* device = m_graphicsDevice->GetDevice();
     m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_graphicsDevice->GetDeviceContext());
@@ -76,7 +76,10 @@ void Minimap::Render(const Camera* camera)
         m_position.y + m_viewSize.y * 0.5f
     };
 
-    float mapHeightInCells = m_mazeData->size();
+    // ▼▼▼ 警告が出ていた箇所を修正 ▼▼▼
+    float mapHeightInCells = static_cast<float>(m_mazeData->size());
+    // ▲▲▲ 警告が出ていた箇所を修正 ▲▲▲
+
     DirectX::XMFLOAT2 playerMapPixelPos = {
         (playerWorldPos.x / m_pathWidth) * m_cellSize, // <<< m_pathWidth を使用
         (mapHeightInCells - (playerWorldPos.z / m_pathWidth)) * m_cellSize // <<< m_pathWidth を使用
@@ -125,7 +128,7 @@ void Minimap::Render(const Camera* camera)
 
     // プレイヤーの描画
     m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, nullptr, nullptr, nullptr, m_scissorRasterizerState.Get());
-    m_playerSprite->Render(m_spriteBatch.get(), minimapCenter, m_playerSpriteScale * m_zoomFactor*0.3f, 0.0f);
+    m_playerSprite->Render(m_spriteBatch.get(), minimapCenter, m_playerSpriteScale * m_zoomFactor * 0.3f, 0.0f);
     m_spriteBatch->End();
 
     // --- 後処理 ---
