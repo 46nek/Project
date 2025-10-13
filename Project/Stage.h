@@ -26,8 +26,8 @@ public:
 
 private:
     // íËêî
-    static constexpr int MAZE_WIDTH = 21;
-    static constexpr int MAZE_HEIGHT = 21;
+    static constexpr int MAZE_WIDTH = 31;
+    static constexpr int MAZE_HEIGHT = 31;
     static constexpr float PATH_WIDTH = 2.5f;
     static constexpr float WALL_HEIGHT = 5.0f;
 

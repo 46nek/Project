@@ -43,7 +43,7 @@ float4 main(float4 position : SV_POSITION, float2 tex : TEXCOORD) : SV_TARGET
 
     // --- 4. 動きのベクトルに沿って複数回テクスチャをサンプリングし、平均をとる ---
     float4 finalColor = 0;
-    const int SAMPLES = 12; // サンプリング回数 (値を下げると軽くなるが、品質も落ちる)
+    const int SAMPLES = 32; 
     for (int i = 0; i < SAMPLES; ++i)
     {
         finalColor += sceneTexture.Sample(Sampler, tex + velocity * (float(i) / (SAMPLES - 1)));

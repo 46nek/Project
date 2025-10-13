@@ -26,7 +26,7 @@ private:
     void CarvePath(int x, int y);
     void RemoveDeadEnds();
     void CreateMoreLoops(int count);
-
+    void CreateRoom(int x, int y, int width, int height);
 
     int m_startX;
     int m_startY;

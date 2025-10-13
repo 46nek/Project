@@ -20,7 +20,7 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
     m_player = std::make_unique<Player>();
     m_camera = std::make_unique<Camera>();
     m_lightManager = std::make_unique<LightManager>();
-    m_lightManager->Initialize();
+    m_lightManager->Initialize(m_stage->GetMazeData(), m_stage->GetPathWidth(), 5.0f /*WALL_HEIGHT*/);
     m_renderer = std::make_unique<Renderer>(m_graphicsDevice);
 
     // スタート座標をStageから取得してプレイヤーを配置
@@ -62,7 +62,7 @@ void GameScene::Update(float deltaTime)
     m_camera->SetRotation(playerRot.x, playerRot.y, playerRot.z);
     m_camera->UpdateBobbing(deltaTime, m_player->IsMoving());
     m_camera->Update();
-    m_lightManager->Update(deltaTime, m_camera->GetPosition(), m_camera->GetRotation());
+    m_lightManager->Update(deltaTime, m_camera->GetPosition());
 }
 
 void GameScene::Render()

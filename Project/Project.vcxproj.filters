@@ -118,6 +118,15 @@
     <ClInclude Include="Player.h">
       <Filter>Source\GamePlay</Filter>
     </ClInclude>
+    <ClInclude Include="Stage.h">
+      <Filter>Source\GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="OrthoWindow.h">
+      <Filter>Source\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTarget.h">
+      <Filter>Source\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -189,6 +198,15 @@
     <ClCompile Include="Player.cpp">
       <Filter>Source\GamePlay</Filter>
     </ClCompile>
+    <ClCompile Include="Stage.cpp">
+      <Filter>Source\GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="OrthoWindow.cpp">
+      <Filter>Source\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTarget.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Project.rc">
@@ -220,6 +238,15 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="DepthVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="MotionBlur.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="PostProcessVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="TexturePixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

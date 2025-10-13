@@ -1,31 +1,56 @@
 #include "LightManager.h"
-#include <cstdlib> // rand() のために追加
-#include <ctime>   // time() のために追加
+#include "MazeGenerator.h" // MazeGeneratorをインクルード
+#include "Stage.h"         // Stageをインクルード
+#include <vector>
 
-LightManager::LightManager() : m_flickerTimer(0.0f), m_originalIntensity(0.0f)
+LightManager::LightManager()
 {
-    // 乱数のシードを初期化
-    srand(static_cast<unsigned int>(time(NULL)));
 }
 
-LightManager::~LightManager() {}
-
-void LightManager::Initialize()
+LightManager::~LightManager()
 {
-    Light playerLight = {};
-    playerLight.Enabled = true;
-    playerLight.Type = SpotLight;
-    playerLight.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
-    playerLight.Intensity = 1.5f;
-    playerLight.Range = 20.0f;
-    playerLight.SpotAngle = 0.90f;
-    // ▼▼▼ 以下1行を修正 ▼▼▼
-    playerLight.Attenuation = { 0.05f, 0.4f, 0.2f }; // 距離による減衰をより自然に
-    // ▲▲▲ ここまで ▲▲▲
-    m_lights.push_back(playerLight);
+}
 
-    m_originalIntensity = playerLight.Intensity;
+void LightManager::Initialize(const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth, float wallHeight)
+{
+    m_lights.clear(); // 既存のライトをクリア
 
+    // 迷路の通路にライトを配置
+    for (int z = 0; z < mazeData.size(); ++z)
+    {
+        for (int x = 0; x < mazeData[z].size(); ++x)
+        {
+            // 通路であり、一定間隔で配置する
+            if (mazeData[z][x] == MazeGenerator::Path && (x % 5 == 0) && (z % 5== 0))
+            {
+                Light newLight = {};
+                newLight.Enabled = true;
+                newLight.Type = SpotLight;
+                newLight.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
+                newLight.Intensity = 1.0f; // ライトの強度
+                newLight.Range = 10.0f;    // 照らす範囲
+                newLight.SpotAngle = 0.7f; // スポットライトの角度
+                newLight.Attenuation = { 0.1f, 0.2f, 0.1f }; // 距離による減衰
+
+                // 天井から床向きに設定
+                newLight.Position = { (x + 0.5f) * pathWidth, wallHeight + 0.5f, (z + 0.5f) * pathWidth };
+                newLight.Direction = { 0.0f, -1.0f, 0.0f };
+
+                m_lights.push_back(newLight);
+            }
+        }
+    }
+
+    // シェーダーに渡すライトの数を設定
+    m_lightBuffer.NumLights = static_cast<int>(m_lights.size());
+    if (m_lightBuffer.NumLights > 16) {
+        m_lightBuffer.NumLights = 16; // 上限を超えないように
+    }
+    for (int i = 0; i < m_lightBuffer.NumLights; ++i) {
+        m_lightBuffer.Lights[i] = m_lights[i];
+    }
+
+    // シャドウマッピング用の設定（シーン全体を照らす単一のライトを想定）
     DirectX::XMVECTOR lightPos = DirectX::XMVectorSet(15.0f, 20.0f, 15.0f, 1.0f);
     DirectX::XMVECTOR lightLookAt = DirectX::XMVectorSet(15.0f, 0.0f, 15.0f, 1.0f);
     DirectX::XMVECTOR lightUp = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
@@ -33,41 +58,8 @@ void LightManager::Initialize()
     m_lightProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV2, 1.0f, 0.1f, 100.0f);
 }
 
-void LightManager::Update(float deltaTime, const DirectX::XMFLOAT3& playerPosition, const DirectX::XMFLOAT3& cameraRotation)
+void LightManager::Update(float deltaTime, const DirectX::XMFLOAT3& cameraPosition)
 {
-    // プレイヤーライトの位置と向きの更新
-    m_lights[0].Position = playerPosition;
-
-    DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(
-        cameraRotation.x * (DirectX::XM_PI / 180.0f),
-        cameraRotation.y * (DirectX::XM_PI / 180.0f),
-        cameraRotation.z * (DirectX::XM_PI / 180.0f)
-    );
-    DirectX::XMVECTOR lookAt = DirectX::XMVector3TransformCoord({ 0, 0, 1 }, rotationMatrix);
-    DirectX::XMStoreFloat3(&m_lights[0].Direction, lookAt);
-
-    m_flickerTimer += deltaTime;
-    // 0.05秒ごとにちらつくかどうかを判定
-    if (m_flickerTimer > 0.05f)
-    {
-        // 普段は元の明るさに戻す
-        m_lights[0].Intensity = m_originalIntensity;
-
-        // 5%の確率でちらつかせる
-        if ((rand() % 100) < 5)
-        {
-            // 明るさをランダムに元の0%～50%の間の値にする
-            float randomDim = static_cast<float>(rand() % 50) / 100.0f;
-            m_lights[0].Intensity = m_originalIntensity * randomDim;
-        }
-
-        m_flickerTimer = 0.0f; // タイマーをリセット
-    }
-
-    // シェーダーに渡すバッファを更新
-    m_lightBuffer.NumLights = static_cast<int>(m_lights.size());
-    m_lightBuffer.CameraPosition = playerPosition;
-    for (int i = 0; i < m_lightBuffer.NumLights; ++i) {
-        m_lightBuffer.Lights[i] = m_lights[i];
-    }
+    // カメラ位置をシェーダーに渡す
+    m_lightBuffer.CameraPosition = cameraPosition;
 }

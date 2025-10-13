@@ -2,6 +2,7 @@
 #include <DirectXMath.h>
 #include <vector>
 #include "Light.h"
+#include "MazeGenerator.h" // MazeGeneratorをインクルード
 
 /**
  * @struct LightBufferType
@@ -24,8 +25,10 @@ public:
     LightManager();
     ~LightManager();
 
-    void Initialize();
-    void Update(float deltaTime, const DirectX::XMFLOAT3& playerPosition, const DirectX::XMFLOAT3& cameraRotation);
+    // Initializeの引数を変更
+    void Initialize(const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth, float wallHeight);
+    // Updateの引数を変更
+    void Update(float deltaTime, const DirectX::XMFLOAT3& cameraPosition);
 
     // ゲッター
     const LightBufferType& GetLightBuffer() const { return m_lightBuffer; }
@@ -35,8 +38,6 @@ public:
 private:
     std::vector<Light> m_lights;
     LightBufferType m_lightBuffer;
-    float m_flickerTimer;
-    float m_originalIntensity;
 
     // シャドウマッピング用
     DirectX::XMMATRIX m_lightViewMatrix;
