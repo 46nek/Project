@@ -30,27 +30,35 @@ void Renderer::RenderFinalPass(const Camera* camera)
     m_graphicsDevice->GetSwapChain()->TurnZBufferOff(deviceContext);
 
     deviceContext->IASetInputLayout(shaderManager->GetInputLayout());
-
-    // ▼▼▼ ここでポストプロセス専用の頂点シェーダーを使用 ▼▼▼
     deviceContext->VSSetShader(shaderManager->GetPostProcessVertexShader(), nullptr, 0);
-    // ▲▲▲ 変更点 ▲▲▲
-
-    // ▼▼▼ ここでモーションブラーのシェーダーを使用 ▼▼▼
     deviceContext->PSSetShader(shaderManager->GetMotionBlurPixelShader(), nullptr, 0);
-    // ▲▲▲ 変更点 ▲▲▲
+
+    // --- ここからが修正箇所 ---
+
+    // カメラの現在と1フレーム前の行列を取得
+    DirectX::XMMATRIX currentView = camera->GetViewMatrix();
+    DirectX::XMMATRIX previousView = camera->GetPreviousViewMatrix();
+
+    // カメラが動いたかどうかを判定
+    float blurAmount = 1.0f; // デフォルトのブラー強度
+    // 行列の特定の要素を比較して、完全に一致すればカメラは静止していると判断
+    if (memcmp(&currentView, &previousView, sizeof(DirectX::XMMATRIX)) == 0)
+    {
+        blurAmount = 0.0f; // 静止しているならブラーを無効化
+    }
 
     // モーションブラー用の定数バッファを更新
     DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
-    DirectX::XMMATRIX prevViewProj = camera->GetPreviousViewMatrix() * projectionMatrix;
-    DirectX::XMMATRIX currentViewProj = camera->GetViewMatrix() * projectionMatrix;
+    DirectX::XMMATRIX prevViewProj = previousView * projectionMatrix; // 1フレーム前の行列を使用
+    DirectX::XMMATRIX currentViewProj = currentView * projectionMatrix;
     DirectX::XMMATRIX currentViewProjInv = DirectX::XMMatrixInverse(nullptr, currentViewProj);
-    m_graphicsDevice->UpdateMotionBlurBuffer(prevViewProj, currentViewProjInv, 1.0f);
+    m_graphicsDevice->UpdateMotionBlurBuffer(prevViewProj, currentViewProjInv, blurAmount);
 
-    // 3Dモデル用の行列バッファは使わないので、単位行列を設定しておく（安全のため）
+    // --- 修正箇所ここまで ---
+
     DirectX::XMMATRIX identity = DirectX::XMMatrixIdentity();
     m_graphicsDevice->UpdateMatrixBuffer(identity, identity, identity, identity, identity);
 
-    // シーンを描画したテクスチャと深度テクスチャをシェーダーに渡す
     ID3D11ShaderResourceView* sceneTexture = m_graphicsDevice->GetRenderTarget()->GetShaderResourceView();
     deviceContext->PSSetShaderResources(0, 1, &sceneTexture);
     ID3D11ShaderResourceView* depthTexture = m_graphicsDevice->GetRenderTarget()->GetDepthShaderResourceView();

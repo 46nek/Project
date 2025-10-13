@@ -1,7 +1,14 @@
+// PostProcessVertexShader.hlsl (この内容で完全に置き換えてください)
+
+// 3Dモデルと同じ、完全な頂点構造を入力として受け取る
 struct VS_INPUT
 {
     float4 Pos : POSITION;
+    float4 Color : COLOR;
     float2 Tex : TEXCOORD0;
+    float3 Normal : NORMAL;
+    float3 Tangent : TANGENT;
+    float3 Binormal : BINORMAL;
 };
 
 struct VS_OUTPUT
@@ -13,7 +20,7 @@ struct VS_OUTPUT
 VS_OUTPUT VS(VS_INPUT input)
 {
     VS_OUTPUT output;
-    // 頂点座標とテクスチャ座標をそのままピクセルシェーダーへ渡すだけ
+    // 受け取ったデータのうち、位置とテクスチャ座標だけをピクセルシェーダーへ渡す
     output.Pos = input.Pos;
     output.Tex = input.Tex;
     return output;
