@@ -12,6 +12,92 @@ MazeGenerator::~MazeGenerator()
 {
 }
 
+void MazeGenerator::Generate(int width, int height)
+{
+    m_width = (width % 2 == 0) ? width + 1 : width;
+    m_height = (height % 2 == 0) ? height + 1 : height;
+
+    m_maze.assign(m_height, std::vector<CellType>(m_width, Wall));
+    std::vector<std::vector<bool>> protectedCells(m_height, std::vector<bool>(m_width, false));
+
+    // 1. 固定の部屋の周辺を保護領域に設定
+    const int roomSize = 3;
+    const int cornerOffset = 1;
+    using Rect = std::tuple<int, int, int, int>;
+    const std::vector<Rect> rooms = {
+        std::make_tuple(cornerOffset, cornerOffset, roomSize, roomSize),
+        std::make_tuple(m_width - cornerOffset - roomSize, cornerOffset, roomSize, roomSize),
+        std::make_tuple(cornerOffset, m_height - cornerOffset - roomSize, roomSize, roomSize),
+        std::make_tuple(m_width - cornerOffset - roomSize, m_height - cornerOffset - roomSize, roomSize, roomSize),
+        std::make_tuple((m_width - roomSize) / 2, (m_height - roomSize) / 2, roomSize, roomSize)
+    };
+    for (const auto& r : rooms) {
+        int sx = std::get<0>(r), sy = std::get<1>(r), w = std::get<2>(r), h = std::get<3>(r);
+        for (int y = sy - 1; y <= sy + h; ++y) {
+            for (int x = sx - 1; x <= sx + w; ++x) {
+                if (x >= 0 && x < m_width && y >= 0 && y < m_height) {
+                    protectedCells[y][x] = true;
+                }
+            }
+        }
+    }
+
+    // 2. ベースとなるランダムな迷路を生成
+    GenerateBaseMaze(protectedCells);
+
+    // 3. 迷路を調整（行き止まりを減らし、通路を細くする）
+    RefineMaze(protectedCells);
+
+    // 4. 固定の部屋や通路を上書きして配置
+    AddFeatures();
+
+    // 5. スタート地点を設定
+    m_startX = (m_width - 1) / 2;
+    m_startY = (m_height - 1) / 2;
+}
+
+void MazeGenerator::GenerateBaseMaze(const std::vector<std::vector<bool>>& protectedCells)
+{
+    for (int y = 1; y < m_height; y += 2) {
+        for (int x = 1; x < m_width; x += 2) {
+            CarvePath(x, y, protectedCells);
+        }
+    }
+}
+
+void MazeGenerator::AddFeatures()
+{
+    const int roomSize = 3;
+    const int offset = 1;
+
+    // 部屋
+    CreateRoom(offset, offset, roomSize, roomSize); // 左上
+    CreateRoom(m_width - offset - roomSize, offset, roomSize, roomSize); // 右上
+    CreateRoom(offset, m_height - offset - roomSize, roomSize, roomSize); // 左下
+    CreateRoom(m_width - offset - roomSize, m_height - offset - roomSize, roomSize, roomSize); // 右下
+    CreateRoom((m_width - roomSize) / 2, (m_height - roomSize) / 2, roomSize, roomSize); // 中央
+
+    // 外周通路
+    CreateRoom(offset, offset, m_width - offset * 2, 1); // 上
+    CreateRoom(offset, m_height - offset - 1, m_width - offset * 2, 1); // 下
+    CreateRoom(offset, offset, 1, m_height - offset * 2); // 左
+    CreateRoom(m_width - offset - 1, offset, 1, m_height - offset * 2); // 右
+
+    // 中央からの接続通路
+    int centerX = m_width / 2;
+    int centerY = m_height / 2;
+    CreateRoom(centerX, offset, 1, centerY - offset); // 中央から上へ
+    CreateRoom(centerX, centerY + 1, 1, (m_height - offset - 1) - centerY); // 中央から下へ
+    CreateRoom(offset, centerY, centerX - offset, 1); // 中央から左へ
+    CreateRoom(centerX + 1, centerY, (m_width - offset - 1) - centerX, 1); // 中央から右へ
+}
+
+void MazeGenerator::RefineMaze(const std::vector<std::vector<bool>>& protectedCells)
+{
+    RemoveDeadEnds(protectedCells);
+    ThinPaths(protectedCells);
+}
+
 void MazeGenerator::CreateRoom(int startX, int startY, int width, int height)
 {
     if (startX < 0 || startY < 0 || startX + width > m_width || startY + height > m_height) return;
@@ -108,7 +194,6 @@ void MazeGenerator::RemoveDeadEnds(const std::vector<std::vector<bool>>& protect
                 if (protectedCells[y][x]) continue;
 
                 std::vector<std::pair<int, int>> wallNeighbors;
-                // 迷路の外周の壁(x=0, y=0, x=m_width-1, y=m_height-1)は壊さないようにする
                 if (y > 1 && m_maze[y - 1][x] == Wall && !protectedCells[y - 1][x]) wallNeighbors.push_back({ x, y - 1 });
                 if (y < m_height - 2 && m_maze[y + 1][x] == Wall && !protectedCells[y + 1][x]) wallNeighbors.push_back({ x, y + 1 });
                 if (x > 1 && m_maze[y][x - 1] == Wall && !protectedCells[y][x - 1]) wallNeighbors.push_back({ x - 1, y });
@@ -148,91 +233,6 @@ void MazeGenerator::ThinPaths(const std::vector<std::vector<bool>>& protectedCel
         }
     }
 }
-
-void MazeGenerator::Generate(int width, int height)
-{
-    m_width = (width % 2 == 0) ? width + 1 : width;
-    m_height = (height % 2 == 0) ? height + 1 : height;
-
-    m_maze.assign(m_height, std::vector<CellType>(m_width, Wall));
-    std::vector<std::vector<bool>> protectedCells(m_height, std::vector<bool>(m_width, false));
-
-    const int roomSize = 3;
-    const int cornerOffset = 1;
-    using Rect = std::tuple<int, int, int, int>;
-
-    const std::vector<Rect> rooms = {
-        std::make_tuple(cornerOffset, cornerOffset, roomSize, roomSize),
-        std::make_tuple(m_width - cornerOffset - roomSize, cornerOffset, roomSize, roomSize),
-        std::make_tuple(cornerOffset, m_height - cornerOffset - roomSize, roomSize, roomSize),
-        std::make_tuple(m_width - cornerOffset - roomSize, m_height - cornerOffset - roomSize, roomSize, roomSize),
-        std::make_tuple((m_width - roomSize) / 2, (m_height - roomSize) / 2, roomSize, roomSize)
-    };
-
-    int center_x = (m_width - 1) / 2;
-    int center_y = (m_height - 1) / 2;
-    int top_y = cornerOffset + 1;
-    int bottom_y = m_height - cornerOffset - 2;
-    int left_x = cornerOffset + 1;
-    int right_x = m_width - cornerOffset - 2;
-
-    // 部屋の壁（周囲1マス）のみを保護する
-    auto protectStructure = [&](const Rect& structure) {
-        int sx = std::get<0>(structure);
-        int sy = std::get<1>(structure);
-        int w = std::get<2>(structure);
-        int h = std::get<3>(structure);
-        for (int y = sy - 1; y <= sy + h; ++y) {
-            for (int x = sx - 1; x <= sx + w; ++x) {
-                if (x >= 0 && x < m_width && y >= 0 && y < m_height) {
-                    protectedCells[y][x] = true;
-                }
-            }
-        }
-        };
-    for (const auto& r : rooms) {
-        protectStructure(r);
-    }
-
-    // 1. 保護領域以外にランダムな迷路を生成
-    for (int y = 1; y < m_height; y += 2) {
-        for (int x = 1; x < m_width; x += 2) {
-            CarvePath(x, y, protectedCells);
-        }
-    }
-
-    // 2. 部屋と通路を上書きで生成
-    for (const auto& r : rooms) {
-        CreateRoom(std::get<0>(r), std::get<1>(r), std::get<2>(r), std::get<3>(r));
-    }
-    // 外周の通路
-    CreateRoom(left_x, top_y, right_x - left_x + 1, 1);
-    CreateRoom(left_x, bottom_y, right_x - left_x + 1, 1);
-    CreateRoom(left_x, top_y, 1, bottom_y - top_y + 1);
-    CreateRoom(right_x, top_y, 1, bottom_y - top_y + 1);
-    // 中央から外周への通路
-    CreateRoom(center_x, top_y, 1, center_y - top_y);
-    CreateRoom(center_x, center_y + 1, 1, bottom_y - (center_y + 1));
-    CreateRoom(left_x, center_y, center_x - left_x, 1);
-    CreateRoom(center_x + 1, center_y, right_x - (center_x + 1), 1);
-
-    // 3. 行き止まりをなくす
-    RemoveDeadEnds(protectedCells);
-
-    // 4. 通路の幅を1マスに統一する
-    ThinPaths(protectedCells);
-
-    // 5. 【最終仕上げ】外周の通路を再度上書きし、直線を復元する
-    CreateRoom(left_x, top_y, right_x - left_x + 1, 1);
-    CreateRoom(left_x, bottom_y, right_x - left_x + 1, 1);
-    CreateRoom(left_x, top_y, 1, bottom_y - top_y + 1);
-    CreateRoom(right_x, top_y, 1, bottom_y - top_y + 1);
-
-
-    m_startX = (m_width - 1) / 2;
-    m_startY = (m_height - 1) / 2;
-}
-
 
 const std::vector<std::vector<MazeGenerator::CellType>>& MazeGenerator::GetMazeData() const
 {

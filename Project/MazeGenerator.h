@@ -19,10 +19,17 @@ public:
     std::pair<int, int> GetStartPosition() const;
 
 private:
+    // 既存のヘルパー関数
     void CarvePath(int x, int y, const std::vector<std::vector<bool>>& protectedCells);
     void CreateRoom(int x, int y, int width, int height);
     void RemoveDeadEnds(const std::vector<std::vector<bool>>& protectedCells);
     void ThinPaths(const std::vector<std::vector<bool>>& protectedCells);
+
+    // Generate関数から分割された新しいヘルパー関数
+    void GenerateBaseMaze(const std::vector<std::vector<bool>>& protectedCells);
+    void AddFeatures();
+    void RefineMaze(const std::vector<std::vector<bool>>& protectedCells);
+
 
     int m_startX;
     int m_startY;
