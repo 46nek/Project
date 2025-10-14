@@ -2,18 +2,13 @@
 #include <vector>
 #include <random>
 
-/**
- * @class MazeGenerator
- * @brief [‚³—Dæ’TõƒAƒ‹ƒSƒŠƒYƒ€‚ğ—p‚¢‚Ä–À˜H‚ğ©“®¶¬
- */
 class MazeGenerator
 {
 public:
-    // –À˜H‚ÌƒZƒ‹‚Ìí—Ş
     enum CellType
     {
-        Path, // “¹
-        Wall  // •Ç
+        Path,
+        Wall
     };
 
     MazeGenerator();
@@ -24,9 +19,10 @@ public:
     std::pair<int, int> GetStartPosition() const;
 
 private:
-    void CarvePath(int x, int y, const std::vector<std::vector<bool>>& protectedWalls);
-    void CreateMoreLoops(int count, const std::vector<std::vector<bool>>& protectedWalls);
+    void CarvePath(int x, int y, const std::vector<std::vector<bool>>& protectedCells);
     void CreateRoom(int x, int y, int width, int height);
+    void RemoveDeadEnds(const std::vector<std::vector<bool>>& protectedCells);
+    void ThinPaths(const std::vector<std::vector<bool>>& protectedCells);
 
     int m_startX;
     int m_startY;
