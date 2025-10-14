@@ -23,4 +23,9 @@ private:
     std::unique_ptr<Sprite> m_titleLogo;
     std::unique_ptr<Sprite> m_pressEnter;
     std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
+
+    // Å•Å•Å• à»â∫Çí«â¡ Å•Å•Å•
+    float m_titleLogoScale;
+    float m_pressEnterScale;
+    // Å£Å£Å£ í«â¡Ç±Ç±Ç‹Ç≈ Å£Å£Å£
 };
