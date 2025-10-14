@@ -24,12 +24,13 @@ public:
     std::pair<int, int> GetStartPosition() const;
     float GetPathWidth() const;
 
-private:
     // íËêî
     static constexpr int MAZE_WIDTH = 31;
     static constexpr int MAZE_HEIGHT = 31;
     static constexpr float PATH_WIDTH = 2.5f;
     static constexpr float WALL_HEIGHT = 5.0f;
+
+private:
 
     std::unique_ptr<MazeGenerator> m_mazeGenerator;
     std::vector<std::unique_ptr<Model>> m_models;

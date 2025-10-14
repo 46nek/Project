@@ -16,6 +16,7 @@ public:
     DirectX::XMFLOAT3 GetPosition() const { return m_position; }
     DirectX::XMFLOAT3 GetRotation() const { return m_rotation; }
     bool IsMoving() const { return m_isMoving; }
+    bool IsRunning() const { return m_isRunning; }
 
 private:
     bool IsCollidingWithWall(const DirectX::XMFLOAT3& position, float radius, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth);
@@ -24,6 +25,8 @@ private:
     DirectX::XMFLOAT3 m_rotation;
 
     float m_moveSpeed;
+    float m_runSpeed;
     float m_rotationSpeed;
     bool m_isMoving;
+    bool m_isRunning;
 };

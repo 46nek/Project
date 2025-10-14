@@ -138,6 +138,16 @@ void Camera::Turn(int mouseX, int mouseY, float deltaTime)
     if (m_rotationX < -90.0f) m_rotationX = -90.0f;
 }
 
+void Camera::SetBobbingParameters(float bobbingSpeed, float bobbingAmount, float swaySpeed, float swayAmount, float rollSpeed, float rollAmount)
+{
+    m_bobbingSpeed = bobbingSpeed;
+    m_bobbingAmount = bobbingAmount;
+    m_swaySpeed = swaySpeed;
+    m_swayAmount = swayAmount;
+    m_rollSpeed = rollSpeed;
+    m_rollAmount = rollAmount;
+}
+
 void Camera::UpdateBobbing(float deltaTime, bool isMoving)
 {
     DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationY(m_rotationY * (DirectX::XM_PI / 180.0f));

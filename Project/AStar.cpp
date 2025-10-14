@@ -13,6 +13,26 @@ AStar::~AStar()
 {
 }
 
+bool AStar::IsWalkable(int x, int y) const
+{
+    if (y < 0 || y >= GetMazeHeight() || x < 0 || x >= GetMazeWidth())
+    {
+        return false;
+    }
+    return m_mazeData[y][x] == MazeGenerator::CellType::Path;
+}
+
+int AStar::GetMazeWidth() const
+{
+    if (m_mazeData.empty()) return 0;
+    return static_cast<int>(m_mazeData[0].size());
+}
+
+int AStar::GetMazeHeight() const
+{
+    return static_cast<int>(m_mazeData.size());
+}
+
 // 2点間のヒューリスティックコスト（推定距離）を計算
 int Heuristic(int x1, int y1, int x2, int y2)
 {

@@ -67,12 +67,20 @@ void Enemy::Wander(float deltaTime, float pathWidth)
         int currentX = static_cast<int>(m_position.x / pathWidth);
         int currentY = static_cast<int>(m_position.z / pathWidth);
 
-        // 現在地からランダムな目標地点を決定
+        int mazeWidth = m_astar->GetMazeWidth();
+        int mazeHeight = m_astar->GetMazeHeight();
+        int targetX, targetY;
+
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_int_distribution<> distrib(-5, 5);
-        int targetX = currentX + distrib(gen);
-        int targetY = currentY + distrib(gen);
+        std::uniform_int_distribution<> distribX(0, mazeWidth - 1);
+        std::uniform_int_distribution<> distribY(0, mazeHeight - 1);
+
+        // 現在地から一定距離（マンハッタン距離で5以上）離れた有効な場所が見つかるまで探し続ける
+        do {
+            targetX = distribX(gen);
+            targetY = distribY(gen);
+        } while (abs(currentX - targetX) + abs(currentY - targetY) < 5 || !m_astar->IsWalkable(targetX, targetY));
 
         // 経路探索
         m_path = m_astar->FindPath(currentX, currentY, targetX, targetY);
@@ -100,7 +108,7 @@ void Enemy::Update(float deltaTime, const Player* player, const std::vector<std:
         break;
 
     case AIState::Chasing:
-        m_speed = 7.0f; // 追跡時の速度（速くする！）
+        m_speed = 6.0f; // 追跡時の速度（速くする！）
         // プレイヤーが見えなくなって5秒経ったら徘徊モードに戻る
         if (!CanSeePlayer(player, mazeData, pathWidth))
         {

@@ -21,6 +21,10 @@ public:
 
     std::vector<DirectX::XMFLOAT2> FindPath(int startX, int startY, int goalX, int goalY);
 
+    bool IsWalkable(int x, int y) const;
+    int GetMazeWidth() const;
+    int GetMazeHeight() const;
+
 private:
     const std::vector<std::vector<MazeGenerator::CellType>>& m_mazeData;
     std::vector<Node*> m_nodes;

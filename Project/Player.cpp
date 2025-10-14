@@ -4,8 +4,10 @@ Player::Player()
     : m_position({ 0.0f, 0.0f, 0.0f }),
     m_rotation({ 0.0f, 0.0f, 0.0f }),
     m_moveSpeed(5.0f),
+    m_runSpeed(8.5f),
     m_rotationSpeed(5.0f),
-    m_isMoving(false)
+    m_isMoving(false),
+    m_isRunning(false)
 {
 }
 
@@ -17,7 +19,10 @@ void Player::Initialize(const DirectX::XMFLOAT3& startPosition)
 void Player::Update(float deltaTime, Input* input, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth)
 {
     m_isMoving = false;
-    float moveAmount = m_moveSpeed * deltaTime;
+    m_isRunning = input->IsKeyDown(0x10);
+    
+    float currentSpeed = m_isRunning ? m_runSpeed : m_moveSpeed;
+    float moveAmount = currentSpeed * deltaTime;
 
     DirectX::XMFLOAT3 desiredMove = { 0, 0, 0 };
     float yaw = m_rotation.y * (DirectX::XM_PI / 180.0f);

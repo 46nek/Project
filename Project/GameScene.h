@@ -32,5 +32,5 @@ private:
     std::unique_ptr<Renderer> m_renderer;
     std::unique_ptr<Minimap> m_minimap;
     std::unique_ptr<Player> m_player;
-    std::unique_ptr<Enemy> m_enemy;
+    std::vector<std::unique_ptr<Enemy>> m_enemies;
 };

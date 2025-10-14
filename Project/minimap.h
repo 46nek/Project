@@ -22,7 +22,7 @@ public:
 
     bool Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth);
     void Shutdown();
-    void Render(const Camera* camera, const Enemy* enemy);
+    void Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies);
 
 private:
     GraphicsDevice* m_graphicsDevice;

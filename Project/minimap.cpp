@@ -8,7 +8,7 @@ Minimap::Minimap()
     m_position({ 20.0f, 20.0f }),
     m_viewSize({ 200.0f, 200.0f }),
     m_cellSize(8.0f),
-    m_zoomFactor(4.0f),
+    m_zoomFactor(1.0f),
     m_pathSpriteScale(1.0f),
     m_playerSpriteScale(0.0f)
 {
@@ -66,7 +66,7 @@ void Minimap::Shutdown()
     m_scissorRasterizerState.Reset();
 }
 
-void Minimap::Render(const Camera* camera, const Enemy* enemy)
+void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies)
 {
     if (!m_graphicsDevice || !m_mazeData || !camera) return;
 
@@ -126,27 +126,27 @@ void Minimap::Render(const Camera* camera, const Enemy* enemy)
         }
     }
 
-    // 敵を描画する処理
-    if (enemy)
+
+    // すべての敵を描画
+    for (const auto& enemy : enemies)
     {
-        // --- ▼▼▼ ここからが修正箇所 ▼▼▼ ---
-        DirectX::XMFLOAT3 enemyWorldPos = enemy->GetPosition();
+        if (enemy)
+        {
+            DirectX::XMFLOAT3 enemyWorldPos = enemy->GetPosition();
 
-        // 敵の正確なワールド座標から、どのマスにいるかを整数で計算する
-        int enemyGridX = static_cast<int>(enemyWorldPos.x / m_pathWidth);
-        int enemyGridZ = static_cast<int>(enemyWorldPos.z / m_pathWidth);
+            // 敵の正確なワールド座標から、どのマスにいるかを整数で計算する
+            int enemyGridX = static_cast<int>(enemyWorldPos.x / m_pathWidth);
+            int enemyGridZ = static_cast<int>(enemyWorldPos.z / m_pathWidth);
 
-        // そのマスの中心座標をピクセル単位で計算する
-        DirectX::XMFLOAT2 enemyMapPixelPos = {
+            // そのマスの中心座標をピクセル単位で計算する
+            DirectX::XMFLOAT2 enemyMapPixelPos = {
             (float)enemyGridX * m_cellSize + m_cellSize * 0.5f,
             (mapHeightInCells - (float)enemyGridZ) * m_cellSize - m_cellSize * 0.5f
-        };
-        // --- ▲▲▲ 修正箇所ここまで ▲▲▲ ---
+            };
 
-        // 赤色で描画
-        m_enemySprite->Render(m_spriteBatch.get(), enemyMapPixelPos, m_enemySpriteScale * 0.5f, 0.0f, { 1.0f, 0.2f, 0.2f, 1.0f });
+            m_enemySprite->Render(m_spriteBatch.get(), enemyMapPixelPos, m_enemySpriteScale * 0.5f, 0.0f, { 1.0f, 0.2f, 0.2f, 1.0f });
+        }
     }
-
     m_spriteBatch->End();
 
 
