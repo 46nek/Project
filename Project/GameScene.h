@@ -1,3 +1,5 @@
+// GameScene.h
+
 #pragma once
 #include "Scene.h"
 #include <memory>
@@ -7,9 +9,9 @@
 #include "LightManager.h"
 #include "Renderer.h"
 #include "Minimap.h"
-#include "Stage.h" 
+#include "Stage.h"
 #include "Enemy.h"
-#include "Orb.h" 
+#include "Orb.h"
 
 class GameScene : public Scene
 {
@@ -23,11 +25,9 @@ public:
     void Render() override;
 
 private:
-    // ’è”
     static constexpr float PLAYER_HEIGHT = 4.0f;
 
-    // ƒƒ“ƒo[•Ï”
-    std::unique_ptr<Stage> m_stage; 
+    std::unique_ptr<Stage> m_stage;
     std::unique_ptr<Camera> m_camera;
     std::unique_ptr<LightManager> m_lightManager;
     std::unique_ptr<Renderer> m_renderer;

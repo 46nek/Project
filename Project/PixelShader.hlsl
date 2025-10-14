@@ -33,7 +33,7 @@ struct Light
 // ライト情報を格納するコンスタントバッファ
 cbuffer LightBuffer : register(b1)
 {
-    Light Lights[16];
+    Light Lights[32];
     int NumLights;
     float3 CameraPosition;
 };
