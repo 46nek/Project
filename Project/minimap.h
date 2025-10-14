@@ -1,3 +1,5 @@
+// minimap.h (この内容で完全に置き換えてください)
+
 #pragma once
 #include <DirectXMath.h>
 #include <wrl/client.h>
@@ -8,7 +10,8 @@
 #include "Sprite.h"
 #include "Camera.h"
 #include "SpriteBatch.h"
-#include "Enemy.h" 
+#include "Enemy.h"
+#include "Orb.h" 
 
 /**
  * @class Minimap
@@ -22,7 +25,8 @@ public:
 
     bool Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth);
     void Shutdown();
-    void Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies);
+    // Render関数の引数にオーブのリストを追加
+    void Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs);
 
 private:
     GraphicsDevice* m_graphicsDevice;
@@ -30,6 +34,7 @@ private:
     std::unique_ptr<Sprite> m_pathSprite;
     std::unique_ptr<Sprite> m_playerSprite;
     std::unique_ptr<Sprite> m_enemySprite;
+    std::unique_ptr<Sprite> m_orbSprite; // <--- 追加
     std::unique_ptr<Sprite> m_frameSprite;
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_scissorRasterizerState;
 
@@ -44,4 +49,5 @@ private:
     float m_pathSpriteScale;
     float m_playerSpriteScale;
     float m_enemySpriteScale;
+    float m_orbSpriteScale; // <--- 追加
 };

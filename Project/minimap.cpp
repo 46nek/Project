@@ -1,3 +1,5 @@
+// minimap.cpp (この内容で完全に置き換えてください)
+
 #include "Minimap.h"
 #include "Game.h" 
 
@@ -10,7 +12,8 @@ Minimap::Minimap()
     m_cellSize(8.0f),
     m_zoomFactor(3.0f),
     m_pathSpriteScale(1.0f),
-    m_playerSpriteScale(0.0f)
+    m_playerSpriteScale(0.0f),
+    m_orbSpriteScale(0.0f) // <--- 追加：初期化
 {
 }
 
@@ -34,9 +37,13 @@ bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::
 
     m_playerSprite = std::make_unique<Sprite>();
     if (!m_playerSprite->Initialize(device, L"Assets/minimap_player.png")) return false;
-    
+
     m_enemySprite = std::make_unique<Sprite>();
-    if (!m_enemySprite->Initialize(device, L"Assets/minimap_enemy.png")) return false; // プレイヤーと同じ画像を流用
+    if (!m_enemySprite->Initialize(device, L"Assets/minimap_enemy.png")) return false;
+
+    // オーブのスプライトを読み込み (プレイヤーの画像を流用)
+    m_orbSprite = std::make_unique<Sprite>();
+    if (!m_orbSprite->Initialize(device, L"Assets/minimap_orb.png")) return false;
 
     m_frameSprite = std::make_unique<Sprite>();
     if (!m_frameSprite->Initialize(device, L"Assets/minimap_frame.png")) return false;
@@ -45,6 +52,7 @@ bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::
     m_pathSpriteScale = m_cellSize / m_pathSprite->GetWidth();
     m_playerSpriteScale = m_cellSize / m_playerSprite->GetWidth();
     m_enemySpriteScale = m_cellSize / m_enemySprite->GetWidth();
+    m_orbSpriteScale = m_cellSize / m_orbSprite->GetWidth(); // <--- 追加
 
     // 描画領域外を切り取るための設定を作成
     D3D11_RASTERIZER_DESC rasterDesc = {};
@@ -63,10 +71,12 @@ void Minimap::Shutdown()
     if (m_pathSprite) m_pathSprite->Shutdown();
     if (m_playerSprite) m_playerSprite->Shutdown();
     if (m_enemySprite) m_enemySprite->Shutdown();
+    if (m_orbSprite) m_orbSprite->Shutdown(); // <--- 追加
     m_scissorRasterizerState.Reset();
 }
 
-void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies)
+// Render関数の引数にオーブのリストを追加
+void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs)
 {
     if (!m_graphicsDevice || !m_mazeData || !camera) return;
 
@@ -107,7 +117,7 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
     m_frameSprite->RenderFill(m_spriteBatch.get(), scissorRect);
     m_spriteBatch->End();
 
-    // --- 2. 迷路と敵を描画 (クリッピング有効) ---
+    // --- 2. 迷路、敵、オーブを描画 (クリッピング有効) ---
     deviceContext->RSSetScissorRects(1, &scissorRect);
 
     m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, nullptr, nullptr, nullptr, m_scissorRasterizerState.Get(), nullptr, transform);
@@ -126,27 +136,43 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
         }
     }
 
-
     // すべての敵を描画
     for (const auto& enemy : enemies)
     {
         if (enemy)
         {
             DirectX::XMFLOAT3 enemyWorldPos = enemy->GetPosition();
-
-            // 敵の正確なワールド座標から、どのマスにいるかを整数で計算する
             int enemyGridX = static_cast<int>(enemyWorldPos.x / m_pathWidth);
             int enemyGridZ = static_cast<int>(enemyWorldPos.z / m_pathWidth);
 
-            // そのマスの中心座標をピクセル単位で計算する
             DirectX::XMFLOAT2 enemyMapPixelPos = {
-            (float)enemyGridX * m_cellSize + m_cellSize * 0.5f,
-            (mapHeightInCells - (float)enemyGridZ) * m_cellSize - m_cellSize * 0.5f
+                (float)enemyGridX * m_cellSize + m_cellSize * 0.5f,
+                (mapHeightInCells - (float)enemyGridZ) * m_cellSize - m_cellSize * 0.5f
             };
 
             m_enemySprite->Render(m_spriteBatch.get(), enemyMapPixelPos, m_enemySpriteScale * 0.5f, 0.0f, { 1.0f, 0.2f, 0.2f, 1.0f });
         }
     }
+
+    for (const auto& orb : orbs)
+    {
+        if (orb && !orb->IsCollected())
+        {
+            // エラー箇所を修正: GetPosition() を使用する
+            DirectX::XMFLOAT3 orbWorldPos = orb->GetPosition();
+
+            int orbGridX = static_cast<int>(orbWorldPos.x / m_pathWidth);
+            int orbGridZ = static_cast<int>(orbWorldPos.z / m_pathWidth);
+
+            DirectX::XMFLOAT2 orbMapPixelPos = {
+                (float)orbGridX * m_cellSize + m_cellSize * 0.5f,
+                (mapHeightInCells - (float)orbGridZ) * m_cellSize - m_cellSize * 0.5f
+            };
+
+            m_orbSprite->Render(m_spriteBatch.get(), orbMapPixelPos, m_orbSpriteScale * 0.3f, 0.0f, { 0.6f, 0.8f, 1.0f, 1.0f });
+        }
+    }
+
     m_spriteBatch->End();
 
 

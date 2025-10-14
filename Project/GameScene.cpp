@@ -1,8 +1,9 @@
-// GameScene.cpp
+// GameScene.cpp (この内容で完全に置き換えてください)
 
 #include "GameScene.h"
 #include "AssetLoader.h"
 #include <random>
+#include <tuple> // std::tupleを使用するために追加
 
 GameScene::GameScene()
 {
@@ -11,7 +12,6 @@ GameScene::~GameScene() {}
 
 bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
 {
-    // ... (変更なし) ...
     m_graphicsDevice = graphicsDevice;
     m_input = input;
 
@@ -73,22 +73,49 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
     const auto& mazeData = m_stage->GetMazeData();
     std::vector<std::pair<int, int>> possibleSpawns;
 
-    // オーブの配置候補地（行き止まりや角）を探す
+    // ▼▼▼ ここからオーブ生成ロジックの修正 ▼▼▼
+
+    // 1. 部屋の範囲を定義 (MazeGenerator.cpp と同じ定義)
+    const int roomSize = 3;
+    const int cornerOffset = 1;
+    using Rect = std::tuple<int, int, int, int>;
+    const std::vector<Rect> rooms = {
+        std::make_tuple(cornerOffset, cornerOffset, roomSize, roomSize), // 左上
+        std::make_tuple(Stage::MAZE_WIDTH - cornerOffset - roomSize, cornerOffset, roomSize, roomSize), // 右上
+        std::make_tuple(cornerOffset, Stage::MAZE_HEIGHT - cornerOffset - roomSize, roomSize, roomSize), // 左下
+        std::make_tuple(Stage::MAZE_WIDTH - cornerOffset - roomSize, Stage::MAZE_HEIGHT - cornerOffset - roomSize, roomSize, roomSize), // 右下
+        std::make_tuple((Stage::MAZE_WIDTH - roomSize) / 2, (Stage::MAZE_HEIGHT - roomSize) / 2, roomSize, roomSize) // 中央
+    };
+
+    // 2. オーブの配置候補地（行き止まりや角）を探す
     for (size_t y = 1; y < mazeData.size() - 1; ++y)
     {
         for (size_t x = 1; x < mazeData[0].size() - 1; ++x)
         {
             if (mazeData[y][x] == MazeGenerator::Path)
             {
-                // 隣接する通路の数を数える
+                // 2a. 部屋の中かどうかをチェック
+                bool isInRoom = false;
+                for (const auto& r : rooms) {
+                    int sx = std::get<0>(r), sy = std::get<1>(r), w = std::get<2>(r), h = std::get<3>(r);
+                    if (x >= sx && x < sx + w && y >= sy && y < sy + h) {
+                        isInRoom = true;
+                        break;
+                    }
+                }
+                // 部屋の中なら候補地から除外
+                if (isInRoom) continue;
+
+
+                // 2b. 隣接する通路の数を数える
                 int pathNeighbors = 0;
                 if (mazeData[y - 1][x] == MazeGenerator::Path) pathNeighbors++;
                 if (mazeData[y + 1][x] == MazeGenerator::Path) pathNeighbors++;
                 if (mazeData[y][x - 1] == MazeGenerator::Path) pathNeighbors++;
                 if (mazeData[y][x + 1] == MazeGenerator::Path) pathNeighbors++;
 
-                // 通路が2つ以下なら候補地とする
-                if (pathNeighbors >= 2)
+                // 通路が2つ以下（行き止まり or 角）なら候補地とする
+                if (pathNeighbors <= 2)
                 {
                     possibleSpawns.push_back({ static_cast<int>(x), static_cast<int>(y) });
                 }
@@ -100,29 +127,50 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
     std::shuffle(possibleSpawns.begin(), possibleSpawns.end(), gen);
 
     int numOrbs = 50; // 生成するオーブの数
-    for (int i = 0; i < numOrbs && i < possibleSpawns.size(); ++i)
+    std::vector<std::pair<int, int>> spawnedOrbPositions; // 実際にオーブを配置した座標を記録
+
+    // 3. 候補地リストを調べてオーブを配置
+    for (const auto& spawnPos : possibleSpawns)
     {
-        // オーブの座標を計算
-        float orbX = (static_cast<float>(possibleSpawns[i].first) + 0.5f) * pathWidth;
-        float orbZ = (static_cast<float>(possibleSpawns[i].second) + 0.5f) * pathWidth;
-        DirectX::XMFLOAT3 orbPos = { orbX, 2.0f, orbZ }; // 少し浮かせる
+        // 既に配置したい数のオーブを配置済みならループを抜ける
+        if (m_orbs.size() >= numOrbs) break;
 
-        // オーブ用のポイントライトを作成
-        DirectX::XMFLOAT4 orbColor = { 0.8f, 0.8f, 1.0f, 1.0f }; // 青白い光
-        float orbRange = 5.0f;
-        float orbIntensity = 1.0f;
-        int lightIndex = m_lightManager->AddPointLight(orbPos, orbColor, orbRange, orbIntensity);
-
-        if (lightIndex != -1)
+        bool canSpawn = true;
+        // 3a. 既に配置済みのオーブとの距離をチェック
+        for (const auto& spawnedPos : spawnedOrbPositions)
         {
-            // オーブを生成してリストに追加
-            auto orb = std::make_unique<Orb>();
-            if (orb->Initialize(m_graphicsDevice->GetDevice(), orbPos, lightIndex))
+            // マンハッタン距離で2マス以内なら配置しない
+            if (std::abs(spawnPos.first - spawnedPos.first) + std::abs(spawnPos.second - spawnedPos.second) <= 2)
             {
-                m_orbs.push_back(std::move(orb));
+                canSpawn = false;
+                break;
+            }
+        }
+
+        // 配置可能ならオーブを生成
+        if (canSpawn)
+        {
+            float orbX = (static_cast<float>(spawnPos.first) + 0.5f) * pathWidth;
+            float orbZ = (static_cast<float>(spawnPos.second) + 0.5f) * pathWidth;
+            DirectX::XMFLOAT3 orbPos = { orbX, 2.0f, orbZ };
+
+            DirectX::XMFLOAT4 orbColor = { 0.8f, 0.8f, 1.0f, 1.0f };
+            float orbRange = 5.0f;
+            float orbIntensity = 1.0f;
+            int lightIndex = m_lightManager->AddPointLight(orbPos, orbColor, orbRange, orbIntensity);
+
+            if (lightIndex != -1)
+            {
+                auto orb = std::make_unique<Orb>();
+                if (orb->Initialize(m_graphicsDevice->GetDevice(), orbPos, lightIndex))
+                {
+                    m_orbs.push_back(std::move(orb));
+                    spawnedOrbPositions.push_back(spawnPos); // 配置した座標を記録
+                }
             }
         }
     }
+    // ▲▲▲ オーブ生成ロジックの修正ここまで ▲▲▲
 
     return true;
 }
@@ -200,7 +248,7 @@ void GameScene::Render()
 
     m_renderer->RenderSceneToTexture(modelsToRender, m_camera.get(), m_lightManager.get());
     m_renderer->RenderFinalPass(m_camera.get());
-    m_minimap->Render(m_camera.get(), m_enemies);
+    m_minimap->Render(m_camera.get(), m_enemies, m_orbs);
 
     m_graphicsDevice->EndScene();
 }
