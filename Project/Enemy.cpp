@@ -7,7 +7,7 @@ Enemy::Enemy()
     : m_speed(2.0f),
     m_pathIndex(-1),
     m_pathCooldown(0.0f),
-    m_currentState(AIState::Wandering), // 初期状態は「徘徊」
+    m_currentState(AIState::Wandering),
     m_stateTimer(0.0f)
 {
 }
@@ -93,61 +93,77 @@ void Enemy::Update(float deltaTime, const Player* player, const std::vector<std:
 {
     if (!player || !m_model) return;
 
+    // プレイヤーとの距離を計算
+    DirectX::XMFLOAT3 playerPos = player->GetPosition();
+    float dx = playerPos.x - m_position.x;
+    float dz = playerPos.z - m_position.z;
+    float distanceSq = (dx * dx) + (dz * dz); // 距離の2乗で比較
+
     // === 状態遷移の判定 ===
     switch (m_currentState)
     {
     case AIState::Wandering:
-        m_speed = 4.0f; // 徘徊時の速度
-        // プレイヤーが見えたら追跡モードに切り替え
+        m_speed = 4.0f;
         if (CanSeePlayer(player, mazeData, pathWidth))
         {
             m_currentState = AIState::Chasing;
-            m_pathCooldown = 0.0f; // すぐに経路探索を開始
-            // ここで「発見時の叫び声」などのサウンドを再生すると効果的！
+            m_pathCooldown = 0.0f;
         }
         break;
 
     case AIState::Chasing:
-        m_speed = 6.0f; // 追跡時の速度（速くする！）
-        // プレイヤーが見えなくなって5秒経ったら徘徊モードに戻る
+        m_speed = 6.0f;
         if (!CanSeePlayer(player, mazeData, pathWidth))
         {
             m_stateTimer += deltaTime;
-            if (m_stateTimer > 5.0f)
+            if (m_stateTimer > 3.0f)
             {
                 m_currentState = AIState::Wandering;
-                m_pathIndex = -1; // パスをリセット
+                m_pathIndex = -1;
             }
         }
         else
         {
-            m_stateTimer = 0.0f; // 見えている間はタイマーをリセット
+            m_stateTimer = 0.0f;
         }
         break;
     }
 
     // === 状態ごとの行動 ===
-    switch (m_currentState)
+    m_pathCooldown -= deltaTime;
+    if (m_pathCooldown <= 0.0f)
     {
-    case AIState::Wandering:
-        Wander(deltaTime, pathWidth);
-        break;
-
-    case AIState::Chasing:
-        // 経路探索のクールダウン処理 (1秒ごと)
-        m_pathCooldown -= deltaTime;
-        if (m_pathCooldown <= 0.0f)
+        switch (m_currentState)
         {
-            m_pathCooldown = 1.0f;
-            DirectX::XMFLOAT3 playerPos = player->GetPosition();
+        case AIState::Wandering:
+            // 徘徊モードでは5秒ごとに新しい目標を設定
+            m_pathCooldown = 5.0f;
+            Wander(deltaTime, pathWidth); // Wander関数は目標設定のみに利用
+            break;
+
+        case AIState::Chasing:
+            // --- プレイヤーとの距離に応じて経路探索の頻度を変更 ---
+            if (distanceSq > 15.0f * 15.0f) // 距離が15以上なら
+            {
+                m_pathCooldown = 2.0f; // 2秒ごと
+            }
+            else if (distanceSq > 10.0f * 10.0f) // 距離が10以上なら
+            {
+                m_pathCooldown = 1.0f; // 1秒ごと
+            }
+            else // 距離が10未満なら
+            {
+                m_pathCooldown = 0.5f; // 0.5秒ごと（より正確に追跡）
+            }
+
             int startX = static_cast<int>(m_position.x / pathWidth);
             int startY = static_cast<int>(m_position.z / pathWidth);
             int goalX = static_cast<int>(playerPos.x / pathWidth);
             int goalY = static_cast<int>(playerPos.z / pathWidth);
             m_path = m_astar->FindPath(startX, startY, goalX, goalY);
             m_pathIndex = m_path.empty() ? -1 : 1;
+            break;
         }
-        break;
     }
 
 
@@ -174,7 +190,6 @@ void Enemy::Update(float deltaTime, const Player* player, const std::vector<std:
             moveVec = DirectX::XMVectorScale(moveVec, m_speed * deltaTime);
             DirectX::XMStoreFloat3(&m_position, DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&m_position), moveVec));
             m_model->SetPosition(m_position.x, m_position.y, m_position.z);
-            // ここで「足音」を再生すると良い
         }
     }
 }

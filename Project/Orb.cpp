@@ -58,9 +58,12 @@ void Orb::Update(float deltaTime, Player* player, LightManager* lightManager)
     float dx = playerPos.x - m_position.x;
     float dy = playerPos.y - floatingY;
     float dz = playerPos.z - m_position.z;
-    float distance = sqrt(dx * dx + dy * dy + dz * dz);
 
-    if (distance < 1.0f)
+    float distanceSq = (dx * dx) + (dy * dy) + (dz * dz);
+    float collisionRadius = 1.0f;
+    float collisionRadiusSq = collisionRadius * collisionRadius;
+
+    if (distanceSq < collisionRadiusSq)
     {
         m_isCollected = true;
         if (lightManager && m_lightIndex != -1)

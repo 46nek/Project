@@ -169,7 +169,7 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
                 (mapHeightInCells - (float)orbGridZ) * m_cellSize - m_cellSize * 0.5f
             };
 
-            m_orbSprite->Render(m_spriteBatch.get(), orbMapPixelPos, m_orbSpriteScale * 0.3f, 0.0f, { 0.6f, 0.8f, 1.0f, 1.0f });
+            m_orbSprite->Render(m_spriteBatch.get(), orbMapPixelPos, m_orbSpriteScale * 0.4f, 0.0f, { 0.6f, 0.8f, 1.0f, 1.0f });
         }
     }
 
