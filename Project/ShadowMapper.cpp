@@ -34,11 +34,14 @@ bool ShadowMapper::Initialize(ID3D11Device* device)
     hr = device->CreateShaderResourceView(m_shadowMapTexture, &srvDesc, &m_shadowMapSRV);
     if (FAILED(hr)) return false;
 
+    // ▼▼▼ 深度バイアスの値を修正 ▼▼▼
     D3D11_RASTERIZER_DESC rasterDesc = {};
     rasterDesc.FillMode = D3D11_FILL_SOLID;
     rasterDesc.CullMode = D3D11_CULL_BACK;
-    rasterDesc.DepthBias = 1000;
+    rasterDesc.DepthBias = 5000; // 値を調整
     rasterDesc.SlopeScaledDepthBias = 1.0f;
+    rasterDesc.DepthBiasClamp = 0.0f; // クランプは0に設定
+    // ▲▲▲ 修正完了 ▲▲▲
     hr = device->CreateRasterizerState(&rasterDesc, &m_rasterState);
     if (FAILED(hr)) return false;
 

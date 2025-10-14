@@ -115,7 +115,12 @@ bool MeshGenerator::CreateMazeMesh(
 
     if (type == MeshType::Ceiling || type == MeshType::Floor)
     {
-        // ▼▼▼ 床・天井の生成ロジックを修正 ▼▼▼
+        // ▼▼▼ ここからが修正箇所 ▼▼▼
+        // Zファイティングを防ぐために、床と天井のメッシュをわずかに小さくする
+        const float inset = 0.001f;
+        const float faceSize = pathWidth - inset;
+        // ▲▲▲ 修正箇所ここまで ▲▲▲
+
         for (int y = 0; y < mazeHeight; ++y)
         {
             for (int x = 0; x < mazeWidth; ++x)
@@ -128,19 +133,18 @@ bool MeshGenerator::CreateMazeMesh(
 
                 if (type == MeshType::Ceiling) {
                     centerPos.y = wallHeight;
-                    // 天井の面を追加（下向き）
-                    AddFace(FaceDirection::Bottom, centerPos, pathWidth, pathWidth, outVertices, outIndices);
+                    // 小さくしたサイズで天井の面を追加
+                    AddFace(FaceDirection::Bottom, centerPos, faceSize, faceSize, outVertices, outIndices);
                 }
                 else { // type == MeshType::Floor
-                    // 床の面を追加（上向き）
-                    AddFace(FaceDirection::Top, centerPos, pathWidth, pathWidth, outVertices, outIndices);
+                    // 小さくしたサイズで床の面を追加
+                    AddFace(FaceDirection::Top, centerPos, faceSize, faceSize, outVertices, outIndices);
                 }
             }
         }
     }
     else if (type == MeshType::Wall)
     {
-        // 壁生成ロジックは変更なし
         for (int y = 0; y < mazeHeight; ++y)
         {
             for (int x = 0; x < mazeWidth; ++x)
@@ -149,19 +153,15 @@ bool MeshGenerator::CreateMazeMesh(
 
                 DirectX::XMFLOAT3 pos = { x * pathWidth, wallHeight / 2.0f, y * pathWidth };
 
-                // 上のセルが壁なら、現在のセルの「奥」の壁を描画
                 if (y > 0 && mazeData[y - 1][x] == MazeGenerator::Wall)
                     AddFace(FaceDirection::Back, { pos.x + pathWidth / 2.0f, pos.y, pos.z }, pathWidth, wallHeight, outVertices, outIndices);
 
-                // 下のセルが壁なら、現在のセルの「手前」の壁を描画
                 if (y < mazeHeight - 1 && mazeData[y + 1][x] == MazeGenerator::Wall)
                     AddFace(FaceDirection::Front, { pos.x + pathWidth / 2.0f, pos.y, pos.z + pathWidth }, pathWidth, wallHeight, outVertices, outIndices);
 
-                // 左のセルが壁なら、現在のセルの「左」の壁を描画
                 if (x > 0 && mazeData[y][x - 1] == MazeGenerator::Wall)
                     AddFace(FaceDirection::Left, { pos.x, pos.y, pos.z + pathWidth / 2.0f }, pathWidth, wallHeight, outVertices, outIndices);
 
-                // 右のセルが壁なら、現在のセルの「右」の壁を描画
                 if (x < mazeWidth - 1 && mazeData[y][x + 1] == MazeGenerator::Wall)
                     AddFace(FaceDirection::Right, { pos.x + pathWidth, pos.y, pos.z + pathWidth / 2.0f }, pathWidth, wallHeight, outVertices, outIndices);
             }
