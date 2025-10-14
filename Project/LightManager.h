@@ -9,7 +9,7 @@
 
 struct LightBufferType
 {
-    Light               Lights[32];
+    Light               Lights[MAX_LIGHTS];
     int                 NumLights;
     DirectX::XMFLOAT3   CameraPosition;
 };

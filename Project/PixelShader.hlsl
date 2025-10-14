@@ -1,3 +1,8 @@
+// PixelShader.hlsl
+
+// C++側の Light.h の MAX_LIGHTS と値を合わせること
+#define MAX_LIGHTS 64
+
 // テクスチャとサンプラーステート
 Texture2D shaderTexture : register(t0); // オブジェクトのテクスチャ
 Texture2D shadowMapTexture : register(t1); // シャドウマップ（深度テクスチャ）
@@ -30,13 +35,15 @@ struct Light
     float Intensity;
     float2 Padding;
 };
+
 // ライト情報を格納するコンスタントバッファ
 cbuffer LightBuffer : register(b1)
 {
-    Light Lights[32];
+    Light Lights[MAX_LIGHTS];
     int NumLights;
     float3 CameraPosition;
 };
+
 // ピクセルシェーダーへの入力データ構造
 struct VS_OUTPUT
 {
@@ -70,13 +77,17 @@ float4 PS(VS_OUTPUT input) : SV_Target
     float3 normalMapSample = normalMapTexture.Sample(SampleType, input.Tex).rgb;
     float3 normalFromMap = (2.0f * normalMapSample) - 1.0f;
     float3 finalNormal = normalize(mul(normalFromMap, tbnMatrix));
+
     // 環境光
     float4 ambient = textureColor * float4(0.3f, 0.3f, 0.3f, 1.0f);
+
     // 拡散光と鏡面反射光の合計を初期化
     float4 totalDiffuse = float4(0, 0, 0, 0);
     float4 totalSpecular = float4(0, 0, 0, 0);
+
     // カメラへの視線ベクトル
     float3 viewDir = normalize(CameraPosition - input.WorldPos);
+
     // --- 影の計算 ---
     float shadowFactor = 1.0f;
     float2 projectTexCoord;
@@ -92,6 +103,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
     {
         if (!Lights[i].Enabled)
             continue;
+
         float3 lightDir;
         float distance;
 
@@ -104,6 +116,13 @@ float4 PS(VS_OUTPUT input) : SV_Target
         {
             lightDir = normalize(Lights[i].Position - input.WorldPos);
             distance = length(Lights[i].Position - input.WorldPos);
+            
+            // ▼▼▼【最適化】▼▼▼
+            // ライトの影響範囲外なら、このライトの計算をスキップ
+            if (distance > Lights[i].Range)
+            {
+                continue;
+            }
         }
         
         float attenuation = 1.0f;
@@ -111,15 +130,11 @@ float4 PS(VS_OUTPUT input) : SV_Target
         {
             // 従来の距離による減衰
             attenuation = 1.0f / (Lights[i].Attenuation.x + Lights[i].Attenuation.y * distance + Lights[i].Attenuation.z * (distance * distance));
-
             // Rangeに基づいてスムーズにフェードアウトさせる計算を追加
-            // (1 - 距離/範囲)^2 を計算し、滑らかな減衰カーブを作る
             float falloff = pow(saturate(1.0 - distance / Lights[i].Range), 2);
-            
             // 2つの減衰を掛け合わせる
             attenuation *= falloff;
         }
-        
         
         // スポットライトの減衰
         float spotFactor = 1.0f;
@@ -135,7 +150,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
         // 拡散光の計算 (各ライトごとに影を適用)
         float diffuseIntensity = saturate(dot(finalNormal, lightDir));
         totalDiffuse += Lights[i].Color * diffuseIntensity * Lights[i].Intensity * attenuation * spotFactor * shadowFactor;
-        
+
         // 鏡面反射光の計算 (各ライトごとに影を適用)
         float3 halfwayDir = normalize(lightDir + viewDir);
         float specAngle = saturate(dot(finalNormal, halfwayDir));
@@ -144,13 +159,9 @@ float4 PS(VS_OUTPUT input) : SV_Target
     }
 
     // --- 最終的な色の合成処理を修正 ---
-    // ライティング計算結果と環境光を合成
     float4 finalColor = (textureColor * (totalDiffuse + ambient)) + totalSpecular;
-    
-    // 自己発光色を加算
     finalColor += EmissiveColor;
-
-    finalColor.a = 1.0f; // アルファ値は1で固定
+    finalColor.a = 1.0f;
 
     // --- Vignette Effect ---
     float2 screenCenter = float2(0.5f, 0.5f);

@@ -9,8 +9,8 @@ class ShadowMapper
 {
 public:
     // íËêî
-    static constexpr int SHADOWMAP_WIDTH = 2048;
-    static constexpr int SHADOWMAP_HEIGHT = 2048;
+    static constexpr int SHADOWMAP_WIDTH = 1024;
+    static constexpr int SHADOWMAP_HEIGHT = 1024;
 
     ShadowMapper();
     ~ShadowMapper();

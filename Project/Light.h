@@ -1,6 +1,9 @@
 #pragma once
 #include <DirectXMath.h>
 
+// ライトの最大数を定義
+constexpr int MAX_LIGHTS = 64;
+
 // ライトの種類
 enum LightType
 {

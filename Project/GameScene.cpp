@@ -88,7 +88,7 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
                 if (mazeData[y][x + 1] == MazeGenerator::Path) pathNeighbors++;
 
                 // 通路が2つ以下なら候補地とする
-                if (pathNeighbors <= 2)
+                if (pathNeighbors >= 2)
                 {
                     possibleSpawns.push_back({ static_cast<int>(x), static_cast<int>(y) });
                 }
@@ -99,7 +99,7 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
     // 候補地をシャッフル
     std::shuffle(possibleSpawns.begin(), possibleSpawns.end(), gen);
 
-    int numOrbs = 5; // 生成するオーブの数
+    int numOrbs = 50; // 生成するオーブの数
     for (int i = 0; i < numOrbs && i < possibleSpawns.size(); ++i)
     {
         // オーブの座標を計算
@@ -109,8 +109,8 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
 
         // オーブ用のポイントライトを作成
         DirectX::XMFLOAT4 orbColor = { 0.8f, 0.8f, 1.0f, 1.0f }; // 青白い光
-        float orbRange = 8.0f;
-        float orbIntensity = 2.5f;
+        float orbRange = 5.0f;
+        float orbIntensity = 1.0f;
         int lightIndex = m_lightManager->AddPointLight(orbPos, orbColor, orbRange, orbIntensity);
 
         if (lightIndex != -1)

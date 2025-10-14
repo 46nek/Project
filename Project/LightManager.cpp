@@ -67,8 +67,8 @@ void LightManager::Initialize(const std::vector<std::vector<MazeGenerator::CellT
 
     // --- ÅIˆ— ---
     m_lightBuffer.NumLights = static_cast<int>(m_lights.size());
-    if (m_lightBuffer.NumLights > 32) {
-        m_lightBuffer.NumLights = 32;
+    if (m_lightBuffer.NumLights > MAX_LIGHTS) {
+        m_lightBuffer.NumLights = MAX_LIGHTS;
     }
     for (int i = 0; i < m_lightBuffer.NumLights; ++i) {
         m_lightBuffer.Lights[i] = m_lights[i];
@@ -88,9 +88,9 @@ void LightManager::Update(float deltaTime, const DirectX::XMFLOAT3& cameraPositi
     m_lightBuffer.CameraPosition = cameraPosition;
     UpdateFlashlight(deltaTime, cameraPosition, cameraRotation);
     m_lightBuffer.NumLights = static_cast<int>(m_lights.size());
-    if (m_lightBuffer.NumLights > 32)
+    if (m_lightBuffer.NumLights > MAX_LIGHTS)
     {
-        m_lightBuffer.NumLights = 32;
+        m_lightBuffer.NumLights = MAX_LIGHTS;
     }
 
     for (int i = 0; i < m_lightBuffer.NumLights; ++i)
@@ -153,7 +153,7 @@ void LightManager::ApplyFlicker(int lightIndex, float deltaTime)
 
 int LightManager::AddPointLight(const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT4& color, float range, float intensity)
 {
-    if (m_lights.size() >= 32)
+    if (m_lights.size() >= MAX_LIGHTS)
     {
         return -1;
     }
