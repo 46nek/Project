@@ -53,7 +53,6 @@ bool GraphicsDevice::Initialize(HWND hWnd, int screenWidth, int screenHeight)
     hr = m_d3dDevice->CreateBuffer(&lightBufferDesc, NULL, &m_lightBuffer);
     if (FAILED(hr)) return false;
 
-    // <--- 以下をすべて追加 --->
     D3D11_BUFFER_DESC motionBlurBufferDesc = {};
     motionBlurBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
     motionBlurBufferDesc.ByteWidth = sizeof(MotionBlurBufferType);
@@ -72,11 +71,33 @@ bool GraphicsDevice::Initialize(HWND hWnd, int screenWidth, int screenHeight)
     hr = m_d3dDevice->CreateSamplerState(&samplerDesc, &m_samplerState);
     if (FAILED(hr)) return false;
 
+    // ブレンドステートの作成
+    D3D11_BLEND_DESC blendDesc = {};
+    // デフォルト（ブレンドなし）
+    blendDesc.RenderTarget[0].BlendEnable = FALSE;
+    blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+    hr = m_d3dDevice->CreateBlendState(&blendDesc, &m_defaultBlendState);
+    if (FAILED(hr)) return false;
+
+    // アルファブレンド有効
+    blendDesc.RenderTarget[0].BlendEnable = TRUE;
+    blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+    blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+    blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+    blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+    blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+    blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+    hr = m_d3dDevice->CreateBlendState(&blendDesc, &m_alphaBlendState);
+    if (FAILED(hr)) return false;
+
     return true;
 }
 
 void GraphicsDevice::Shutdown()
 {
+    if (m_alphaBlendState) m_alphaBlendState->Release();
+    if (m_defaultBlendState) m_defaultBlendState->Release();
+
     if (m_samplerState) m_samplerState->Release();
     if (m_lightBuffer) m_lightBuffer->Release();
     if (m_matrixBuffer) m_matrixBuffer->Release();
@@ -129,7 +150,6 @@ bool GraphicsDevice::UpdateLightBuffer(const LightBufferType& lightBuffer)
     return true;
 }
 
-// <--- 以下をすべて追加 --->
 bool GraphicsDevice::UpdateMotionBlurBuffer(const DirectX::XMMATRIX& prevViewProj, const DirectX::XMMATRIX& currentViewProjInv, float blurAmount)
 {
     D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -141,4 +161,14 @@ bool GraphicsDevice::UpdateMotionBlurBuffer(const DirectX::XMMATRIX& prevViewPro
     m_immediateContext->Unmap(m_motionBlurBuffer, 0);
     m_immediateContext->PSSetConstantBuffers(0, 1, &m_motionBlurBuffer);
     return true;
+}
+
+ID3D11BlendState* GraphicsDevice::GetAlphaBlendState() const
+{
+    return m_alphaBlendState;
+}
+
+ID3D11BlendState* GraphicsDevice::GetDefaultBlendState() const
+{
+    return m_defaultBlendState;
 }

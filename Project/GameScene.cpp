@@ -37,11 +37,19 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
         return false;
     }
 
+    // 敵を初期化
+    m_enemy = std::make_unique<Enemy>();
+    if (!m_enemy->Initialize(m_graphicsDevice->GetDevice(), { startX, 1.0f, startZ }, m_stage->GetMazeData()))
+    {
+        return false;
+    }
+
     return true;
 }
 
 void GameScene::Shutdown()
 {
+    if (m_enemy) m_enemy->Shutdown();
     if (m_minimap) m_minimap->Shutdown();
     if (m_stage) m_stage->Shutdown();
 }
@@ -55,6 +63,9 @@ void GameScene::Update(float deltaTime)
     // 当たり判定にStageの情報を利用
     m_player->Update(deltaTime, m_input, m_stage->GetMazeData(), m_stage->GetPathWidth());
 
+    // 敵を更新
+    m_enemy->Update(deltaTime, m_player.get(), m_stage->GetMazeData(), m_stage->GetPathWidth());
+
     // カメラとライトの更新
     DirectX::XMFLOAT3 playerPos = m_player->GetPosition();
     DirectX::XMFLOAT3 playerRot = m_player->GetRotation();
@@ -67,8 +78,18 @@ void GameScene::Update(float deltaTime)
 
 void GameScene::Render()
 {
-    m_renderer->RenderSceneToTexture(m_stage->GetModels(), m_camera.get(), m_lightManager.get());
+    // 描画するモデルのリストを作成
+    std::vector<Model*> modelsToRender;
+    for (const auto& model : m_stage->GetModels())
+    {
+        modelsToRender.push_back(model.get());
+    }
+    modelsToRender.push_back(m_enemy->GetModel());
+
+    // モデルリストをレンダラーに渡す
+    m_renderer->RenderSceneToTexture(modelsToRender, m_camera.get(), m_lightManager.get());
     m_renderer->RenderFinalPass(m_camera.get());
-    m_minimap->Render(m_camera.get());
+    m_minimap->Render(m_camera.get(), m_enemy.get());
+
     m_graphicsDevice->EndScene();
 }

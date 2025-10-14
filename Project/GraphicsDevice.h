@@ -18,7 +18,6 @@ struct MatrixBufferType
     DirectX::XMMATRIX lightProjection;
 };
 
-// <--- ˆÈ‰º‚ð‚·‚×‚Ä’Ç‰Á --->
 struct MotionBlurBufferType
 {
     DirectX::XMMATRIX previousViewProjection;
@@ -51,14 +50,17 @@ public:
     RenderTarget* GetRenderTarget() const { return m_renderTarget.get(); }
     OrthoWindow* GetOrthoWindow() const { return m_orthoWindow.get(); }
     ID3D11SamplerState* GetSamplerState() const { return m_samplerState; }
-
+    ID3D11BlendState* GetAlphaBlendState() const; 
+    ID3D11BlendState* GetDefaultBlendState() const;
 private:
     ID3D11Device* m_d3dDevice;
     ID3D11DeviceContext* m_immediateContext;
     ID3D11Buffer* m_matrixBuffer;
     ID3D11Buffer* m_lightBuffer;
-    ID3D11Buffer* m_motionBlurBuffer; // <--- ’Ç‰Á
+    ID3D11Buffer* m_motionBlurBuffer; 
     ID3D11SamplerState* m_samplerState;
+    ID3D11BlendState* m_alphaBlendState;
+    ID3D11BlendState* m_defaultBlendState;
 
     std::unique_ptr<SwapChain> m_swapChain;
     std::unique_ptr<ShaderManager> m_shaderManager;

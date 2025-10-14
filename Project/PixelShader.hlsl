@@ -131,7 +131,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
 
     // ç≈èIìIÇ»êFÇÃçáê¨
     float4 finalColor = (textureColor * (totalDiffuse + ambient)) + totalSpecular;
-    finalColor.a = textureColor.a;
+    finalColor.a = 1.0f;
 
     // --- Vignette Effect ---
     float2 screenCenter = float2(0.5f, 0.5f);

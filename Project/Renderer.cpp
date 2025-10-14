@@ -1,12 +1,10 @@
-// Renderer.cpp (完全上書き)
-
 #include "Renderer.h"
 #include "Game.h"
 
 Renderer::Renderer(GraphicsDevice* graphicsDevice) : m_graphicsDevice(graphicsDevice) {}
 Renderer::~Renderer() {}
 
-void Renderer::RenderSceneToTexture(const std::vector<std::unique_ptr<Model>>& models, const Camera* camera, LightManager* lightManager)
+void Renderer::RenderSceneToTexture(const std::vector<Model*>& models, const Camera* camera, LightManager* lightManager)
 {
     if (!m_graphicsDevice || !camera || !lightManager) return;
 
@@ -33,8 +31,6 @@ void Renderer::RenderFinalPass(const Camera* camera)
     deviceContext->VSSetShader(shaderManager->GetPostProcessVertexShader(), nullptr, 0);
     deviceContext->PSSetShader(shaderManager->GetMotionBlurPixelShader(), nullptr, 0);
 
-    // --- ここからが修正箇所 ---
-
     // カメラの現在と1フレーム前の行列を取得
     DirectX::XMMATRIX currentView = camera->GetViewMatrix();
     DirectX::XMMATRIX previousView = camera->GetPreviousViewMatrix();
@@ -53,8 +49,6 @@ void Renderer::RenderFinalPass(const Camera* camera)
     DirectX::XMMATRIX currentViewProj = currentView * projectionMatrix;
     DirectX::XMMATRIX currentViewProjInv = DirectX::XMMatrixInverse(nullptr, currentViewProj);
     m_graphicsDevice->UpdateMotionBlurBuffer(prevViewProj, currentViewProjInv, blurAmount);
-
-    // --- 修正箇所ここまで ---
 
     DirectX::XMMATRIX identity = DirectX::XMMatrixIdentity();
     m_graphicsDevice->UpdateMatrixBuffer(identity, identity, identity, identity, identity);
@@ -75,9 +69,8 @@ void Renderer::RenderFinalPass(const Camera* camera)
     deviceContext->PSSetShaderResources(0, 2, nullSRVs);
 }
 
-void Renderer::RenderDepthPass(const std::vector<std::unique_ptr<Model>>& models, LightManager* lightManager)
+void Renderer::RenderDepthPass(const std::vector<Model*>& models, LightManager* lightManager)
 {
-    // (この関数の中身は変更ありません)
     ID3D11DeviceContext* deviceContext = m_graphicsDevice->GetDeviceContext();
     ShaderManager* shaderManager = m_graphicsDevice->GetShaderManager();
 
@@ -87,7 +80,7 @@ void Renderer::RenderDepthPass(const std::vector<std::unique_ptr<Model>>& models
     deviceContext->VSSetShader(shaderManager->GetDepthVertexShader(), nullptr, 0);
     deviceContext->PSSetShader(nullptr, nullptr, 0);
 
-    for (const auto& model : models) {
+    for (Model* model : models) {
         if (model) {
             m_graphicsDevice->UpdateMatrixBuffer(
                 model->GetWorldMatrix(),
@@ -101,9 +94,8 @@ void Renderer::RenderDepthPass(const std::vector<std::unique_ptr<Model>>& models
     }
 }
 
-void Renderer::RenderMainPass(const std::vector<std::unique_ptr<Model>>& models, const Camera* camera, LightManager* lightManager)
+void Renderer::RenderMainPass(const std::vector<Model*>& models, const Camera* camera, LightManager* lightManager)
 {
-    // (この関数の中身は変更ありません)
     ID3D11DeviceContext* deviceContext = m_graphicsDevice->GetDeviceContext();
     ShaderManager* shaderManager = m_graphicsDevice->GetShaderManager();
     ShadowMapper* shadowMapper = m_graphicsDevice->GetShadowMapper();
@@ -114,6 +106,10 @@ void Renderer::RenderMainPass(const std::vector<std::unique_ptr<Model>>& models,
     vp.MaxDepth = 1.0f;
     deviceContext->RSSetViewports(1, &vp);
     deviceContext->RSSetState(nullptr);
+
+    // ブレンドステートを設定
+    float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    deviceContext->OMSetBlendState(m_graphicsDevice->GetAlphaBlendState(), blendFactor, 0xffffffff);
 
     m_graphicsDevice->GetSwapChain()->TurnZBufferOn(deviceContext);
 
@@ -131,7 +127,7 @@ void Renderer::RenderMainPass(const std::vector<std::unique_ptr<Model>>& models,
     ID3D11SamplerState* shadowSampler = shadowMapper->GetShadowSampleState();
     deviceContext->PSSetSamplers(1, 1, &shadowSampler);
 
-    for (const auto& model : models) {
+    for (Model* model : models) {
         if (model) {
             m_graphicsDevice->UpdateMatrixBuffer(
                 model->GetWorldMatrix(),
@@ -143,4 +139,7 @@ void Renderer::RenderMainPass(const std::vector<std::unique_ptr<Model>>& models,
             model->Render(deviceContext);
         }
     }
+    // ブレンドステートをデフォルトに戻す
+    deviceContext->OMSetBlendState(m_graphicsDevice->GetDefaultBlendState(), blendFactor, 0xffffffff);
+
 }

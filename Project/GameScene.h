@@ -8,6 +8,7 @@
 #include "Renderer.h"
 #include "Minimap.h"
 #include "Stage.h" 
+#include "Enemy.h"
 
 class GameScene : public Scene
 {
@@ -31,4 +32,5 @@ private:
     std::unique_ptr<Renderer> m_renderer;
     std::unique_ptr<Minimap> m_minimap;
     std::unique_ptr<Player> m_player;
+    std::unique_ptr<Enemy> m_enemy;
 };

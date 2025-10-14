@@ -127,6 +127,12 @@
     <ClInclude Include="RenderTarget.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="AStar.h">
+      <Filter>Source\GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemy.h">
+      <Filter>Source\GamePlay</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -206,6 +212,12 @@
     </ClCompile>
     <ClCompile Include="RenderTarget.cpp">
       <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="AStar.cpp">
+      <Filter>Source\GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="Enemy.cpp">
+      <Filter>Source\GamePlay</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

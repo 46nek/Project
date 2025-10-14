@@ -8,7 +8,7 @@ Minimap::Minimap()
     m_position({ 20.0f, 20.0f }),
     m_viewSize({ 200.0f, 200.0f }),
     m_cellSize(8.0f),
-    m_zoomFactor(1.0f),
+    m_zoomFactor(4.0f),
     m_pathSpriteScale(1.0f),
     m_playerSpriteScale(0.0f)
 {
@@ -34,6 +34,9 @@ bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::
 
     m_playerSprite = std::make_unique<Sprite>();
     if (!m_playerSprite->Initialize(device, L"Assets/minimap_player.png")) return false;
+    
+    m_enemySprite = std::make_unique<Sprite>();
+    if (!m_enemySprite->Initialize(device, L"Assets/minimap_enemy.png")) return false; // プレイヤーと同じ画像を流用
 
     m_frameSprite = std::make_unique<Sprite>();
     if (!m_frameSprite->Initialize(device, L"Assets/minimap_frame.png")) return false;
@@ -41,6 +44,7 @@ bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::
     // 各スプライトのスケールを個別に計算
     m_pathSpriteScale = m_cellSize / m_pathSprite->GetWidth();
     m_playerSpriteScale = m_cellSize / m_playerSprite->GetWidth();
+    m_enemySpriteScale = m_cellSize / m_enemySprite->GetWidth();
 
     // 描画領域外を切り取るための設定を作成
     D3D11_RASTERIZER_DESC rasterDesc = {};
@@ -58,10 +62,11 @@ void Minimap::Shutdown()
 {
     if (m_pathSprite) m_pathSprite->Shutdown();
     if (m_playerSprite) m_playerSprite->Shutdown();
+    if (m_enemySprite) m_enemySprite->Shutdown();
     m_scissorRasterizerState.Reset();
 }
 
-void Minimap::Render(const Camera* camera)
+void Minimap::Render(const Camera* camera, const Enemy* enemy)
 {
     if (!m_graphicsDevice || !m_mazeData || !camera) return;
 
@@ -76,13 +81,11 @@ void Minimap::Render(const Camera* camera)
         m_position.y + m_viewSize.y * 0.5f
     };
 
-    // ▼▼▼ 警告が出ていた箇所を修正 ▼▼▼
     float mapHeightInCells = static_cast<float>(m_mazeData->size());
-    // ▲▲▲ 警告が出ていた箇所を修正 ▲▲▲
 
     DirectX::XMFLOAT2 playerMapPixelPos = {
-        (playerWorldPos.x / m_pathWidth) * m_cellSize, // <<< m_pathWidth を使用
-        (mapHeightInCells - (playerWorldPos.z / m_pathWidth)) * m_cellSize // <<< m_pathWidth を使用
+        (playerWorldPos.x / m_pathWidth) * m_cellSize,
+        (mapHeightInCells - (playerWorldPos.z / m_pathWidth)) * m_cellSize
     };
 
     DirectX::XMMATRIX transform =
@@ -101,14 +104,12 @@ void Minimap::Render(const Camera* camera)
 
     // --- 1. フレーム(背景)を一番後ろに描画 ---
     m_spriteBatch->Begin();
-    // 白い画像を黒・半透明に着色して背景として描画
     m_frameSprite->RenderFill(m_spriteBatch.get(), scissorRect);
     m_spriteBatch->End();
 
-    // --- 2. 迷路とプレイヤーを描画z (クリッピング有効) ---
+    // --- 2. 迷路と敵を描画 (クリッピング有効) ---
     deviceContext->RSSetScissorRects(1, &scissorRect);
 
-    // 迷路の描画
     m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, nullptr, nullptr, nullptr, m_scissorRasterizerState.Get(), nullptr, transform);
     for (size_t y = 0; y < m_mazeData->size(); ++y)
     {
@@ -124,9 +125,32 @@ void Minimap::Render(const Camera* camera)
             }
         }
     }
+
+    // 敵を描画する処理
+    if (enemy)
+    {
+        // --- ▼▼▼ ここからが修正箇所 ▼▼▼ ---
+        DirectX::XMFLOAT3 enemyWorldPos = enemy->GetPosition();
+
+        // 敵の正確なワールド座標から、どのマスにいるかを整数で計算する
+        int enemyGridX = static_cast<int>(enemyWorldPos.x / m_pathWidth);
+        int enemyGridZ = static_cast<int>(enemyWorldPos.z / m_pathWidth);
+
+        // そのマスの中心座標をピクセル単位で計算する
+        DirectX::XMFLOAT2 enemyMapPixelPos = {
+            (float)enemyGridX * m_cellSize + m_cellSize * 0.5f,
+            (mapHeightInCells - (float)enemyGridZ) * m_cellSize - m_cellSize * 0.5f
+        };
+        // --- ▲▲▲ 修正箇所ここまで ▲▲▲ ---
+
+        // 赤色で描画
+        m_enemySprite->Render(m_spriteBatch.get(), enemyMapPixelPos, m_enemySpriteScale * 0.5f, 0.0f, { 1.0f, 0.2f, 0.2f, 1.0f });
+    }
+
     m_spriteBatch->End();
 
-    // プレイヤーの描画
+
+    // プレイヤーの描画 (常に中央)
     m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, nullptr, nullptr, nullptr, m_scissorRasterizerState.Get());
     m_playerSprite->Render(m_spriteBatch.get(), minimapCenter, m_playerSpriteScale * m_zoomFactor * 0.3f, 0.0f);
     m_spriteBatch->End();
