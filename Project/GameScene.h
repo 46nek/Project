@@ -9,6 +9,7 @@
 #include "Minimap.h"
 #include "Stage.h" 
 #include "Enemy.h"
+#include "Orb.h" 
 
 class GameScene : public Scene
 {
@@ -33,4 +34,5 @@ private:
     std::unique_ptr<Minimap> m_minimap;
     std::unique_ptr<Player> m_player;
     std::vector<std::unique_ptr<Enemy>> m_enemies;
+    std::vector<std::unique_ptr<Orb>> m_orbs;
 };

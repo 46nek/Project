@@ -50,6 +50,18 @@ public:
     void SetRotation(float x, float y, float z);
     void SetScale(float x, float y, float z);
     DirectX::XMMATRIX GetWorldMatrix() const;
+    /**
+    * @brief 自己発光色を設定します
+    */
+    void SetEmissiveColor(const DirectX::XMFLOAT4& color);
+
+    /**
+     * @brief テクスチャを使用するかどうかを設定します
+     */
+    void SetUseTexture(bool useTexture);
+
+    DirectX::XMFLOAT4 GetEmissiveColor() const;
+    bool GetUseTexture() const;
 
 private:
     void RenderBuffers(ID3D11DeviceContext*, const Mesh& mesh);
@@ -60,4 +72,7 @@ private:
     DirectX::XMFLOAT3 m_position;
     DirectX::XMFLOAT3 m_rotation;
     DirectX::XMFLOAT3 m_scale;
+
+    DirectX::XMFLOAT4 m_emissiveColor;
+    bool m_useTexture;
 };

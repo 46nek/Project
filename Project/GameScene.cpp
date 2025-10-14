@@ -65,12 +65,71 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
         }
         m_enemies.push_back(std::move(enemy));
     }
+        const auto& mazeData = m_stage->GetMazeData();
+        std::vector<std::pair<int, int>> possibleSpawns;
+
+        // オーブの配置候補地（行き止まりや角）を探す
+        for (size_t y = 1; y < mazeData.size() - 1; ++y)
+        {
+            for (size_t x = 1; x < mazeData[0].size() - 1; ++x)
+            {
+                if (mazeData[y][x] == MazeGenerator::Path)
+                {
+                    // 隣接する通路の数を数える
+                    int pathNeighbors = 0;
+                    if (mazeData[y - 1][x] == MazeGenerator::Path) pathNeighbors++;
+                    if (mazeData[y + 1][x] == MazeGenerator::Path) pathNeighbors++;
+                    if (mazeData[y][x - 1] == MazeGenerator::Path) pathNeighbors++;
+                    if (mazeData[y][x + 1] == MazeGenerator::Path) pathNeighbors++;
+
+                    // 通路が2つ以下なら候補地とする
+                    if (pathNeighbors <= 2)
+                    {
+                        possibleSpawns.push_back({ static_cast<int>(x), static_cast<int>(y) });
+                    }
+                }
+            }
+        }
+
+        // 候補地をシャッフル
+        std::shuffle(possibleSpawns.begin(), possibleSpawns.end(), gen);
+
+        int numOrbs = 5; // 生成するオーブの数
+        for (int i = 0; i < numOrbs && i < possibleSpawns.size(); ++i)
+        {
+            // オーブの座標を計算
+            float orbX = (static_cast<float>(possibleSpawns[i].first) + 0.5f) * pathWidth;
+            float orbZ = (static_cast<float>(possibleSpawns[i].second) + 0.5f) * pathWidth;
+            DirectX::XMFLOAT3 orbPos = { orbX, 2.0f, orbZ }; // 少し浮かせる
+
+            // オーブ用のポイントライトを作成
+            DirectX::XMFLOAT4 orbColor = { 0.8f, 0.8f, 1.0f, 1.0f }; // 青白い光
+            float orbRange = 8.0f;
+            float orbIntensity = 2.5f;
+            int lightIndex = m_lightManager->AddPointLight(orbPos, orbColor, orbRange, orbIntensity);
+
+            if (lightIndex != -1)
+            {
+                // オーブを生成してリストに追加
+                auto orb = std::make_unique<Orb>();
+                if (orb->Initialize(m_graphicsDevice->GetDevice(), orbPos, lightIndex))
+                {
+                    m_orbs.push_back(std::move(orb));
+                }
+            }
+        }
 
     return true;
 }
 
 void GameScene::Shutdown()
 {
+    for (auto& orb : m_orbs)
+    {
+        if (orb) orb->Shutdown();
+    }
+    m_orbs.clear();
+
     for (auto& enemy : m_enemies)
         {
             if (enemy) enemy->Shutdown();
@@ -93,7 +152,10 @@ void GameScene::Update(float deltaTime)
     {
         enemy->Update(deltaTime, m_player.get(), m_stage->GetMazeData(), m_stage->GetPathWidth());
     }
-
+    for (auto& orb : m_orbs)
+    {
+        orb->Update(deltaTime, m_player.get(), m_lightManager.get());
+    }
     // カメラとライトの更新
     DirectX::XMFLOAT3 playerPos = m_player->GetPosition();
     DirectX::XMFLOAT3 playerRot = m_player->GetRotation();
@@ -124,6 +186,13 @@ void GameScene::Render()
         {
             modelsToRender.push_back(enemy->GetModel());
         }
+    for (const auto& orb : m_orbs)
+    {
+        if (Model* orbModel = orb->GetModel()) // 回収されていないオーブのみ追加
+        {
+            modelsToRender.push_back(orbModel);
+        }
+    }
 
     // モデルリストをレンダラーに渡す
     m_renderer->RenderSceneToTexture(modelsToRender, m_camera.get(), m_lightManager.get());

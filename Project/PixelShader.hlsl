@@ -5,6 +5,12 @@ Texture2D normalMapTexture : register(t2);
 SamplerState SampleType : register(s0); // 通常のテクスチャ用サンプラー
 SamplerComparisonState ShadowSampleType : register(s1); // シャドウマップ比較用サンプラー
 
+cbuffer MaterialBuffer : register(b2)
+{
+    float4 EmissiveColor;
+    bool UseTexture;
+    float3 Padding;
+};
 
 // --- ライトの定義 ---
 #define DIRECTIONAL_LIGHT 0
@@ -46,8 +52,19 @@ struct VS_OUTPUT
 
 float4 PS(VS_OUTPUT input) : SV_Target
 {
-    // テクスチャから基本色を取得
-    float4 textureColor = shaderTexture.Sample(SampleType, input.Tex);
+    // --- テクスチャ色の取得処理を修正 ---
+    float4 textureColor;
+    if (UseTexture)
+    {
+        // UseTextureがtrueならテクスチャから色を取得
+        textureColor = shaderTexture.Sample(SampleType, input.Tex);
+    }
+    else
+    {
+        // falseなら白色を基本色とする
+        textureColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
+    }
+    
     // --- ノーマルマッピング ---
     float3x3 tbnMatrix = float3x3(normalize(input.Tangent), normalize(input.Binormal), normalize(input.Normal));
     float3 normalMapSample = normalMapTexture.Sample(SampleType, input.Tex).rgb;
@@ -88,8 +105,6 @@ float4 PS(VS_OUTPUT input) : SV_Target
             lightDir = normalize(Lights[i].Position - input.WorldPos);
             distance = length(Lights[i].Position - input.WorldPos);
         }
-
-        // ▼▼▼ ここからが修正箇所 ▼▼▼
         
         float attenuation = 1.0f;
         if (Lights[i].Type != DIRECTIONAL_LIGHT)
@@ -104,8 +119,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
             // 2つの減衰を掛け合わせる
             attenuation *= falloff;
         }
-
-        // ▲▲▲ 修正箇所ここまで ▲▲▲
+        
         
         // スポットライトの減衰
         float spotFactor = 1.0f;
@@ -129,9 +143,14 @@ float4 PS(VS_OUTPUT input) : SV_Target
         totalSpecular += float4(1.0f, 1.0f, 1.0f, 1.0f) * specular * Lights[i].Intensity * attenuation * spotFactor * shadowFactor;
     }
 
-    // 最終的な色の合成
+    // --- 最終的な色の合成処理を修正 ---
+    // ライティング計算結果と環境光を合成
     float4 finalColor = (textureColor * (totalDiffuse + ambient)) + totalSpecular;
-    finalColor.a = 1.0f;
+    
+    // 自己発光色を加算
+    finalColor += EmissiveColor;
+
+    finalColor.a = 1.0f; // アルファ値は1で固定
 
     // --- Vignette Effect ---
     float2 screenCenter = float2(0.5f, 0.5f);

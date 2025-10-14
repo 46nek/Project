@@ -129,6 +129,12 @@ void Renderer::RenderMainPass(const std::vector<Model*>& models, const Camera* c
 
     for (Model* model : models) {
         if (model) {
+            // モデルのマテリアル情報をシェーダーに渡す
+            MaterialBufferType materialBuffer;
+            materialBuffer.EmissiveColor = model->GetEmissiveColor();
+            materialBuffer.UseTexture = model->GetUseTexture();
+            m_graphicsDevice->UpdateMaterialBuffer(materialBuffer);
+
             m_graphicsDevice->UpdateMatrixBuffer(
                 model->GetWorldMatrix(),
                 camera->GetViewMatrix(),

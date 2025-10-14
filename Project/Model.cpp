@@ -6,6 +6,8 @@ Model::Model()
     m_position = { 0.0f, 0.0f, 0.0f };
     m_rotation = { 0.0f, 0.0f, 0.0f };
     m_scale = { 1.0f, 1.0f, 1.0f };
+    m_emissiveColor = { 0.0f, 0.0f, 0.0f, 1.0f }; // デフォルトは光らない
+    m_useTexture = true; // デフォルトはテクスチャを使用する
 }
 
 Model::~Model()
@@ -101,4 +103,24 @@ DirectX::XMMATRIX Model::GetWorldMatrix() const // const を追加
     DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(m_rotation.x, m_rotation.y, m_rotation.z);
     DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
     return scaleMatrix * rotationMatrix * translationMatrix;
+}
+
+void Model::SetEmissiveColor(const DirectX::XMFLOAT4& color)
+{
+    m_emissiveColor = color;
+}
+
+void Model::SetUseTexture(bool useTexture)
+{
+    m_useTexture = useTexture;
+}
+
+DirectX::XMFLOAT4 Model::GetEmissiveColor() const
+{
+    return m_emissiveColor;
+}
+
+bool Model::GetUseTexture() const
+{
+    return m_useTexture;
 }

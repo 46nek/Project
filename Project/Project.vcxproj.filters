@@ -133,6 +133,9 @@
     <ClInclude Include="Enemy.h">
       <Filter>Source\GamePlay</Filter>
     </ClInclude>
+    <ClInclude Include="Orb.h">
+      <Filter>Source\GamePlay</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -217,6 +220,9 @@
       <Filter>Source\GamePlay</Filter>
     </ClCompile>
     <ClCompile Include="Enemy.cpp">
+      <Filter>Source\GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="Orb.cpp">
       <Filter>Source\GamePlay</Filter>
     </ClCompile>
   </ItemGroup>

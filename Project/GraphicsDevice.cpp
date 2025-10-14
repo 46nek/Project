@@ -3,7 +3,9 @@
 
 GraphicsDevice::GraphicsDevice()
     : m_d3dDevice(nullptr), m_immediateContext(nullptr),
-    m_matrixBuffer(nullptr), m_lightBuffer(nullptr), m_motionBlurBuffer(nullptr), m_samplerState(nullptr)
+    m_matrixBuffer(nullptr), m_lightBuffer(nullptr), m_motionBlurBuffer(nullptr),
+    m_materialBuffer(nullptr), 
+    m_samplerState(nullptr)
 {
 }
 
@@ -61,6 +63,15 @@ bool GraphicsDevice::Initialize(HWND hWnd, int screenWidth, int screenHeight)
     hr = m_d3dDevice->CreateBuffer(&motionBlurBufferDesc, NULL, &m_motionBlurBuffer);
     if (FAILED(hr)) return false;
 
+    // マテリアルバッファの作成
+    D3D11_BUFFER_DESC materialBufferDesc = {};
+    materialBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    materialBufferDesc.ByteWidth = sizeof(MaterialBufferType);
+    materialBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    materialBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    hr = m_d3dDevice->CreateBuffer(&materialBufferDesc, NULL, &m_materialBuffer);
+    if (FAILED(hr)) return false;
+
     D3D11_SAMPLER_DESC samplerDesc = {};
     samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
     samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -101,6 +112,7 @@ void GraphicsDevice::Shutdown()
     if (m_samplerState) m_samplerState->Release();
     if (m_lightBuffer) m_lightBuffer->Release();
     if (m_matrixBuffer) m_matrixBuffer->Release();
+    if (m_materialBuffer) m_materialBuffer->Release();
     if (m_motionBlurBuffer) m_motionBlurBuffer->Release();
 
     if (m_orthoWindow) m_orthoWindow->Shutdown();
@@ -171,4 +183,19 @@ ID3D11BlendState* GraphicsDevice::GetAlphaBlendState() const
 ID3D11BlendState* GraphicsDevice::GetDefaultBlendState() const
 {
     return m_defaultBlendState;
+}
+
+bool GraphicsDevice::UpdateMaterialBuffer(const MaterialBufferType& materialBuffer)
+{
+    D3D11_MAPPED_SUBRESOURCE mappedResource;
+    if (FAILED(m_immediateContext->Map(m_materialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) return false;
+
+    MaterialBufferType* dataPtr = (MaterialBufferType*)mappedResource.pData;
+    *dataPtr = materialBuffer;
+
+    m_immediateContext->Unmap(m_materialBuffer, 0);
+    // ピクセルシェーダーの定数バッファスロット2番に設定
+    m_immediateContext->PSSetConstantBuffers(2, 1, &m_materialBuffer);
+
+    return true;
 }
