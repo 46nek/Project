@@ -11,13 +11,3 @@
 #include <comdef.h>
 // C++
 #include <string>
-
-// デバッグ用のログ出力マクロ
-#if defined(_DEBUG)
-inline void DbgPrint(const std::wstring& msg)
-{
-	wprintf(L"%s\n", msg.c_str());
-}
-#else
-#define DbgPrint(msg)
-#endif

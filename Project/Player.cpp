@@ -41,14 +41,14 @@ void Player::Update(float deltaTime, Input* input, const std::vector<std::vector
 
 		DirectX::XMFLOAT3 nextPosition = m_position;
 		nextPosition.x += desiredMove.x;
-		if (!IsCollidingWithWall(nextPosition, 0.45f, mazeData, pathWidth))
+		if (!IsCollidingWithWall(nextPosition, COLLISION_RADIUS, mazeData, pathWidth))
 		{
 			m_position.x = nextPosition.x;
 		}
 
 		nextPosition = m_position;
 		nextPosition.z += desiredMove.z;
-		if (!IsCollidingWithWall(nextPosition, 0.45f, mazeData, pathWidth))
+		if (!IsCollidingWithWall(nextPosition, COLLISION_RADIUS, mazeData, pathWidth))
 		{
 			m_position.z = nextPosition.z;
 		}

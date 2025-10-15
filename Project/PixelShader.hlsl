@@ -1,23 +1,20 @@
-// PixelShader.hlsl
+// PixelShader.hlsl (この内容で完全に置き換えてください)
 
-// C++側の Light.h の MAX_LIGHTS と値を合わせること
 #define MAX_LIGHTS 64
 
-// テクスチャとサンプラーステート
-Texture2D shaderTexture : register(t0); // オブジェクトのテクスチャ
-Texture2D shadowMapTexture : register(t1); // シャドウマップ（深度テクスチャ）
+Texture2D shaderTexture : register(t0);
+Texture2D shadowMapTexture : register(t1);
 Texture2D normalMapTexture : register(t2);
-SamplerState SampleType : register(s0); // 通常のテクスチャ用サンプラー
-SamplerComparisonState ShadowSampleType : register(s1); // シャドウマップ比較用サンプラー
+SamplerState SampleType : register(s0);
+SamplerComparisonState ShadowSampleType : register(s1);
 
 cbuffer MaterialBuffer : register(b2)
 {
     float4 EmissiveColor;
     bool UseTexture;
-    float3 Padding;
+    float3 Padding; 
 };
 
-// --- ライトの定義 ---
 #define DIRECTIONAL_LIGHT 0
 #define POINT_LIGHT 1
 #define SPOT_LIGHT 2
@@ -36,7 +33,6 @@ struct Light
     float2 Padding;
 };
 
-// ライト情報を格納するコンスタントバッファ
 cbuffer LightBuffer : register(b1)
 {
     Light Lights[MAX_LIGHTS];
@@ -44,7 +40,6 @@ cbuffer LightBuffer : register(b1)
     float3 CameraPosition;
 };
 
-// ピクセルシェーダーへの入力データ構造
 struct VS_OUTPUT
 {
     float4 Pos : SV_POSITION;
@@ -59,36 +54,26 @@ struct VS_OUTPUT
 
 float4 PS(VS_OUTPUT input) : SV_Target
 {
-    // --- テクスチャ色の取得処理を修正 ---
     float4 textureColor;
     if (UseTexture)
     {
-        // UseTextureがtrueならテクスチャから色を取得
         textureColor = shaderTexture.Sample(SampleType, input.Tex);
     }
     else
     {
-        // falseなら白色を基本色とする
         textureColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
     }
     
-    // --- ノーマルマッピング ---
     float3x3 tbnMatrix = float3x3(normalize(input.Tangent), normalize(input.Binormal), normalize(input.Normal));
     float3 normalMapSample = normalMapTexture.Sample(SampleType, input.Tex).rgb;
     float3 normalFromMap = (2.0f * normalMapSample) - 1.0f;
     float3 finalNormal = normalize(mul(normalFromMap, tbnMatrix));
 
-    // 環境光
     float4 ambient = textureColor * float4(0.3f, 0.3f, 0.3f, 1.0f);
-
-    // 拡散光と鏡面反射光の合計を初期化
     float4 totalDiffuse = float4(0, 0, 0, 0);
     float4 totalSpecular = float4(0, 0, 0, 0);
-
-    // カメラへの視線ベクトル
     float3 viewDir = normalize(CameraPosition - input.WorldPos);
-
-    // --- 影の計算 ---
+    
     float shadowFactor = 1.0f;
     float2 projectTexCoord;
     projectTexCoord.x = input.LightViewPos.x / input.LightViewPos.w / 2.0f + 0.5f;
@@ -98,27 +83,23 @@ float4 PS(VS_OUTPUT input) : SV_Target
         shadowFactor = shadowMapTexture.SampleCmpLevelZero(ShadowSampleType, projectTexCoord, input.LightViewPos.z / input.LightViewPos.w);
     }
 
-    // --- ライティングの計算 ---
     for (int i = 0; i < NumLights; ++i)
     {
         if (!Lights[i].Enabled)
             continue;
-
+        
         float3 lightDir;
         float distance;
 
         if (Lights[i].Type == DIRECTIONAL_LIGHT)
         {
             lightDir = -normalize(Lights[i].Direction);
-            distance = 0.0f; // ディレクショナルライトの距離は0とする
+            distance = 0.0f;
         }
         else
         {
             lightDir = normalize(Lights[i].Position - input.WorldPos);
             distance = length(Lights[i].Position - input.WorldPos);
-            
-            // ▼▼▼【最適化】▼▼▼
-            // ライトの影響範囲外なら、このライトの計算をスキップ
             if (distance > Lights[i].Range)
             {
                 continue;
@@ -128,15 +109,12 @@ float4 PS(VS_OUTPUT input) : SV_Target
         float attenuation = 1.0f;
         if (Lights[i].Type != DIRECTIONAL_LIGHT)
         {
-            // 従来の距離による減衰
             attenuation = 1.0f / (Lights[i].Attenuation.x + Lights[i].Attenuation.y * distance + Lights[i].Attenuation.z * (distance * distance));
-            // Rangeに基づいてスムーズにフェードアウトさせる計算を追加
-            float falloff = pow(saturate(1.0 - distance / Lights[i].Range), 2);
-            // 2つの減衰を掛け合わせる
+            float fade = saturate(1.0 - distance / Lights[i].Range);
+            float falloff = fade * fade;
             attenuation *= falloff;
         }
         
-        // スポットライトの減衰
         float spotFactor = 1.0f;
         if (Lights[i].Type == SPOT_LIGHT)
         {
@@ -147,23 +125,20 @@ float4 PS(VS_OUTPUT input) : SV_Target
             spotFactor = smoothstep(outerConeCos, innerConeCos, spotCos);
         }
 
-        // 拡散光の計算 (各ライトごとに影を適用)
         float diffuseIntensity = saturate(dot(finalNormal, lightDir));
         totalDiffuse += Lights[i].Color * diffuseIntensity * Lights[i].Intensity * attenuation * spotFactor * shadowFactor;
 
-        // 鏡面反射光の計算 (各ライトごとに影を適用)
         float3 halfwayDir = normalize(lightDir + viewDir);
         float specAngle = saturate(dot(finalNormal, halfwayDir));
         float specular = pow(specAngle, 32.0f);
         totalSpecular += float4(1.0f, 1.0f, 1.0f, 1.0f) * specular * Lights[i].Intensity * attenuation * spotFactor * shadowFactor;
     }
 
-    // --- 最終的な色の合成処理を修正 ---
     float4 finalColor = (textureColor * (totalDiffuse + ambient)) + totalSpecular;
     finalColor += EmissiveColor;
-    finalColor.a = 1.0f;
+    finalColor.a = textureColor.a; // Alphaの計算を元に戻す
 
-    // --- Vignette Effect ---
+    // Vignette Effect
     float2 screenCenter = float2(0.5f, 0.5f);
     float2 texCoord = input.Pos.xy / float2(1280, 720);
     float dist = distance(texCoord, screenCenter);
@@ -171,7 +146,6 @@ float4 PS(VS_OUTPUT input) : SV_Target
     float vignetteSmoothness = 0.1f;
     float vignette = 1.0f - smoothstep(vignetteSmoothness, 1.0f, dist * vignetteIntensity);
     finalColor.rgb *= vignette;
-    finalColor.a = textureColor.a;
-
+    
     return finalColor;
 }

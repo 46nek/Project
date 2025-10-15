@@ -1,5 +1,3 @@
-// GameScene.h
-
 #pragma once
 #include "Scene.h"
 #include <memory>
@@ -19,14 +17,22 @@ public:
 	GameScene();
 	~GameScene();
 
-	bool Initialize(GraphicsDevice* graphicsDevice, Input* input) override;
+	bool Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine) override;
 	void Shutdown() override;
 	void Update(float deltaTime) override;
 	void Render() override;
 
 private:
-	static constexpr float PLAYER_HEIGHT = 4.0f;
+	// プライベートなヘルパー関数
+	bool InitializeEnemies();
+	bool InitializeOrbs();
 
+	// 定数
+	static constexpr float PLAYER_HEIGHT = 4.0f;
+	static constexpr int NUM_ENEMIES = 2;
+	static constexpr int NUM_ORBS = 50;
+
+	// メンバー変数
 	std::unique_ptr<Stage> m_stage;
 	std::unique_ptr<Camera> m_camera;
 	std::unique_ptr<LightManager> m_lightManager;
@@ -35,4 +41,6 @@ private:
 	std::unique_ptr<Player> m_player;
 	std::vector<std::unique_ptr<Enemy>> m_enemies;
 	std::vector<std::unique_ptr<Orb>> m_orbs;
+
+	std::unique_ptr<DirectX::SoundEffect> m_collectSound;
 };

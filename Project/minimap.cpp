@@ -13,7 +13,7 @@ Minimap::Minimap()
 	m_zoomFactor(3.0f),
 	m_pathSpriteScale(1.0f),
 	m_playerSpriteScale(0.0f),
-	m_orbSpriteScale(0.0f) // <--- 追加：初期化
+	m_orbSpriteScale(0.0f)
 {
 }
 
@@ -41,7 +41,6 @@ bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::
 	m_enemySprite = std::make_unique<Sprite>();
 	if (!m_enemySprite->Initialize(device, L"Assets/minimap_enemy.png")) return false;
 
-	// オーブのスプライトを読み込み (プレイヤーの画像を流用)
 	m_orbSprite = std::make_unique<Sprite>();
 	if (!m_orbSprite->Initialize(device, L"Assets/minimap_orb.png")) return false;
 
@@ -52,7 +51,7 @@ bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::
 	m_pathSpriteScale = m_cellSize / m_pathSprite->GetWidth();
 	m_playerSpriteScale = m_cellSize / m_playerSprite->GetWidth();
 	m_enemySpriteScale = m_cellSize / m_enemySprite->GetWidth();
-	m_orbSpriteScale = m_cellSize / m_orbSprite->GetWidth(); // <--- 追加
+	m_orbSpriteScale = m_cellSize / m_orbSprite->GetWidth();
 
 	// 描画領域外を切り取るための設定を作成
 	D3D11_RASTERIZER_DESC rasterDesc = {};
@@ -71,11 +70,10 @@ void Minimap::Shutdown()
 	if (m_pathSprite) m_pathSprite->Shutdown();
 	if (m_playerSprite) m_playerSprite->Shutdown();
 	if (m_enemySprite) m_enemySprite->Shutdown();
-	if (m_orbSprite) m_orbSprite->Shutdown(); // <--- 追加
+	if (m_orbSprite) m_orbSprite->Shutdown();
 	m_scissorRasterizerState.Reset();
 }
 
-// Render関数の引数にオーブのリストを追加
 void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs)
 {
 	if (!m_graphicsDevice || !m_mazeData || !camera) return;
@@ -158,7 +156,6 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 	{
 		if (orb && !orb->IsCollected())
 		{
-			// エラー箇所を修正: GetPosition() を使用する
 			DirectX::XMFLOAT3 orbWorldPos = orb->GetPosition();
 
 			int orbGridX = static_cast<int>(orbWorldPos.x / m_pathWidth);

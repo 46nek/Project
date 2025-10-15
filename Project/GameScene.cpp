@@ -3,17 +3,19 @@
 #include "GameScene.h"
 #include "AssetLoader.h"
 #include <random>
-#include <tuple> // std::tupleを使用するために追加
+#include <tuple>
+#include <algorithm> // std::shuffle用
 
 GameScene::GameScene()
 {
 }
 GameScene::~GameScene() {}
 
-bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
+bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine)
 {
 	m_graphicsDevice = graphicsDevice;
 	m_input = input;
+	m_audioEngine = audioEngine;
 
 	// ステージの初期化
 	m_stage = std::make_unique<Stage>();
@@ -26,7 +28,7 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
 	m_player = std::make_unique<Player>();
 	m_camera = std::make_unique<Camera>();
 	m_lightManager = std::make_unique<LightManager>();
-	m_lightManager->Initialize(m_stage->GetMazeData(), m_stage->GetPathWidth(), 5.0f /*WALL_HEIGHT*/);
+	m_lightManager->Initialize(m_stage->GetMazeData(), m_stage->GetPathWidth(), Stage::WALL_HEIGHT);
 	m_renderer = std::make_unique<Renderer>(m_graphicsDevice);
 
 	// スタート座標をStageから取得してプレイヤーを配置
@@ -43,12 +45,38 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
 		return false;
 	}
 
+	// ヘルパー関数を呼び出す
+	if (!InitializeEnemies())
+	{
+		return false;
+	}
+	if (!InitializeOrbs())
+	{
+		return false;
+	}
+	try
+	{
+		m_collectSound = std::make_unique<DirectX::SoundEffect>(m_audioEngine, L"Assets/orb_get.wav");
+	}
+	catch (const std::exception& e)
+	{
+		// ファイルが見つからない場合などのエラー処理
+		MessageBoxA(nullptr, e.what(), "Sound Error", MB_OK);
+		return false;
+	}
+	return true;
+}
+
+bool GameScene::InitializeEnemies()
+{
+	float pathWidth = m_stage->GetPathWidth();
+
 	// 敵の出現候補となる部屋のリスト
 	std::vector<std::pair<int, int>> spawnRooms = {
-	{1, 1}, // 左上
-	{Stage::MAZE_WIDTH - 4, 1}, // 右上
-	{1, Stage::MAZE_HEIGHT - 4}, // 左下
-	{Stage::MAZE_WIDTH - 4, Stage::MAZE_HEIGHT - 4}  // 右下
+		{1, 1}, // 左上
+		{Stage::MAZE_WIDTH - 4, 1}, // 右上
+		{1, Stage::MAZE_HEIGHT - 4}, // 左下
+		{Stage::MAZE_WIDTH - 4, Stage::MAZE_HEIGHT - 4}  // 右下
 	};
 
 	// 部屋のリストをシャッフルして、重複しないように選ぶ
@@ -56,8 +84,8 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
 	std::mt19937 gen(rd());
 	std::shuffle(spawnRooms.begin(), spawnRooms.end(), gen);
 
-	// 2体の敵を生成
-	for (int i = 0; i < 2; ++i)
+	// 定数で指定された数の敵を生成
+	for (int i = 0; i < NUM_ENEMIES; ++i)
 	{
 		std::pair<int, int> room = spawnRooms[i];
 		float enemyStartX = (static_cast<float>(room.first) + 1.5f) * pathWidth;
@@ -70,10 +98,17 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
 		}
 		m_enemies.push_back(std::move(enemy));
 	}
+	return true;
+}
+
+bool GameScene::InitializeOrbs()
+{
 	const auto& mazeData = m_stage->GetMazeData();
+	float pathWidth = m_stage->GetPathWidth();
 	std::vector<std::pair<int, int>> possibleSpawns;
 
-	// ▼▼▼ ここからオーブ生成ロジックの修正 ▼▼▼
+	std::random_device rd;
+	std::mt19937 gen(rd());
 
 	// 1. 部屋の範囲を定義 (MazeGenerator.cpp と同じ定義)
 	const int roomSize = 3;
@@ -94,7 +129,6 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
 		{
 			if (mazeData[y][x] == MazeGenerator::Path)
 			{
-				// 2a. 部屋の中かどうかをチェック
 				bool isInRoom = false;
 				for (const auto& r : rooms) {
 					int sx = std::get<0>(r), sy = std::get<1>(r), w = std::get<2>(r), h = std::get<3>(r);
@@ -103,17 +137,14 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
 						break;
 					}
 				}
-				// 部屋の中なら候補地から除外
 				if (isInRoom) continue;
 
-				// 2b. 隣接する通路の数を数える
 				int pathNeighbors = 0;
 				if (mazeData[y - 1][x] == MazeGenerator::Path) pathNeighbors++;
 				if (mazeData[y + 1][x] == MazeGenerator::Path) pathNeighbors++;
 				if (mazeData[y][x - 1] == MazeGenerator::Path) pathNeighbors++;
 				if (mazeData[y][x + 1] == MazeGenerator::Path) pathNeighbors++;
 
-				// 通路が2つ以下（行き止まり or 角）なら候補地とする
 				if (pathNeighbors <= 2)
 				{
 					possibleSpawns.push_back({ static_cast<int>(x), static_cast<int>(y) });
@@ -122,23 +153,18 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
 		}
 	}
 
-	// 候補地をシャッフル
 	std::shuffle(possibleSpawns.begin(), possibleSpawns.end(), gen);
 
-	int numOrbs = 50; // 生成するオーブの数
-	std::vector<std::pair<int, int>> spawnedOrbPositions; // 実際にオーブを配置した座標を記録
+	std::vector<std::pair<int, int>> spawnedOrbPositions;
 
 	// 3. 候補地リストを調べてオーブを配置
 	for (const auto& spawnPos : possibleSpawns)
 	{
-		// 既に配置したい数のオーブを配置済みならループを抜ける
-		if (m_orbs.size() >= numOrbs) break;
+		if (m_orbs.size() >= NUM_ORBS) break;
 
 		bool canSpawn = true;
-		// 3a. 既に配置済みのオーブとの距離をチェック
 		for (const auto& spawnedPos : spawnedOrbPositions)
 		{
-			// マンハッタン距離で2マス以内なら配置しない
 			if (std::abs(spawnPos.first - spawnedPos.first) + std::abs(spawnPos.second - spawnedPos.second) <= 2)
 			{
 				canSpawn = false;
@@ -146,7 +172,6 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
 			}
 		}
 
-		// 配置可能ならオーブを生成
 		if (canSpawn)
 		{
 			float orbX = (static_cast<float>(spawnPos.first) + 0.5f) * pathWidth;
@@ -164,13 +189,11 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
 				if (orb->Initialize(m_graphicsDevice->GetDevice(), orbPos, lightIndex))
 				{
 					m_orbs.push_back(std::move(orb));
-					spawnedOrbPositions.push_back(spawnPos); // 配置した座標を記録
+					spawnedOrbPositions.push_back(spawnPos);
 				}
 			}
 		}
 	}
-	// ▲▲▲ オーブ生成ロジックの修正ここまで ▲▲▲
-
 	return true;
 }
 
@@ -186,6 +209,8 @@ void GameScene::Shutdown()
 	{
 		if (enemy) enemy->Shutdown();
 	}
+	m_enemies.clear();
+
 	if (m_minimap) m_minimap->Shutdown();
 	if (m_stage) m_stage->Shutdown();
 }
@@ -204,7 +229,7 @@ void GameScene::Update(float deltaTime)
 	}
 	for (auto& orb : m_orbs)
 	{
-		orb->Update(deltaTime, m_player.get(), m_lightManager.get());
+		orb->Update(deltaTime, m_player.get(), m_lightManager.get(), m_collectSound.get());
 	}
 
 	DirectX::XMFLOAT3 playerPos = m_player->GetPosition();

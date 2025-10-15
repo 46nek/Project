@@ -2,7 +2,7 @@
 
 #include "Orb.h"
 #include "AssetLoader.h"
-#include <cmath> // sinä÷êîóp
+#include <cmath>
 
 Orb::Orb()
 	: m_isCollected(false),
@@ -43,7 +43,7 @@ void Orb::Shutdown()
 	}
 }
 
-void Orb::Update(float deltaTime, Player* player, LightManager* lightManager)
+void Orb::Update(float deltaTime, Player* player, LightManager* lightManager, DirectX::SoundEffect* collectSound)
 {
 	if (m_isCollected)
 	{
@@ -56,19 +56,25 @@ void Orb::Update(float deltaTime, Player* player, LightManager* lightManager)
 
 	DirectX::XMFLOAT3 playerPos = player->GetPosition();
 	float dx = playerPos.x - m_position.x;
-	float dy = playerPos.y - floatingY;
 	float dz = playerPos.z - m_position.z;
+	float distanceSq = (dx * dx) + (dz * dz);
 
-	float distanceSq = (dx * dx) + (dy * dy) + (dz * dz);
 	float collisionRadius = 1.0f;
 	float collisionRadiusSq = collisionRadius * collisionRadius;
 
 	if (distanceSq < collisionRadiusSq)
 	{
 		m_isCollected = true;
+
+		// ÉâÉCÉgÇèuéûÇ…ñ≥å¯âªÇ∑ÇÈ
 		if (lightManager && m_lightIndex != -1)
 		{
 			lightManager->SetLightEnabled(m_lightIndex, false);
+		}
+		// å¯â âπÇçƒê∂Ç∑ÇÈ
+		if (collectSound)
+		{
+			collectSound->Play();
 		}
 	}
 }

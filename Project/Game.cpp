@@ -1,4 +1,7 @@
+// Game.cpp (この内容で完全に置き換えてください)
+
 #include "Game.h"
+#include <comdef.h> // CoInitializeEx用
 
 // Gameのコンストラクタで、ゲーム開始時にポーズ状態にする
 Game::Game() : m_isPaused(true)
@@ -7,7 +10,6 @@ Game::Game() : m_isPaused(true)
 
 Game::~Game() {}
 
-// SetPaused関数を、カーソル表示を確実に行うように修正
 void Game::SetPaused(bool isPaused)
 {
 	m_isPaused = isPaused;
@@ -15,11 +17,21 @@ void Game::SetPaused(bool isPaused)
 	{
 		// カーソルが表示されるまで ShowCursor(true) を呼び出し続ける
 		while (ShowCursor(true) < 0);
+		// ▼▼▼ オーディオを一時停止 ▼▼▼
+		if (m_audioEngine)
+		{
+			m_audioEngine->Suspend();
+		}
 	}
 	else
 	{
 		// カーソルが非表示になるまで ShowCursor(false) を呼び出し続ける
 		while (ShowCursor(false) >= 0);
+		// ▼▼▼ オーディオを再開 ▼▼▼
+		if (m_audioEngine)
+		{
+			m_audioEngine->Resume();
+		}
 	}
 }
 
@@ -30,6 +42,14 @@ bool Game::IsPaused() const
 
 bool Game::Initialize(HINSTANCE hInstance)
 {
+	// ▼▼▼ COMライブラリを初期化 ▼▼▼
+	HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+	if (FAILED(hr))
+	{
+		// エラー処理
+		return false;
+	}
+
 	m_input = std::make_unique<Input>();
 	m_input->Initialize();
 
@@ -37,8 +57,6 @@ bool Game::Initialize(HINSTANCE hInstance)
 	if (!m_window->Initialize(hInstance, m_input.get())) {
 		return false;
 	}
-	// SetPausedを呼び出して初期カーソル状態を確定させる
-	SetPaused(m_isPaused);
 
 	m_graphicsDevice = std::make_unique<GraphicsDevice>();
 	if (!m_graphicsDevice->Initialize(m_window->GetHwnd(), SCREEN_WIDTH, SCREEN_HEIGHT)) {
@@ -46,8 +64,10 @@ bool Game::Initialize(HINSTANCE hInstance)
 		return false;
 	}
 
+	m_audioEngine = std::make_unique<DirectX::AudioEngine>(DirectX::AudioEngine_Default);
+
 	m_sceneManager = std::make_unique<SceneManager>();
-	if (!m_sceneManager->Initialize(m_graphicsDevice.get(), m_input.get())) {
+	if (!m_sceneManager->Initialize(m_graphicsDevice.get(), m_input.get(), m_audioEngine.get())) {
 		return false;
 	}
 
@@ -56,14 +76,25 @@ bool Game::Initialize(HINSTANCE hInstance)
 		return false;
 	}
 
+	// SetPausedを呼び出して初期カーソル状態とオーディオ状態を確定させる
+	SetPaused(m_isPaused);
+
 	return true;
 }
 
 void Game::Shutdown()
 {
+	if (m_audioEngine)
+	{
+		m_audioEngine->Suspend();
+	}
+	m_audioEngine.reset(); // スマートポインタを解放
+
 	if (m_sceneManager) m_sceneManager->Shutdown();
 	if (m_graphicsDevice) m_graphicsDevice->Shutdown();
 	if (m_window) m_window->Shutdown();
+
+	CoUninitialize();
 }
 
 void Game::Run()
@@ -86,6 +117,15 @@ void Game::Run()
 bool Game::Update()
 {
 	m_timer->Tick();
+
+	if (m_audioEngine && !m_audioEngine->Update())
+	{
+		// オーディオデバイスが失われた場合などのエラー処理
+		if (m_audioEngine->IsCriticalError())
+		{
+			// エラーメッセージを表示するなど
+		}
+	}
 
 	if (m_input->IsKeyPressed(VK_ESCAPE)) {
 		SetPaused(!m_isPaused);

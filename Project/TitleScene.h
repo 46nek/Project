@@ -13,7 +13,7 @@ public:
 	TitleScene();
 	~TitleScene();
 
-	bool Initialize(GraphicsDevice* graphicsDevice, Input* input) override;
+	bool Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine) override;
 	void Shutdown() override;
 	void Update(float deltaTime) override;
 	void Render() override;

@@ -1,3 +1,4 @@
+// Player.h (ïœçXå„)
 #pragma once
 #include <DirectXMath.h>
 #include <vector>
@@ -19,6 +20,8 @@ public:
 	bool IsRunning() const { return m_isRunning; }
 
 private:
+	static constexpr float COLLISION_RADIUS = 0.45f;
+
 	bool IsCollidingWithWall(const DirectX::XMFLOAT3& position, float radius, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth);
 
 	DirectX::XMFLOAT3 m_position;

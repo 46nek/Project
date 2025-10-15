@@ -24,6 +24,7 @@ public:
 	void Update(float deltaTime, const DirectX::XMFLOAT3& cameraPosition, const DirectX::XMFLOAT3& cameraRotation);
 	int AddPointLight(const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT4& color, float range, float intensity);
 	void SetLightEnabled(int index, bool enabled);
+
 	int GetFlashlightIndex() const;
 
 	const LightBufferType& GetLightBuffer() const { return m_lightBuffer; }

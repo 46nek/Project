@@ -12,10 +12,11 @@ TitleScene::TitleScene()
 
 TitleScene::~TitleScene() {}
 
-bool TitleScene::Initialize(GraphicsDevice* graphicsDevice, Input* input)
+bool TitleScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine)
 {
 	m_graphicsDevice = graphicsDevice;
 	m_input = input;
+	m_audioEngine = audioEngine;
 
 	ID3D11Device* device = m_graphicsDevice->GetDevice();
 

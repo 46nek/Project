@@ -49,5 +49,5 @@ private:
 	float m_pathSpriteScale;
 	float m_playerSpriteScale;
 	float m_enemySpriteScale;
-	float m_orbSpriteScale; // <--- ’Ç‰Á
+	float m_orbSpriteScale;
 };

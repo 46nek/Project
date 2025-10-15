@@ -4,10 +4,8 @@
 #include "Model.h"
 #include "Player.h"
 #include "LightManager.h"
+#include "Audio.h"
 
-/**
- * @brief 回収可能なオーブを管理するクラス
- */
 class Orb
 {
 public:
@@ -16,15 +14,17 @@ public:
 
 	bool Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& position, int lightIndex);
 	void Shutdown();
-	void Update(float deltaTime, Player* player, LightManager* lightManager);
+	void Update(float deltaTime, Player* player, LightManager* lightManager, DirectX::SoundEffect* collectSound);
+
 	Model* GetModel();
-	bool IsCollected() const;
-	DirectX::XMFLOAT3 GetPosition() const; // <--- この行を追加
+	bool IsCollected() const; // <--- GetState() から IsCollected() に戻します
+	DirectX::XMFLOAT3 GetPosition() const;
 
 private:
 	std::unique_ptr<Model> m_model;
 	DirectX::XMFLOAT3 m_position;
-	bool m_isCollected;
+
+	bool m_isCollected;      // <--- enum OrbState から bool に戻します
 	int m_lightIndex;
 	float m_animationTimer;
 };

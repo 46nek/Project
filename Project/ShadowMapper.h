@@ -10,10 +10,8 @@
 class ShadowMapper
 {
 public:
-	// ¥¥¥ ‰ğ‘œ“x‚ğ 1024 ‚©‚ç 512 ‚É•ÏX ¥¥¥
-	static constexpr int SHADOWMAP_WIDTH = 512;
-	static constexpr int SHADOWMAP_HEIGHT = 512;
-	// £££ •ÏX‚±‚±‚Ü‚Å £££
+	static constexpr int SHADOWMAP_WIDTH = 256;
+	static constexpr int SHADOWMAP_HEIGHT = 256;
 
 	ShadowMapper();
 	~ShadowMapper();

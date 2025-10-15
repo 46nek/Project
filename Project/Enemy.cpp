@@ -145,15 +145,15 @@ void Enemy::Update(float deltaTime, const Player* player, const std::vector<std:
 			// --- プレイヤーとの距離に応じて経路探索の頻度を変更 ---
 			if (distanceSq > 15.0f * 15.0f) // 距離が15以上なら
 			{
-				m_pathCooldown = 2.0f; // 2秒ごと
+				m_pathCooldown = 3.0f; // 2秒ごと
 			}
 			else if (distanceSq > 10.0f * 10.0f) // 距離が10以上なら
 			{
-				m_pathCooldown = 1.0f; // 1秒ごと
+				m_pathCooldown = 1.5f; // 1秒ごと
 			}
 			else // 距離が10未満なら
 			{
-				m_pathCooldown = 0.5f; // 0.5秒ごと（より正確に追跡）
+				m_pathCooldown = 0.8f; // 0.5秒ごと（より正確に追跡）
 			}
 
 			int startX = static_cast<int>(m_position.x / pathWidth);

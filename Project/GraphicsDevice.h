@@ -32,9 +32,9 @@ struct MotionBlurBufferType
  */
 struct MaterialBufferType
 {
-	DirectX::XMFLOAT4 EmissiveColor; // 自己発光色
-	BOOL UseTexture;                 // テクスチャを使うかどうかのフラグ
-	DirectX::XMFLOAT3 Padding;       // 16バイトアラインメントのためのパディング
+	DirectX::XMFLOAT4 EmissiveColor;
+	BOOL UseTexture;
+	DirectX::XMFLOAT3 Padding; // AlphaとPadding(XMFLOAT2)から元に戻す
 };
 
 struct LightBufferType;

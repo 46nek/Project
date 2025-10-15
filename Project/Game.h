@@ -5,6 +5,7 @@
 #include "Input.h"
 #include "SceneManager.h"
 #include "Timer.h"
+#include "Audio.h"
 
 /**
  * @brief ゲーム全体の管理を行うメインクラス
@@ -66,5 +67,6 @@ private:
 	std::unique_ptr<GraphicsDevice> m_graphicsDevice;
 	std::unique_ptr<SceneManager> m_sceneManager;
 	std::unique_ptr<Timer> m_timer;
+	std::unique_ptr<DirectX::AudioEngine> m_audioEngine;
 	bool m_isPaused;
 };
