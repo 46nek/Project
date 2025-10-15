@@ -1,243 +1,219 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="リソース ファイル">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="Source">
-      <UniqueIdentifier>{abc46e0d-5c93-4b5c-bdab-9a43f99a74b3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Core">
-      <UniqueIdentifier>{6c64e0e4-f7eb-4d37-af47-5fd4006700fb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\DirectX">
-      <UniqueIdentifier>{f9e50b3d-0be7-4b29-ac39-a50e9d5714fb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Graphics">
-      <UniqueIdentifier>{d14a872f-1719-4669-80a3-b29e97d98446}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Scenes">
-      <UniqueIdentifier>{229d7e91-2cca-4934-8107-67d45d9d5049}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shaders">
-      <UniqueIdentifier>{e390a009-5510-4a04-a7af-8efe4c8cd6de}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Assets">
-      <UniqueIdentifier>{d68cbf2e-48b3-4056-a66b-c5428c428370}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\GamePlay">
-      <UniqueIdentifier>{f54cd52b-d12a-4551-ac41-71cad1f45a73}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Utilities">
-      <UniqueIdentifier>{cdd1634e-797f-4979-ad14-2fa8fa57108d}</UniqueIdentifier>
-    </Filter>
+    <FxCompile Include="DepthVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="PostProcessVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="TexturePixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="VertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="MotionBlur.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Model.h">
-      <Filter>Source\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Sprite.h">
-      <Filter>Source\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture.h">
-      <Filter>Source\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="framework.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Game.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Project.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="GameScene.h">
-      <Filter>Source\Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>Source\Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneManager.h">
-      <Filter>Source\Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="TitleScene.h">
-      <Filter>Source\Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="Window.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Light.h">
-      <Filter>Source\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicsDevice.h">
-      <Filter>Source\DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="SwapChain.h">
-      <Filter>Source\DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>Source\DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="AssetLoader.h">
-      <Filter>Source\Utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>Source\Utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="MeshGenerator.h">
-      <Filter>Source\Utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="MazeGenerator.h">
-      <Filter>Source\GamePlay</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Source\GamePlay</Filter>
-    </ClInclude>
-    <ClInclude Include="input.h">
-      <Filter>Source\GamePlay</Filter>
-    </ClInclude>
-    <ClInclude Include="LightManager.h">
-      <Filter>Source\GamePlay</Filter>
-    </ClInclude>
-    <ClInclude Include="ShaderManager.h">
-      <Filter>Source\DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="ShadowMapper.h">
-      <Filter>Source\DirectX</Filter>
-    </ClInclude>
-    <ClInclude Include="minimap.h">
-      <Filter>Source\GamePlay</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Source\GamePlay</Filter>
-    </ClInclude>
-    <ClInclude Include="Stage.h">
-      <Filter>Source\GamePlay</Filter>
-    </ClInclude>
-    <ClInclude Include="OrthoWindow.h">
-      <Filter>Source\Utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderTarget.h">
-      <Filter>Source\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="AStar.h">
-      <Filter>Source\GamePlay</Filter>
-    </ClInclude>
-    <ClInclude Include="Enemy.h">
-      <Filter>Source\GamePlay</Filter>
-    </ClInclude>
-    <ClInclude Include="Orb.h">
-      <Filter>Source\GamePlay</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source\Core</Filter>
-    </ClCompile>
     <ClCompile Include="Game.cpp">
-      <Filter>Source\Core</Filter>
+      <Filter>Source\00_Core</Filter>
     </ClCompile>
-    <ClCompile Include="GameScene.cpp">
-      <Filter>Source\Scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneManager.cpp">
-      <Filter>Source\Scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="TitleScene.cpp">
-      <Filter>Source\Scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>Source\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Sprite.cpp">
-      <Filter>Source\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>Source\Graphics</Filter>
+    <ClCompile Include="main.cpp">
+      <Filter>Source\00_Core</Filter>
     </ClCompile>
     <ClCompile Include="Window.cpp">
-      <Filter>Source\Core</Filter>
+      <Filter>Source\00_Core</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsDevice.cpp">
-      <Filter>Source\DirectX</Filter>
+    <ClCompile Include="TitleScene.cpp">
+      <Filter>Source\01_Scene</Filter>
     </ClCompile>
-    <ClCompile Include="SwapChain.cpp">
-      <Filter>Source\DirectX</Filter>
+    <ClCompile Include="GameScene.cpp">
+      <Filter>Source\01_Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>Source\DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="AssetLoader.cpp">
-      <Filter>Source\Utilities</Filter>
-    </ClCompile>
-    <ClCompile Include="Timer.cpp">
-      <Filter>Source\Utilities</Filter>
-    </ClCompile>
-    <ClCompile Include="MeshGenerator.cpp">
-      <Filter>Source\Utilities</Filter>
-    </ClCompile>
-    <ClCompile Include="MazeGenerator.cpp">
-      <Filter>Source\GamePlay</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Source\GamePlay</Filter>
-    </ClCompile>
-    <ClCompile Include="input.cpp">
-      <Filter>Source\GamePlay</Filter>
-    </ClCompile>
-    <ClCompile Include="LightManager.cpp">
-      <Filter>Source\GamePlay</Filter>
-    </ClCompile>
-    <ClCompile Include="ShaderManager.cpp">
-      <Filter>Source\DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="ShadowMapper.cpp">
-      <Filter>Source\DirectX</Filter>
-    </ClCompile>
-    <ClCompile Include="minimap.cpp">
-      <Filter>Source\GamePlay</Filter>
-    </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Source\GamePlay</Filter>
-    </ClCompile>
-    <ClCompile Include="Stage.cpp">
-      <Filter>Source\GamePlay</Filter>
-    </ClCompile>
-    <ClCompile Include="OrthoWindow.cpp">
-      <Filter>Source\Utilities</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderTarget.cpp">
-      <Filter>Source\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="AStar.cpp">
-      <Filter>Source\GamePlay</Filter>
+    <ClCompile Include="SceneManager.cpp">
+      <Filter>Source\01_Scene</Filter>
     </ClCompile>
     <ClCompile Include="Enemy.cpp">
-      <Filter>Source\GamePlay</Filter>
+      <Filter>Source\04_GamePlay\Entities</Filter>
     </ClCompile>
     <ClCompile Include="Orb.cpp">
-      <Filter>Source\GamePlay</Filter>
+      <Filter>Source\04_GamePlay\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source\04_GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="AStar.cpp">
+      <Filter>Source\04_GamePlay\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="input.cpp">
+      <Filter>Source\05_System</Filter>
+    </ClCompile>
+    <ClCompile Include="OrthoWindow.cpp">
+      <Filter>Source\05_System</Filter>
+    </ClCompile>
+    <ClCompile Include="MazeGenerator.cpp">
+      <Filter>Source\04_GamePlay\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="Stage.cpp">
+      <Filter>Source\04_GamePlay\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source\04_GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetLoader.cpp">
+      <Filter>Source\05_System</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsDevice.cpp">
+      <Filter>Source\03_DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="LightManager.cpp">
+      <Filter>Source\02_Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshGenerator.cpp">
+      <Filter>Source\05_System</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Source\02_Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Source\02_Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTarget.cpp">
+      <Filter>Source\03_DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderManager.cpp">
+      <Filter>Source\03_DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowMapper.cpp">
+      <Filter>Source\03_DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Sprite.cpp">
+      <Filter>Source\02_Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="SwapChain.cpp">
+      <Filter>Source\03_DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>Source\05_System</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source\02_Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="minimap.cpp">
+      <Filter>Source\04_GamePlay\Stage</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Project.rc">
-      <Filter>リソース ファイル</Filter>
-    </ResourceCompile>
+    <ClInclude Include="Game.h">
+      <Filter>Source\00_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Window.h">
+      <Filter>Source\00_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="TitleScene.h">
+      <Filter>Source\01_Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="GameScene.h">
+      <Filter>Source\01_Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>Source\01_Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Source\01_Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemy.h">
+      <Filter>Source\04_GamePlay\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Orb.h">
+      <Filter>Source\04_GamePlay\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Source\04_GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="AStar.h">
+      <Filter>Source\04_GamePlay\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="input.h">
+      <Filter>Source\05_System</Filter>
+    </ClInclude>
+    <ClInclude Include="OrthoWindow.h">
+      <Filter>Source\05_System</Filter>
+    </ClInclude>
+    <ClInclude Include="MazeGenerator.h">
+      <Filter>Source\04_GamePlay\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="Stage.h">
+      <Filter>Source\04_GamePlay\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Source\04_GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetLoader.h">
+      <Filter>Source\05_System</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsDevice.h">
+      <Filter>Source\03_DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Source\02_Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="LightManager.h">
+      <Filter>Source\02_Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshGenerator.h">
+      <Filter>Source\05_System</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Source\02_Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Source\02_Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTarget.h">
+      <Filter>Source\03_DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderManager.h">
+      <Filter>Source\03_DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowMapper.h">
+      <Filter>Source\03_DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Sprite.h">
+      <Filter>Source\02_Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SwapChain.h">
+      <Filter>Source\03_DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Source\05_System</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Source\02_Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Project.h">
+      <Filter>Source\06_Other</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Source\06_Other</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Source\06_Other</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h">
+      <Filter>Source\06_Other</Filter>
+    </ClInclude>
+    <ClInclude Include="minimap.h">
+      <Filter>Source\04_GamePlay\Stage</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="small.ico">
-      <Filter>リソース ファイル</Filter>
-    </Image>
-    <Image Include="Project.ico">
-      <Filter>リソース ファイル</Filter>
-    </Image>
     <Image Include="Assets\background.png">
       <Filter>Assets</Filter>
     </Image>
@@ -247,25 +223,60 @@
     <Image Include="Assets\title.png">
       <Filter>Assets</Filter>
     </Image>
+    <Image Include="small.ico">
+      <Filter>Resource</Filter>
+    </Image>
+    <Image Include="Project.ico">
+      <Filter>Resource</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="PixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="VertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="DepthVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="MotionBlur.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="PostProcessVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="TexturePixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
+    <Filter Include="Assets">
+      <UniqueIdentifier>{72e1e81b-ba44-41d1-8798-2284aa04f8d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{0be0f67d-1c2c-488c-b4f7-4545894627f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{0b58851d-90a8-4819-bf48-5fe16eecfb8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{d9f136e0-bb99-4e45-a20c-5c40df22acb1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\01_Scene">
+      <UniqueIdentifier>{0b52fbbb-4844-427f-802a-43a9f4451c3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\02_Graphics">
+      <UniqueIdentifier>{7ffe4622-4e22-436a-935e-325493b33301}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\03_DirectX">
+      <UniqueIdentifier>{1714fd5b-60ed-4778-b901-58550a202e2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\04_GamePlay">
+      <UniqueIdentifier>{ad62415c-154d-4dd6-8478-cbce1459f458}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\05_System">
+      <UniqueIdentifier>{aec882d0-8574-4364-b061-7b78c35de2e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\04_GamePlay\AI">
+      <UniqueIdentifier>{bb82579d-1c3d-4a91-89e9-1a613f0437e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\04_GamePlay\Entities">
+      <UniqueIdentifier>{9e2ffe64-da5c-4ab0-a56f-f5448f9d282e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\04_GamePlay\Stage">
+      <UniqueIdentifier>{a4286daf-beb7-4b33-93de-74941c4189bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\00_Core">
+      <UniqueIdentifier>{ea523a78-08d3-4e4a-b000-195bd0450c2f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\06_Other">
+      <UniqueIdentifier>{05b67270-2bed-4eb8-9060-6d1d32cfebeb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Project.rc">
+      <Filter>Resource</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
