@@ -11,16 +11,16 @@ Texture::~Texture()
 
 bool Texture::Initialize(ID3D11Device* device, const wchar_t* filename)
 {
-    HRESULT result;
+	HRESULT result;
 
-    // テクスチャファイルを読み込む
-    result = DirectX::CreateWICTextureFromFile(device, filename, nullptr, m_textureView.GetAddressOf());
-    if (FAILED(result))
-    {
-        return false;
-    }
+	// テクスチャファイルを読み込む
+	result = DirectX::CreateWICTextureFromFile(device, filename, nullptr, m_textureView.GetAddressOf());
+	if (FAILED(result))
+	{
+		return false;
+	}
 
-    return true;
+	return true;
 }
 
 void Texture::Shutdown()
@@ -29,5 +29,5 @@ void Texture::Shutdown()
 
 ID3D11ShaderResourceView* Texture::GetTexture()
 {
-    return m_textureView.Get();
+	return m_textureView.Get();
 }

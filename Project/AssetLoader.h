@@ -14,21 +14,21 @@
 class AssetLoader
 {
 public:
-    /**
-     * @brief Assimpライブラリを使用してモデルファイルを読み込む
-     * @return 読み込みに成功した場合はModelのユニークポインタ
-     */
-    static std::unique_ptr<Model> LoadModelFromFile(ID3D11Device* device, const std::string& filename);
+	/**
+	 * @brief Assimpライブラリを使用してモデルファイルを読み込む
+	 * @return 読み込みに成功した場合はModelのユニークポインタ
+	 */
+	static std::unique_ptr<Model> LoadModelFromFile(ID3D11Device* device, const std::string& filename);
 
-    /**
-     * @brief 迷路データから3Dモデルを生成する
-     * @return 生成に成功した場合はModelのユニークポインタ
-     */
-    static std::unique_ptr<Model> CreateMazeModel(ID3D11Device* device, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth, float wallHeight, MeshGenerator::MeshType type);
+	/**
+	 * @brief 迷路データから3Dモデルを生成する
+	 * @return 生成に成功した場合はModelのユニークポインタ
+	 */
+	static std::unique_ptr<Model> CreateMazeModel(ID3D11Device* device, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth, float wallHeight, MeshGenerator::MeshType type);
 
-    /**
-     * @brief テクスチャファイルを読み込む
-     * @return 読み込みに成功した場合はTextureのユニークポインタ
-     */
-    static std::unique_ptr<Texture> LoadTexture(ID3D11Device* device, const wchar_t* filename);
+	/**
+	 * @brief テクスチャファイルを読み込む
+	 * @return 読み込みに成功した場合はTextureのユニークポインタ
+	 */
+	static std::unique_ptr<Texture> LoadTexture(ID3D11Device* device, const wchar_t* filename);
 };

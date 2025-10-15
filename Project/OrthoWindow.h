@@ -6,13 +6,13 @@
 class OrthoWindow
 {
 public:
-    OrthoWindow();
-    ~OrthoWindow();
+	OrthoWindow();
+	~OrthoWindow();
 
-    bool Initialize(ID3D11Device* device, int windowWidth, int windowHeight);
-    void Shutdown();
-    void Render(ID3D11DeviceContext* deviceContext);
+	bool Initialize(ID3D11Device* device, int windowWidth, int windowHeight);
+	void Shutdown();
+	void Render(ID3D11DeviceContext* deviceContext);
 
 private:
-    std::unique_ptr<Model> m_quad;
+	std::unique_ptr<Model> m_quad;
 };

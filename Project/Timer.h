@@ -7,24 +7,24 @@
 class Timer
 {
 public:
-    Timer();
-    ~Timer();
+	Timer();
+	~Timer();
 
-    bool Initialize();
-    /**
-     * @brief 毎フレーム呼び出し、デルタタイムを計算
-     */
-    void Tick();
+	bool Initialize();
+	/**
+	 * @brief 毎フレーム呼び出し、デルタタイムを計算
+	 */
+	void Tick();
 
-    /**
-     * @brief 前フレームからの経過時間を秒単位で取得
-     * @return float デルタタイム（秒）
-     */
-    float GetDeltaTime() const;
+	/**
+	 * @brief 前フレームからの経過時間を秒単位で取得
+	 * @return float デルタタイム（秒）
+	 */
+	float GetDeltaTime() const;
 
 private:
-    INT64 m_frequency;
-    float m_ticksPerMillisecond;
-    INT64 m_startTime;
-    float m_deltaTime;
+	INT64 m_frequency;
+	float m_ticksPerMillisecond;
+	INT64 m_startTime;
+	float m_deltaTime;
 };

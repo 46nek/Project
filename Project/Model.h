@@ -12,12 +12,12 @@
  */
 struct SimpleVertex
 {
-    DirectX::XMFLOAT3 Pos;
-    DirectX::XMFLOAT4 Color;
-    DirectX::XMFLOAT2 Tex;
-    DirectX::XMFLOAT3 Normal;
-    DirectX::XMFLOAT3 Tangent;   
-    DirectX::XMFLOAT3 Binormal;
+	DirectX::XMFLOAT3 Pos;
+	DirectX::XMFLOAT4 Color;
+	DirectX::XMFLOAT2 Tex;
+	DirectX::XMFLOAT3 Normal;
+	DirectX::XMFLOAT3 Tangent;
+	DirectX::XMFLOAT3 Binormal;
 };
 
 /**
@@ -27,52 +27,52 @@ struct SimpleVertex
 class Model
 {
 public:
-    /**
-     * @struct Mesh
-     * @brief モデルを構成する単一のメッシュを表す
-     */
-    struct Mesh {
-        ID3D11Buffer* vertexBuffer = nullptr;
-        ID3D11Buffer* indexBuffer = nullptr;
-        int indexCount = 0;
-    };
+	/**
+	 * @struct Mesh
+	 * @brief モデルを構成する単一のメッシュを表す
+	 */
+	struct Mesh {
+		ID3D11Buffer* vertexBuffer = nullptr;
+		ID3D11Buffer* indexBuffer = nullptr;
+		int indexCount = 0;
+	};
 
-    Model();
-    ~Model();
+	Model();
+	~Model();
 
-    bool Initialize(ID3D11Device* device, const std::vector<SimpleVertex>& vertices, const std::vector<unsigned long>& indices);
-    void Shutdown();
-    void Render(ID3D11DeviceContext* deviceContext);
+	bool Initialize(ID3D11Device* device, const std::vector<SimpleVertex>& vertices, const std::vector<unsigned long>& indices);
+	void Shutdown();
+	void Render(ID3D11DeviceContext* deviceContext);
 
-    void SetTexture(std::unique_ptr<Texture> texture);
-    void SetNormalMap(std::unique_ptr<Texture> normalMap);
-    void SetPosition(float x, float y, float z);
-    void SetRotation(float x, float y, float z);
-    void SetScale(float x, float y, float z);
-    DirectX::XMMATRIX GetWorldMatrix() const;
-    /**
-    * @brief 自己発光色を設定します
-    */
-    void SetEmissiveColor(const DirectX::XMFLOAT4& color);
+	void SetTexture(std::unique_ptr<Texture> texture);
+	void SetNormalMap(std::unique_ptr<Texture> normalMap);
+	void SetPosition(float x, float y, float z);
+	void SetRotation(float x, float y, float z);
+	void SetScale(float x, float y, float z);
+	DirectX::XMMATRIX GetWorldMatrix() const;
+	/**
+	* @brief 自己発光色を設定します
+	*/
+	void SetEmissiveColor(const DirectX::XMFLOAT4& color);
 
-    /**
-     * @brief テクスチャを使用するかどうかを設定します
-     */
-    void SetUseTexture(bool useTexture);
+	/**
+	 * @brief テクスチャを使用するかどうかを設定します
+	 */
+	void SetUseTexture(bool useTexture);
 
-    DirectX::XMFLOAT4 GetEmissiveColor() const;
-    bool GetUseTexture() const;
+	DirectX::XMFLOAT4 GetEmissiveColor() const;
+	bool GetUseTexture() const;
 
 private:
-    void RenderBuffers(ID3D11DeviceContext*, const Mesh& mesh);
+	void RenderBuffers(ID3D11DeviceContext*, const Mesh& mesh);
 
-    std::vector<Mesh> m_meshes;
-    std::unique_ptr<Texture> m_texture;
-    std::unique_ptr<Texture> m_normalMap;
-    DirectX::XMFLOAT3 m_position;
-    DirectX::XMFLOAT3 m_rotation;
-    DirectX::XMFLOAT3 m_scale;
+	std::vector<Mesh> m_meshes;
+	std::unique_ptr<Texture> m_texture;
+	std::unique_ptr<Texture> m_normalMap;
+	DirectX::XMFLOAT3 m_position;
+	DirectX::XMFLOAT3 m_rotation;
+	DirectX::XMFLOAT3 m_scale;
 
-    DirectX::XMFLOAT4 m_emissiveColor;
-    bool m_useTexture;
+	DirectX::XMFLOAT4 m_emissiveColor;
+	bool m_useTexture;
 };

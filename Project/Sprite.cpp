@@ -12,46 +12,46 @@ Sprite::~Sprite()
 
 bool Sprite::Initialize(ID3D11Device* device, const wchar_t* textureFilename)
 {
-    Microsoft::WRL::ComPtr<ID3D11Resource> resource;
-    HRESULT hr = DirectX::CreateWICTextureFromFile(device, textureFilename, resource.GetAddressOf(), m_textureView.GetAddressOf());
-    if (FAILED(hr))
-    {
-        return false;
-    }
+	Microsoft::WRL::ComPtr<ID3D11Resource> resource;
+	HRESULT hr = DirectX::CreateWICTextureFromFile(device, textureFilename, resource.GetAddressOf(), m_textureView.GetAddressOf());
+	if (FAILED(hr))
+	{
+		return false;
+	}
 
-    Microsoft::WRL::ComPtr<ID3D11Texture2D> texture2D;
-    hr = resource.As(&texture2D);
-    if (SUCCEEDED(hr))
-    {
-        D3D11_TEXTURE2D_DESC desc;
-        texture2D->GetDesc(&desc);
-        m_textureWidth = desc.Width;
-        m_textureHeight = desc.Height;
-    }
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> texture2D;
+	hr = resource.As(&texture2D);
+	if (SUCCEEDED(hr))
+	{
+		D3D11_TEXTURE2D_DESC desc;
+		texture2D->GetDesc(&desc);
+		m_textureWidth = desc.Width;
+		m_textureHeight = desc.Height;
+	}
 
-    return true;
+	return true;
 }
 
 // ƒƒSEƒ{ƒ^ƒ“—p‚ÌRenderŠÖ”‚ÌŽÀ‘•
 void Sprite::Render(DirectX::SpriteBatch* spriteBatch, const DirectX::XMFLOAT2& position, float scale, float rotation, const DirectX::XMFLOAT4& color)
 {
-    if (spriteBatch && m_textureView)
-    {
-        DirectX::XMFLOAT2 origin(m_textureWidth / 2.0f, m_textureHeight / 2.0f);
-        spriteBatch->Draw(m_textureView.Get(), position, nullptr, DirectX::XMLoadFloat4(&color), rotation, origin, scale);
-    }
+	if (spriteBatch && m_textureView)
+	{
+		DirectX::XMFLOAT2 origin(m_textureWidth / 2.0f, m_textureHeight / 2.0f);
+		spriteBatch->Draw(m_textureView.Get(), position, nullptr, DirectX::XMLoadFloat4(&color), rotation, origin, scale);
+	}
 }
 
 // ”wŒi—p‚ÌRenderŠÖ”‚ÌŽÀ‘•
 void Sprite::RenderFill(DirectX::SpriteBatch* spriteBatch, const RECT& destinationRectangle)
 {
-    if (spriteBatch && m_textureView)
-    {
-        spriteBatch->Draw(m_textureView.Get(), destinationRectangle);
-    }
+	if (spriteBatch && m_textureView)
+	{
+		spriteBatch->Draw(m_textureView.Get(), destinationRectangle);
+	}
 }
 
 void Sprite::Shutdown()
 {
-    m_textureView.Reset();
+	m_textureView.Reset();
 }

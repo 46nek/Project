@@ -16,7 +16,7 @@
 #if defined(_DEBUG)
 inline void DbgPrint(const std::wstring& msg)
 {
-    wprintf(L"%s\n", msg.c_str());
+	wprintf(L"%s\n", msg.c_str());
 }
 #else
 #define DbgPrint(msg)

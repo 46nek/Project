@@ -7,7 +7,7 @@
 
 // ポリゴンの面の向き
 enum class FaceDirection {
-    Top, Bottom, Left, Right, Front, Back
+	Top, Bottom, Left, Right, Front, Back
 };
 
 /**
@@ -17,17 +17,17 @@ enum class FaceDirection {
 class MeshGenerator
 {
 public:
-    // 生成するメッシュの種類
-    enum class MeshType
-    {
-        Wall, Ceiling, Floor
-    };
+	// 生成するメッシュの種類
+	enum class MeshType
+	{
+		Wall, Ceiling, Floor
+	};
 
-    static bool CreateMazeMesh(
-        const std::vector<std::vector<MazeGenerator::CellType>>& mazeData,
-        float pathWidth,
-        float wallHeight,
-        MeshType type,
-        std::vector<SimpleVertex>& outVertices,
-        std::vector<unsigned long>& outIndices);
+	static bool CreateMazeMesh(
+		const std::vector<std::vector<MazeGenerator::CellType>>& mazeData,
+		float pathWidth,
+		float wallHeight,
+		MeshType type,
+		std::vector<SimpleVertex>& outVertices,
+		std::vector<unsigned long>& outIndices);
 };

@@ -13,25 +13,25 @@
 class Stage
 {
 public:
-    Stage();
-    ~Stage();
+	Stage();
+	~Stage();
 
-    bool Initialize(GraphicsDevice* graphicsDevice);
-    void Shutdown();
+	bool Initialize(GraphicsDevice* graphicsDevice);
+	void Shutdown();
 
-    const std::vector<std::unique_ptr<Model>>& GetModels() const;
-    const std::vector<std::vector<MazeGenerator::CellType>>& GetMazeData() const;
-    std::pair<int, int> GetStartPosition() const;
-    float GetPathWidth() const;
+	const std::vector<std::unique_ptr<Model>>& GetModels() const;
+	const std::vector<std::vector<MazeGenerator::CellType>>& GetMazeData() const;
+	std::pair<int, int> GetStartPosition() const;
+	float GetPathWidth() const;
 
-    // íËêî
-    static constexpr int MAZE_WIDTH = 31;
-    static constexpr int MAZE_HEIGHT = 31;
-    static constexpr float PATH_WIDTH = 2.5f;
-    static constexpr float WALL_HEIGHT = 5.0f;
+	// íËêî
+	static constexpr int MAZE_WIDTH = 31;
+	static constexpr int MAZE_HEIGHT = 31;
+	static constexpr float PATH_WIDTH = 2.5f;
+	static constexpr float WALL_HEIGHT = 5.0f;
 
 private:
 
-    std::unique_ptr<MazeGenerator> m_mazeGenerator;
-    std::vector<std::unique_ptr<Model>> m_models;
+	std::unique_ptr<MazeGenerator> m_mazeGenerator;
+	std::vector<std::unique_ptr<Model>> m_models;
 };
