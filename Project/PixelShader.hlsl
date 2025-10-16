@@ -12,7 +12,8 @@ cbuffer MaterialBuffer : register(b2)
 {
     float4 EmissiveColor;
     bool UseTexture;
-    float3 Padding; 
+    bool UseNormalMap; // <--- ’Ç‰Á
+    float2 Padding; // <--- •ÏX
 };
 
 #define DIRECTIONAL_LIGHT 0
@@ -64,10 +65,20 @@ float4 PS(VS_OUTPUT input) : SV_Target
         textureColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
     }
     
-    float3x3 tbnMatrix = float3x3(normalize(input.Tangent), normalize(input.Binormal), normalize(input.Normal));
-    float3 normalMapSample = normalMapTexture.Sample(SampleType, input.Tex).rgb;
-    float3 normalFromMap = (2.0f * normalMapSample) - 1.0f;
-    float3 finalNormal = normalize(mul(normalFromMap, tbnMatrix));
+    // ¥¥¥ ‚±‚±‚©‚çC³ ¥¥¥
+    float3 finalNormal;
+    if (UseNormalMap)
+    {
+        float3x3 tbnMatrix = float3x3(normalize(input.Tangent), normalize(input.Binormal), normalize(input.Normal));
+        float3 normalMapSample = normalMapTexture.Sample(SampleType, input.Tex).rgb;
+        float3 normalFromMap = (2.0f * normalMapSample) - 1.0f;
+        finalNormal = normalize(mul(normalFromMap, tbnMatrix));
+    }
+    else
+    {
+        finalNormal = normalize(input.Normal);
+    }
+    // £££ C³‚±‚±‚Ü‚Å £££
 
     float4 ambient = textureColor * float4(0.3f, 0.3f, 0.3f, 1.0f);
     float4 totalDiffuse = float4(0, 0, 0, 0);
@@ -87,7 +98,6 @@ float4 PS(VS_OUTPUT input) : SV_Target
     {
         if (!Lights[i].Enabled)
             continue;
-        
         float3 lightDir;
         float distance;
 
@@ -125,18 +135,18 @@ float4 PS(VS_OUTPUT input) : SV_Target
             spotFactor = smoothstep(outerConeCos, innerConeCos, spotCos);
         }
 
-        float diffuseIntensity = saturate(dot(finalNormal, lightDir));
+        float diffuseIntensity = saturate(dot(finalNormal, lightDir)); // finalNormal ‚ðŽg—p
         totalDiffuse += Lights[i].Color * diffuseIntensity * Lights[i].Intensity * attenuation * spotFactor * shadowFactor;
 
         float3 halfwayDir = normalize(lightDir + viewDir);
-        float specAngle = saturate(dot(finalNormal, halfwayDir));
+        float specAngle = saturate(dot(finalNormal, halfwayDir)); // finalNormal ‚ðŽg—p
         float specular = pow(specAngle, 32.0f);
         totalSpecular += float4(1.0f, 1.0f, 1.0f, 1.0f) * specular * Lights[i].Intensity * attenuation * spotFactor * shadowFactor;
     }
 
     float4 finalColor = (textureColor * (totalDiffuse + ambient)) + totalSpecular;
     finalColor += EmissiveColor;
-    finalColor.a = textureColor.a; // Alpha‚ÌŒvŽZ‚ðŒ³‚É–ß‚·
+    finalColor.a = textureColor.a;
 
     // Vignette Effect
     float2 screenCenter = float2(0.5f, 0.5f);

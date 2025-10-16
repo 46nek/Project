@@ -1,3 +1,5 @@
+// GraphicsDevice.cpp (この内容で完全に置き換えてください)
+
 #include "GraphicsDevice.h"
 #include "LightManager.h"
 
@@ -5,7 +7,8 @@ GraphicsDevice::GraphicsDevice()
 	: m_d3dDevice(nullptr), m_immediateContext(nullptr),
 	m_matrixBuffer(nullptr), m_lightBuffer(nullptr), m_motionBlurBuffer(nullptr),
 	m_materialBuffer(nullptr),
-	m_samplerState(nullptr)
+	m_samplerState(nullptr),
+	m_defaultRasterizerState(nullptr)
 {
 }
 
@@ -63,7 +66,6 @@ bool GraphicsDevice::Initialize(HWND hWnd, int screenWidth, int screenHeight)
 	hr = m_d3dDevice->CreateBuffer(&motionBlurBufferDesc, NULL, &m_motionBlurBuffer);
 	if (FAILED(hr)) return false;
 
-	// マテリアルバッファの作成
 	D3D11_BUFFER_DESC materialBufferDesc = {};
 	materialBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	materialBufferDesc.ByteWidth = sizeof(MaterialBufferType);
@@ -82,15 +84,26 @@ bool GraphicsDevice::Initialize(HWND hWnd, int screenWidth, int screenHeight)
 	hr = m_d3dDevice->CreateSamplerState(&samplerDesc, &m_samplerState);
 	if (FAILED(hr)) return false;
 
-	// ブレンドステートの作成
+	D3D11_RASTERIZER_DESC rasterDesc = {};
+	rasterDesc.FillMode = D3D11_FILL_SOLID;
+	rasterDesc.CullMode = D3D11_CULL_BACK;
+	rasterDesc.FrontCounterClockwise = true;
+	rasterDesc.DepthBias = 0;
+	rasterDesc.SlopeScaledDepthBias = 0.0f;
+	rasterDesc.DepthBiasClamp = 0.0f;
+	rasterDesc.DepthClipEnable = true;
+	rasterDesc.ScissorEnable = false;
+	rasterDesc.MultisampleEnable = false;
+	rasterDesc.AntialiasedLineEnable = false;
+	hr = m_d3dDevice->CreateRasterizerState(&rasterDesc, &m_defaultRasterizerState);
+	if (FAILED(hr)) return false;
+
 	D3D11_BLEND_DESC blendDesc = {};
-	// デフォルト（ブレンドなし）
 	blendDesc.RenderTarget[0].BlendEnable = FALSE;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 	hr = m_d3dDevice->CreateBlendState(&blendDesc, &m_defaultBlendState);
 	if (FAILED(hr)) return false;
 
-	// アルファブレンド有効
 	blendDesc.RenderTarget[0].BlendEnable = TRUE;
 	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
 	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
@@ -106,21 +119,19 @@ bool GraphicsDevice::Initialize(HWND hWnd, int screenWidth, int screenHeight)
 
 void GraphicsDevice::Shutdown()
 {
+	if (m_defaultRasterizerState) m_defaultRasterizerState->Release();
 	if (m_alphaBlendState) m_alphaBlendState->Release();
 	if (m_defaultBlendState) m_defaultBlendState->Release();
-
 	if (m_samplerState) m_samplerState->Release();
 	if (m_lightBuffer) m_lightBuffer->Release();
 	if (m_matrixBuffer) m_matrixBuffer->Release();
 	if (m_materialBuffer) m_materialBuffer->Release();
 	if (m_motionBlurBuffer) m_motionBlurBuffer->Release();
-
 	if (m_orthoWindow) m_orthoWindow->Shutdown();
 	if (m_renderTarget) m_renderTarget->Shutdown();
 	if (m_shadowMapper) m_shadowMapper->Shutdown();
 	if (m_shaderManager) m_shaderManager->Shutdown();
 	if (m_swapChain) m_swapChain->Shutdown();
-
 	if (m_immediateContext) m_immediateContext->Release();
 	if (m_d3dDevice) m_d3dDevice->Release();
 }
@@ -175,6 +186,17 @@ bool GraphicsDevice::UpdateMotionBlurBuffer(const DirectX::XMMATRIX& prevViewPro
 	return true;
 }
 
+bool GraphicsDevice::UpdateMaterialBuffer(const MaterialBufferType& materialBuffer)
+{
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	if (FAILED(m_immediateContext->Map(m_materialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) return false;
+	MaterialBufferType* dataPtr = (MaterialBufferType*)mappedResource.pData;
+	*dataPtr = materialBuffer;
+	m_immediateContext->Unmap(m_materialBuffer, 0);
+	m_immediateContext->PSSetConstantBuffers(2, 1, &m_materialBuffer);
+	return true;
+}
+
 ID3D11BlendState* GraphicsDevice::GetAlphaBlendState() const
 {
 	return m_alphaBlendState;
@@ -185,17 +207,7 @@ ID3D11BlendState* GraphicsDevice::GetDefaultBlendState() const
 	return m_defaultBlendState;
 }
 
-bool GraphicsDevice::UpdateMaterialBuffer(const MaterialBufferType& materialBuffer)
+ID3D11RasterizerState* GraphicsDevice::GetDefaultRasterizerState() const
 {
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	if (FAILED(m_immediateContext->Map(m_materialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) return false;
-
-	MaterialBufferType* dataPtr = (MaterialBufferType*)mappedResource.pData;
-	*dataPtr = materialBuffer;
-
-	m_immediateContext->Unmap(m_materialBuffer, 0);
-	// ピクセルシェーダーの定数バッファスロット2番に設定
-	m_immediateContext->PSSetConstantBuffers(2, 1, &m_materialBuffer);
-
-	return true;
+	return m_defaultRasterizerState;
 }

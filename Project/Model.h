@@ -42,9 +42,12 @@ public:
 	DirectX::XMMATRIX GetWorldMatrix() const;
 	void SetEmissiveColor(const DirectX::XMFLOAT4& color);
 	void SetUseTexture(bool useTexture);
+	void SetUseNormalMap(bool useNormalMap); // <--- ’Ç‰Á
 
 	DirectX::XMFLOAT4 GetEmissiveColor() const;
 	bool GetUseTexture() const;
+	bool GetUseNormalMap() const; // <--- ’Ç‰Á
+	bool HasNormalMap() const;    // <--- ’Ç‰Á
 
 private:
 	void RenderBuffers(ID3D11DeviceContext*, const Mesh& mesh);
@@ -58,4 +61,5 @@ private:
 
 	DirectX::XMFLOAT4 m_emissiveColor;
 	bool m_useTexture;
+	bool m_useNormalMap; // <--- ’Ç‰Á
 };

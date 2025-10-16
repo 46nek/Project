@@ -107,7 +107,6 @@ void Renderer::RenderMainPass(const std::vector<Model*>& models, const Camera* c
 	deviceContext->RSSetViewports(1, &vp);
 	deviceContext->RSSetState(nullptr);
 
-	// ブレンドステートを設定
 	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	deviceContext->OMSetBlendState(m_graphicsDevice->GetAlphaBlendState(), blendFactor, 0xffffffff);
 
@@ -129,11 +128,13 @@ void Renderer::RenderMainPass(const std::vector<Model*>& models, const Camera* c
 
 	for (Model* model : models) {
 		if (model) {
-			// モデルのマテリアル情報をシェーダーに渡す
+			// ▼▼▼ ここから修正 ▼▼▼
 			MaterialBufferType materialBuffer;
 			materialBuffer.EmissiveColor = model->GetEmissiveColor();
 			materialBuffer.UseTexture = model->GetUseTexture();
+			materialBuffer.UseNormalMap = model->HasNormalMap() && model->GetUseNormalMap(); // モデルが法線マップを持っているか確認
 			m_graphicsDevice->UpdateMaterialBuffer(materialBuffer);
+			// ▲▲▲ 修正ここまで ▲▲▲
 
 			m_graphicsDevice->UpdateMatrixBuffer(
 				model->GetWorldMatrix(),
@@ -145,6 +146,5 @@ void Renderer::RenderMainPass(const std::vector<Model*>& models, const Camera* c
 			model->Render(deviceContext);
 		}
 	}
-	// ブレンドステートをデフォルトに戻す
 	deviceContext->OMSetBlendState(m_graphicsDevice->GetDefaultBlendState(), blendFactor, 0xffffffff);
 }

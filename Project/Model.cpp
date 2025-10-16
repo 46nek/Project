@@ -8,8 +8,9 @@ Model::Model()
 	m_position = { 0.0f, 0.0f, 0.0f };
 	m_rotation = { 0.0f, 0.0f, 0.0f };
 	m_scale = { 1.0f, 1.0f, 1.0f };
-	m_emissiveColor = { 0.0f, 0.0f, 0.0f, 1.0f }; // デフォルトは光らない
-	m_useTexture = true; // デフォルトはテクスチャを使用する
+	m_emissiveColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+	m_useTexture = true;
+	m_useNormalMap = true; // <--- 追加 (デフォルトは使用する)
 }
 
 Model::~Model()
@@ -78,7 +79,7 @@ void Model::Render(ID3D11DeviceContext* deviceContext)
 	}
 	if (m_normalMap) {
 		ID3D11ShaderResourceView* normalMapView = m_normalMap->GetTexture();
-		deviceContext->PSSetShaderResources(2, 1, &normalMapView); // レジスタースロットを t2 に設定
+		deviceContext->PSSetShaderResources(2, 1, &normalMapView);
 	}
 	for (auto& mesh : m_meshes) {
 		RenderBuffers(deviceContext, mesh);
@@ -117,6 +118,12 @@ void Model::SetUseTexture(bool useTexture)
 	m_useTexture = useTexture;
 }
 
+// ▼▼▼ 以下をすべて追加 ▼▼▼
+void Model::SetUseNormalMap(bool useNormalMap)
+{
+	m_useNormalMap = useNormalMap;
+}
+
 DirectX::XMFLOAT4 Model::GetEmissiveColor() const
 {
 	return m_emissiveColor;
@@ -126,3 +133,14 @@ bool Model::GetUseTexture() const
 {
 	return m_useTexture;
 }
+
+bool Model::GetUseNormalMap() const
+{
+	return m_useNormalMap;
+}
+
+bool Model::HasNormalMap() const
+{
+	return m_normalMap != nullptr;
+}
+// ▲▲▲ 追加ここまで ▲▲▲

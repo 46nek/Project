@@ -77,6 +77,7 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX
 	m_uiOrb->SetScale(0.5f, 0.5f, 0.5f);
 	m_uiOrb->SetEmissiveColor({ 0.6f, 0.8f, 1.0f, 1.0f });
 	m_uiOrb->SetUseTexture(false);
+	m_uiOrb->SetUseNormalMap(false);
 
 	// UI用カメラの初期化
 	m_uiCamera = std::make_unique<Camera>();
@@ -302,15 +303,18 @@ void GameScene::Render()
 		}
 	}
 
+	// 1. 3Dシーンをテクスチャにレンダリング
 	m_renderer->RenderSceneToTexture(modelsToRender, m_camera.get(), m_lightManager.get());
+	// 2. ポストエフェクトを適用して画面に描画
 	m_renderer->RenderFinalPass(m_camera.get());
+	// 3. ミニマップを描画
 	m_minimap->Render(m_camera.get(), m_enemies, m_orbs);
 
 	ID3D11DeviceContext* deviceContext = m_graphicsDevice->GetDeviceContext();
 	ShaderManager* shaderManager = m_graphicsDevice->GetShaderManager();
 
 	// --- UI用Orbの描画 ---
-	// 1. 新しいビューポートを定義 (画面右上に150x150の領域)
+	// a. 新しいビューポートを定義
 	D3D11_VIEWPORT uiViewport = {};
 	uiViewport.Width = 150.0f;
 	uiViewport.Height = 150.0f;
@@ -320,58 +324,66 @@ void GameScene::Render()
 	uiViewport.MaxDepth = 1.0f;
 	deviceContext->RSSetViewports(1, &uiViewport);
 
-	// 2. 深度バッファをクリア（UIが常に手前に描画されるようにする）
-	deviceContext->ClearDepthStencilView(m_graphicsDevice->GetSwapChain()->GetDepthStencilView(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	// b. ▼▼▼ ここが最重要修正点 ▼▼▼
+	// UIは常に最前面なので、深度テストを完全に無効化する
+	m_graphicsDevice->GetSwapChain()->TurnZBufferOff(deviceContext);
 
-	// 3. 3Dモデル描画用のシェーダーとステートを"すべて"再設定する
-	m_graphicsDevice->GetSwapChain()->TurnZBufferOn(deviceContext);
-	deviceContext->RSSetState(nullptr); // ラスタライザーステートをデフォルトに戻す (シザー矩形を解除)
+	// 3. ゲーム本編用のシェーダーとステートを設定
 	deviceContext->IASetInputLayout(shaderManager->GetInputLayout());
-	deviceContext->VSSetShader(shaderManager->GetVertexShader(), nullptr, 0);
-	deviceContext->PSSetShader(shaderManager->GetPixelShader(), nullptr, 0);
-
-	// ▼▼▼ サンプラーステートを再設定する処理を追加 ▼▼▼
-	ID3D11SamplerState* samplerState = m_graphicsDevice->GetSamplerState();
-	deviceContext->PSSetSamplers(0, 1, &samplerState);
-	ID3D11SamplerState* shadowSampler = m_graphicsDevice->GetShadowMapper()->GetShadowSampleState();
-	deviceContext->PSSetSamplers(1, 1, &shadowSampler);
-	// ▲▲▲ 追加ここまで ▲▲▲
+	deviceContext->VSSetShader(shaderManager->GetVertexShader(), nullptr, 0); // Simpleから本編用に変更
+	deviceContext->PSSetShader(shaderManager->GetPixelShader(), nullptr, 0);  // Simpleから本編用に変更
+	deviceContext->RSSetState(m_graphicsDevice->GetDefaultRasterizerState());
 
 	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	deviceContext->OMSetBlendState(m_graphicsDevice->GetDefaultBlendState(), blendFactor, 0xffffffff);
 
+	// 4. UI Orb専用の照明を設定
+	LightBufferType uiLightBuffer = {};
+	uiLightBuffer.NumLights = 1;
+	uiLightBuffer.CameraPosition = m_uiCamera->GetPosition(); // UIカメラの位置を設定
 
-	// 4. UI用のカメラと射影行列でモデルを描画
+	// 右上から照らすような指向性ライトを1つ定義
+	uiLightBuffer.Lights[0].Type = LightType::DirectionalLight;
+	uiLightBuffer.Lights[0].Enabled = true;
+	uiLightBuffer.Lights[0].Direction = { 0.5f, -0.5f, 0.5f }; // 右上からの光
+	uiLightBuffer.Lights[0].Color = { 1.0f, 1.0f, 1.0f, 1.0f };
+	uiLightBuffer.Lights[0].Intensity = 1.0f;
+	m_graphicsDevice->UpdateLightBuffer(uiLightBuffer);
+
+	// 5. UI Orbのマテリアルを設定
+	MaterialBufferType materialBuffer;
+	materialBuffer.EmissiveColor = m_uiOrb->GetEmissiveColor();
+	materialBuffer.UseTexture = false;    // テクスチャは使わない
+	materialBuffer.UseNormalMap = false;  // 法線マップも使わない
+	m_graphicsDevice->UpdateMaterialBuffer(materialBuffer);
+
+	// 不要なテクスチャがGPUに残らないようクリア
+	ID3D11ShaderResourceView* nullSRVs[] = { nullptr, nullptr, nullptr };
+	deviceContext->PSSetShaderResources(0, 3, nullSRVs);
+
+	// 6. UI用のカメラと射影行列でモデルを描画
 	m_uiCamera->Update();
 	DirectX::XMMATRIX uiViewMatrix = m_uiCamera->GetViewMatrix();
 	DirectX::XMMATRIX uiProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, 1.0f, 0.1f, 100.0f);
-
-	// UI Orbのマテリアル情報を更新
-	MaterialBufferType materialBuffer;
-	materialBuffer.EmissiveColor = m_uiOrb->GetEmissiveColor();
-	materialBuffer.UseTexture = m_uiOrb->GetUseTexture();
-	m_graphicsDevice->UpdateMaterialBuffer(materialBuffer);
-
-	// ライトを無効化して描画
-	LightBufferType emptyLightBuffer = {};
-	emptyLightBuffer.NumLights = 0;
-	m_graphicsDevice->UpdateLightBuffer(emptyLightBuffer);
 
 	m_graphicsDevice->UpdateMatrixBuffer(
 		m_uiOrb->GetWorldMatrix(),
 		uiViewMatrix,
 		uiProjectionMatrix,
-		m_lightManager->GetLightViewMatrix(), // (未使用だが念のため渡す)
-		m_lightManager->GetLightProjectionMatrix() // (未使用だが念のため渡す)
+		DirectX::XMMatrixIdentity(),
+		DirectX::XMMatrixIdentity()
 	);
+
+	// Orbを描画
 	m_uiOrb->Render(deviceContext);
 
-	// 5. ビューポートを元に戻す
+	// e. 後処理: ビューポートと深度設定を元に戻す
 	D3D11_VIEWPORT mainViewport = {};
 	mainViewport.Width = (FLOAT)Game::SCREEN_WIDTH;
 	mainViewport.Height = (FLOAT)Game::SCREEN_HEIGHT;
 	mainViewport.MaxDepth = 1.0f;
 	deviceContext->RSSetViewports(1, &mainViewport);
+	m_graphicsDevice->GetSwapChain()->TurnZBufferOn(deviceContext); // 次のフレームのためにONに戻す
 
 	m_graphicsDevice->EndScene();
 }

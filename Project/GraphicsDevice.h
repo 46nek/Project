@@ -1,3 +1,5 @@
+// GraphicsDevice.h (‚±‚Ì“à—e‚ÅŠ®‘S‚É’u‚«Š·‚¦‚Ä‚­‚¾‚³‚¢)
+
 #pragma once
 #include <d3d11.h>
 #include <DirectXMath.h>
@@ -34,7 +36,8 @@ struct MaterialBufferType
 {
 	DirectX::XMFLOAT4 EmissiveColor;
 	BOOL UseTexture;
-	DirectX::XMFLOAT3 Padding; // Alpha‚ÆPadding(XMFLOAT2)‚©‚çŒ³‚É–ß‚·
+	BOOL UseNormalMap;
+	DirectX::XMFLOAT2 Padding;
 };
 
 struct LightBufferType;
@@ -64,6 +67,8 @@ public:
 	ID3D11SamplerState* GetSamplerState() const { return m_samplerState; }
 	ID3D11BlendState* GetAlphaBlendState() const;
 	ID3D11BlendState* GetDefaultBlendState() const;
+	ID3D11RasterizerState* GetDefaultRasterizerState() const;
+
 private:
 	ID3D11Device* m_d3dDevice;
 	ID3D11DeviceContext* m_immediateContext;
@@ -74,6 +79,7 @@ private:
 	ID3D11SamplerState* m_samplerState;
 	ID3D11BlendState* m_alphaBlendState;
 	ID3D11BlendState* m_defaultBlendState;
+	ID3D11RasterizerState* m_defaultRasterizerState;
 
 	std::unique_ptr<SwapChain> m_swapChain;
 	std::unique_ptr<ShaderManager> m_shaderManager;
