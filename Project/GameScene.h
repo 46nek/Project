@@ -43,4 +43,7 @@ private:
 	std::vector<std::unique_ptr<Orb>> m_orbs;
 
 	std::unique_ptr<DirectX::SoundEffect> m_collectSound;
+	std::unique_ptr<Model> m_uiOrb;
+	std::unique_ptr<Camera> m_uiCamera;
+	int m_collectedOrbsCount; // 収集したオーブの数
 };

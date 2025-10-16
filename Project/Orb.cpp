@@ -20,6 +20,7 @@ bool Orb::Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& position, in
 	m_position = position;
 	m_lightIndex = lightIndex;
 
+	// モデルのファイル名を "cube.obj" に修正
 	m_model = AssetLoader::LoadModelFromFile(device, "Assets/cube.obj");
 	if (!m_model)
 	{

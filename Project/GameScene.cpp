@@ -2,13 +2,16 @@
 
 #include "GameScene.h"
 #include "AssetLoader.h"
+#include "Game.h"
 #include <random>
 #include <tuple>
 #include <algorithm> // std::shuffle用
 
-GameScene::GameScene()
+// コンストラクタで収集済みオーブの数を初期化
+GameScene::GameScene() : m_collectedOrbsCount(0)
 {
 }
+
 GameScene::~GameScene() {}
 
 bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine)
@@ -64,6 +67,21 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX
 		MessageBoxA(nullptr, e.what(), "Sound Error", MB_OK);
 		return false;
 	}
+
+	// モデルのファイル名を "cube.obj" に修正
+	m_uiOrb = AssetLoader::LoadModelFromFile(m_graphicsDevice->GetDevice(), "Assets/cube.obj");
+	if (!m_uiOrb)
+	{
+		return false;
+	}
+	m_uiOrb->SetScale(0.5f, 0.5f, 0.5f);
+	m_uiOrb->SetEmissiveColor({ 0.6f, 0.8f, 1.0f, 1.0f });
+	m_uiOrb->SetUseTexture(false);
+
+	// UI用カメラの初期化
+	m_uiCamera = std::make_unique<Camera>();
+	m_uiCamera->SetPosition(0.0f, 0.0f, -2.5f); // Orbから少し離れた位置
+
 	return true;
 }
 
@@ -248,6 +266,21 @@ void GameScene::Update(float deltaTime)
 	m_camera->Update();
 
 	m_lightManager->Update(deltaTime, m_camera->GetPosition(), m_camera->GetRotation());
+
+	// UI用Orbを回転させる
+	static float uiOrbRotation = 0.0f;
+	uiOrbRotation += deltaTime * 1.5f;
+	m_uiOrb->SetRotation(0.0f, uiOrbRotation, 0.0f);
+
+	// 収集したオーブの数を更新
+	m_collectedOrbsCount = 0;
+	for (const auto& orb : m_orbs)
+	{
+		if (orb->IsCollected())
+		{
+			m_collectedOrbsCount++;
+		}
+	}
 }
 
 void GameScene::Render()
@@ -272,6 +305,73 @@ void GameScene::Render()
 	m_renderer->RenderSceneToTexture(modelsToRender, m_camera.get(), m_lightManager.get());
 	m_renderer->RenderFinalPass(m_camera.get());
 	m_minimap->Render(m_camera.get(), m_enemies, m_orbs);
+
+	ID3D11DeviceContext* deviceContext = m_graphicsDevice->GetDeviceContext();
+	ShaderManager* shaderManager = m_graphicsDevice->GetShaderManager();
+
+	// --- UI用Orbの描画 ---
+	// 1. 新しいビューポートを定義 (画面右上に150x150の領域)
+	D3D11_VIEWPORT uiViewport = {};
+	uiViewport.Width = 150.0f;
+	uiViewport.Height = 150.0f;
+	uiViewport.TopLeftX = Game::SCREEN_WIDTH - uiViewport.Width - 20.0f;
+	uiViewport.TopLeftY = 20.0f;
+	uiViewport.MinDepth = 0.0f;
+	uiViewport.MaxDepth = 1.0f;
+	deviceContext->RSSetViewports(1, &uiViewport);
+
+	// 2. 深度バッファをクリア（UIが常に手前に描画されるようにする）
+	deviceContext->ClearDepthStencilView(m_graphicsDevice->GetSwapChain()->GetDepthStencilView(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+	// 3. 3Dモデル描画用のシェーダーとステートを"すべて"再設定する
+	m_graphicsDevice->GetSwapChain()->TurnZBufferOn(deviceContext);
+	deviceContext->RSSetState(nullptr); // ラスタライザーステートをデフォルトに戻す (シザー矩形を解除)
+	deviceContext->IASetInputLayout(shaderManager->GetInputLayout());
+	deviceContext->VSSetShader(shaderManager->GetVertexShader(), nullptr, 0);
+	deviceContext->PSSetShader(shaderManager->GetPixelShader(), nullptr, 0);
+
+	// ▼▼▼ サンプラーステートを再設定する処理を追加 ▼▼▼
+	ID3D11SamplerState* samplerState = m_graphicsDevice->GetSamplerState();
+	deviceContext->PSSetSamplers(0, 1, &samplerState);
+	ID3D11SamplerState* shadowSampler = m_graphicsDevice->GetShadowMapper()->GetShadowSampleState();
+	deviceContext->PSSetSamplers(1, 1, &shadowSampler);
+	// ▲▲▲ 追加ここまで ▲▲▲
+
+	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	deviceContext->OMSetBlendState(m_graphicsDevice->GetDefaultBlendState(), blendFactor, 0xffffffff);
+
+
+	// 4. UI用のカメラと射影行列でモデルを描画
+	m_uiCamera->Update();
+	DirectX::XMMATRIX uiViewMatrix = m_uiCamera->GetViewMatrix();
+	DirectX::XMMATRIX uiProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, 1.0f, 0.1f, 100.0f);
+
+	// UI Orbのマテリアル情報を更新
+	MaterialBufferType materialBuffer;
+	materialBuffer.EmissiveColor = m_uiOrb->GetEmissiveColor();
+	materialBuffer.UseTexture = m_uiOrb->GetUseTexture();
+	m_graphicsDevice->UpdateMaterialBuffer(materialBuffer);
+
+	// ライトを無効化して描画
+	LightBufferType emptyLightBuffer = {};
+	emptyLightBuffer.NumLights = 0;
+	m_graphicsDevice->UpdateLightBuffer(emptyLightBuffer);
+
+	m_graphicsDevice->UpdateMatrixBuffer(
+		m_uiOrb->GetWorldMatrix(),
+		uiViewMatrix,
+		uiProjectionMatrix,
+		m_lightManager->GetLightViewMatrix(), // (未使用だが念のため渡す)
+		m_lightManager->GetLightProjectionMatrix() // (未使用だが念のため渡す)
+	);
+	m_uiOrb->Render(deviceContext);
+
+	// 5. ビューポートを元に戻す
+	D3D11_VIEWPORT mainViewport = {};
+	mainViewport.Width = (FLOAT)Game::SCREEN_WIDTH;
+	mainViewport.Height = (FLOAT)Game::SCREEN_HEIGHT;
+	mainViewport.MaxDepth = 1.0f;
+	deviceContext->RSSetViewports(1, &mainViewport);
 
 	m_graphicsDevice->EndScene();
 }

@@ -18,7 +18,7 @@ Enemy::~Enemy() {}
 bool Enemy::Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& startPosition, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData)
 {
 	m_position = startPosition;
-	m_model = AssetLoader::LoadModelFromFile(device, "Assets/cube.fbx");
+	m_model = AssetLoader::LoadModelFromFile(device, "Assets/cube.obj");
 	if (!m_model) return false;
 
 	m_model->SetPosition(startPosition.x, startPosition.y, startPosition.z);
