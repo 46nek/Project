@@ -1,3 +1,5 @@
+// SimpleVertexShader.hlsl (この内容で完全に置き換えてください)
+
 cbuffer MatrixBuffer : register(b0)
 {
     matrix WorldMatrix;
@@ -8,6 +10,7 @@ cbuffer MatrixBuffer : register(b0)
     matrix LightProjectionMatrix;
 };
 
+// アプリケーションからの入力頂点データ
 struct VS_INPUT
 {
     float4 Pos : POSITION;
@@ -19,11 +22,22 @@ struct VS_INPUT
     float3 Binormal : BINORMAL;
 };
 
-float4 main(VS_INPUT input) : SV_POSITION
+// ピクセルシェーダーへの出力
+struct VS_OUTPUT
 {
+    float4 Pos : SV_POSITION;
+};
+
+VS_OUTPUT main(VS_INPUT input)
+{
+    VS_OUTPUT output;
     float4 pos = input.Pos;
+
+    // ワールド、ビュー、プロジェクション行列を適用して座標を変換
     pos = mul(pos, WorldMatrix);
     pos = mul(pos, ViewMatrix);
     pos = mul(pos, ProjectionMatrix);
-    return pos;
+    output.Pos = pos;
+    
+    return output;
 }
