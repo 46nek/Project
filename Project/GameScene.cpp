@@ -211,7 +211,18 @@ void GameScene::Update(float deltaTime)
 
 	m_lightManager->Update(deltaTime, m_camera->GetPosition(), m_camera->GetRotation());
 
-	m_ui->Update(deltaTime);
+	// 残りのオーブ数を計算
+	int remainingOrbs = 0;
+	for (const auto& orb : m_orbs)
+	{
+		if (orb && !orb->IsCollected())
+		{
+			remainingOrbs++;
+		}
+	}
+	// UIにオーブの情報を渡す
+	m_ui->Update(deltaTime, remainingOrbs, static_cast<int>(m_orbs.size()));
+
 }
 
 
