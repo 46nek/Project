@@ -1,3 +1,5 @@
+// Project/Sprite.cpp
+
 #include "Sprite.h"
 #include "WICTextureLoader.h"
 #include "SpriteBatch.h"
@@ -54,4 +56,14 @@ void Sprite::RenderFill(DirectX::SpriteBatch* spriteBatch, const RECT& destinati
 void Sprite::Shutdown()
 {
 	m_textureView.Reset();
+}
+
+void Sprite::RenderFill(DirectX::SpriteBatch* spriteBatch, const RECT& destinationRect, const DirectX::XMFLOAT4& color)
+{
+	// m_texture ではなく、m_textureView を使います
+	if (spriteBatch && m_textureView)
+	{
+		// m_textureView.Get() でシェーダーリソースビューを取得します
+		spriteBatch->Draw(m_textureView.Get(), destinationRect, DirectX::XMLoadFloat4(&color));
+	}
 }

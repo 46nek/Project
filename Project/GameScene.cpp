@@ -219,9 +219,8 @@ void GameScene::Update(float deltaTime)
 		{
 			remainingOrbs++;
 		}
-	}
-	// UIにオーブの情報を渡す
-	m_ui->Update(deltaTime, remainingOrbs, static_cast<int>(m_orbs.size()));
+	}// UIにオーブの情報とプレイヤーのスタミナ情報を渡す
+	m_ui->Update(deltaTime, remainingOrbs, static_cast<int>(m_orbs.size()), m_player->GetStaminaPercentage());
 
 }
 

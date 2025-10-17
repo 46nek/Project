@@ -27,7 +27,13 @@ public:
 
 	int GetWidth() const { return m_textureWidth; }
 	int GetHeight() const { return m_textureHeight; }
-
+	/**
+	 * @brief 指定した色で矩形領域を塗りつぶして描画します。
+	 * @param spriteBatch スプライトバッチ
+	 * @param destinationRect 描画先の矩形
+	 * @param color 塗りつぶす色 (RGBA)
+	 */
+	void RenderFill(DirectX::SpriteBatch* spriteBatch, const RECT& destinationRect, const DirectX::XMFLOAT4& color);
 private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureView;
 	int m_textureWidth;

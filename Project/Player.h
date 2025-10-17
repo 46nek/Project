@@ -1,9 +1,11 @@
-// Player.h (変更後)
+// Project/Player.h
+
 #pragma once
 #include <DirectXMath.h>
 #include <vector>
 #include "Input.h"
 #include "MazeGenerator.h"
+#include <algorithm> // std::max, std::min のために追加
 
 class Player
 {
@@ -19,6 +21,12 @@ public:
 	bool IsMoving() const { return m_isMoving; }
 	bool IsRunning() const { return m_isRunning; }
 
+	/**
+	 * @brief 現在のスタミナの割合を 0.0f ～ 1.0f の範囲で取得します。
+	 * @return float スタミナの割合
+	 */
+	float GetStaminaPercentage() const;
+
 private:
 	static constexpr float COLLISION_RADIUS = 0.45f;
 
@@ -32,4 +40,11 @@ private:
 	float m_rotationSpeed;
 	bool m_isMoving;
 	bool m_isRunning;
+
+	float m_stamina;               // 現在のスタミナ
+	float m_maxStamina;            // 最大スタミナ
+	float m_staminaDepletionRate;  // スタミナ減少率（1秒あたり）
+	float m_staminaRegenRate;      // スタミナ回復率（1秒あたり）
+	bool m_isStaminaExhausted;     // スタミナが枯渇したかどうかのフラグ
+	float m_staminaRechargeThreshold; // 再び走れるようになるために必要なスタミナ量
 };

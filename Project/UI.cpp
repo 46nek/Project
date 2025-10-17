@@ -1,9 +1,10 @@
-// UI.cpp (修正版：この内容で完全に置き換えてください)
+// Project/UI.cpp
 
 #include "UI.h"
 #include "Camera.h"
 #include "Enemy.h"
 #include "Orb.h"
+#include "Game.h" // Game::SCREEN_WIDTH/HEIGHT のために追加
 #include <string>
 
 UI::UI()
@@ -11,7 +12,8 @@ UI::UI()
 	m_fontFactory(nullptr),
 	m_fontWrapper(nullptr),
 	m_remainingOrbs(0),
-	m_totalOrbs(0)
+	m_totalOrbs(0),
+	m_staminaPercentage(1.0f)
 {
 }
 
@@ -24,27 +26,22 @@ bool UI::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::vecto
 	m_graphicsDevice = graphicsDevice;
 	ID3D11Device* device = m_graphicsDevice->GetDevice();
 
-	// ミニマップを初期化
 	m_minimap = std::make_unique<Minimap>();
 	if (!m_minimap->Initialize(graphicsDevice, mazeData, pathWidth))
 	{
 		return false;
 	}
 
-	// FW1FontWrapperのファクトリとラッパーを作成
 	HRESULT hr = FW1CreateFactory(FW1_VERSION, &m_fontFactory);
 	if (FAILED(hr)) return false;
 
-	// ▼▼▼ フォントを "Impact" に変更 ▼▼▼
 	hr = m_fontFactory->CreateFontWrapper(device, L"Impact", &m_fontWrapper);
 	if (FAILED(hr))
 	{
-		// もし "Impact" が見つからなかった場合、"Arial" にフォールバック
 		hr = m_fontFactory->CreateFontWrapper(device, L"Arial", &m_fontWrapper);
 		if (FAILED(hr)) return false;
 	}
 
-	// アイコン表示用のSpriteBatchとSprite
 	m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_graphicsDevice->GetDeviceContext());
 	m_orbIcon = std::make_unique<Sprite>();
 	if (!m_orbIcon->Initialize(device, L"Assets/minimap_orb.png"))
@@ -52,41 +49,90 @@ bool UI::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::vecto
 		return false;
 	}
 
+	// スタミナゲージ用のスプライトを初期化
+	// Assets/minimap_frame.png と Assets/minimap_path.png をゲージの画像として再利用します。
+	m_staminaBarFrame = std::make_unique<Sprite>();
+	if (!m_staminaBarFrame->Initialize(device, L"Assets/minimap_frame.png")) return false;
+
+	m_staminaBarFill = std::make_unique<Sprite>();
+	if (!m_staminaBarFill->Initialize(device, L"Assets/minimap_path.png")) return false;
+
 	return true;
 }
 
 void UI::Shutdown()
 {
-	if (m_minimap)
-	{
-		m_minimap->Shutdown();
-	}
-	if (m_orbIcon)
-	{
-		m_orbIcon->Shutdown();
-	}
+	if (m_minimap) m_minimap->Shutdown();
+	if (m_orbIcon) m_orbIcon->Shutdown();
+	if (m_staminaBarFrame) m_staminaBarFrame->Shutdown();
+	if (m_staminaBarFill) m_staminaBarFill->Shutdown();
 
 	if (m_fontWrapper) m_fontWrapper->Release();
 	if (m_fontFactory) m_fontFactory->Release();
 }
 
-void UI::Update(float deltaTime, int remainingOrbs, int totalOrbs)
+void UI::Update(float deltaTime, int remainingOrbs, int totalOrbs, float staminaPercentage)
 {
 	m_remainingOrbs = remainingOrbs;
 	m_totalOrbs = totalOrbs;
+	m_staminaPercentage = staminaPercentage;
 }
+
 
 void UI::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs)
 {
 	// ミニマップの描画
 	m_minimap->Render(camera, enemies, orbs);
 
-	// オーブカウンターのアイコン描画
+	// オーブカウンターとスタミナゲージの描画開始
 	m_spriteBatch->Begin();
 
+	// --- オーブカウンターのアイコン描画 ---
 	const DirectX::XMFLOAT2 iconPosition = { 280.0f, 40.0f };
+	// ▼▼▼ エラー箇所を修正 ▼▼▼
 	m_orbIcon->Render(m_spriteBatch.get(), iconPosition, 0.5f);
+	// ▲▲▲ 修正ここまで ▲▲▲
 
+	// --- スタミナゲージの描画 ---
+	const float barWidth = 200.0f;
+	const float barHeight = 20.0f;
+	const DirectX::XMFLOAT2 barPosition = {
+		(Game::SCREEN_WIDTH - barWidth) / 2.0f,
+		Game::SCREEN_HEIGHT - 50.0f
+	};
+
+	// 背景（フレーム）
+	RECT frameRect = {
+		(LONG)barPosition.x,
+		(LONG)barPosition.y,
+		(LONG)(barPosition.x + barWidth),
+		(LONG)(barPosition.y + barHeight)
+	};
+	// ▼▼▼ エラー箇所を修正 ▼▼▼
+	m_staminaBarFrame->RenderFill(m_spriteBatch.get(), frameRect);
+	// ▲▲▲ 修正ここまで ▲▲▲
+
+	// 塗りつぶし部分
+	// スタミナの割合に応じて幅を変える
+	RECT fillRect = {
+		(LONG)barPosition.x,
+		(LONG)barPosition.y,
+		(LONG)(barPosition.x + barWidth * m_staminaPercentage),
+		(LONG)(barPosition.y + barHeight)
+	};
+
+	// スタミナ残量に応じて色を変える
+	DirectX::XMFLOAT4 fillColor = { 0.0f, 1.0f, 0.0f, 1.0f }; // 緑
+	if (m_staminaPercentage < 0.3f)
+	{
+		fillColor = { 0.8f, 0.2f, 0.2f, 1.0f }; // 赤
+	}
+
+	// RenderFill に色指定のオーバーロードがないため、色を付けて描画します
+	m_staminaBarFill->RenderFill(m_spriteBatch.get(), fillRect, fillColor);
+
+
+	// 描画終了
 	m_spriteBatch->End();
 
 	// オーブカウンターのテキスト描画
@@ -96,18 +142,17 @@ void UI::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>&
 
 		float fontSize = 32.0f;
 		float textPosX = iconPosition.x + 30.0f;
-		float textPosY = iconPosition.y; // アイコンの中心Y座標
+		float textPosY = iconPosition.y;
 		UINT32 textColor = 0xFFFFFFFF; // 白
 
-		// ▼▼▼ 垂直位置の計算方法とフラグを修正 ▼▼▼
 		m_fontWrapper->DrawString(
 			m_graphicsDevice->GetDeviceContext(),
 			remainingText.c_str(),
 			fontSize,
 			textPosX,
-			textPosY, // Y座標をそのまま指定
+			textPosY,
 			textColor,
-			FW1_VCENTER | FW1_RESTORESTATE // FW1_VCENTERで垂直中央揃え
+			FW1_VCENTER | FW1_RESTORESTATE
 		);
 	}
 }
