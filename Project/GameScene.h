@@ -6,7 +6,6 @@
 #include "Player.h"
 #include "LightManager.h"
 #include "Renderer.h"
-// #include "Minimap.h" // <<< íœ
 #include "Stage.h"
 #include "Enemy.h"
 #include "Orb.h"
@@ -35,12 +34,10 @@ private:
     std::unique_ptr<Camera> m_camera;
     std::unique_ptr<LightManager> m_lightManager;
     std::unique_ptr<Renderer> m_renderer;
-    // std::unique_ptr<Minimap> m_minimap; // <<< íœ
     std::unique_ptr<Player> m_player;
     std::vector<std::unique_ptr<Enemy>> m_enemies;
     std::vector<std::unique_ptr<Orb>> m_orbs;
     std::unique_ptr<UI> m_ui;
 
     std::unique_ptr<DirectX::SoundEffect> m_collectSound;
-    int m_collectedOrbsCount;
 };

@@ -5,7 +5,7 @@
 #include <tuple>
 #include <algorithm>
 
-GameScene::GameScene() : m_collectedOrbsCount(0)
+GameScene::GameScene()
 {
 }
 
@@ -31,10 +31,6 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX
 	float startX = (static_cast<float>(startPos.first) + 0.5f) * pathWidth;
 	float startZ = (static_cast<float>(startPos.second) + 0.5f) * pathWidth;
 	m_player->Initialize({ startX, PLAYER_HEIGHT, startZ });
-
-	// --- ミニマップの初期化を削除 ---
-	// m_minimap = std::make_unique<Minimap>();
-	// if (!m_minimap->Initialize(graphicsDevice, m_stage->GetMazeData(), pathWidth)) return false;
 
 	// UIの初期化（引数に迷路データを渡す）
 	m_ui = std::make_unique<UI>();
@@ -187,7 +183,6 @@ void GameScene::Shutdown()
 	m_orbs.clear();
 	for (auto& enemy : m_enemies) if (enemy) enemy->Shutdown();
 	m_enemies.clear();
-	// if (m_minimap) m_minimap->Shutdown(); // <<< 削除
 	if (m_stage) m_stage->Shutdown();
 }
 
@@ -216,13 +211,7 @@ void GameScene::Update(float deltaTime)
 
 	m_lightManager->Update(deltaTime, m_camera->GetPosition(), m_camera->GetRotation());
 
-	m_collectedOrbsCount = 0;
-	for (const auto& orb : m_orbs)
-	{
-		if (orb->IsCollected()) m_collectedOrbsCount++;
-	}
-
-	m_ui->Update(deltaTime, m_collectedOrbsCount);
+	m_ui->Update(deltaTime);
 }
 
 
