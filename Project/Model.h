@@ -1,5 +1,3 @@
-// Model.h (この内容で完全に置き換えてください)
-
 #pragma once
 #include <d3d11.h>
 #include <DirectXMath.h>
@@ -42,15 +40,20 @@ public:
 	DirectX::XMMATRIX GetWorldMatrix() const;
 	void SetEmissiveColor(const DirectX::XMFLOAT4& color);
 	void SetUseTexture(bool useTexture);
-	void SetUseNormalMap(bool useNormalMap); // <--- 追加
+	void SetUseNormalMap(bool useNormalMap);
 
 	DirectX::XMFLOAT4 GetEmissiveColor() const;
 	bool GetUseTexture() const;
-	bool GetUseNormalMap() const; // <--- 追加
-	bool HasNormalMap() const;    // <--- 追加
+	bool GetUseNormalMap() const;
+	bool HasNormalMap() const;
+
+	// --- 視錐台カリング用の関数 ---
+	DirectX::XMFLOAT3 GetBoundingSphereCenter() const;
+	float GetBoundingSphereRadius() const;
 
 private:
 	void RenderBuffers(ID3D11DeviceContext*, const Mesh& mesh);
+	void CalculateBoundingSphere(const std::vector<SimpleVertex>& vertices);
 
 	std::vector<Mesh> m_meshes;
 	std::unique_ptr<Texture> m_texture;
@@ -61,5 +64,9 @@ private:
 
 	DirectX::XMFLOAT4 m_emissiveColor;
 	bool m_useTexture;
-	bool m_useNormalMap; // <--- 追加
+	bool m_useNormalMap;
+
+	// --- 視錐台カリング用の変数 ---
+	DirectX::XMFLOAT3 m_boundingSphereCenter;
+	float m_boundingSphereRadius;
 };

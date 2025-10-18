@@ -1,7 +1,6 @@
-// Model.cpp (この内容で完全に置き換えてください)
-
 #include "Model.h"
 #include "Texture.h"
+#include <cmath> // sqrtf, pow を使用するために追加
 
 Model::Model()
 {
@@ -10,7 +9,9 @@ Model::Model()
 	m_scale = { 1.0f, 1.0f, 1.0f };
 	m_emissiveColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 	m_useTexture = true;
-	m_useNormalMap = true; // <--- 追加 (デフォルトは使用する)
+	m_useNormalMap = true;
+	m_boundingSphereCenter = { 0.0f, 0.0f, 0.0f };
+	m_boundingSphereRadius = 0.0f;
 }
 
 Model::~Model()
@@ -21,6 +22,8 @@ Model::~Model()
 bool Model::Initialize(ID3D11Device* device, const std::vector<SimpleVertex>& vertices, const std::vector<unsigned long>& indices)
 {
 	if (vertices.empty() || indices.empty()) return false;
+
+	CalculateBoundingSphere(vertices);
 
 	Mesh newMesh = {};
 	D3D11_BUFFER_DESC vertexBufferDesc = {}, indexBufferDesc = {};
@@ -48,6 +51,68 @@ bool Model::Initialize(ID3D11Device* device, const std::vector<SimpleVertex>& ve
 	m_meshes.push_back(newMesh);
 
 	return true;
+}
+
+void Model::CalculateBoundingSphere(const std::vector<SimpleVertex>& vertices)
+{
+	if (vertices.empty()) return;
+
+	DirectX::XMFLOAT3 minPos = vertices[0].Pos;
+	DirectX::XMFLOAT3 maxPos = vertices[0].Pos;
+
+	for (const auto& vertex : vertices)
+	{
+		minPos.x = (vertex.Pos.x < minPos.x) ? vertex.Pos.x : minPos.x;
+		minPos.y = (vertex.Pos.y < minPos.y) ? vertex.Pos.y : minPos.y;
+		minPos.z = (vertex.Pos.z < minPos.z) ? vertex.Pos.z : minPos.z;
+		maxPos.x = (vertex.Pos.x > maxPos.x) ? vertex.Pos.x : maxPos.x;
+		maxPos.y = (vertex.Pos.y > maxPos.y) ? vertex.Pos.y : maxPos.y;
+		maxPos.z = (vertex.Pos.z > maxPos.z) ? vertex.Pos.z : maxPos.z;
+	}
+
+	m_boundingSphereCenter.x = (minPos.x + maxPos.x) / 2.0f;
+	m_boundingSphereCenter.y = (minPos.y + maxPos.y) / 2.0f;
+	m_boundingSphereCenter.z = (minPos.z + maxPos.z) / 2.0f;
+
+	m_boundingSphereRadius = 0.0f;
+	for (const auto& vertex : vertices)
+	{
+		float distance = sqrtf(
+			pow(vertex.Pos.x - m_boundingSphereCenter.x, 2) +
+			pow(vertex.Pos.y - m_boundingSphereCenter.y, 2) +
+			pow(vertex.Pos.z - m_boundingSphereCenter.z, 2)
+		);
+		if (distance > m_boundingSphereRadius)
+		{
+			m_boundingSphereRadius = distance;
+		}
+	}
+}
+
+DirectX::XMFLOAT3 Model::GetBoundingSphereCenter() const
+{
+	DirectX::XMVECTOR center = DirectX::XMLoadFloat3(&m_boundingSphereCenter);
+	DirectX::XMMATRIX world = GetWorldMatrix();
+	center = DirectX::XMVector3TransformCoord(center, world);
+	DirectX::XMFLOAT3 worldCenter;
+	DirectX::XMStoreFloat3(&worldCenter, center);
+	return worldCenter;
+}
+
+float Model::GetBoundingSphereRadius() const
+{
+	// スケールの中で最も大きい値を半径に乗算する
+	// --- エラーの原因となっていた箇所を、より安全なコードに修正しました ---
+	float maxScale = m_scale.x;
+	if (m_scale.y > maxScale)
+	{
+		maxScale = m_scale.y;
+	}
+	if (m_scale.z > maxScale)
+	{
+		maxScale = m_scale.z;
+	}
+	return m_boundingSphereRadius * maxScale;
 }
 
 void Model::SetTexture(std::unique_ptr<Texture> texture)
@@ -118,7 +183,6 @@ void Model::SetUseTexture(bool useTexture)
 	m_useTexture = useTexture;
 }
 
-// ▼▼▼ 以下をすべて追加 ▼▼▼
 void Model::SetUseNormalMap(bool useNormalMap)
 {
 	m_useNormalMap = useNormalMap;
@@ -143,4 +207,3 @@ bool Model::HasNormalMap() const
 {
 	return m_normalMap != nullptr;
 }
-// ▲▲▲ 追加ここまで ▲▲▲

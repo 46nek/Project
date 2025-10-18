@@ -1,7 +1,12 @@
 #include "Renderer.h"
 #include "Game.h"
 
-Renderer::Renderer(GraphicsDevice* graphicsDevice) : m_graphicsDevice(graphicsDevice) {}
+Renderer::Renderer(GraphicsDevice* graphicsDevice) : m_graphicsDevice(graphicsDevice)
+{
+	// --- ここから追加 ---
+	m_frustum = std::make_unique<Frustum>();
+	// --- 追加ここまで ---
+}
 Renderer::~Renderer() {}
 
 void Renderer::RenderSceneToTexture(const std::vector<Model*>& models, const Camera* camera, LightManager* lightManager)
@@ -31,21 +36,17 @@ void Renderer::RenderFinalPass(const Camera* camera)
 	deviceContext->VSSetShader(shaderManager->GetPostProcessVertexShader(), nullptr, 0);
 	deviceContext->PSSetShader(shaderManager->GetMotionBlurPixelShader(), nullptr, 0);
 
-	// カメラの現在と1フレーム前の行列を取得
 	DirectX::XMMATRIX currentView = camera->GetViewMatrix();
 	DirectX::XMMATRIX previousView = camera->GetPreviousViewMatrix();
 
-	// カメラが動いたかどうかを判定
-	float blurAmount = 1.0f; // デフォルトのブラー強度
-	// 行列の特定の要素を比較して、完全に一致すればカメラは静止していると判断
+	float blurAmount = 1.0f;
 	if (memcmp(&currentView, &previousView, sizeof(DirectX::XMMATRIX)) == 0)
 	{
-		blurAmount = 0.0f; // 静止しているならブラーを無効化
+		blurAmount = 0.0f;
 	}
 
-	// モーションブラー用の定数バッファを更新
 	DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
-	DirectX::XMMATRIX prevViewProj = previousView * projectionMatrix; // 1フレーム前の行列を使用
+	DirectX::XMMATRIX prevViewProj = previousView * projectionMatrix;
 	DirectX::XMMATRIX currentViewProj = currentView * projectionMatrix;
 	DirectX::XMMATRIX currentViewProjInv = DirectX::XMMatrixInverse(nullptr, currentViewProj);
 	m_graphicsDevice->UpdateMotionBlurBuffer(prevViewProj, currentViewProjInv, blurAmount);
@@ -100,6 +101,12 @@ void Renderer::RenderMainPass(const std::vector<Model*>& models, const Camera* c
 	ShaderManager* shaderManager = m_graphicsDevice->GetShaderManager();
 	ShadowMapper* shadowMapper = m_graphicsDevice->GetShadowMapper();
 
+	// --- ここから変更 ---
+	DirectX::XMMATRIX viewMatrix = camera->GetViewMatrix();
+	DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
+	m_frustum->ConstructFrustum(viewMatrix, projectionMatrix);
+	// --- 変更ここまで ---
+
 	D3D11_VIEWPORT vp = {};
 	vp.Width = Game::SCREEN_WIDTH;
 	vp.Height = Game::SCREEN_HEIGHT;
@@ -128,18 +135,23 @@ void Renderer::RenderMainPass(const std::vector<Model*>& models, const Camera* c
 
 	for (Model* model : models) {
 		if (model) {
-			// ▼▼▼ ここから修正 ▼▼▼
+			// --- ここから変更 ---
+			if (!m_frustum->CheckSphere(model->GetBoundingSphereCenter(), model->GetBoundingSphereRadius()))
+			{
+				continue; // 視錐台の外にあるモデルは描画しない
+			}
+			// --- 変更ここまで ---
+
 			MaterialBufferType materialBuffer;
 			materialBuffer.EmissiveColor = model->GetEmissiveColor();
 			materialBuffer.UseTexture = model->GetUseTexture();
-			materialBuffer.UseNormalMap = model->HasNormalMap() && model->GetUseNormalMap(); // モデルが法線マップを持っているか確認
+			materialBuffer.UseNormalMap = model->HasNormalMap() && model->GetUseNormalMap();
 			m_graphicsDevice->UpdateMaterialBuffer(materialBuffer);
-			// ▲▲▲ 修正ここまで ▲▲▲
 
 			m_graphicsDevice->UpdateMatrixBuffer(
 				model->GetWorldMatrix(),
-				camera->GetViewMatrix(),
-				DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f),
+				viewMatrix, // 更新されたviewMatrixを使用
+				projectionMatrix, // 更新されたprojectionMatrixを使用
 				lightManager->GetLightViewMatrix(),
 				lightManager->GetLightProjectionMatrix()
 			);
