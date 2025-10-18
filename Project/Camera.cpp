@@ -137,14 +137,13 @@ void Camera::Turn(int mouseX, int mouseY, float deltaTime)
 	if (m_rotationX < -90.0f) m_rotationX = -90.0f;
 }
 
-void Camera::SetBobbingParameters(float bobbingSpeed, float bobbingAmount, float swaySpeed, float swayAmount, float rollSpeed, float rollAmount)
+void Camera::SetBobbingParameters(float bobbingSpeed, float bobbingAmount, float swaySpeed, float swayAmount, float rollSpeed)
 {
 	m_bobbingSpeed = bobbingSpeed;
 	m_bobbingAmount = bobbingAmount;
 	m_swaySpeed = swaySpeed;
 	m_swayAmount = swayAmount;
 	m_rollSpeed = rollSpeed;
-	m_rollAmount = rollAmount;
 }
 
 void Camera::UpdateBobbing(float deltaTime, bool isMoving)
@@ -156,7 +155,6 @@ void Camera::UpdateBobbing(float deltaTime, bool isMoving)
 		m_bobbingTimer += deltaTime;
 		float bobOffset = sinf(m_bobbingTimer * m_bobbingSpeed) * m_bobbingAmount;
 		float swayOffset = sinf(m_bobbingTimer * m_swaySpeed) * m_swayAmount;
-		m_rotationZ = cosf(m_bobbingTimer * m_rollSpeed) * m_rollAmount;
 		DirectX::XMVECTOR localOffset = DirectX::XMVectorSet(swayOffset, bobOffset, 0.0f, 0.0f);
 		DirectX::XMVECTOR worldOffset = DirectX::XMVector3Transform(localOffset, rotationMatrix);
 		m_positionX = m_basePosition.x + DirectX::XMVectorGetX(worldOffset);

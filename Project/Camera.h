@@ -24,7 +24,7 @@ public:
 	void MoveRight(float deltaTime);
 	void Turn(int mouseX, int mouseY, float deltaTime);
 	void UpdateBobbing(float deltaTime, bool isMoving);
-	void SetBobbingParameters(float bobbingSpeed, float bobbingAmount, float swaySpeed, float swayAmount, float rollSpeed, float rollAmount);
+	void SetBobbingParameters(float bobbingSpeed, float bobbingAmount, float swaySpeed, float swayAmount, float rollSpeed);
 
 private:
 	float m_positionX, m_positionY, m_positionZ;

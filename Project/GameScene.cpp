@@ -201,11 +201,15 @@ void GameScene::Update(float deltaTime)
 	DirectX::XMFLOAT3 playerRot = m_player->GetRotation();
 	m_camera->SetPosition(playerPos.x, playerPos.y, playerPos.z);
 	m_camera->SetRotation(playerRot.x, playerRot.y, playerRot.z);
+	
 	m_camera->SetBobbingParameters(
-		m_player->IsRunning() ? 18.0f : 14.0f, m_player->IsRunning() ? 0.05f : 0.03f,
-		m_player->IsRunning() ? 10.0f : 7.0f, m_player->IsRunning() ? 0.08f : 0.05f,
-		m_player->IsRunning() ? 9.0f : 7.0f, m_player->IsRunning() ? 0.15f : 0.1f
+		m_player->IsRunning() ? 18.0f : 14.0f, // bobbingSpeed
+		m_player->IsRunning() ? 0.05f : 0.03f, // bobbingAmount
+		m_player->IsRunning() ? 10.0f : 7.0f,  // swaySpeed
+		m_player->IsRunning() ? 0.08f : 0.05f, // swayAmount
+		m_player->IsRunning() ? 9.0f : 7.0f   // rollSpeed
 	);
+
 	m_camera->UpdateBobbing(deltaTime, m_player->IsMoving());
 	m_camera->Update();
 
