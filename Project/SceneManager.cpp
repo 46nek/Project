@@ -1,6 +1,7 @@
 #include "SceneManager.h"
 #include "TitleScene.h"
 #include "GameScene.h"
+#include "LoadingScene.h"
 
 // コンストラクタの初期化子リストを修正します
 SceneManager::SceneManager() : m_currentScene(nullptr), m_graphicsDevice(nullptr), m_input(nullptr), m_audioEngine(nullptr)
@@ -53,34 +54,67 @@ void SceneManager::Render()
 
 bool SceneManager::ChangeScene(SceneState nextState)
 {
-	if (m_currentScene)
-	{
-		m_currentScene->Shutdown();
-	}
+    // 次のシーンがNoneなら何もしない
+    if (nextState == SceneState::None)
+    {
+        return true;
+    }
 
-	switch (nextState)
-	{
-	case SceneState::Title:
-		m_currentScene = std::make_unique<TitleScene>();
-		break;
-	case SceneState::Game:
-		m_currentScene = std::make_unique<GameScene>();
-		break;
-	default:
-		return false;
-	}
+    // GameSceneへの遷移を特別に処理
+    if (nextState == SceneState::Game)
+    {
+        // 現在のシーンがLoadingSceneかチェック
+        LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(m_currentScene.get());
+        if (loadingScene)
+        {
+            // ローディング済みのGameSceneの所有権を取得
+            std::unique_ptr<Scene> nextScene = loadingScene->GetGameScene();
 
-	if (m_currentScene)
-	{
-		if (!m_currentScene->Initialize(m_graphicsDevice, m_input, m_audioEngine))
-		{
-			return false;
-		}
-	}
-	else
-	{
-		return false;
-	}
+            // 現在のシーン（LoadingScene）を破棄
+            m_currentScene->Shutdown();
+            m_currentScene = nullptr;
 
-	return true;
+            // 次のシーンをセット（このGameSceneは初期化済み）
+            m_currentScene = std::move(nextScene);
+            return true;
+        }
+    }
+
+    // 通常のシーン遷移
+    if (m_currentScene)
+    {
+        m_currentScene->Shutdown();
+        m_currentScene = nullptr;
+    }
+
+    switch (nextState)
+    {
+    case SceneState::Title:
+        m_currentScene = std::make_unique<TitleScene>();
+        break;
+    case SceneState::Loading:
+        m_currentScene = std::make_unique<LoadingScene>();
+        break;
+    case SceneState::Game:
+        // LoadingSceneを介さずに直接GameSceneを生成する場合
+        m_currentScene = std::make_unique<GameScene>();
+        break;
+    default:
+        return false;
+    }
+
+    // 新しいシーンを初期化
+    if (m_currentScene)
+    {
+        if (!m_currentScene->Initialize(m_graphicsDevice, m_input, m_audioEngine))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+
+    return true;
 }

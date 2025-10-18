@@ -18,6 +18,11 @@ public:
     ~GameScene();
 
     bool Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine) override;
+    bool InitializePhase1(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine);
+    bool InitializePhase2();
+    bool InitializePhase3();
+    bool InitializePhase4();
+    bool InitializePhase5();
     void Shutdown() override;
     void Update(float deltaTime) override;
     void Render() override;

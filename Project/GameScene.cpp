@@ -11,8 +11,17 @@ GameScene::GameScene()
 }
 
 GameScene::~GameScene() {}
-
 bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine)
+{
+	if (!InitializePhase1(graphicsDevice, input, audioEngine)) return false;
+	if (!InitializePhase2()) return false;
+	if (!InitializePhase3()) return false;
+	if (!InitializePhase4()) return false;
+	if (!InitializePhase5()) return false;
+	return true;
+}
+
+bool GameScene::InitializePhase1(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine)
 {
 	m_graphicsDevice = graphicsDevice;
 	m_input = input;
@@ -33,13 +42,30 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX
 	float startZ = (static_cast<float>(startPos.second) + 0.5f) * pathWidth;
 	m_player->Initialize({ startX, PLAYER_HEIGHT, startZ });
 
-	// UIの初期化（引数に迷路データを渡す）
+	return true;
+}
+
+bool GameScene::InitializePhase2()
+{
 	m_ui = std::make_unique<UI>();
-	if (!m_ui->Initialize(graphicsDevice, m_stage->GetMazeData(), pathWidth)) return false;
+	if (!m_ui->Initialize(m_graphicsDevice, m_stage->GetMazeData(), m_stage->GetPathWidth())) return false;
+	return true;
+}
 
+bool GameScene::InitializePhase3()
+{
 	if (!InitializeEnemies()) return false;
-	if (!InitializeOrbs()) return false;
+	return true;
+}
 
+bool GameScene::InitializePhase4()
+{
+	if (!InitializeOrbs()) return false;
+	return true;
+}
+
+bool GameScene::InitializePhase5()
+{
 	try
 	{
 		m_collectSound = std::make_unique<DirectX::SoundEffect>(m_audioEngine, L"Assets/orb_get.wav");
@@ -49,7 +75,6 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX
 		MessageBoxA(nullptr, e.what(), "Sound Error", MB_OK);
 		return false;
 	}
-
 	return true;
 }
 

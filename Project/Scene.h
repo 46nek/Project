@@ -7,7 +7,8 @@
 enum class SceneState
 {
 	None,
-	Title,
+	Title, 
+	Loading,
 	Game,
 };
 

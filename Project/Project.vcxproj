@@ -185,6 +185,7 @@
     <ClInclude Include="input.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="LightManager.h" />
+    <ClInclude Include="LoadingScene.h" />
     <ClInclude Include="MazeGenerator.h" />
     <ClInclude Include="MeshGenerator.h" />
     <ClInclude Include="minimap.h" />
@@ -247,6 +248,7 @@
     <ClCompile Include="GraphicsDevice.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="LightManager.cpp" />
+    <ClCompile Include="LoadingScene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MazeGenerator.cpp" />
     <ClCompile Include="MeshGenerator.cpp" />

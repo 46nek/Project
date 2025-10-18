@@ -60,7 +60,7 @@ void TitleScene::Shutdown()
 void TitleScene::Update(float deltaTime)
 {
 	if (m_input->IsKeyPressed(VK_RETURN)) {
-		m_nextScene = SceneState::Game;
+		m_nextScene = SceneState::Loading;
 	}
 }
 

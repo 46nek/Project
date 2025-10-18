@@ -21,7 +21,6 @@ public:
 private:
 	bool ChangeScene(SceneState nextState);
 
-private:
 	std::unique_ptr<Scene> m_currentScene;
 	GraphicsDevice* m_graphicsDevice;
 	Input* m_input;
