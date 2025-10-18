@@ -74,7 +74,7 @@ void Minimap::Shutdown()
 	m_scissorRasterizerState.Reset();
 }
 
-void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs)
+void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs, const std::vector<std::unique_ptr<Orb>>& specialOrbs, bool showEnemies) 
 {
 	if (!m_graphicsDevice || !m_mazeData || !camera) return;
 
@@ -185,4 +185,9 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 	deviceContext->RSSetScissorRects(1, &fullRect);
 
 	m_graphicsDevice->GetSwapChain()->TurnZBufferOn(deviceContext);
+}
+// SetZoomä÷êîÇí«â¡
+void Minimap::SetZoom(float zoomFactor)
+{
+	m_zoomFactor = zoomFactor;
 }

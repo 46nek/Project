@@ -30,6 +30,7 @@ public:
 private:
     bool InitializeEnemies();
     bool InitializeOrbs();
+    bool InitializeSpecialOrbs();
 
     static constexpr float PLAYER_HEIGHT = 4.0f;
     static constexpr int NUM_ENEMIES = 2;
@@ -41,7 +42,9 @@ private:
     std::unique_ptr<Renderer> m_renderer;
     std::unique_ptr<Player> m_player;
     std::vector<std::unique_ptr<Enemy>> m_enemies;
-    std::vector<std::unique_ptr<Orb>> m_orbs;
+    std::vector<std::unique_ptr<Orb>> m_orbs; 
+    std::vector<std::unique_ptr<Orb>> m_specialOrbs; // 特殊オーブのリスト
+    float m_enemyRadarTimer; // 敵レーダーの効果時間タイマー
     std::unique_ptr<UI> m_ui;
 
     std::unique_ptr<DirectX::SoundEffect> m_collectSound; 

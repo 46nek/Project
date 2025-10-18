@@ -71,18 +71,18 @@ void UI::Shutdown()
 	if (m_fontFactory) m_fontFactory->Release();
 }
 
-void UI::Update(float deltaTime, int remainingOrbs, int totalOrbs, float staminaPercentage)
+void UI::Update(float deltaTime, int remainingOrbs, int totalOrbs, float staminaPercentage, bool showEnemiesOnMinimap)
 {
 	m_remainingOrbs = remainingOrbs;
 	m_totalOrbs = totalOrbs;
 	m_staminaPercentage = staminaPercentage;
+	m_showEnemiesOnMinimap = showEnemiesOnMinimap;
 }
 
 
-void UI::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs)
+void UI::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs, const std::vector<std::unique_ptr<Orb>>& specialOrbs)
 {
-	// ミニマップの描画
-	m_minimap->Render(camera, enemies, orbs);
+	m_minimap->Render(camera, enemies, orbs, specialOrbs, m_showEnemiesOnMinimap);
 
 	// オーブカウンターとスタミナゲージの描画開始
 	m_spriteBatch->Begin();
@@ -155,4 +155,9 @@ void UI::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>&
 			FW1_VCENTER | FW1_RESTORESTATE
 		);
 	}
+}
+
+Minimap* UI::GetMinimap() const
+{
+	return m_minimap.get();
 }

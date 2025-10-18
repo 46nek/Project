@@ -60,7 +60,8 @@ bool GameScene::InitializePhase3()
 
 bool GameScene::InitializePhase4()
 {
-	if (!InitializeOrbs()) return false;
+	if (!InitializeOrbs()) return false; 
+	if (!InitializeSpecialOrbs()) return false;
 	return true;
 }
 
@@ -78,7 +79,6 @@ bool GameScene::InitializePhase5()
 	return true;
 }
 
-// (InitializeEnemies, InitializeOrbs は変更なし)
 bool GameScene::InitializeEnemies()
 {
 	float pathWidth = m_stage->GetPathWidth();
@@ -201,6 +201,58 @@ bool GameScene::InitializeOrbs()
 	return true;
 }
 
+bool GameScene::InitializeSpecialOrbs()
+{
+	float pathWidth = m_stage->GetPathWidth();
+	std::vector<std::pair<int, int>> cornerRooms = {
+		{1, 1},
+		{Stage::MAZE_WIDTH - 4, 1},
+		{1, Stage::MAZE_HEIGHT - 4},
+		{Stage::MAZE_WIDTH - 4, Stage::MAZE_HEIGHT - 4}
+	};
+
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::shuffle(cornerRooms.begin(), cornerRooms.end(), gen);
+
+	// オーブの種類リスト
+	std::vector<OrbType> specialOrbTypes = { OrbType::MinimapZoomOut, OrbType::EnemyRadar, OrbType::EnemyRadar };
+
+	for (size_t i = 0; i < specialOrbTypes.size(); ++i)
+	{
+		std::pair<int, int> room = cornerRooms[i];
+		float orbX = (static_cast<float>(room.first) + 1.5f) * pathWidth; // 部屋の中心あたり
+		float orbZ = (static_cast<float>(room.second) + 1.5f) * pathWidth;
+		DirectX::XMFLOAT3 orbPos = { orbX, 2.0f, orbZ };
+
+		DirectX::XMFLOAT4 orbColor;
+		OrbType type = specialOrbTypes[i];
+		switch (type)
+		{
+		case OrbType::MinimapZoomOut:
+			orbColor = { 0.2f, 1.0f, 0.2f, 1.0f }; // 緑
+			break;
+		case OrbType::EnemyRadar:
+			orbColor = { 1.0f, 0.2f, 0.2f, 1.0f }; // 赤
+			break;
+		default:
+			orbColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+			break;
+		}
+
+		int lightIndex = m_lightManager->AddPointLight(orbPos, orbColor, 5.0f, 1.5f);
+
+		if (lightIndex != -1)
+		{
+			auto orb = std::make_unique<Orb>();
+			if (orb->Initialize(m_graphicsDevice->GetDevice(), orbPos, lightIndex, type))
+			{
+				m_specialOrbs.push_back(std::move(orb));
+			}
+		}
+	}
+	return true;
+}
 
 void GameScene::Shutdown()
 {
@@ -262,7 +314,35 @@ void GameScene::Update(float deltaTime)
 
 	for (auto& enemy : m_enemies) enemy->Update(deltaTime, m_player.get(), m_stage->GetMazeData(), m_stage->GetPathWidth());
 	for (auto& orb : m_orbs) orb->Update(deltaTime, m_player.get(), m_lightManager.get(), m_collectSound.get());
+	// 特殊オーブの更新と当たり判定
+	for (auto it = m_specialOrbs.begin(); it != m_specialOrbs.end(); )
+	{
+		(*it)->Update(deltaTime, m_player.get(), m_lightManager.get(), m_collectSound.get());
+		if ((*it)->IsCollected())
+		{
+			// オーブの効果を発動
+			switch ((*it)->GetType())
+			{
+			case OrbType::MinimapZoomOut:
+				if (m_ui) m_ui->GetMinimap()->SetZoom(1.5f); // ズームアウト（値は適宜調整）
+				break;
+			case OrbType::EnemyRadar:
+				m_enemyRadarTimer = 20.0f; // 20秒タイマーセット
+				break;
+			}
+			it = m_specialOrbs.erase(it); // 取得したオーブをリストから削除
+		}
+		else
+		{
+			++it;
+		}
+	}
 
+	// 敵レーダーのタイマー更新
+	if (m_enemyRadarTimer > 0.0f)
+	{
+		m_enemyRadarTimer -= deltaTime;
+	}
 	DirectX::XMFLOAT3 playerRot = m_player->GetRotation();
 	m_camera->SetPosition(playerPos.x, playerPos.y, playerPos.z);
 	m_camera->SetRotation(playerRot.x, playerRot.y, playerRot.z);
@@ -289,7 +369,7 @@ void GameScene::Update(float deltaTime)
 			remainingOrbs++;
 		}
 	}// UIにオーブの情報とプレイヤーのスタミナ情報を渡す
-	m_ui->Update(deltaTime, remainingOrbs, static_cast<int>(m_orbs.size()), m_player->GetStaminaPercentage());
+	m_ui->Update(deltaTime, remainingOrbs, static_cast<int>(m_orbs.size()), m_player->GetStaminaPercentage(), m_enemyRadarTimer > 0.0f);
 
 }
 
@@ -300,12 +380,13 @@ void GameScene::Render()
 	for (const auto& model : m_stage->GetModels()) modelsToRender.push_back(model.get());
 	for (const auto& enemy : m_enemies) modelsToRender.push_back(enemy->GetModel());
 	for (const auto& orb : m_orbs) if (Model* orbModel = orb->GetModel()) modelsToRender.push_back(orbModel);
+	for (const auto& sorb : m_specialOrbs) if (Model* orbModel = sorb->GetModel()) modelsToRender.push_back(orbModel); // 特殊オーブも描画対象に追加
 
 	m_renderer->RenderSceneToTexture(modelsToRender, m_camera.get(), m_lightManager.get());
 	m_renderer->RenderFinalPass(m_camera.get(), m_vignetteIntensity);
 
 	// UIの描画（ミニマップとOrb UIの両方を描画）
-	m_ui->Render(m_camera.get(), m_enemies, m_orbs);
+	m_ui->Render(m_camera.get(), m_enemies, m_orbs, m_specialOrbs);
 
 	m_graphicsDevice->EndScene();
 }

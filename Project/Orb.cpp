@@ -7,7 +7,8 @@
 Orb::Orb()
 	: m_isCollected(false),
 	m_lightIndex(-1),
-	m_animationTimer(0.0f)
+	m_animationTimer(0.0f),
+	m_type(OrbType::Normal)
 {
 }
 
@@ -15,12 +16,12 @@ Orb::~Orb()
 {
 }
 
-bool Orb::Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& position, int lightIndex)
+bool Orb::Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& position, int lightIndex, OrbType type)
 {
 	m_position = position;
 	m_lightIndex = lightIndex;
+	m_type = type;
 
-	// モデルのファイル名を "cube.obj" に修正
 	m_model = AssetLoader::LoadModelFromFile(device, "Assets/cube.obj");
 	if (!m_model)
 	{
@@ -28,7 +29,22 @@ bool Orb::Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& position, in
 	}
 	m_model->SetScale(0.3f, 0.3f, 0.3f);
 	m_model->SetPosition(m_position.x, m_position.y, m_position.z);
-	m_model->SetEmissiveColor({ 0.6f, 0.8f, 1.0f, 1.0f });
+
+	// オーブの種類に応じて色を変える
+	switch (m_type)
+	{
+	case OrbType::MinimapZoomOut:
+		m_model->SetEmissiveColor({ 0.2f, 1.0f, 0.2f, 1.0f }); // 緑
+		break;
+	case OrbType::EnemyRadar:
+		m_model->SetEmissiveColor({ 1.0f, 0.2f, 0.2f, 1.0f }); // 赤
+		break;
+	case OrbType::Normal:
+	default:
+		m_model->SetEmissiveColor({ 0.6f, 0.8f, 1.0f, 1.0f }); // 青
+		break;
+	}
+
 	m_model->SetUseTexture(false);
 
 	m_animationTimer = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 10.0f;
@@ -67,12 +83,10 @@ void Orb::Update(float deltaTime, Player* player, LightManager* lightManager, Di
 	{
 		m_isCollected = true;
 
-		// ライトを瞬時に無効化する
 		if (lightManager && m_lightIndex != -1)
 		{
 			lightManager->SetLightEnabled(m_lightIndex, false);
 		}
-		// 効果音を再生する
 		if (collectSound)
 		{
 			collectSound->Play();
@@ -93,4 +107,9 @@ bool Orb::IsCollected() const
 DirectX::XMFLOAT3 Orb::GetPosition() const
 {
 	return m_position;
+}
+
+OrbType Orb::GetType() const
+{
+	return m_type;
 }
