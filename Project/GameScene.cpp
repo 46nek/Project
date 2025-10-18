@@ -6,6 +6,7 @@
 #include <algorithm>
 
 GameScene::GameScene()
+	: m_vignetteIntensity(0.0f)
 {
 }
 
@@ -193,11 +194,50 @@ void GameScene::Update(float deltaTime)
 	m_input->GetMouseDelta(mouseX, mouseY);
 	m_player->Turn(mouseX, mouseY, deltaTime);
 	m_player->Update(deltaTime, m_input, m_stage->GetMazeData(), m_stage->GetPathWidth());
+	// 最も近い敵との距離を計算
+	float minDistanceSq = FLT_MAX;
+	DirectX::XMFLOAT3 playerPos = m_player->GetPosition();
+
+	for (const auto& enemy : m_enemies)
+	{
+		if (enemy)
+		{
+			DirectX::XMFLOAT3 enemyPos = enemy->GetPosition();
+			float dx = playerPos.x - enemyPos.x;
+			float dz = playerPos.z - enemyPos.z;
+			float distanceSq = (dx * dx) + (dz * dz);
+			if (distanceSq < minDistanceSq)
+			{
+				minDistanceSq = distanceSq;
+			}
+		}
+	}
+
+	// 距離に基づいてビネットの強度を計算
+	const float maxDistance = 15.0f; // この距離以上離れたらエフェクトはかからない
+	const float minDistance = 5.0f;  // この距離まで近づくとエフェクトが最大になる
+	const float maxIntensity = 1.8f; // ビネットの最大強度
+	const float minIntensity = 0.8f; // ビネットの最小強度（常に少しだけかける）
+
+	float distance = sqrt(minDistanceSq);
+	if (distance > maxDistance)
+	{
+		m_vignetteIntensity = minIntensity;
+	}
+	else if (distance < minDistance)
+	{
+		m_vignetteIntensity = maxIntensity;
+	}
+	else
+	{
+		// 距離に応じて強度を線形補間
+		float t = 1.0f - ((distance - minDistance) / (maxDistance - minDistance));
+		m_vignetteIntensity = minIntensity + (maxIntensity - minIntensity) * t;
+	}
 
 	for (auto& enemy : m_enemies) enemy->Update(deltaTime, m_player.get(), m_stage->GetMazeData(), m_stage->GetPathWidth());
 	for (auto& orb : m_orbs) orb->Update(deltaTime, m_player.get(), m_lightManager.get(), m_collectSound.get());
 
-	DirectX::XMFLOAT3 playerPos = m_player->GetPosition();
 	DirectX::XMFLOAT3 playerRot = m_player->GetRotation();
 	m_camera->SetPosition(playerPos.x, playerPos.y, playerPos.z);
 	m_camera->SetRotation(playerRot.x, playerRot.y, playerRot.z);
@@ -237,7 +277,7 @@ void GameScene::Render()
 	for (const auto& orb : m_orbs) if (Model* orbModel = orb->GetModel()) modelsToRender.push_back(orbModel);
 
 	m_renderer->RenderSceneToTexture(modelsToRender, m_camera.get(), m_lightManager.get());
-	m_renderer->RenderFinalPass(m_camera.get());
+	m_renderer->RenderFinalPass(m_camera.get(), m_vignetteIntensity);
 
 	// UIの描画（ミニマップとOrb UIの両方を描画）
 	m_ui->Render(m_camera.get(), m_enemies, m_orbs);

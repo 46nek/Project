@@ -39,7 +39,15 @@ struct MaterialBufferType
 	BOOL UseNormalMap;
 	DirectX::XMFLOAT2 Padding;
 };
-
+/**
+ * @struct PostProcessBufferType
+ * @brief ポストプロセスエフェクト用のパラメータをシェーダーに渡すための構造体
+ */
+struct PostProcessBufferType
+{
+	float VignetteIntensity;
+	DirectX::XMFLOAT3 Padding; // 16バイトアラインメントのためのパディング
+};
 struct LightBufferType;
 
 class GraphicsDevice
@@ -56,6 +64,7 @@ public:
 	bool UpdateLightBuffer(const LightBufferType& lightBuffer);
 	bool UpdateMotionBlurBuffer(const DirectX::XMMATRIX& prevViewProj, const DirectX::XMMATRIX& currentViewProjInv, float blurAmount);
 	bool UpdateMaterialBuffer(const MaterialBufferType& materialBuffer);
+	bool UpdatePostProcessBuffer(const PostProcessBufferType& postProcessBuffer);
 
 	ID3D11Device* GetDevice() const { return m_d3dDevice; }
 	ID3D11DeviceContext* GetDeviceContext() const { return m_immediateContext; }
@@ -76,6 +85,7 @@ private:
 	ID3D11Buffer* m_lightBuffer;
 	ID3D11Buffer* m_motionBlurBuffer;
 	ID3D11Buffer* m_materialBuffer;
+	ID3D11Buffer* m_postProcessBuffer;
 	ID3D11SamplerState* m_samplerState;
 	ID3D11BlendState* m_alphaBlendState;
 	ID3D11BlendState* m_defaultBlendState;

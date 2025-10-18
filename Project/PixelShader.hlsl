@@ -15,7 +15,11 @@ cbuffer MaterialBuffer : register(b2)
     bool UseNormalMap; // <--- ’Ç‰Á
     float2 Padding; // <--- •ÏX
 };
-
+cbuffer PostProcessBuffer : register(b3)
+{
+    float VignetteIntensity;
+    float3 PostProcessPadding;
+};
 #define DIRECTIONAL_LIGHT 0
 #define POINT_LIGHT 1
 #define SPOT_LIGHT 2
@@ -152,7 +156,7 @@ float4 PS(VS_OUTPUT input) : SV_Target
     float2 screenCenter = float2(0.5f, 0.5f);
     float2 texCoord = input.Pos.xy / float2(1280, 720);
     float dist = distance(texCoord, screenCenter);
-    float vignetteIntensity = 1.0f;
+    float vignetteIntensity = VignetteIntensity;
     float vignetteSmoothness = 0.1f;
     float vignette = 1.0f - smoothstep(vignetteSmoothness, 1.0f, dist * vignetteIntensity);
     finalColor.rgb *= vignette;

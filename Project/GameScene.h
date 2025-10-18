@@ -39,5 +39,7 @@ private:
     std::vector<std::unique_ptr<Orb>> m_orbs;
     std::unique_ptr<UI> m_ui;
 
-    std::unique_ptr<DirectX::SoundEffect> m_collectSound;
+    std::unique_ptr<DirectX::SoundEffect> m_collectSound; 
+    
+    float m_vignetteIntensity;
 };

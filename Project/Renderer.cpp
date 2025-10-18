@@ -24,10 +24,14 @@ void Renderer::RenderSceneToTexture(const std::vector<Model*>& models, const Cam
 	RenderMainPass(models, camera, lightManager);
 }
 
-void Renderer::RenderFinalPass(const Camera* camera)
+void Renderer::RenderFinalPass(const Camera* camera, float vignetteIntensity)
 {
 	ID3D11DeviceContext* deviceContext = m_graphicsDevice->GetDeviceContext();
 	ShaderManager* shaderManager = m_graphicsDevice->GetShaderManager();
+	// ポストプロセス用の定数バッファを更新
+	PostProcessBufferType postProcessBuffer;
+	postProcessBuffer.VignetteIntensity = vignetteIntensity;
+	m_graphicsDevice->UpdatePostProcessBuffer(postProcessBuffer);
 
 	m_graphicsDevice->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
 	m_graphicsDevice->GetSwapChain()->TurnZBufferOff(deviceContext);

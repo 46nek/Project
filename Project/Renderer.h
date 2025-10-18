@@ -20,8 +20,7 @@ public:
 	// 1. シーンをテクスチャにレンダリングする
 	void RenderSceneToTexture(const std::vector<Model*>& models, const Camera* camera, LightManager* lightManager);
 	// 2. レンダリングされたテクスチャにポストプロセスを適用し、画面に描画する
-	void RenderFinalPass(const Camera* camera);
-
+	void RenderFinalPass(const Camera* camera, float vignetteIntensity);
 private:
 	// シャドウマップ生成パス
 	void RenderDepthPass(const std::vector<Model*>& models, LightManager* lightManager);
