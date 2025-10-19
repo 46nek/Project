@@ -264,7 +264,6 @@ void GameScene::Shutdown()
 	if (m_stage) m_stage->Shutdown();
 }
 
-// (Updateは変更なし)
 void GameScene::Update(float deltaTime)
 {
 	int mouseX, mouseY;
@@ -324,7 +323,7 @@ void GameScene::Update(float deltaTime)
 			switch ((*it)->GetType())
 			{
 			case OrbType::MinimapZoomOut:
-				if (m_ui) m_ui->GetMinimap()->SetZoom(1.5f); // ズームアウト（値は適宜調整）
+				if (m_ui) m_ui->GetMinimap()->SetZoom(2.0f); // ズームアウト（値は適宜調整）
 				break;
 			case OrbType::EnemyRadar:
 				m_enemyRadarTimer = 20.0f; // 20秒タイマーセット

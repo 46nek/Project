@@ -192,11 +192,11 @@
     <ClCompile Include="minimap.cpp">
       <Filter>Source\04_GamePlay\UI</Filter>
     </ClCompile>
-    <ClCompile Include="Frustum.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="LoadingScene.cpp">
       <Filter>Source\01_Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Frustum.cpp">
+      <Filter>Source\02_Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -353,11 +353,11 @@
     <ClInclude Include="minimap.h">
       <Filter>Source\04_GamePlay\UI</Filter>
     </ClInclude>
-    <ClInclude Include="Frustum.h">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="LoadingScene.h">
       <Filter>Source\01_Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Frustum.h">
+      <Filter>Source\02_Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
