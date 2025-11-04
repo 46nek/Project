@@ -3,9 +3,7 @@
 
 Renderer::Renderer(GraphicsDevice* graphicsDevice) : m_graphicsDevice(graphicsDevice)
 {
-	// --- ‚±‚±‚©‚ç’Ç‰Á ---
 	m_frustum = std::make_unique<Frustum>();
-	// --- ’Ç‰Á‚±‚±‚Ü‚Å ---
 }
 Renderer::~Renderer() {}
 

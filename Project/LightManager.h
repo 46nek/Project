@@ -47,4 +47,9 @@ private:
 	float m_nextFlickerTime;
 	bool m_isFlickering;
 	std::mt19937 m_rng;
+
+	DirectX::XMFLOAT3 m_currentFlashlightPos; 
+	DirectX::XMFLOAT3 m_currentFlashlightDir; 
+	float m_flashlightLagSpeed; 
+	bool m_isFlashlightInitialized; 
 };

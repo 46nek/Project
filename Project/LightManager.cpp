@@ -1,16 +1,18 @@
 #include "LightManager.h"
-#include "MazeGenerator.h"
-#include "Stage.h"
 #include <vector>
 #include <tuple>
 
 LightManager::LightManager()
 	: m_flashlightIndex(-1),
-	m_flashlightBaseIntensity(0.0f), // <--- 追加
+	m_flashlightBaseIntensity(0.0f), 
 	m_flickerTimer(0.0f),
 	m_nextFlickerTime(0.0f),
 	m_isFlickering(false),
-	m_rng(std::random_device{}())
+	m_rng(std::random_device{}()), 
+	m_currentFlashlightPos(0.0f, 0.0f, 0.0f),
+	m_currentFlashlightDir(0.0f, 0.0f, 1.0f) ,
+	m_flashlightLagSpeed(5.0f), 
+	m_isFlashlightInitialized(false)
 {
 }
 
@@ -55,12 +57,11 @@ void LightManager::Initialize(const std::vector<std::vector<MazeGenerator::CellT
 	Light flashlight = {};
 	flashlight.Enabled = true;
 	flashlight.Type = SpotLight;
-	flashlight.Color = { 1.0f, 1.0f, 0.9f, 1.0f };
-	m_flashlightBaseIntensity = 0.2f;
+	flashlight.Color = { 1.0f, 1.0f, 0.9f, 1.0f }; m_flashlightBaseIntensity = 1.2f; // 元(0.2f)より明るく
 	flashlight.Intensity = m_flashlightBaseIntensity;
-	flashlight.Range = 40.0f;
-	flashlight.SpotAngle = 0.85f;
-	flashlight.Attenuation = { 0.05f, 0.08f, 0.0f };
+	flashlight.Range = 30.0f; 
+	flashlight.SpotAngle = 0.75f; 
+	flashlight.Attenuation = { 1.0f, 0.08f, 0.01f };
 	m_lights.push_back(flashlight);
 	m_flashlightIndex = static_cast<int>(m_lights.size()) - 1;
 
@@ -104,15 +105,47 @@ void LightManager::UpdateFlashlight(float deltaTime, const DirectX::XMFLOAT3& po
 
 	ApplyFlicker(m_flashlightIndex, deltaTime);
 
-	m_lights[m_flashlightIndex].Position = position;
+	// --- ターゲットとなるカメラの位置と向きを計算 ---
 	DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(
 		rotation.x * (DirectX::XM_PI / 180.0f),
 		rotation.y * (DirectX::XM_PI / 180.0f),
 		rotation.z * (DirectX::XM_PI / 180.0f)
 	);
 	DirectX::XMVECTOR forward = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
-	DirectX::XMVECTOR direction = DirectX::XMVector3TransformNormal(forward, rotationMatrix);
-	DirectX::XMStoreFloat3(&m_lights[m_flashlightIndex].Direction, direction);
+	DirectX::XMVECTOR targetDirectionVec = DirectX::XMVector3TransformNormal(forward, rotationMatrix);
+	DirectX::XMVECTOR targetPositionVec = DirectX::XMLoadFloat3(&position);
+
+	// --- 初回実行時のみ、現在位置をターゲット位置にスナップさせる ---
+	if (!m_isFlashlightInitialized)
+	{
+		DirectX::XMStoreFloat3(&m_currentFlashlightPos, targetPositionVec);
+		DirectX::XMStoreFloat3(&m_currentFlashlightDir, targetDirectionVec);
+		m_isFlashlightInitialized = true;
+	}
+
+	// --- 現在の位置と向きをロード ---
+	DirectX::XMVECTOR currentPositionVec = DirectX::XMLoadFloat3(&m_currentFlashlightPos);
+	DirectX::XMVECTOR currentDirectionVec = DirectX::XMLoadFloat3(&m_currentFlashlightDir);
+
+	// --- Lerp（線形補間）で滑らかに追従 ---
+	// m_flashlightLagSpeed が小さいほど滑らか（追従が遅い）
+	// std::min で補間係数が 1.0f を超えないようにクランプ
+	float lerpFactor = std::min(deltaTime * m_flashlightLagSpeed, 1.0f);
+
+	// 位置の補間
+	currentPositionVec = DirectX::XMVectorLerp(currentPositionVec, targetPositionVec, lerpFactor);
+
+	// 向きの補間 (Lerp後に正規化)
+	currentDirectionVec = DirectX::XMVectorLerp(currentDirectionVec, targetDirectionVec, lerpFactor);
+	currentDirectionVec = DirectX::XMVector3Normalize(currentDirectionVec); // 正規化が重要
+
+	// --- 結果をメンバ変数に保存 ---
+	DirectX::XMStoreFloat3(&m_currentFlashlightPos, currentPositionVec);
+	DirectX::XMStoreFloat3(&m_currentFlashlightDir, currentDirectionVec);
+
+	// --- ライトバッファ（m_lights配列）に反映 ---
+	m_lights[m_flashlightIndex].Position = m_currentFlashlightPos;
+	DirectX::XMStoreFloat3(&m_lights[m_flashlightIndex].Direction, currentDirectionVec);
 }
 
 void LightManager::ApplyFlicker(int lightIndex, float deltaTime)
