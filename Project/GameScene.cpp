@@ -6,7 +6,9 @@
 #include <algorithm>
 
 GameScene::GameScene()
-	: m_vignetteIntensity(0.0f)
+	: m_vignetteIntensity(0.0f),
+	m_remainingOrbs(0),
+	m_totalOrbs(0)
 {
 }
 
@@ -198,6 +200,8 @@ bool GameScene::InitializeOrbs()
 			}
 		}
 	}
+	m_totalOrbs = static_cast<int>(m_orbs.size());
+	m_remainingOrbs = m_totalOrbs;
 	return true;
 }
 
@@ -270,49 +274,23 @@ void GameScene::Update(float deltaTime)
 	m_input->GetMouseDelta(mouseX, mouseY);
 	m_player->Turn(mouseX, mouseY, deltaTime);
 	m_player->Update(deltaTime, m_input, m_stage->GetMazeData(), m_stage->GetPathWidth());
-	// 最も近い敵との距離を計算
-	float minDistanceSq = FLT_MAX;
-	DirectX::XMFLOAT3 playerPos = m_player->GetPosition();
-
-	for (const auto& enemy : m_enemies)
+	
+	m_vignetteIntensity = 1.1f;
+	
+	for (auto& enemy : m_enemies) enemy->Update(deltaTime, m_player.get(), m_stage->GetMazeData(), m_stage->GetPathWidth());
+	for (auto& orb : m_orbs) //
 	{
-		if (enemy)
+		// 収集済みでなければ更新処理をかける
+		if (orb && !orb->IsCollected()) //
 		{
-			DirectX::XMFLOAT3 enemyPos = enemy->GetPosition();
-			float dx = playerPos.x - enemyPos.x;
-			float dz = playerPos.z - enemyPos.z;
-			float distanceSq = (dx * dx) + (dz * dz);
-			if (distanceSq < minDistanceSq)
+			orb->Update(deltaTime, m_player.get(), m_lightManager.get(), m_collectSound.get()); //
+			// Update の結果、収集されたらカウントを減らす
+			if (orb->IsCollected()) //
 			{
-				minDistanceSq = distanceSq;
+				m_remainingOrbs--;
 			}
 		}
 	}
-
-	// 距離に基づいてビネットの強度を計算
-	const float maxDistance = 15.0f; // この距離以上離れたらエフェクトはかからない
-	const float minDistance = 5.0f;  // この距離まで近づくとエフェクトが最大になる
-	const float maxIntensity = 1.8f; // ビネットの最大強度
-	const float minIntensity = 0.8f; // ビネットの最小強度（常に少しだけかける）
-
-	float distance = sqrt(minDistanceSq);
-	if (distance > maxDistance)
-	{
-		m_vignetteIntensity = minIntensity;
-	}
-	else if (distance < minDistance)
-	{
-		m_vignetteIntensity = maxIntensity;
-	}
-	else
-	{
-		// 距離に応じて強度を線形補間
-		float t = 1.0f - ((distance - minDistance) / (maxDistance - minDistance));
-		m_vignetteIntensity = minIntensity + (maxIntensity - minIntensity) * t;
-	}
-
-	for (auto& enemy : m_enemies) enemy->Update(deltaTime, m_player.get(), m_stage->GetMazeData(), m_stage->GetPathWidth());
-	for (auto& orb : m_orbs) orb->Update(deltaTime, m_player.get(), m_lightManager.get(), m_collectSound.get());
 	// 特殊オーブの更新と当たり判定
 	for (auto it = m_specialOrbs.begin(); it != m_specialOrbs.end(); )
 	{
@@ -342,6 +320,8 @@ void GameScene::Update(float deltaTime)
 	{
 		m_enemyRadarTimer -= deltaTime;
 	}
+
+	DirectX::XMFLOAT3 playerPos = m_player->GetPosition();
 	DirectX::XMFLOAT3 playerRot = m_player->GetRotation();
 	m_camera->SetPosition(playerPos.x, playerPos.y, playerPos.z);
 	m_camera->SetRotation(playerRot.x, playerRot.y, playerRot.z);
@@ -359,17 +339,7 @@ void GameScene::Update(float deltaTime)
 
 	m_lightManager->Update(deltaTime, m_camera->GetPosition(), m_camera->GetRotation());
 
-	// 残りのオーブ数を計算
-	int remainingOrbs = 0;
-	for (const auto& orb : m_orbs)
-	{
-		if (orb && !orb->IsCollected())
-		{
-			remainingOrbs++;
-		}
-	}// UIにオーブの情報とプレイヤーのスタミナ情報を渡す
-	m_ui->Update(deltaTime, remainingOrbs, static_cast<int>(m_orbs.size()), m_player->GetStaminaPercentage(), m_enemyRadarTimer > 0.0f);
-
+	m_ui->Update(deltaTime, m_remainingOrbs, m_totalOrbs, m_player->GetStaminaPercentage(), m_enemyRadarTimer > 0.0f);
 }
 
 

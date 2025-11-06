@@ -50,4 +50,7 @@ private:
     std::unique_ptr<DirectX::SoundEffect> m_collectSound; 
     
     float m_vignetteIntensity;
+
+    int m_remainingOrbs;
+    int m_totalOrbs;
 };

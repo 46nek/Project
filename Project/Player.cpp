@@ -79,8 +79,6 @@ void Player::Update(float deltaTime, Input* input, const std::vector<std::vector
 	// --- ‘¬“x‚ÌŒˆ’è ---
 	float currentSpeed = m_isRunning ? m_runSpeed : m_moveSpeed;
 
-	// £££ C³‚±‚±‚Ü‚Å £££
-
 	float moveAmount = currentSpeed * deltaTime;
 
 	DirectX::XMFLOAT3 desiredMove = { 0, 0, 0 };
