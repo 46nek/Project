@@ -96,7 +96,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source;C:\imgui-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -104,7 +104,7 @@
       <AdditionalLibraryDirectories>d3d11.lib;dxgi.lib;%(AdditionalLibraryDirectories);C:\FW1FontWrapper-master\FW1FontWrapper-master\Debug\x64</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);DirectXTK.libassimp-vc143-mtd.lib;d2d1.lib
 
-;dwrite.lib;FW1FontWrapper.lib</AdditionalDependencies>
+;dwrite.lib;FW1FontWrapper.lib;imgui_lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -115,14 +115,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source;C:\imgui-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);DirectXTK.libassimp-vc143-mt.lib;d2d1.lib
 
-;dwrite.lib;FW1FontWrapper.lib</AdditionalDependencies>
+;dwrite.lib;FW1FontWrapper.lib;imgui_lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>;C:\FW1FontWrapper-master\FW1FontWrapper-master\Release\x64</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -132,15 +132,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source;C:\imgui-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);C:\FW1FontWrapper-master\FW1FontWrapper-master\Debug\x64</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;dxgi.lib;%(AdditionalDependencies);DirectXTK.lib;assimp-vc143-mtd.lib;d2d1.lib
-
-;dwrite.lib;FW1FontWrapper.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);C:\FW1FontWrapper-master\FW1FontWrapper-master\Debug\x64;C:\imgui-master\lib\imgui_lib\x64\Debug</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;%(AdditionalDependencies);DirectXTK.lib;assimp-vc143-mtd.lib;d2d1.lib;dwrite.lib;FW1FontWrapper.lib;imgui_lib.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -151,15 +149,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source;C:\imgui-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);C:\FW1FontWrapper-master\FW1FontWrapper-master\Release\x64</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;dxgi.lib;%(AdditionalDependencies);DirectXTK.lib;assimp-vc143-mt.lib;d2d1.lib
-
-;dwrite.lib;FW1FontWrapper.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);C:\FW1FontWrapper-master\FW1FontWrapper-master\Release\x64;C:\imgui-master\lib\imgui_lib\x64\Release</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;%(AdditionalDependencies);DirectXTK.lib;assimp-vc143-mt.lib;d2d1.lib;dwrite.lib;FW1FontWrapper.lib;imgui_lib.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

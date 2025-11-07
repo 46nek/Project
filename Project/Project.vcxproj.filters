@@ -111,81 +111,6 @@
     <ClCompile Include="Texture.cpp">
       <Filter>Source\02_Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1ColorRGBA.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1ColorRGBAInterface.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1DWriteRenderTarget.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1DWriteRenderTargetInterface.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1Factory.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1FactoryInterface.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1FontWrapper.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1FontWrapperInterface.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1GlyphAtlas.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1GlyphAtlasInterface.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1GlyphProvider.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1GlyphProviderInterface.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1GlyphRenderStates.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1GlyphRenderStatesInterface.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1GlyphSheet.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1GlyphSheetInterface.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1GlyphVertexDrawer.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1GlyphVertexDrawerInterface.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1StateSaver.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1TextGeometry.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1TextGeometryInterface.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1TextRenderer.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1TextRendererInterface.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\FW1FontWrapper.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\FW1Precompiled.cpp">
-      <Filter>Library</Filter>
-    </ClCompile>
     <ClCompile Include="UI.cpp">
       <Filter>Source\04_GamePlay\UI</Filter>
     </ClCompile>
@@ -298,54 +223,6 @@
     </ClInclude>
     <ClInclude Include="framework.h">
       <Filter>Source\06_Other</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1ColorRGBA.h">
-      <Filter>Library</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1DWriteRenderTarget.h">
-      <Filter>Library</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1Factory.h">
-      <Filter>Library</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1FontWrapper.h">
-      <Filter>Library</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1GlyphAtlas.h">
-      <Filter>Library</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1GlyphProvider.h">
-      <Filter>Library</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1GlyphRenderStates.h">
-      <Filter>Library</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1GlyphSheet.h">
-      <Filter>Library</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1GlyphVertexDrawer.h">
-      <Filter>Library</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1Object.h">
-      <Filter>Library</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1StateSaver.h">
-      <Filter>Library</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1TextGeometry.h">
-      <Filter>Library</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\CFW1TextRenderer.h">
-      <Filter>Library</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\FW1CompileSettings.h">
-      <Filter>Library</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\FW1FontWrapper.h">
-      <Filter>Library</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source\FW1Precompiled.h">
-      <Filter>Library</Filter>
     </ClInclude>
     <ClInclude Include="UI.h">
       <Filter>Source\04_GamePlay\UI</Filter>

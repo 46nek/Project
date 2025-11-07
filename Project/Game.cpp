@@ -1,7 +1,5 @@
-// Game.cpp (この内容で完全に置き換えてください)
-
 #include "Game.h"
-#include <comdef.h> // CoInitializeEx用
+#include <comdef.h> 
 
 // Gameのコンストラクタで、ゲーム開始時にポーズ状態にする
 Game::Game() : m_isPaused(true)
