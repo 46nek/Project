@@ -1,4 +1,3 @@
-
 #include "AStar.h"
 #include <algorithm>
 #include <cmath>

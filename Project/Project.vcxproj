@@ -137,8 +137,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);C:\FW1FontWrapper-master\FW1FontWrapper-master\Debug\x64;C:\imgui-master\lib\imgui_lib\x64\Debug</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;dxgi.lib;%(AdditionalDependencies);DirectXTK.lib;assimp-vc143-mtd.lib;d2d1.lib;dwrite.lib;FW1FontWrapper.lib;imgui_lib.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);C:\FW1FontWrapper-master\FW1FontWrapper-master\Debug\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;%(AdditionalDependencies);DirectXTK.lib;assimp-vc143-mtd.lib;d2d1.lib;dwrite.lib;FW1FontWrapper.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -154,7 +154,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);C:\FW1FontWrapper-master\FW1FontWrapper-master\Release\x64;C:\imgui-master\lib\imgui_lib\x64\Release</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);C:\FW1FontWrapper-master\FW1FontWrapper-master\Release\x64</AdditionalLibraryDirectories>
       <AdditionalDependencies>d3d11.lib;dxgi.lib;%(AdditionalDependencies);DirectXTK.lib;assimp-vc143-mt.lib;d2d1.lib;dwrite.lib;FW1FontWrapper.lib;imgui_lib.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
