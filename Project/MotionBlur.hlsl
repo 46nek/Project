@@ -1,5 +1,3 @@
-// MotionBlur.hlsl (C³”Å)
-
 Texture2D sceneTexture : register(t0);
 Texture2D depthTexture : register(t1);
 SamplerState Sampler : register(s0);

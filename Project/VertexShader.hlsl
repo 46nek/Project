@@ -45,8 +45,8 @@ VS_OUTPUT VS(VS_INPUT input)
     
     // 法線、接線、従法線をワールド空間に変換
     output.Normal = normalize(mul(input.Normal, (float3x3) WorldInverseTransposeMatrix));
-    output.Tangent = normalize(mul(input.Tangent, (float3x3) WorldInverseTransposeMatrix)); // <--- 追加
-    output.Binormal = normalize(mul(input.Binormal, (float3x3) WorldInverseTransposeMatrix)); // <--- 追加
+    output.Tangent = normalize(mul(input.Tangent, (float3x3) WorldInverseTransposeMatrix)); 
+    output.Binormal = normalize(mul(input.Binormal, (float3x3) WorldInverseTransposeMatrix)); 
 
     // シャドウマッピングのための座標変換
     output.LightViewPos = mul(worldPos, LightViewMatrix);

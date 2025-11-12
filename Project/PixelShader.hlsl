@@ -1,5 +1,3 @@
-// PixelShader.hlsl (この内容で完全に置き換えてください)
-
 #define MAX_LIGHTS 64
 
 Texture2D shaderTexture : register(t0);
@@ -12,8 +10,8 @@ cbuffer MaterialBuffer : register(b2)
 {
     float4 EmissiveColor;
     bool UseTexture;
-    bool UseNormalMap; // <--- 追加
-    float2 Padding; // <--- 変更
+    bool UseNormalMap; 
+    float2 Padding;
 };
 cbuffer PostProcessBuffer : register(b3)
 {

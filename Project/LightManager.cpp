@@ -57,10 +57,10 @@ void LightManager::Initialize(const std::vector<std::vector<MazeGenerator::CellT
 	Light flashlight = {};
 	flashlight.Enabled = true;
 	flashlight.Type = SpotLight;
-	flashlight.Color = { 1.0f, 1.0f, 0.9f, 1.0f }; m_flashlightBaseIntensity = 1.2f; // Œ³(0.2f)‚æ‚è–¾‚é‚­
+	flashlight.Color = { 1.0f, 1.0f, 0.9f, 1.0f }; m_flashlightBaseIntensity = 1.2f; 
 	flashlight.Intensity = m_flashlightBaseIntensity;
 	flashlight.Range = 30.0f; 
-	flashlight.SpotAngle = 0.75f; 
+	flashlight.SpotAngle = 0.9f; 
 	flashlight.Attenuation = { 1.0f, 0.08f, 0.01f };
 	m_lights.push_back(flashlight);
 	m_flashlightIndex = static_cast<int>(m_lights.size()) - 1;
