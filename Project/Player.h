@@ -47,4 +47,7 @@ private:
 	float m_staminaRegenRate;      // スタミナ回復率（1秒あたり）
 	bool m_isStaminaExhausted;     // スタミナが枯渇したかどうかのフラグ
 	float m_staminaRechargeThreshold; // 再び走れるようになるために必要なスタミナ量
+	float m_staminaWarningThreshhold;
+	float m_slowDepletionFactor;
+	float m_staminaRegenCoolDown;
 };

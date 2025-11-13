@@ -1,5 +1,3 @@
-// Project/Player.cpp
-
 #include "Player.h"
 
 Player::Player()
@@ -15,7 +13,10 @@ Player::Player()
 	m_staminaDepletionRate(20.0f), // 走っていると5秒でスタミナが尽きる計算
 	m_staminaRegenRate(15.0f),     // 止まっていると約6.7秒で全回復する計算
 	m_isStaminaExhausted(false),
-	m_staminaRechargeThreshold(25.0f) // 最大スタミナの25%
+	m_staminaRechargeThreshold(30.0f),
+	m_staminaWarningThreshhold(30.0f),
+	m_slowDepletionFactor(0.6f),
+	m_staminaRegenCoolDown(0.0f)
 {
 }
 
@@ -31,28 +32,24 @@ void Player::Update(float deltaTime, Input* input, const std::vector<std::vector
 
 	bool isTryingToRun = input->IsKeyDown(0x10); // Shiftキー
 
-	// ▼▼▼ ここからスタミナと走りのロジックを全面的に修正 ▼▼▼
-
-	// --- スタミナの状態管理 ---
-	// もし「スタミナ切れ」状態なら、一定量回復したかチェックする
-	if (m_isStaminaExhausted)
-	{
-		if (m_stamina >= m_staminaRechargeThreshold)
-		{
-			// 閾値まで回復したので、「スタミナ切れ」状態を解除
-			m_isStaminaExhausted = false;
-		}
-	}
-
 	// --- 走るかどうかの決定 ---
 	// Shiftキーが押されていて、かつ「スタミナ切れ」でない場合に走る
 	m_isRunning = isTryingToRun && !m_isStaminaExhausted;
 
+	if (m_staminaRegenCoolDown > 0.0f)
+	{
+		m_staminaRegenCoolDown -= deltaTime;
+	}
+
 	// --- スタミナの更新 ---
 	if (m_isRunning)
 	{
-		// 走っている場合はスタミナを減少
-		m_stamina -= m_staminaDepletionRate * deltaTime;
+		float currentDepletionRate = m_staminaDepletionRate;
+		if (m_stamina <= m_staminaWarningThreshhold)
+		{
+			currentDepletionRate *= m_slowDepletionFactor;
+		}
+		m_stamina -= currentDepletionRate * deltaTime;
 
 		// もし、このフレームでスタミナが0になったら
 		if (m_stamina <= 0.0f)
@@ -60,24 +57,46 @@ void Player::Update(float deltaTime, Input* input, const std::vector<std::vector
 			m_stamina = 0.0f;           // スタミナを0に固定
 			m_isRunning = false;        // 即座に走りをやめる
 			m_isStaminaExhausted = true; // 「スタミナ切れ」状態にする
+			m_staminaRegenCoolDown = 1.0f; //回復クールダウン
 		}
 	}
 	else
 	{
-		// 走っていない場合はスタミナを回復
-		float currentRegenRate = m_staminaRegenRate;
-		if (input->IsKeyDown('W') || input->IsKeyDown('S') || input->IsKeyDown('A') || input->IsKeyDown('D'))
+		if (m_staminaRegenCoolDown <= 0.0f)
 		{
-			currentRegenRate *= 0.7f;
-		}
-		m_stamina += currentRegenRate * deltaTime;
+			bool isWalking = input->IsKeyDown('W') || input->IsKeyDown('S') || input->IsKeyDown('A') || input->IsKeyDown('D');
 
-		// スタミナが最大値を超えないようにする
-		m_stamina = std::min(m_stamina, m_maxStamina);
+			if (m_isStaminaExhausted || isWalking)
+			{
+				m_stamina += m_staminaRegenRate * 0.5f * deltaTime;
+			}
+			else
+			{
+				m_stamina += m_staminaRegenRate * deltaTime;
+			}
+			m_stamina = std::min(m_stamina, m_maxStamina);
+
+			if (m_isStaminaExhausted && m_stamina >= m_staminaRechargeThreshold)
+			{
+				m_isStaminaExhausted = false;
+			}
+		}
 	}
 
 	// --- 速度の決定 ---
-	float currentSpeed = m_isRunning ? m_runSpeed : m_moveSpeed;
+	float currentSpeed;
+	if (m_isStaminaExhausted)
+	{
+		currentSpeed = m_moveSpeed * 0.6f;
+	}
+	else if (m_isRunning)
+	{
+		currentSpeed = m_runSpeed;
+	}
+	else
+	{
+		currentSpeed = m_moveSpeed;
+	}
 
 	float moveAmount = currentSpeed * deltaTime;
 

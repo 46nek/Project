@@ -275,10 +275,25 @@ void GameScene::Update(float deltaTime)
 	m_player->Turn(mouseX, mouseY, deltaTime);
 	m_player->Update(deltaTime, m_input, m_stage->GetMazeData(), m_stage->GetPathWidth());
 	
-	m_vignetteIntensity = 1.1f;
+	float staminaPercentage = m_player->GetStaminaPercentage();
+
+	const float minIntensity = 1.1f;
+	const float maxIntensity = 2.0f;
+	const float warningThreshold = 0.3f;
+
+	if (staminaPercentage > warningThreshold)
+	{
+		m_vignetteIntensity = minIntensity;
+	}
+	else
+	{
+		float factorInWarningZone = staminaPercentage / warningThreshold;
+		float intensityFactor = 1.0f - factorInWarningZone;
+		m_vignetteIntensity = minIntensity + (maxIntensity - minIntensity) * intensityFactor;
+	}
 	
 	for (auto& enemy : m_enemies) enemy->Update(deltaTime, m_player.get(), m_stage->GetMazeData(), m_stage->GetPathWidth());
-	for (auto& orb : m_orbs) //
+	for (auto& orb : m_orbs) 
 	{
 		// ŽûWÏ‚Ý‚Å‚È‚¯‚ê‚ÎXVˆ—‚ð‚©‚¯‚é
 		if (orb && !orb->IsCollected()) //

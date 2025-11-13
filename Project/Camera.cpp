@@ -91,7 +91,6 @@ DirectX::XMMATRIX Camera::GetViewMatrix() const
 	return m_viewMatrix;
 }
 
-// <--- ˆÈ‰º‚ð‚·‚×‚Ä’Ç‰Á --->
 DirectX::XMMATRIX Camera::GetPreviousViewMatrix() const
 {
 	return m_previousViewMatrix;
