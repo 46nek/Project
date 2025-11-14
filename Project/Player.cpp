@@ -111,7 +111,6 @@ void Player::Update(float deltaTime, Input* input, const std::vector<std::vector
 
 	if (desiredMove.x != 0.0f || desiredMove.z != 0.0f)
 	{
-		m_isMoving = true;
 		DirectX::XMVECTOR moveVec = DirectX::XMLoadFloat3(&desiredMove);
 		moveVec = DirectX::XMVector3Normalize(moveVec);
 		DirectX::XMStoreFloat3(&desiredMove, DirectX::XMVectorScale(moveVec, moveAmount));
@@ -120,7 +119,8 @@ void Player::Update(float deltaTime, Input* input, const std::vector<std::vector
 		nextPosition.x += desiredMove.x;
 		if (!IsCollidingWithWall(nextPosition, COLLISION_RADIUS, mazeData, pathWidth))
 		{
-			m_position.x = nextPosition.x;
+			m_position.x = nextPosition.x; 
+			m_isMoving = true;
 		}
 
 		nextPosition = m_position;
@@ -128,6 +128,7 @@ void Player::Update(float deltaTime, Input* input, const std::vector<std::vector
 		if (!IsCollidingWithWall(nextPosition, COLLISION_RADIUS, mazeData, pathWidth))
 		{
 			m_position.z = nextPosition.z;
+			m_isMoving = true;
 		}
 	}
 }
