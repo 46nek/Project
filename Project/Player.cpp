@@ -42,8 +42,9 @@ void Player::Update(float deltaTime, Input* input, const std::vector<std::vector
 	}
 
 	// --- スタミナの更新 ---
-	if (m_isRunning)
+	if (m_isRunning) 
 	{
+		m_staminaRegenCoolDown = 0.5f;
 		float currentDepletionRate = m_staminaDepletionRate;
 		if (m_stamina <= m_staminaWarningThreshhold)
 		{

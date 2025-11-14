@@ -40,8 +40,15 @@ float4 main(float4 position : SV_POSITION, float2 tex : TEXCOORD) : SV_TARGET
     velocity *= blurAmount;
 
     // --- 4. 動きのベクトルに沿って複数回テクスチャをサンプリングし、平均をとる ---
+    float velocitySq = dot(velocity, velocity);
+    if(velocitySq < 0.000001f)
+    {
+        return sceneTexture.Sample(Sampler, tex);
+    }
+    
     float4 finalColor = 0;
-    const int SAMPLES = 12; 
+    
+    const int SAMPLES = 8; 
     for (int i = 0; i < SAMPLES; ++i)
     {
         finalColor += sceneTexture.Sample(Sampler, tex + velocity * (float(i) / (SAMPLES - 1)));
