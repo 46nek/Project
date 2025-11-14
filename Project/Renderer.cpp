@@ -7,7 +7,13 @@ Renderer::Renderer(GraphicsDevice* graphicsDevice) : m_graphicsDevice(graphicsDe
 }
 Renderer::~Renderer() {}
 
-void Renderer::RenderSceneToTexture(const std::vector<Model*>& models, const Camera* camera, LightManager* lightManager)
+void Renderer::RenderSceneToTexture(
+	const std::vector<Model*>& stageModels,
+	const std::vector<Model*>& dynamicModels,
+	const Camera* camera, 
+	LightManager* lightManager,
+	const std::vector<std::vector<MazeGenerator::CellType>>& mazeData,
+	float pathWidth)
 {
 	if (!m_graphicsDevice || !camera || !lightManager) return;
 
@@ -15,11 +21,11 @@ void Renderer::RenderSceneToTexture(const std::vector<Model*>& models, const Cam
 	renderTarget->SetRenderTarget(m_graphicsDevice->GetDeviceContext());
 	renderTarget->ClearRenderTarget(m_graphicsDevice->GetDeviceContext(), 0.1f, 0.2f, 0.4f, 1.0f);
 
-	RenderDepthPass(models, lightManager);
+	RenderDepthPass(stageModels, dynamicModels,lightManager);
 
 	renderTarget->SetRenderTarget(m_graphicsDevice->GetDeviceContext());
 
-	RenderMainPass(models, camera, lightManager);
+	RenderMainPass(stageModels, dynamicModels, camera, lightManager, mazeData,pathWidth);
 }
 
 void Renderer::RenderFinalPass(const Camera* camera, float vignetteIntensity)
@@ -72,7 +78,10 @@ void Renderer::RenderFinalPass(const Camera* camera, float vignetteIntensity)
 	deviceContext->PSSetShaderResources(0, 2, nullSRVs);
 }
 
-void Renderer::RenderDepthPass(const std::vector<Model*>& models, LightManager* lightManager)
+void Renderer::RenderDepthPass(
+	const std::vector<Model*>& stageModels,
+	const std::vector<Model*>& dynamicModels,
+	LightManager* lightManager)
 {
 	ID3D11DeviceContext* deviceContext = m_graphicsDevice->GetDeviceContext();
 	ShaderManager* shaderManager = m_graphicsDevice->GetShaderManager();
@@ -83,7 +92,10 @@ void Renderer::RenderDepthPass(const std::vector<Model*>& models, LightManager* 
 	deviceContext->VSSetShader(shaderManager->GetDepthVertexShader(), nullptr, 0);
 	deviceContext->PSSetShader(nullptr, nullptr, 0);
 
-	for (Model* model : models) {
+	std::vector<Model*> allModels = stageModels;
+	allModels.insert(allModels.end(), dynamicModels.begin(), dynamicModels.end());
+	
+	for (Model* model : allModels) {
 		if (model) {
 			m_graphicsDevice->UpdateMatrixBuffer(
 				model->GetWorldMatrix(),
@@ -97,17 +109,21 @@ void Renderer::RenderDepthPass(const std::vector<Model*>& models, LightManager* 
 	}
 }
 
-void Renderer::RenderMainPass(const std::vector<Model*>& models, const Camera* camera, LightManager* lightManager)
+void Renderer::RenderMainPass(
+	const std::vector<Model*>& stageModels,
+	const std::vector<Model*>& dynamicmodels,
+	const Camera* camera,
+	LightManager* lightManager,
+	const std::vector<std::vector<MazeGenerator::CellType>>& mazeData,
+	float pathWidth)
 {
 	ID3D11DeviceContext* deviceContext = m_graphicsDevice->GetDeviceContext();
 	ShaderManager* shaderManager = m_graphicsDevice->GetShaderManager();
 	ShadowMapper* shadowMapper = m_graphicsDevice->GetShadowMapper();
 
-	// --- ここから変更 ---
 	DirectX::XMMATRIX viewMatrix = camera->GetViewMatrix();
 	DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
 	m_frustum->ConstructFrustum(viewMatrix, projectionMatrix);
-	// --- 変更ここまで ---
 
 	D3D11_VIEWPORT vp = {};
 	vp.Width = Game::SCREEN_WIDTH;
@@ -135,30 +151,120 @@ void Renderer::RenderMainPass(const std::vector<Model*>& models, const Camera* c
 	ID3D11SamplerState* shadowSampler = shadowMapper->GetShadowSampleState();
 	deviceContext->PSSetSamplers(1, 1, &shadowSampler);
 
-	for (Model* model : models) {
-		if (model) {
-			// --- ここから変更 ---
-			if (!m_frustum->CheckSphere(model->GetBoundingSphereCenter(), model->GetBoundingSphereRadius()))
-			{
-				continue; // 視錐台の外にあるモデルは描画しない
-			}
-			// --- 変更ここまで ---
+	auto renderModel = [&](Model* model) {
+		if (!model) return;
 
-			MaterialBufferType materialBuffer;
-			materialBuffer.EmissiveColor = model->GetEmissiveColor();
-			materialBuffer.UseTexture = model->GetUseTexture();
-			materialBuffer.UseNormalMap = model->HasNormalMap() && model->GetUseNormalMap();
-			m_graphicsDevice->UpdateMaterialBuffer(materialBuffer);
+		MaterialBufferType materialBuffer;
+		materialBuffer.EmissiveColor = model->GetEmissiveColor();
+		materialBuffer.UseTexture = model->GetUseTexture();
+		materialBuffer.UseNormalMap = model->HasNormalMap() && model->GetUseNormalMap();
+		m_graphicsDevice->UpdateMaterialBuffer(materialBuffer);
 
-			m_graphicsDevice->UpdateMatrixBuffer(
-				model->GetWorldMatrix(),
-				viewMatrix, // 更新されたviewMatrixを使用
-				projectionMatrix, // 更新されたprojectionMatrixを使用
-				lightManager->GetLightViewMatrix(),
-				lightManager->GetLightProjectionMatrix()
-			);
-			model->Render(deviceContext);
+		m_graphicsDevice->UpdateMatrixBuffer(
+			model->GetWorldMatrix(),
+			viewMatrix, // 更新されたviewMatrixを使用
+			projectionMatrix, // 更新されたprojectionMatrixを使用
+			lightManager->GetLightViewMatrix(),
+			lightManager->GetLightProjectionMatrix()
+		);
+		model->Render(deviceContext);
+		};
+
+	//1.
+	for (Model* model : stageModels)
+	{
+		if (!m_frustum->CheckSphere(model->GetBoundingSphereCenter(), model->GetBoundingSphereRadius()))
+		{
+			continue;
 		}
+		renderModel(model);
+	}
+
+	//2.
+	DirectX::XMFLOAT3 cameraPos = camera->GetPosition();
+
+	for (Model* model : dynamicmodels)
+	{
+		DirectX::XMFLOAT3 modelPos = model->GetBoundingSphereCenter();
+
+		if (!m_frustum->CheckSphere(modelPos, model->GetBoundingSphereRadius()))
+		{
+			continue;
+		}
+
+		float distSq = (cameraPos.x - modelPos.x) * (cameraPos.x - modelPos.x) +
+			(cameraPos.z - modelPos.z) * (cameraPos.z - modelPos.z);
+
+		if (distSq > 400.0f &&
+			IsOccluded(cameraPos, modelPos, mazeData, pathWidth))
+		{
+			continue;
+		}
+		renderModel(model);
 	}
 	deviceContext->OMSetBlendState(m_graphicsDevice->GetDefaultBlendState(), blendFactor, 0xffffffff);
+}
+
+bool Renderer::IsOccluded(
+	const DirectX::XMFLOAT3& from,
+	const DirectX::XMFLOAT3& to,
+	const std::vector<std::vector<MazeGenerator::CellType>>& mazeData,
+	float pathWidth)
+{
+	int x0 = static_cast<int>(from.x / pathWidth);
+	int y0 = static_cast<int>(from.z / pathWidth);
+	int x1 = static_cast<int>(to.x / pathWidth);
+	int y1 = static_cast<int>(to.z / pathWidth);
+
+	int dx = std::abs(x1 - x0);
+	int dy = std::abs(y1 - y0);
+	int x = x0;
+	int y = y0;
+	int n = 1 + dx + dy;
+	int x_inc = (x1 > x0) ? 1 : -1;
+	int y_inc = (y1 > y0) ? 1 : -1;
+	int error = dx - dy;
+	dx *= 2;
+	dy *= 2;
+
+	int mazeHeight = static_cast<int>(mazeData.size());
+	int mazeWidth = static_cast<int>(mazeData[0].size());
+
+	for (; n > 0; --n)
+	{
+		// グリッド座標 (x, y) が壁かどうかチェック
+		if (y >= 0 && y < mazeHeight && x >= 0 && x < mazeWidth)
+		{
+			// スタート地点とゴール地点自体は壁チェックをスキップ
+			if ((x == x0 && y == y0) || (x == x1 && y == y1))
+			{
+				// 何もしない
+			}
+			else if (mazeData[y][x] == MazeGenerator::Wall)
+			{
+				return true; // 壁にぶつかった (遮蔽されている)
+			}
+		}
+		else
+		{
+			// 迷路の範囲外に出た (壁扱いとする)
+			if ((x != x0 || y != y0) && (x != x1 || y != y1))
+			{
+				return true;
+			}
+		}
+
+		if (error > 0)
+		{
+			x += x_inc;
+			error -= dy;
+		}
+		else
+		{
+			y += y_inc;
+			error += dx;
+		}
+	}
+
+	return false; // 遮蔽されていない
 }

@@ -360,13 +360,22 @@ void GameScene::Update(float deltaTime)
 
 void GameScene::Render()
 {
-	std::vector<Model*> modelsToRender;
-	for (const auto& model : m_stage->GetModels()) modelsToRender.push_back(model.get());
-	for (const auto& enemy : m_enemies) modelsToRender.push_back(enemy->GetModel());
-	for (const auto& orb : m_orbs) if (Model* orbModel = orb->GetModel()) modelsToRender.push_back(orbModel);
-	for (const auto& sorb : m_specialOrbs) if (Model* orbModel = sorb->GetModel()) modelsToRender.push_back(orbModel); // 特殊オーブも描画対象に追加
+	std::vector<Model*> stageModels;
+	std::vector<Model*> dynamicModels; // カリング対象
 
-	m_renderer->RenderSceneToTexture(modelsToRender, m_camera.get(), m_lightManager.get());
+	for (const auto& model : m_stage->GetModels()) stageModels.push_back(model.get());
+	for (const auto& enemy : m_enemies) dynamicModels.push_back(enemy->GetModel());
+	for (const auto& orb : m_orbs) if (Model* orbModel = orb->GetModel()) dynamicModels.push_back(orbModel);
+	for (const auto& sorb : m_specialOrbs) if (Model* orbModel = sorb->GetModel()) dynamicModels.push_back(orbModel);
+	
+	m_renderer->RenderSceneToTexture(
+		stageModels,
+		dynamicModels,
+		m_camera.get(), 
+		m_lightManager.get(),
+		m_stage->GetMazeData(),
+		m_stage->GetPathWidth()
+	);
 	m_renderer->RenderFinalPass(m_camera.get(), m_vignetteIntensity);
 
 	// UIの描画（ミニマップとOrb UIの両方を描画）

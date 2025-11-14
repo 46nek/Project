@@ -1,5 +1,3 @@
-// RenderTarget.cpp (‚±‚Ì“à—e‚ÅŠ®‘S‚É’u‚«Š·‚¦‚Ä‚­‚¾‚³‚¢)
-
 #include "RenderTarget.h"
 
 RenderTarget::RenderTarget() {}

@@ -5,7 +5,8 @@
 #include "Model.h"
 #include "LightManager.h"
 #include "Camera.h"
-#include "Frustum.h" // <--- 追加
+#include "Frustum.h" 
+#include "MazeGenerator.h"
 
 /**
  * @brief 3Dシーンの描画処理を統括するクラス
@@ -18,17 +19,40 @@ public:
 
 	// --- 新しい描画フロー ---
 	// 1. シーンをテクスチャにレンダリングする
-	void RenderSceneToTexture(const std::vector<Model*>& models, const Camera* camera, LightManager* lightManager);
+	void RenderSceneToTexture(
+		const std::vector<Model*>& stageModels,
+		const std::vector<Model*>& dynamicModels, 
+		const Camera* camera, 
+		LightManager* lightManager,
+		const std::vector<std::vector<MazeGenerator::CellType>>& mazeData,
+		float pathWidth
+	);
 	// 2. レンダリングされたテクスチャにポストプロセスを適用し、画面に描画する
 	void RenderFinalPass(const Camera* camera, float vignetteIntensity);
 private:
 	// シャドウマップ生成パス
-	void RenderDepthPass(const std::vector<Model*>& models, LightManager* lightManager);
+	void RenderDepthPass(
+		const std::vector<Model*>& stageModels,
+		const std::vector<Model*>& dynamicModels, 
+		LightManager* lightManager
+	);
 	// 通常の描画パス
-	void RenderMainPass(const std::vector<Model*>& models, const Camera* camera, LightManager* lightManager);
+	void RenderMainPass(
+		const std::vector<Model*>& stageModels,
+		const std::vector<Model*>& dynamicModels,
+		const Camera* camera, 
+		LightManager* lightManager,
+		const std::vector<std::vector<MazeGenerator::CellType>>& mazeData,
+		float pathWidth
+	);
 
+	bool IsOccluded(
+		const DirectX::XMFLOAT3& from,
+		const DirectX::XMFLOAT3& to, 
+		const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, 
+		float pathWidth
+	);
+	
 	GraphicsDevice* m_graphicsDevice;
-	// --- ここから追加 ---
 	std::unique_ptr<Frustum> m_frustum;
-	// --- 追加ここまで ---
 };
