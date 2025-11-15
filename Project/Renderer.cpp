@@ -1,5 +1,8 @@
 #include "Renderer.h"
 #include "Game.h"
+#include "Stage.h"
+#include <algorithm>
+#include <cmath>
 
 Renderer::Renderer(GraphicsDevice* graphicsDevice) : m_graphicsDevice(graphicsDevice)
 {
@@ -195,10 +198,10 @@ void Renderer::RenderMainPass(
 		float distSq = (cameraPos.x - modelPos.x) * (cameraPos.x - modelPos.x) +
 			(cameraPos.z - modelPos.z) * (cameraPos.z - modelPos.z);
 
-		if (distSq > 400.0f &&
-			IsOccluded(cameraPos, modelPos, mazeData, pathWidth))
+		// オクルージョンカリング
+		if (IsOccluded(cameraPos, modelPos, mazeData, pathWidth))
 		{
-			continue;
+			continue; // 遮蔽されているため描画をスキップ
 		}
 		renderModel(model);
 	}
@@ -211,60 +214,129 @@ bool Renderer::IsOccluded(
 	const std::vector<std::vector<MazeGenerator::CellType>>& mazeData,
 	float pathWidth)
 {
-	int x0 = static_cast<int>(from.x / pathWidth);
-	int y0 = static_cast<int>(from.z / pathWidth);
-	int x1 = static_cast<int>(to.x / pathWidth);
-	int y1 = static_cast<int>(to.z / pathWidth);
+	// 0. 基本的なセットアップ
+	DirectX::XMVECTOR vFrom = DirectX::XMLoadFloat3(&from);
+	DirectX::XMVECTOR vTo = DirectX::XMLoadFloat3(&to);
+	DirectX::XMVECTOR vRayDir = DirectX::XMVectorSubtract(vTo, vFrom);
 
-	int dx = std::abs(x1 - x0);
-	int dy = std::abs(y1 - y0);
-	int x = x0;
-	int y = y0;
-	int n = 1 + dx + dy;
-	int x_inc = (x1 > x0) ? 1 : -1;
-	int y_inc = (y1 > y0) ? 1 : -1;
-	int error = dx - dy;
-	dx *= 2;
-	dy *= 2;
+	DirectX::XMFLOAT3 rayDir;
+	DirectX::XMStoreFloat3(&rayDir, vRayDir);
 
+	// 迷路のサイズ
 	int mazeHeight = static_cast<int>(mazeData.size());
 	int mazeWidth = static_cast<int>(mazeData[0].size());
+	if (mazeHeight == 0 || mazeWidth == 0) return false;
 
-	for (; n > 0; --n)
+	// 1. グリッド座標とステップ方向の計算
+	// 現在のグリッド座標 (整数)
+	int gridX = static_cast<int>(std::floor(from.x / pathWidth));
+	int gridZ = static_cast<int>(std::floor(from.z / pathWidth));
+
+	// 目標のグリッド座標 (整数)
+	int targetGridX = static_cast<int>(std::floor(to.x / pathWidth));
+	int targetGridZ = static_cast<int>(std::floor(to.z / pathWidth));
+
+	// スタート地点のグリッド座標
+	int startGridX = gridX;
+	int startGridZ = gridZ;
+
+	// レイの進行方向 (ステップ)
+	int stepX = (rayDir.x > 0) ? 1 : -1;
+	int stepZ = (rayDir.z > 0) ? 1 : -1;
+
+	// 2. レイパラメータ t のセットアップ
+	// レイ: P(t) = from + rayDir * t (t=0..1)
+	float t = 0.0f;
+	float tMaxX, tMaxZ;
+	float deltaTx, deltaTz;
+
+	// 最初のX境界までの t (0..1 の範囲で)
+	float nextBoundX = (stepX > 0) ? (std::floor(from.x / pathWidth) + 1) * pathWidth : std::floor(from.x / pathWidth) * pathWidth;
+	// 最初のZ境界までの t (0..1 の範囲で)
+	float nextBoundZ = (stepZ > 0) ? (std::floor(from.z / pathWidth) + 1) * pathWidth : std::floor(from.z / pathWidth) * pathWidth;
+
+	// ゼロ除算を避ける
+	tMaxX = (rayDir.x == 0.0f) ? FLT_MAX : (nextBoundX - from.x) / rayDir.x;
+	tMaxZ = (rayDir.z == 0.0f) ? FLT_MAX : (nextBoundZ - from.z) / rayDir.z;
+
+	// グリッドセル1つ分進むのに必要な t の増分
+	deltaTx = (rayDir.x == 0.0f) ? FLT_MAX : std::abs(pathWidth / rayDir.x);
+	deltaTz = (rayDir.z == 0.0f) ? FLT_MAX : std::abs(pathWidth / rayDir.z);
+
+	// 3. グリッドの走査 (DDA)
+	while (t <= 1.0f) // t=1 (ゴール) に到達するまで
 	{
-		// グリッド座標 (x, y) が壁かどうかチェック
-		if (y >= 0 && y < mazeHeight && x >= 0 && x < mazeWidth)
+		// 現在のセル (gridX, gridZ) をチェック
+		bool isStart = (gridX == startGridX && gridZ == startGridZ);
+		bool isTarget = (gridX == targetGridX && gridZ == targetGridZ);
+
+		// スタート地点とゴール地点自体は壁チェックをスキップ
+		if (!isStart && !isTarget)
 		{
-			// スタート地点とゴール地点自体は壁チェックをスキップ
-			if ((x == x0 && y == y0) || (x == x1 && y == y1))
+			bool isWall = false;
+			// グリッド範囲内か？
+			if (gridZ >= 0 && gridZ < mazeHeight && gridX >= 0 && gridX < mazeWidth)
 			{
-				// 何もしない
+				if (mazeData[gridZ][gridX] == MazeGenerator::Wall)
+				{
+					isWall = true;
+				}
 			}
-			else if (mazeData[y][x] == MazeGenerator::Wall)
+			else
 			{
-				return true; // 壁にぶつかった (遮蔽されている)
+				// 迷路の範囲外は壁として扱う
+				isWall = true;
 			}
-		}
-		else
-		{
-			// 迷路の範囲外に出た (壁扱いとする)
-			if ((x != x0 || y != y0) && (x != x1 || y != y1))
+
+			if (isWall)
 			{
-				return true;
+				// 4. 高さチェック
+				// この壁セルに侵入した瞬間の t
+				float entryT = (tMaxX < tMaxZ) ? (tMaxX - deltaTx) : (tMaxZ - deltaTz);
+				if (entryT < 0.0f) entryT = 0.0f; // 最初のセルの場合
+
+				// このセルから出る瞬間の t
+				float exitT = (std::min)(tMaxX, tMaxZ);
+
+				// レイがこのセルを通過する間の Y 座標の範囲 [y_entry, y_exit]
+				float y_entry = from.y + rayDir.y * entryT;
+				float y_exit = from.y + rayDir.y * exitT;
+
+				float minY = (std::min)(y_entry, y_exit);
+				float maxY = (std::max)(y_entry, y_exit);
+
+				// 壁の高さ (0.0 から Stage::WALL_HEIGHT)
+				const float wallBottom = 0.0f;
+				const float wallTop = Stage::WALL_HEIGHT;
+
+				// [minY, maxY] と [wallBottom, wallTop] のオーバーラップチェック
+				if (maxY >= wallBottom && minY <= wallTop)
+				{
+					return true; // 遮蔽されている
+				}
 			}
 		}
 
-		if (error > 0)
+		if (isTarget)
 		{
-			x += x_inc;
-			error -= dy;
+			break; // ターゲットセルに到達
+		}
+
+		// 5. t を進める
+		if (tMaxX < tMaxZ)
+		{
+			t = tMaxX;
+			tMaxX += deltaTx;
+			gridX += stepX;
 		}
 		else
 		{
-			y += y_inc;
-			error += dx;
+			t = tMaxZ;
+			tMaxZ += deltaTz;
+			gridZ += stepZ;
 		}
 	}
 
+	// 6. ゴールまで到達した (壁に当たらなかった)
 	return false; // 遮蔽されていない
 }
