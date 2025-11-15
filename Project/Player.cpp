@@ -5,7 +5,7 @@ Player::Player()
 	m_rotation({ 0.0f, 0.0f, 0.0f }),
 	m_moveSpeed(5.0f),
 	m_runSpeed(8.5f),
-	m_rotationSpeed(5.0f),
+	m_rotationSpeed(0.1f),
 	m_isMoving(false),
 	m_isRunning(false),
 	m_maxStamina(100.0f),
@@ -135,8 +135,8 @@ void Player::Update(float deltaTime, Input* input, const std::vector<std::vector
 
 void Player::Turn(int mouseX, int mouseY, float deltaTime)
 {
-	m_rotation.y += (float)mouseX * m_rotationSpeed * deltaTime;
-	m_rotation.x += (float)mouseY * m_rotationSpeed * deltaTime;
+	m_rotation.y += (float)mouseX * m_rotationSpeed;
+	m_rotation.x += (float)mouseY * m_rotationSpeed;
 
 	if (m_rotation.x > 90.0f) m_rotation.x = 90.0f;
 	if (m_rotation.x < -90.0f) m_rotation.x = -90.0f;
