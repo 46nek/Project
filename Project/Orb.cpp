@@ -60,11 +60,11 @@ void Orb::Shutdown()
 	}
 }
 
-void Orb::Update(float deltaTime, Player* player, LightManager* lightManager, DirectX::SoundEffect* collectSound)
+bool Orb::Update(float deltaTime, Player* player, LightManager* lightManager, DirectX::SoundEffect* collectSound)
 {
 	if (m_isCollected)
 	{
-		return;
+		return false; // ‚·‚Å‚ÉûWÏ‚İ‚È‚ç false ‚ğ•Ô‚·
 	}
 
 	float floatingY = m_position.y + sin(m_animationTimer * 2.0f) * 0.25f;
@@ -91,7 +91,11 @@ void Orb::Update(float deltaTime, Player* player, LightManager* lightManager, Di
 		{
 			collectSound->Play();
 		}
+
+		return true;
 	}
+
+	return false; // ûW‚³‚ê‚È‚©‚Á‚½ê‡‚Í false ‚ğ•Ô‚·
 }
 
 Model* Orb::GetModel()

@@ -298,9 +298,8 @@ void GameScene::Update(float deltaTime)
 		// 収集済みでなければ更新処理をかける
 		if (orb && !orb->IsCollected()) //
 		{
-			orb->Update(deltaTime, m_player.get(), m_lightManager.get(), m_collectSound.get()); //
-			// Update の結果、収集されたらカウントを減らす
-			if (orb->IsCollected()) //
+			bool justCollected = orb->Update(deltaTime, m_player.get(), m_lightManager.get(), m_collectSound.get());
+			if (justCollected)
 			{
 				m_remainingOrbs--;
 			}

@@ -22,7 +22,7 @@ public:
 
 	bool Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& position, int lightIndex, OrbType type = OrbType::Normal);
 	void Shutdown();
-	void Update(float deltaTime, Player* player, LightManager* lightManager, DirectX::SoundEffect* collectSound);
+	bool Update(float deltaTime, Player* player, LightManager* lightManager, DirectX::SoundEffect* collectSound);
 
 	Model* GetModel();
 	bool IsCollected() const;
