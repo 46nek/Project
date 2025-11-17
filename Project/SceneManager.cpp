@@ -17,7 +17,7 @@ bool SceneManager::Initialize(GraphicsDevice* graphicsDevice, Input* input, Dire
 {
 	m_graphicsDevice = graphicsDevice;
 	m_input = input;
-	m_audioEngine = audioEngine; // <--- この行を追加
+	m_audioEngine = audioEngine; 
 	// 最初のシーンとしてタイトルシーンを設定
 	return ChangeScene(SceneState::Title);
 }
