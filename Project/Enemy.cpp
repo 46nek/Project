@@ -5,7 +5,7 @@
 
 // コンストラクタ
 Enemy::Enemy()
-	: m_speed(2.0f),
+	: m_speed(4.0f),
 	m_pathIndex(-1),
 	m_pathCooldown(0.0f)
 {

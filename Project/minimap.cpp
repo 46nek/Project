@@ -1,5 +1,3 @@
-// minimap.cpp (‚±‚Ì“à—e‚ÅŠ®‘S‚É’u‚«Š·‚¦‚Ä‚­‚¾‚³‚¢)
-
 #include "Minimap.h"
 #include "Game.h"
 
