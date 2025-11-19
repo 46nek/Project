@@ -1,5 +1,3 @@
-// minimap.h (‚±‚Ì“à—e‚ÅŠ®‘S‚É’u‚«Š·‚¦‚Ä‚­‚¾‚³‚¢)
-
 #pragma once
 #include <DirectXMath.h>
 #include <wrl/client.h>
@@ -35,6 +33,9 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_scissorRasterizerState;
 
 	const std::vector<std::vector<MazeGenerator::CellType>>* m_mazeData;
+	std::vector<std::vector<bool>> m_visitedCells;
+
+
 	float m_pathWidth;
 
 	DirectX::XMFLOAT2 m_position;
