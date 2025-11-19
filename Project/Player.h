@@ -5,7 +5,11 @@
 #include <vector>
 #include "Input.h"
 #include "MazeGenerator.h"
-#include <algorithm> // std::max, std::min のために追加
+#include <algorithm> 
+
+namespace DirectX {
+	class SoundEffect;
+}
 
 class Player
 {
@@ -16,15 +20,12 @@ public:
 	void Update(float deltaTime, Input* input, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth);
 	void Turn(int mouseX, int mouseY, float deltaTime);
 
+	void SetFootstepSounds(DirectX::SoundEffect* walkSound, DirectX::SoundEffect* runSound);
+
 	DirectX::XMFLOAT3 GetPosition() const { return m_position; }
 	DirectX::XMFLOAT3 GetRotation() const { return m_rotation; }
 	bool IsMoving() const { return m_isMoving; }
 	bool IsRunning() const { return m_isRunning; }
-
-	/**
-	 * @brief 現在のスタミナの割合を 0.0f ～ 1.0f の範囲で取得します。
-	 * @return float スタミナの割合
-	 */
 	float GetStaminaPercentage() const;
 
 private:
@@ -50,4 +51,10 @@ private:
 	float m_staminaWarningThreshhold;
 	float m_slowDepletionFactor;
 	float m_staminaRegenCoolDown;
+
+	DirectX::SoundEffect* m_walkSound;
+	DirectX::SoundEffect* m_runSound;
+	float m_stepTimer;
+	float m_walkInterval;
+	float m_runInterval;
 };

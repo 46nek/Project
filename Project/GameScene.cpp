@@ -72,7 +72,16 @@ bool GameScene::InitializePhase5()
 	try
 	{
 		m_collectSound = std::make_unique<DirectX::SoundEffect>(m_audioEngine, L"Assets/orb_get.wav");
+		m_walkSoundEffect = std::make_unique<DirectX::SoundEffect>(m_audioEngine, L"Assets/walk.wav");
+		m_runSoundEffect = std::make_unique<DirectX::SoundEffect>(m_audioEngine, L"Assets/walk.wav");
+
+		// プレイヤーに音をセット
+		if (m_player)
+		{
+			m_player->SetFootstepSounds(m_walkSoundEffect.get(), m_runSoundEffect.get());
+		}
 	}
+
 	catch (const std::exception& e)
 	{
 		MessageBoxA(nullptr, e.what(), "Sound Error", MB_OK);

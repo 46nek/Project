@@ -48,6 +48,8 @@ private:
     std::unique_ptr<UI> m_ui;
 
     std::unique_ptr<DirectX::SoundEffect> m_collectSound; 
+    std::unique_ptr<DirectX::SoundEffect> m_walkSoundEffect;
+    std::unique_ptr<DirectX::SoundEffect> m_runSoundEffect;
     
     float m_vignetteIntensity;
 
