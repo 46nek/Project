@@ -28,7 +28,7 @@ public:
 		bool inOpenList = false;
 		bool inClosedList = false;
 
-		unsigned int searchId = 0; 
+		unsigned int searchId = 0;
 
 		int f() const { return g + h; }
 
@@ -36,9 +36,9 @@ public:
 		{
 			g = 0;
 			h = 0;
-			DirectX::XMFLOAT2 parent = { -1, -1 };
-			bool inOpenList = false;
-			bool inClosedList = false;
+			parent = { -1, -1 };   // C³: Œ^–¼‚ğíœ
+			inOpenList = false;    // C³: Œ^–¼‚ğíœ
+			inClosedList = false;  // C³: Œ^–¼‚ğíœ
 		}
 
 		void Reset() { ResetValue(); searchId = 0; }
