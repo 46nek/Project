@@ -36,7 +36,7 @@ bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::
 	m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_graphicsDevice->GetDeviceContext());
 
 	// アセットの読み込み
-	if (!m_pathSprite) m_pathSprite = std::make_unique<Sprite>(); // 再初期化対策
+	if (!m_pathSprite) m_pathSprite = std::make_unique<Sprite>();
 	if (!m_pathSprite->Initialize(device, L"Assets/minimap_path.png")) return false;
 
 	if (!m_playerSprite) m_playerSprite = std::make_unique<Sprite>();
@@ -75,7 +75,7 @@ void Minimap::Shutdown()
 	if (m_playerSprite) m_playerSprite->Shutdown();
 	if (m_enemySprite) m_enemySprite->Shutdown();
 	if (m_orbSprite) m_orbSprite->Shutdown();
-	if (m_frameSprite) m_frameSprite->Shutdown(); // フレームも解放
+	if (m_frameSprite) m_frameSprite->Shutdown();
 	m_scissorRasterizerState.Reset();
 	m_visitedCells.clear();
 }
@@ -150,7 +150,7 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 	{
 		for (size_t x = 0; x < (*m_mazeData)[y].size(); ++x)
 		{
-			// 未訪問エリアは描画しない
+			// 未訪問エリアは描画しない (道は隠す)
 			if (!m_visitedCells[y][x]) continue;
 
 			if ((*m_mazeData)[y][x] == MazeGenerator::CellType::Path)
@@ -164,7 +164,7 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 		}
 	}
 
-	// 敵の描画 (訪問済み、またはレーダー有効時のみ)
+	// 敵の描画 (常に表示に変更)
 	for (const auto& enemy : enemies)
 	{
 		if (enemy)
@@ -173,31 +173,16 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 			int enemyGridX = static_cast<int>(enemyWorldPos.x / m_pathWidth);
 			int enemyGridZ = static_cast<int>(enemyWorldPos.z / m_pathWidth);
 
-			bool isVisible = showEnemies; // レーダー発動中は無条件で表示
-
-			// レーダーなしでも、訪問済みの場所にいれば表示
-			if (!isVisible &&
-				enemyGridZ >= 0 && enemyGridZ < static_cast<int>(m_visitedCells.size()) &&
-				enemyGridX >= 0 && enemyGridX < static_cast<int>(m_visitedCells[enemyGridZ].size()))
-			{
-				if (m_visitedCells[enemyGridZ][enemyGridX])
-				{
-					isVisible = true;
-				}
-			}
-
-			if (isVisible)
-			{
-				DirectX::XMFLOAT2 enemyMapPixelPos = {
-					(float)enemyGridX * m_cellSize + m_cellSize * 0.5f,
-					(mapHeightInCells - (float)enemyGridZ) * m_cellSize - m_cellSize * 0.5f
-				};
-				m_enemySprite->Render(m_spriteBatch.get(), enemyMapPixelPos, m_enemySpriteScale * 0.5f, 0.0f, { 1.0f, 0.2f, 0.2f, 1.0f });
-			}
+			// 敵に関しては isVisible チェックを行わず常に描画する
+			DirectX::XMFLOAT2 enemyMapPixelPos = {
+				(float)enemyGridX * m_cellSize + m_cellSize * 0.5f,
+				(mapHeightInCells - (float)enemyGridZ) * m_cellSize - m_cellSize * 0.5f
+			};
+			m_enemySprite->Render(m_spriteBatch.get(), enemyMapPixelPos, m_enemySpriteScale * 0.5f, 0.0f, { 1.0f, 0.2f, 0.2f, 1.0f });
 		}
 	}
 
-	// オーブの描画 (常に表示：訪問チェックを行わない)
+	// オーブの描画 (常に表示)
 	for (const auto& orb : orbs)
 	{
 		if (orb && !orb->IsCollected())
@@ -206,8 +191,6 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 
 			int orbGridX = static_cast<int>(orbWorldPos.x / m_pathWidth);
 			int orbGridZ = static_cast<int>(orbWorldPos.z / m_pathWidth);
-
-			// オーブに関しては isVisible のチェックを行わず常に描画する
 
 			DirectX::XMFLOAT2 orbMapPixelPos = {
 				(float)orbGridX * m_cellSize + m_cellSize * 0.5f,
