@@ -50,27 +50,23 @@ void Enemy::Update(float deltaTime, const Player* player, const std::vector<std:
 	{
 		int startX = static_cast<int>(m_position.x / pathWidth);
 		int startY = static_cast<int>(m_position.z / pathWidth);
-		int goalX, goalY;
-		
-		// プレイヤーとの距離に応じて経路探索の頻度（ラグ）を変更
-		// (これがプレイヤーがAIを撒くための「隙」になる)
-		if (distanceSq > 15.0f * 15.0f)
-		{
-			m_pathCooldown = 2.0f; // 遠い場合 (2.0秒のラグ)
-		}
-		else if (distanceSq > 10.0f * 10.0f)
-		{
-			m_pathCooldown = 1.0f; // 中距離 (1.0秒のラグ)
-		}
-		else
-		{
-			m_pathCooldown = 0.5f; // 近距離 (0.5秒のラグ)
-		}
+		int goalX = static_cast<int>(playerPos.x / pathWidth);
+		int goalY = static_cast<int>(playerPos.z / pathWidth);
 
-		goalX = static_cast<int>(playerPos.x / pathWidth);
-		goalY = static_cast<int>(playerPos.z / pathWidth);
-		m_path = m_astar->FindPath(startX, startY, goalX, goalY);
-		m_pathIndex = m_path.empty() ? -1 : 1;
+		m_pathCooldown = 2.0f;
+
+		// --- 結果を一時変数で受け取る ---
+		std::vector<DirectX::XMFLOAT2> newPath = m_astar->FindPath(startX, startY, goalX, goalY);
+
+		// パスが見つかった場合のみ更新する！
+		// (失敗しても、今のパス情報を捨てずに維持する)
+		if (!newPath.empty())
+		{
+			m_path = newPath;
+			// 新しいパスの 1番目 (0番目は現在地なので次は1番目) を目指す
+			// ただし、パスが "現在地のみ" の1個しかない場合はゴール済みとする
+			m_pathIndex = (m_path.size() > 1) ? 1 : -1;
+		}
 	}
 
 	// === パスに沿った移動処理 (共通) ===

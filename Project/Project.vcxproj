@@ -155,7 +155,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);C:\FW1FontWrapper-master\FW1FontWrapper-master\Release\x64</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;dxgi.lib;%(AdditionalDependencies);DirectXTK.lib;assimp-vc143-mt.lib;d2d1.lib;dwrite.lib;FW1FontWrapper.lib;imgui_lib.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;%(AdditionalDependencies);DirectXTK.lib;assimp-vc143-mt.lib;d2d1.lib;dwrite.lib;FW1FontWrapper.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

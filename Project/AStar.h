@@ -28,15 +28,20 @@ public:
 		bool inOpenList = false;
 		bool inClosedList = false;
 
+		unsigned int searchId = 0; 
+
 		int f() const { return g + h; }
-		void Reset()
+
+		void ResetValue()
 		{
 			g = 0;
 			h = 0;
-			parent = { -1, -1 };
-			inOpenList = false;
-			inClosedList = false;
+			DirectX::XMFLOAT2 parent = { -1, -1 };
+			bool inOpenList = false;
+			bool inClosedList = false;
 		}
+
+		void Reset() { ResetValue(); searchId = 0; }
 	};
 
 private:
@@ -44,6 +49,7 @@ private:
 	int m_width;
 	int m_height;
 
-	// ノード情報をクラスメンバーとして保持 (FindPath呼び出しごとに確保するのを避ける)
 	std::vector<std::vector<NodeInfo>> m_nodes;
+
+	unsigned int m_currentSearchId = 0;
 };
