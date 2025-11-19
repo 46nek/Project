@@ -3,6 +3,7 @@
 #include <wrl/client.h>
 #include <vector>
 #include <memory>
+#include <cfloat>
 #include "GraphicsDevice.h"
 #include "MazeGenerator.h"
 #include "Sprite.h"
@@ -29,7 +30,9 @@ private:
 	std::unique_ptr<Sprite> m_playerSprite;
 	std::unique_ptr<Sprite> m_enemySprite;
 	std::unique_ptr<Sprite> m_orbSprite;
-	std::unique_ptr<Sprite> m_frameSprite;
+	std::unique_ptr<Sprite> m_frameSprite; 
+	std::unique_ptr<Sprite> m_orbArrowSprite;
+
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_scissorRasterizerState;
 
 	const std::vector<std::vector<MazeGenerator::CellType>>* m_mazeData;
@@ -46,4 +49,5 @@ private:
 	float m_playerSpriteScale;
 	float m_enemySpriteScale;
 	float m_orbSpriteScale;
+	float m_orbArrowSpriteScale;
 };

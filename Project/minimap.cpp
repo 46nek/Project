@@ -1,5 +1,6 @@
 #include "Minimap.h"
 #include "Game.h"
+#include <cmath>
 
 Minimap::Minimap()
 	: m_graphicsDevice(nullptr),
@@ -11,7 +12,8 @@ Minimap::Minimap()
 	m_zoomFactor(3.0f),
 	m_pathSpriteScale(1.0f),
 	m_playerSpriteScale(0.0f),
-	m_orbSpriteScale(0.0f)
+	m_orbSpriteScale(0.0f),
+	m_orbArrowSpriteScale(0.0f)
 {
 }
 
@@ -51,11 +53,15 @@ bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::
 	if (!m_frameSprite) m_frameSprite = std::make_unique<Sprite>();
 	if (!m_frameSprite->Initialize(device, L"Assets/minimap_frame.png")) return false;
 
+	if (!m_orbArrowSprite) m_orbArrowSprite = std::make_unique<Sprite>();
+	if (!m_orbArrowSprite->Initialize(device, L"Assets/orb_arrow.png")) return false;
+
 	// 各スプライトのスケールを個別に計算
 	m_pathSpriteScale = m_cellSize / m_pathSprite->GetWidth();
 	m_playerSpriteScale = m_cellSize / m_playerSprite->GetWidth();
 	m_enemySpriteScale = m_cellSize / m_enemySprite->GetWidth();
 	m_orbSpriteScale = m_cellSize / m_orbSprite->GetWidth();
+	m_orbArrowSpriteScale = m_cellSize / m_orbArrowSprite->GetWidth();
 
 	// 描画領域外を切り取るための設定を作成
 	D3D11_RASTERIZER_DESC rasterDesc = {};
@@ -76,6 +82,7 @@ void Minimap::Shutdown()
 	if (m_enemySprite) m_enemySprite->Shutdown();
 	if (m_orbSprite) m_orbSprite->Shutdown();
 	if (m_frameSprite) m_frameSprite->Shutdown();
+	if (m_orbArrowSprite) m_orbArrowSprite->Shutdown();
 	m_scissorRasterizerState.Reset();
 	m_visitedCells.clear();
 }
@@ -202,6 +209,58 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 	}
 
 	m_spriteBatch->End();
+
+	// --- 最も近いオーブの探索 ---
+	float minDistanceSq = FLT_MAX;
+	DirectX::XMFLOAT3 targetPos = {};
+	bool foundTarget = false;
+
+	// ヘルパーラムダ式
+	auto CheckClosestOrb = [&](const auto& orbList) {
+		for (const auto& orb : orbList)
+		{
+			if (orb && !orb->IsCollected())
+			{
+				DirectX::XMFLOAT3 pos = orb->GetPosition();
+				float dx = pos.x - playerWorldPos.x;
+				float dz = pos.z - playerWorldPos.z;
+				float distSq = dx * dx + dz * dz;
+				if (distSq < minDistanceSq)
+				{
+					minDistanceSq = distSq;
+					targetPos = pos;
+					foundTarget = true;
+				}
+			}
+		}
+		};
+
+	CheckClosestOrb(orbs);
+	CheckClosestOrb(specialOrbs);
+
+	// --- 矢印の描画 (プレイヤーの下、または周囲に描画) ---
+	if (foundTarget)
+	{
+		float dx = targetPos.x - playerWorldPos.x;
+		float dz = targetPos.z - playerWorldPos.z;
+
+		// プレイヤーの回転を考慮した角度計算
+		// atan2(x, z) は Z軸(上) を0として時計回りの角度(ラジアン)に変換しやすい (x:Right, z:Forward)
+		float angleToOrb = atan2f(dx, dz);
+		float arrowRotation = angleToOrb - playerRotation;
+
+		// 矢印を表示する位置（プレイヤーの中心から少し離す場合はradiusを設定）
+		float radius = 15.0f; // 中心からの距離(ピクセル)
+		DirectX::XMFLOAT2 arrowPos = minimapCenter;
+		arrowPos.x += sinf(arrowRotation) * radius;
+		arrowPos.y -= cosf(arrowRotation) * radius; // 画面Y座標は下がプラスなので、上に行くにはマイナス
+
+		m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, nullptr, nullptr, nullptr, m_scissorRasterizerState.Get());
+		// 矢印を描画。回転角度はラジアン(時計回り)。
+		// ここでは矢印画像が「上」を向いている前提で計算しています。
+		m_orbArrowSprite->Render(m_spriteBatch.get(), arrowPos, m_orbArrowSpriteScale * 1.2f, arrowRotation);
+		m_spriteBatch->End();
+	}
 
 	// プレイヤーの描画 (常に中央)
 	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, nullptr, nullptr, nullptr, m_scissorRasterizerState.Get());
