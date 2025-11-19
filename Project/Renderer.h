@@ -45,13 +45,6 @@ private:
 		const std::vector<std::vector<MazeGenerator::CellType>>& mazeData,
 		float pathWidth
 	);
-
-	bool IsOccluded(
-		const DirectX::XMFLOAT3& from,
-		const DirectX::XMFLOAT3& to, 
-		const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, 
-		float pathWidth
-	);
 	
 	GraphicsDevice* m_graphicsDevice;
 	std::unique_ptr<Frustum> m_frustum;
