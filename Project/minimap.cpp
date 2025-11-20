@@ -245,21 +245,36 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 		float dz = targetPos.z - playerWorldPos.z;
 
 		// プレイヤーの回転を考慮した角度計算
-		// atan2(x, z) は Z軸(上) を0として時計回りの角度(ラジアン)に変換しやすい (x:Right, z:Forward)
 		float angleToOrb = atan2f(dx, dz);
 		float arrowRotation = angleToOrb - playerRotation;
 
-		// 矢印を表示する位置（プレイヤーの中心から少し離す場合はradiusを設定）
-		float radius = 15.0f; // 中心からの距離(ピクセル)
-		DirectX::XMFLOAT2 arrowPos = minimapCenter;
-		arrowPos.x += sinf(arrowRotation) * radius;
-		arrowPos.y -= cosf(arrowRotation) * radius; // 画面Y座標は下がプラスなので、上に行くにはマイナス
+		// --- 変更点: オーブが画面外にあるかどうかの判定 ---
 
-		m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, nullptr, nullptr, nullptr, m_scissorRasterizerState.Get());
-		// 矢印を描画。回転角度はラジアン(時計回り)。
-		// ここでは矢印画像が「上」を向いている前提で計算しています。
-		m_orbArrowSprite->Render(m_spriteBatch.get(), arrowPos, m_orbArrowSpriteScale * 1.2f, arrowRotation);
-		m_spriteBatch->End();
+		// オーブまでのミニマップ上でのピクセル距離を計算
+		// ワールド距離 / パス幅 * セルサイズ * ズーム倍率
+		float distPixels = sqrtf(minDistanceSq) / m_pathWidth * m_cellSize * m_zoomFactor;
+
+		// プレイヤーを中心としたミニマップ上の相対座標を計算
+		// (arrowRotationは画面上の上方向(0度)からの回転)
+		float relativeX = distPixels * sinf(arrowRotation);
+		float relativeY = -distPixels * cosf(arrowRotation);
+
+		float limitX = m_viewSize.x * 0.5f;
+		float limitY = m_viewSize.y * 0.5f;
+
+		// 相対座標がビューサイズ（の半分）を超えている場合のみ矢印を描画
+		if (fabsf(relativeX) > limitX || fabsf(relativeY) > limitY)
+		{
+			// 矢印を表示する位置（プレイヤーの中心から少し離す）
+			float radius = 15.0f; // 中心からの距離(ピクセル)
+			DirectX::XMFLOAT2 arrowPos = minimapCenter;
+			arrowPos.x += sinf(arrowRotation) * radius;
+			arrowPos.y -= cosf(arrowRotation) * radius;
+
+			m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, nullptr, nullptr, nullptr, m_scissorRasterizerState.Get());
+			m_orbArrowSprite->Render(m_spriteBatch.get(), arrowPos, m_orbArrowSpriteScale * 1.2f, arrowRotation);
+			m_spriteBatch->End();
+		}
 	}
 
 	// プレイヤーの描画 (常に中央)
