@@ -168,19 +168,46 @@ void Renderer::RenderMainPass(
 	ID3D11SamplerState* shadowSampler = shadowMapper->GetShadowSampleState();
 	deviceContext->PSSetSamplers(1, 1, &shadowSampler);
 
+	struct CurrentMaterialState {
+		DirectX::XMFLOAT4 EmissiveColor;
+		int UseTexture;
+		int UseNormalMap;
+		bool IsValid = false; // 最初かどうか
+	} currentState;
+
 	auto renderModel = [&](Model* model) {
 		if (!model) return;
 
-		MaterialBufferType materialBuffer;
-		materialBuffer.EmissiveColor = model->GetEmissiveColor();
-		materialBuffer.UseTexture = model->GetUseTexture();
-		materialBuffer.UseNormalMap = model->HasNormalMap() && model->GetUseNormalMap();
-		m_graphicsDevice->UpdateMaterialBuffer(materialBuffer);
+		bool needUpdate = !currentState.IsValid;
+		if (currentState.IsValid) {
+			auto ec = model->GetEmissiveColor();
+			if (ec.x != currentState.EmissiveColor.x ||
+				ec.y != currentState.EmissiveColor.y ||
+				ec.z != currentState.EmissiveColor.z ||
+				model->GetUseTexture() != currentState.UseTexture ||
+				(model->HasNormalMap() && model->GetUseNormalMap()) != currentState.UseNormalMap) {
+				needUpdate = true;
+			}
+		}
+
+		if (needUpdate) {
+			MaterialBufferType materialBuffer;
+			materialBuffer.EmissiveColor = model->GetEmissiveColor();
+			materialBuffer.UseTexture = model->GetUseTexture();
+			materialBuffer.UseNormalMap = model->HasNormalMap() && model->GetUseNormalMap();
+			m_graphicsDevice->UpdateMaterialBuffer(materialBuffer);
+
+			// 状態を更新
+			currentState.EmissiveColor = materialBuffer.EmissiveColor;
+			currentState.UseTexture = materialBuffer.UseTexture;
+			currentState.UseNormalMap = materialBuffer.UseNormalMap;
+			currentState.IsValid = true;
+		}
 
 		m_graphicsDevice->UpdateMatrixBuffer(
 			model->GetWorldMatrix(),
-			viewMatrix, // 更新されたviewMatrixを使用
-			projectionMatrix, // 更新されたprojectionMatrixを使用
+			viewMatrix,
+			projectionMatrix,
 			lightManager->GetLightViewMatrix(),
 			lightManager->GetLightProjectionMatrix()
 		);

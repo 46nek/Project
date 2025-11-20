@@ -51,6 +51,9 @@ private:
     std::unique_ptr<DirectX::SoundEffect> m_walkSoundEffect;
     std::unique_ptr<DirectX::SoundEffect> m_runSoundEffect;
     
+    std::vector<Model*> m_cachedStageModels;
+    std::vector<Model*> m_cachedDynamicModels;
+
     float m_vignetteIntensity;
 
     int m_remainingOrbs;

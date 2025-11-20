@@ -42,9 +42,13 @@ bool GameScene::InitializePhase1(GraphicsDevice* graphicsDevice, Input* input, D
 	m_lightManager = std::make_unique<LightManager>();
 	m_lightManager->Initialize(m_stage->GetMazeData(), m_stage->GetPathWidth(), Stage::WALL_HEIGHT);
 	m_renderer = std::make_unique<Renderer>(m_graphicsDevice);
-
 	m_player->Initialize({ startX, PLAYER_HEIGHT, startZ });
 
+	m_cachedStageModels.clear();
+	m_cachedStageModels.reserve(m_stage->GetModels().size());
+	for (const auto& model : m_stage->GetModels()) {
+		m_cachedStageModels.push_back(model.get());
+	}
 	return true;
 }
 
@@ -369,24 +373,22 @@ void GameScene::Update(float deltaTime)
 
 void GameScene::Render()
 {
-	std::vector<Model*> stageModels;
-	std::vector<Model*> dynamicModels; // カリング対象
+	m_cachedDynamicModels.clear();
+	m_cachedDynamicModels.reserve(m_enemies.size() + m_orbs.size() + m_specialOrbs.size());
 
-	for (const auto& model : m_stage->GetModels()) stageModels.push_back(model.get());
-	for (const auto& enemy : m_enemies) dynamicModels.push_back(enemy->GetModel());
-	for (const auto& orb : m_orbs) if (Model* orbModel = orb->GetModel()) dynamicModels.push_back(orbModel);
-	for (const auto& sorb : m_specialOrbs) if (Model* orbModel = sorb->GetModel()) dynamicModels.push_back(orbModel);
-	
+	for (const auto& enemy : m_enemies) m_cachedDynamicModels.push_back(enemy->GetModel());
+	for (const auto& orb : m_orbs) if (Model* orbModel = orb->GetModel()) m_cachedDynamicModels.push_back(orbModel);
+	for (const auto& sorb : m_specialOrbs) if (Model* orbModel = sorb->GetModel()) m_cachedDynamicModels.push_back(orbModel);
+
 	m_renderer->RenderSceneToTexture(
-		stageModels,
-		dynamicModels,
-		m_camera.get(), 
+		m_cachedStageModels,
+		m_cachedDynamicModels,
+		m_camera.get(),
 		m_lightManager.get(),
 		m_stage->GetMazeData(),
 		m_stage->GetPathWidth()
 	);
 	m_renderer->RenderFinalPass(m_camera.get(), m_vignetteIntensity);
-
 	// UIの描画（ミニマップとOrb UIの両方を描画）
 	m_ui->Render(m_camera.get(), m_enemies, m_orbs, m_specialOrbs);
 
