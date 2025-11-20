@@ -1,6 +1,6 @@
 #include "Model.h"
 #include "Texture.h"
-#include <cmath> // sqrtf, pow を使用するために追加
+#include <cmath>
 
 Model::Model()
 {
@@ -101,8 +101,6 @@ DirectX::XMFLOAT3 Model::GetBoundingSphereCenter() const
 
 float Model::GetBoundingSphereRadius() const
 {
-	// スケールの中で最も大きい値を半径に乗算する
-	// --- エラーの原因となっていた箇所を、より安全なコードに修正しました ---
 	float maxScale = m_scale.x;
 	if (m_scale.y > maxScale)
 	{
@@ -115,14 +113,14 @@ float Model::GetBoundingSphereRadius() const
 	return m_boundingSphereRadius * maxScale;
 }
 
-void Model::SetTexture(std::unique_ptr<Texture> texture)
+void Model::SetTexture(std::shared_ptr<Texture> texture)
 {
-	m_texture = std::move(texture);
+	m_texture = texture;
 }
 
-void Model::SetNormalMap(std::unique_ptr<Texture> normalMap)
+void Model::SetNormalMap(std::shared_ptr<Texture> normalMap)
 {
-	m_normalMap = std::move(normalMap);
+	m_normalMap = normalMap;
 }
 
 void Model::Shutdown()

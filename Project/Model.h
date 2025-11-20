@@ -32,8 +32,9 @@ public:
 	void Shutdown();
 	void Render(ID3D11DeviceContext* deviceContext);
 
-	void SetTexture(std::unique_ptr<Texture> texture);
-	void SetNormalMap(std::unique_ptr<Texture> normalMap);
+	void SetTexture(std::shared_ptr<Texture> texture);
+	void SetNormalMap(std::shared_ptr<Texture> normalMap);
+
 	void SetPosition(float x, float y, float z);
 	void SetRotation(float x, float y, float z);
 	void SetScale(float x, float y, float z);
@@ -56,8 +57,10 @@ private:
 	void CalculateBoundingSphere(const std::vector<SimpleVertex>& vertices);
 
 	std::vector<Mesh> m_meshes;
-	std::unique_ptr<Texture> m_texture;
-	std::unique_ptr<Texture> m_normalMap;
+
+	std::shared_ptr<Texture> m_texture;
+	std::shared_ptr<Texture> m_normalMap;
+
 	DirectX::XMFLOAT3 m_position;
 	DirectX::XMFLOAT3 m_rotation;
 	DirectX::XMFLOAT3 m_scale;
