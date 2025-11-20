@@ -95,14 +95,14 @@ void Renderer::RenderDepthPass(
 	deviceContext->VSSetShader(shaderManager->GetDepthVertexShader(), nullptr, 0);
 	deviceContext->PSSetShader(nullptr, nullptr, 0);
 
-	std::vector<Model*> allModels = stageModels;
-	allModels.insert(allModels.end(), dynamicModels.begin(), dynamicModels.end());
-	
-	for (Model* model : allModels) {
-		if (model) {
+	// ラムダ式で描画処理を共通化
+	auto renderDepth = [&](Model* model)
+		{
+			if (!model) return;
+
 			if (!m_frustum->CheckSphere(model->GetBoundingSphereCenter(), model->GetBoundingSphereRadius()))
 			{
-				continue;
+				return;
 			}
 
 			m_graphicsDevice->UpdateMatrixBuffer(
@@ -113,7 +113,16 @@ void Renderer::RenderDepthPass(
 				lightManager->GetLightProjectionMatrix()
 			);
 			model->Render(deviceContext);
-		}
+		};
+
+	// ステージモデルの描画
+	for (Model* model : stageModels) {
+		renderDepth(model);
+	}
+
+	// 動的モデル（敵など）の描画
+	for (Model* model : dynamicModels) {
+		renderDepth(model);
 	}
 }
 

@@ -56,7 +56,7 @@ DirectX::XMFLOAT3 Camera::GetRotation() const
 void Camera::Update()
 {
 	// 現在のビュー行列を前のフレームのものとして保存
-	m_previousViewMatrix = m_viewMatrix; // <--- 追加
+	m_previousViewMatrix = m_viewMatrix; 
 
 	DirectX::XMFLOAT3 up, position, lookAt;
 	DirectX::XMVECTOR upVector, positionVector, lookAtVector;
