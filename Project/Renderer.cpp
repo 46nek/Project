@@ -100,6 +100,11 @@ void Renderer::RenderDepthPass(
 	
 	for (Model* model : allModels) {
 		if (model) {
+			if (!m_frustum->CheckSphere(model->GetBoundingSphereCenter(), model->GetBoundingSphereRadius()))
+			{
+				continue;
+			}
+
 			m_graphicsDevice->UpdateMatrixBuffer(
 				model->GetWorldMatrix(),
 				lightManager->GetLightViewMatrix(),
