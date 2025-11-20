@@ -1,20 +1,19 @@
 #include "Camera.h"
 #include <cmath>
 
-Camera::Camera()
+Camera::Camera(float x, float y, float z)
 {
-	m_positionX = 0.0f;
-	m_positionY = 0.0f;
-	m_positionZ = 0.0f;
+	m_positionX = x;
+	m_positionY = y;
+	m_positionZ = z;
+	m_basePosition = { x, y, z };
 
 	m_rotationX = 0.0f;
 	m_rotationY = 0.0f;
 	m_rotationZ = 0.0f;
 
-	m_basePosition = { 0.0f, 0.0f, 0.0f };
-
 	m_viewMatrix = DirectX::XMMatrixIdentity();
-	m_previousViewMatrix = DirectX::XMMatrixIdentity(); // <--- ’Ç‰Á
+	m_previousViewMatrix = DirectX::XMMatrixIdentity(); 
 
 	m_moveSpeed = 5.0f;
 	m_rotationSpeed = 5.0f;

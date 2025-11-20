@@ -32,16 +32,17 @@ bool GameScene::InitializePhase1(GraphicsDevice* graphicsDevice, Input* input, D
 	m_stage = std::make_unique<Stage>();
 	if (!m_stage->Initialize(graphicsDevice)) return false;
 
-	m_player = std::make_unique<Player>();
-	m_camera = std::make_unique<Camera>();
-	m_lightManager = std::make_unique<LightManager>();
-	m_lightManager->Initialize(m_stage->GetMazeData(), m_stage->GetPathWidth(), Stage::WALL_HEIGHT);
-	m_renderer = std::make_unique<Renderer>(m_graphicsDevice);
-
 	std::pair<int, int> startPos = m_stage->GetStartPosition();
 	float pathWidth = m_stage->GetPathWidth();
 	float startX = (static_cast<float>(startPos.first) + 0.5f) * pathWidth;
 	float startZ = (static_cast<float>(startPos.second) + 0.5f) * pathWidth;
+
+	m_player = std::make_unique<Player>();
+	m_camera = std::make_unique<Camera>(startX, PLAYER_HEIGHT, startZ);
+	m_lightManager = std::make_unique<LightManager>();
+	m_lightManager->Initialize(m_stage->GetMazeData(), m_stage->GetPathWidth(), Stage::WALL_HEIGHT);
+	m_renderer = std::make_unique<Renderer>(m_graphicsDevice);
+
 	m_player->Initialize({ startX, PLAYER_HEIGHT, startZ });
 
 	return true;

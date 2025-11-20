@@ -5,7 +5,7 @@
 class Camera
 {
 public:
-	Camera();
+	Camera(float x = 0.0f, float y = 0.0f, float z = 0.0f);
 	~Camera();
 
 	void SetPosition(float x, float y, float z);
