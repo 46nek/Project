@@ -1,6 +1,7 @@
 #include "LightManager.h"
 #include <vector>
 #include <tuple>
+#include <cmath>
 
 LightManager::LightManager()
 	: m_flashlightIndex(-1),
@@ -22,6 +23,9 @@ LightManager::~LightManager()
 
 void LightManager::Initialize(const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth, float wallHeight)
 {
+	m_mazeData = mazeData;
+	m_pathWidth = pathWidth;
+
 	m_lights.clear();
 
 	const int maze_width = static_cast<int>(mazeData[0].size());
@@ -83,20 +87,108 @@ void LightManager::Initialize(const std::vector<std::vector<MazeGenerator::CellT
 	m_lightProjectionMatrix = DirectX::XMMatrixOrthographicLH(mazeWorldWidth, mazeWorldHeight, 0.1f, 100.0f);
 }
 
-void LightManager::Update(float deltaTime, const DirectX::XMFLOAT3& cameraPosition, const DirectX::XMFLOAT3& cameraRotation)
+void LightManager::Update(float deltaTime, const DirectX::XMMATRIX& viewMatrix, const DirectX::XMMATRIX& projectionMatrix, const DirectX::XMFLOAT3& cameraPosition, const DirectX::XMFLOAT3& cameraRotation)
 {
 	m_lightBuffer.CameraPosition = cameraPosition;
 	UpdateFlashlight(deltaTime, cameraPosition, cameraRotation);
-	m_lightBuffer.NumLights = static_cast<int>(m_lights.size());
-	if (m_lightBuffer.NumLights > MAX_LIGHTS)
+
+	Frustum frustum;
+	frustum.ConstructFrustum(viewMatrix, projectionMatrix);
+
+	m_lightBuffer.NumLights = 0;
+
+	for (const auto& light : m_lights)
 	{
-		m_lightBuffer.NumLights = MAX_LIGHTS;
+		if (!light.Enabled) continue;
+
+		// 1. フラスタム（画面内）チェック
+		if (frustum.CheckSphere(light.Position, light.Range))
+		{
+			// 2. オクルージョン（遮蔽）チェック
+			// 「光の範囲」も渡して、壁からの漏れを判定させる
+			if (CheckOcclusion(cameraPosition, light.Position, light.Range))
+			{
+				if (m_lightBuffer.NumLights < MAX_LIGHTS)
+				{
+					m_lightBuffer.Lights[m_lightBuffer.NumLights] = light;
+					m_lightBuffer.NumLights++;
+				}
+			}
+		}
+	}
+}
+
+bool LightManager::CheckOcclusion(const DirectX::XMFLOAT3& start, const DirectX::XMFLOAT3& end, float range)
+{
+	if (m_mazeData.empty() || m_pathWidth <= 0.0f) return true;
+
+	// グリッド座標へ変換
+	int x0 = static_cast<int>(start.x / m_pathWidth);
+	int y0 = static_cast<int>(start.z / m_pathWidth);
+	int x1 = static_cast<int>(end.x / m_pathWidth);
+	int y1 = static_cast<int>(end.z / m_pathWidth);
+
+	auto isValid = [&](int x, int y) {
+		return x >= 0 && x < m_mazeData[0].size() && y >= 0 && y < m_mazeData.size();
+		};
+
+	if (!isValid(x0, y0) || !isValid(x1, y1)) return true;
+
+	// ブレゼンハムのアルゴリズムで視線をトレース
+	int dx = std::abs(x1 - x0);
+	int dy = std::abs(y1 - y0);
+	int sx = (x0 < x1) ? 1 : -1;
+	int sy = (y0 < y1) ? 1 : -1;
+	int err = dx - dy;
+
+	while (true)
+	{
+		// 現在のセルが壁かどうかチェック
+		if (m_mazeData[y0][x0] != MazeGenerator::Path)
+		{
+			// === ここがポイント ===
+			// 壁にぶつかった場合、即座に false を返すのではなく、
+			// 「その壁まで光が届いているか（光漏れ）」を計算する。
+
+			// 壁の中心座標を計算
+			float wallX = (static_cast<float>(x0) + 0.5f) * m_pathWidth;
+			float wallZ = (static_cast<float>(y0) + 0.5f) * m_pathWidth;
+
+			// ライト（end）と壁の距離の2乗を計算
+			float distX = end.x - wallX;
+			float distZ = end.z - wallZ;
+			float distSq = distX * distX + distZ * distZ;
+
+			// ライトの半径の2乗と比較
+			// 少し余裕を持たせるために半径を 1.2倍 程度にして判定
+			float checkRange = range * 3.0f;
+
+			if (distSq <= (checkRange * checkRange))
+			{
+				return true; // 壁は光の中にある -> 描画する
+			}
+			else
+			{
+				return false; // 壁はずっと手前にあり、光は届いていない -> 描画しない
+			}
+		}
+
+		if (x0 == x1 && y0 == y1) break;
+
+		int e2 = 2 * err;
+		if (e2 > -dy)
+		{
+			err -= dy;
+			x0 += sx;
+		}
+		if (e2 < dx)
+		{
+			err += dx;
+			y0 += sy;
+		}
 	}
 
-	for (int i = 0; i < m_lightBuffer.NumLights; ++i)
-	{
-		m_lightBuffer.Lights[i] = m_lights[i];
-	}
+	return true; // 遮蔽物なし
 }
 
 void LightManager::UpdateFlashlight(float deltaTime, const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT3& rotation)

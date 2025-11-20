@@ -6,6 +6,7 @@
 #include <random>
 #include "Light.h"
 #include "MazeGenerator.h"
+#include "Frustum.h"
 
 struct LightBufferType
 {
@@ -21,7 +22,7 @@ public:
 	~LightManager();
 
 	void Initialize(const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth, float wallHeight);
-	void Update(float deltaTime, const DirectX::XMFLOAT3& cameraPosition, const DirectX::XMFLOAT3& cameraRotation);
+	void Update(float deltaTime, const DirectX::XMMATRIX& viewMatrix, const DirectX::XMMATRIX& projectionMatrix, const DirectX::XMFLOAT3& cameraPosition, const DirectX::XMFLOAT3& cameraRotation);
 	int AddPointLight(const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT4& color, float range, float intensity);
 	void SetLightEnabled(int index, bool enabled);
 
@@ -34,6 +35,9 @@ public:
 private:
 	void UpdateFlashlight(float deltaTime, const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT3& rotation);
 	void ApplyFlicker(int lightIndex, float deltaTime);
+
+	bool CheckOcclusion(const DirectX::XMFLOAT3& start, const DirectX::XMFLOAT3& end, float range);
+
 
 	std::vector<Light> m_lights;
 	LightBufferType m_lightBuffer;
@@ -48,8 +52,11 @@ private:
 	bool m_isFlickering;
 	std::mt19937 m_rng;
 
-	DirectX::XMFLOAT3 m_currentFlashlightPos; 
-	DirectX::XMFLOAT3 m_currentFlashlightDir; 
-	float m_flashlightLagSpeed; 
-	bool m_isFlashlightInitialized; 
+	DirectX::XMFLOAT3 m_currentFlashlightPos;
+	DirectX::XMFLOAT3 m_currentFlashlightDir;
+	float m_flashlightLagSpeed;
+	bool m_isFlashlightInitialized;
+
+	std::vector<std::vector<MazeGenerator::CellType>> m_mazeData;
+	float m_pathWidth;
 };

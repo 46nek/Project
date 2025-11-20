@@ -365,8 +365,9 @@ void GameScene::Update(float deltaTime)
 	m_camera->UpdateBobbing(deltaTime, m_player->IsMoving());
 	m_camera->Update();
 
-	m_lightManager->Update(deltaTime, m_camera->GetPosition(), m_camera->GetRotation());
+	DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
 
+	m_lightManager->Update(deltaTime, m_camera->GetViewMatrix(), projectionMatrix, m_camera->GetPosition(), m_camera->GetRotation());
 	m_ui->Update(deltaTime, m_remainingOrbs, m_totalOrbs, m_player->GetStaminaPercentage(), m_enemyRadarTimer > 0.0f);
 }
 
