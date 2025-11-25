@@ -274,6 +274,10 @@ bool GameScene::InitializeSpecialOrbs()
 
 void GameScene::Shutdown()
 {
+	if (m_player)
+	{
+		m_player->SetFootstepSounds(nullptr, nullptr);
+	}
 	if (m_ui) m_ui->Shutdown();
 	for (auto& orb : m_orbs) if (orb) orb->Shutdown();
 	m_orbs.clear();
@@ -373,17 +377,16 @@ void GameScene::Update(float deltaTime)
 			// ここでBGMをチェイス曲に変えるなどの演出を入れる
 		}
 	}
-
-	// ▼▼▼ 追加: 脱出判定（クリア判定） ▼▼▼
+	
 	if (m_escapeMode)
 	{
 		// 出口座標（Z=0付近）に到達したかチェック
-		// m_stage->OpenExit() で出口の壁判定は消えているので、プレイヤーはそこに入ることができる
 		DirectX::XMFLOAT3 pPos = m_player->GetPosition();
-		if (pPos.z < m_stage->GetPathWidth() * 0.8f) // 一番上の行（Z=0〜2.5）に入り込んだらクリア
+		if (pPos.z < m_stage->GetPathWidth() * 0.8f)
 		{
-			MessageBoxA(nullptr, "ESCAPED! YOU WIN!", "CONGRATULATIONS", MB_OK);
-			// ゲームクリア処理（タイトルに戻るなど）
+			// MessageBoxA(nullptr, "ESCAPED! YOU WIN!", "CONGRATULATIONS", MB_OK);
+			// ▼ 修正: リザルトシーンへ遷移
+			m_nextScene = SceneState::Result;
 		}
 	}
 

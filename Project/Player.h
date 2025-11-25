@@ -1,20 +1,22 @@
-// Project/Player.h
-
 #pragma once
 #include <DirectXMath.h>
 #include <vector>
 #include "Input.h"
 #include "MazeGenerator.h"
 #include <algorithm> 
+#include <memory> // unique_ptr用
 
+// 前方宣言
 namespace DirectX {
 	class SoundEffect;
+	class SoundEffectInstance; // 追加
 }
 
 class Player
 {
 public:
 	Player();
+	~Player(); // デストラクタを明示的に定義
 
 	void Initialize(const DirectX::XMFLOAT3& startPosition);
 	void Update(float deltaTime, Input* input, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth);
@@ -42,18 +44,23 @@ private:
 	bool m_isMoving;
 	bool m_isRunning;
 
-	float m_stamina;               // 現在のスタミナ
-	float m_maxStamina;            // 最大スタミナ
-	float m_staminaDepletionRate;  // スタミナ減少率（1秒あたり）
-	float m_staminaRegenRate;      // スタミナ回復率（1秒あたり）
-	bool m_isStaminaExhausted;     // スタミナが枯渇したかどうかのフラグ
-	float m_staminaRechargeThreshold; // 再び走れるようになるために必要なスタミナ量
+	float m_stamina;
+	float m_maxStamina;
+	float m_staminaDepletionRate;
+	float m_staminaRegenRate;
+	bool m_isStaminaExhausted;
+	float m_staminaRechargeThreshold;
 	float m_staminaWarningThreshhold;
 	float m_slowDepletionFactor;
 	float m_staminaRegenCoolDown;
 
-	DirectX::SoundEffect* m_walkSound;
-	DirectX::SoundEffect* m_runSound;
+	// ▼▼▼ 変更: SoundEffectInstanceで管理する ▼▼▼
+	DirectX::SoundEffect* m_walkSound; // 参照用（データ元）
+	DirectX::SoundEffect* m_runSound;  // 参照用（データ元）
+	std::unique_ptr<DirectX::SoundEffectInstance> m_walkInstance; // 再生管理用
+	std::unique_ptr<DirectX::SoundEffectInstance> m_runInstance;  // 再生管理用
+	// ▲▲▲ 変更ここまで ▲▲▲
+
 	float m_stepTimer;
 	float m_walkInterval;
 	float m_runInterval;

@@ -2,6 +2,7 @@
 #include "TitleScene.h"
 #include "GameScene.h"
 #include "LoadingScene.h"
+#include "ResultScene.h"
 
 // コンストラクタの初期化子リストを修正します
 SceneManager::SceneManager() : m_currentScene(nullptr), m_graphicsDevice(nullptr), m_input(nullptr), m_audioEngine(nullptr)
@@ -98,6 +99,9 @@ bool SceneManager::ChangeScene(SceneState nextState)
     case SceneState::Game:
         // LoadingSceneを介さずに直接GameSceneを生成する場合
         m_currentScene = std::make_unique<GameScene>();
+        break;
+    case SceneState::Result: 
+        m_currentScene = std::make_unique<ResultScene>();
         break;
     default:
         return false;

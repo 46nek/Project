@@ -123,6 +123,9 @@
     <ClCompile Include="Frustum.cpp">
       <Filter>Source\02_Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="ResultScene.cpp">
+      <Filter>Source\01_Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -235,6 +238,9 @@
     </ClInclude>
     <ClInclude Include="Frustum.h">
       <Filter>Source\02_Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="ResultScene.h">
+      <Filter>Source\01_Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

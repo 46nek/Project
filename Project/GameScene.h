@@ -34,12 +34,17 @@ private:
 
     static constexpr float PLAYER_HEIGHT = 4.0f;
     static constexpr int NUM_ENEMIES = 2;
-    static constexpr int NUM_ORBS = 50;
+    static constexpr int NUM_ORBS = 1;
+
+    std::unique_ptr<DirectX::SoundEffect> m_collectSound;
+    std::unique_ptr<DirectX::SoundEffect> m_walkSoundEffect;
+    std::unique_ptr<DirectX::SoundEffect> m_runSoundEffect;
 
     std::unique_ptr<Stage> m_stage;
     std::unique_ptr<Camera> m_camera;
     std::unique_ptr<LightManager> m_lightManager;
     std::unique_ptr<Renderer> m_renderer;
+
     std::unique_ptr<Player> m_player;
     std::vector<std::unique_ptr<Enemy>> m_enemies;
     std::vector<std::unique_ptr<Orb>> m_orbs; 
@@ -47,10 +52,6 @@ private:
     float m_enemyRadarTimer; // 敵レーダーの効果時間タイマー
     std::unique_ptr<UI> m_ui;
 
-    std::unique_ptr<DirectX::SoundEffect> m_collectSound; 
-    std::unique_ptr<DirectX::SoundEffect> m_walkSoundEffect;
-    std::unique_ptr<DirectX::SoundEffect> m_runSoundEffect;
-    
     std::vector<Model*> m_cachedStageModels;
     std::vector<Model*> m_cachedDynamicModels;
 

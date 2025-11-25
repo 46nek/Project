@@ -10,6 +10,7 @@ enum class SceneState
 	Title, 
 	Loading,
 	Game,
+	Result,
 };
 
 /**
