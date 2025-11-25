@@ -58,4 +58,8 @@ private:
 
     int m_remainingOrbs;
     int m_totalOrbs;
+
+    std::unique_ptr<Orb> m_goalOrb;
+    bool m_goalSpawned; 
+    bool m_escapeMode;
 };

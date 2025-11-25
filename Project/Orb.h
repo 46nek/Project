@@ -11,7 +11,8 @@ enum class OrbType
 {
 	Normal,
 	MinimapZoomOut,
-	EnemyRadar
+	EnemyRadar,
+	Goal
 };
 
 class Orb

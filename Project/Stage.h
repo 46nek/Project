@@ -20,9 +20,12 @@ public:
 	void Shutdown();
 
 	const std::vector<std::unique_ptr<Model>>& GetModels() const;
+	Model* GetGateModel() const;
+
 	const std::vector<std::vector<MazeGenerator::CellType>>& GetMazeData() const;
 	std::pair<int, int> GetStartPosition() const;
 	float GetPathWidth() const;
+	void OpenExit();
 
 	// íËêî
 	static constexpr int MAZE_WIDTH = 31;
@@ -34,4 +37,8 @@ private:
 
 	std::unique_ptr<MazeGenerator> m_mazeGenerator;
 	std::vector<std::unique_ptr<Model>> m_models;
+
+	std::unique_ptr<Model> m_gateModel;
+	int m_exitX;
+	int m_exitY;
 };

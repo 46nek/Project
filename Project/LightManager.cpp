@@ -146,7 +146,6 @@ bool LightManager::CheckOcclusion(const DirectX::XMFLOAT3& start, const DirectX:
 		// 現在のセルが壁かどうかチェック
 		if (m_mazeData[y0][x0] != MazeGenerator::Path)
 		{
-			// === ここがポイント ===
 			// 壁にぶつかった場合、即座に false を返すのではなく、
 			// 「その壁まで光が届いているか（光漏れ）」を計算する。
 

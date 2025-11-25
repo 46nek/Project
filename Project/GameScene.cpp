@@ -1,4 +1,4 @@
-#include "GameScene.h"
+﻿#include "GameScene.h"
 #include "AssetLoader.h"
 #include "Game.h"
 #include <random>
@@ -80,7 +80,7 @@ bool GameScene::InitializePhase5()
 		m_walkSoundEffect = std::make_unique<DirectX::SoundEffect>(m_audioEngine, L"Assets/walk.wav");
 		m_runSoundEffect = std::make_unique<DirectX::SoundEffect>(m_audioEngine, L"Assets/walk.wav");
 
-		// �v���C���[�ɉ����Z�b�g
+		// プレイヤーに音をセット
 		if (m_player)
 		{
 			m_player->SetFootstepSounds(m_walkSoundEffect.get(), m_runSoundEffect.get());
@@ -233,13 +233,13 @@ bool GameScene::InitializeSpecialOrbs()
 	std::mt19937 gen(rd());
 	std::shuffle(cornerRooms.begin(), cornerRooms.end(), gen);
 
-	// �I�[�u�̎�ރ��X�g
+	// オーブの種類リスト
 	std::vector<OrbType> specialOrbTypes = { OrbType::MinimapZoomOut, OrbType::EnemyRadar, OrbType::EnemyRadar };
 
 	for (size_t i = 0; i < specialOrbTypes.size(); ++i)
 	{
 		std::pair<int, int> room = cornerRooms[i];
-		float orbX = (static_cast<float>(room.first) + 1.5f) * pathWidth; // �����̒��S������
+		float orbX = (static_cast<float>(room.first) + 1.5f) * pathWidth; // 部屋の中心あたり
 		float orbZ = (static_cast<float>(room.second) + 1.5f) * pathWidth;
 		DirectX::XMFLOAT3 orbPos = { orbX, 2.0f, orbZ };
 
@@ -248,10 +248,10 @@ bool GameScene::InitializeSpecialOrbs()
 		switch (type)
 		{
 		case OrbType::MinimapZoomOut:
-			orbColor = { 0.2f, 1.0f, 0.2f, 1.0f }; // ��
+			orbColor = { 0.2f, 1.0f, 0.2f, 1.0f }; // 緑
 			break;
 		case OrbType::EnemyRadar:
-			orbColor = { 1.0f, 0.2f, 0.2f, 1.0f }; // ��
+			orbColor = { 1.0f, 0.2f, 0.2f, 1.0f }; // 赤
 			break;
 		default:
 			orbColor = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -309,7 +309,7 @@ void GameScene::Update(float deltaTime)
 	for (auto& enemy : m_enemies) enemy->Update(deltaTime, m_player.get(), m_stage->GetMazeData(), m_stage->GetPathWidth());
 	for (auto& orb : m_orbs) 
 	{
-		// ���W�ς݂łȂ���΍X�V������������
+		// 収集済みでなければ更新処理をかける
 		if (orb && !orb->IsCollected()) //
 		{
 			bool justCollected = orb->Update(deltaTime, m_player.get(), m_lightManager.get(), m_collectSound.get());
@@ -319,23 +319,23 @@ void GameScene::Update(float deltaTime)
 			}
 		}
 	}
-	// ����I�[�u�̍X�V�Ɠ����蔻��
+	// 特殊オーブの更新と当たり判定
 	for (auto it = m_specialOrbs.begin(); it != m_specialOrbs.end(); )
 	{
 		(*it)->Update(deltaTime, m_player.get(), m_lightManager.get(), m_collectSound.get());
 		if ((*it)->IsCollected())
 		{
-			// �I�[�u�̌��ʂ𔭓�
+			// オーブの効果を発動
 			switch ((*it)->GetType())
 			{
 			case OrbType::MinimapZoomOut:
-				if (m_ui) m_ui->GetMinimap()->SetZoom(2.0f); // �Y�[���A�E�g�i�l�͓K�X�����j
+				if (m_ui) m_ui->GetMinimap()->SetZoom(2.0f); // ズームアウト（値は適宜調整）
 				break;
 			case OrbType::EnemyRadar:
-				m_enemyRadarTimer = 20.0f; // 20�b�^�C�}�[�Z�b�g
+				m_enemyRadarTimer = 20.0f; // 20秒タイマーセット
 				break;
 			}
-			it = m_specialOrbs.erase(it); // �擾�����I�[�u�����X�g����폜
+			it = m_specialOrbs.erase(it); // 取得したオーブをリストから削除
 		}
 		else
 		{
@@ -343,7 +343,51 @@ void GameScene::Update(float deltaTime)
 		}
 	}
 
-	// �G���[�_�[�̃^�C�}�[�X�V
+	if (m_remainingOrbs <= 0 && !m_goalSpawned)
+	{
+		// スタート地点にゴールオーブを出現させる
+		std::pair<int, int> startPos = m_stage->GetStartPosition();
+		float pathWidth = m_stage->GetPathWidth();
+		float goalX = (static_cast<float>(startPos.first) + 0.5f) * pathWidth;
+		float goalZ = (static_cast<float>(startPos.second) + 0.5f) * pathWidth;
+
+		// 目立つように強い光を放つ
+		int lightIndex = m_lightManager->AddPointLight({ goalX, 2.0f, goalZ }, { 1.0f, 0.8f, 0.0f, 1.0f }, 10.0f, 2.0f);
+
+		m_goalOrb = std::make_unique<Orb>();
+		m_goalOrb->Initialize(m_graphicsDevice->GetDevice(), { goalX, 2.0f, goalZ }, lightIndex, OrbType::Goal);
+
+		m_goalSpawned = true;
+
+		// ここで「脱出への道が開かれるぞ！」などの音やメッセージを出すと良いでしょう
+	}
+
+	// ▼▼▼ 追加: ゴールオーブの更新と壁開放 ▼▼▼
+	if (m_goalSpawned && m_goalOrb && !m_goalOrb->IsCollected())
+	{
+		if (m_goalOrb->Update(deltaTime, m_player.get(), m_lightManager.get(), m_collectSound.get()))
+		{
+			// ゴールオーブを取得した！ -> 出口を開ける
+			m_stage->OpenExit();
+			m_escapeMode = true;
+			// ここでBGMをチェイス曲に変えるなどの演出を入れる
+		}
+	}
+
+	// ▼▼▼ 追加: 脱出判定（クリア判定） ▼▼▼
+	if (m_escapeMode)
+	{
+		// 出口座標（Z=0付近）に到達したかチェック
+		// m_stage->OpenExit() で出口の壁判定は消えているので、プレイヤーはそこに入ることができる
+		DirectX::XMFLOAT3 pPos = m_player->GetPosition();
+		if (pPos.z < m_stage->GetPathWidth() * 0.8f) // 一番上の行（Z=0〜2.5）に入り込んだらクリア
+		{
+			MessageBoxA(nullptr, "ESCAPED! YOU WIN!", "CONGRATULATIONS", MB_OK);
+			// ゲームクリア処理（タイトルに戻るなど）
+		}
+	}
+
+	// 敵レーダーのタイマー更新
 	if (m_enemyRadarTimer > 0.0f)
 	{
 		m_enemyRadarTimer -= deltaTime;
@@ -381,6 +425,17 @@ void GameScene::Render()
 	for (const auto& orb : m_orbs) if (Model* orbModel = orb->GetModel()) m_cachedDynamicModels.push_back(orbModel);
 	for (const auto& sorb : m_specialOrbs) if (Model* orbModel = sorb->GetModel()) m_cachedDynamicModels.push_back(orbModel);
 
+	if (m_goalOrb)
+	{
+		if (Model* gModel = m_goalOrb->GetModel()) m_cachedDynamicModels.push_back(gModel);
+	}
+
+	// OpenExit()が呼ばれるとGetGateModelはnullptrを返すか、Shutdownされて描画されなくなります
+	if (Model* gate = m_stage->GetGateModel())
+	{
+		m_cachedDynamicModels.push_back(gate);
+	}
+
 	m_renderer->RenderSceneToTexture(
 		m_cachedStageModels,
 		m_cachedDynamicModels,
@@ -390,7 +445,7 @@ void GameScene::Render()
 		m_stage->GetPathWidth()
 	);
 	m_renderer->RenderFinalPass(m_camera.get(), m_vignetteIntensity);
-	// UI�̕`��i�~�j�}�b�v��Orb UI�̗�����`��j
+	// UIの描画（ミニマップとOrb UIの両方を描画）
 	m_ui->Render(m_camera.get(), m_enemies, m_orbs, m_specialOrbs);
 
 	m_graphicsDevice->EndScene();

@@ -282,9 +282,6 @@
     <Filter Include="Source\05_System">
       <UniqueIdentifier>{aec882d0-8574-4364-b061-7b78c35de2e4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\04_GamePlay\AI">
-      <UniqueIdentifier>{bb82579d-1c3d-4a91-89e9-1a613f0437e7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\04_GamePlay\Entities">
       <UniqueIdentifier>{9e2ffe64-da5c-4ab0-a56f-f5448f9d282e}</UniqueIdentifier>
     </Filter>
@@ -302,6 +299,9 @@
     </Filter>
     <Filter Include="Source\04_GamePlay\UI">
       <UniqueIdentifier>{9b517ecd-4319-456b-a989-3ecf3dc9dfa0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\04_GamePlay\AI">
+      <UniqueIdentifier>{bb82579d-1c3d-4a91-89e9-1a613f0437e7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

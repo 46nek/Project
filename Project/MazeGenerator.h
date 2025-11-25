@@ -18,6 +18,8 @@ public:
 	const std::vector<std::vector<CellType>>& GetMazeData() const;
 	std::pair<int, int> GetStartPosition() const;
 
+	void SetCell(int x, int y, CellType type);
+
 private:
 	// Šù‘¶‚Ìƒwƒ‹ƒp[ŠÖ”
 	void CarvePath(int x, int y, const std::vector<std::vector<bool>>& protectedCells);

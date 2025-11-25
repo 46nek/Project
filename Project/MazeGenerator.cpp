@@ -243,3 +243,10 @@ std::pair<int, int> MazeGenerator::GetStartPosition() const
 {
 	return { m_startX, m_startY };
 }
+void MazeGenerator::SetCell(int x, int y, CellType type)
+{
+	if (x >= 0 && x < m_width && y >= 0 && y < m_height)
+	{
+		m_maze[y][x] = type;
+	}
+}

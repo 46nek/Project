@@ -39,6 +39,9 @@ bool Orb::Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& position, in
 	case OrbType::EnemyRadar:
 		m_model->SetEmissiveColor({ 1.0f, 0.2f, 0.2f, 1.0f }); // Ô
 		break;
+	case OrbType::Goal: 
+		m_model->SetEmissiveColor({ 1.0f, 0.8f, 0.0f, 1.0f });
+		break;
 	case OrbType::Normal:
 	default:
 		m_model->SetEmissiveColor({ 0.6f, 0.8f, 1.0f, 1.0f }); // Â
