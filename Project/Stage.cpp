@@ -60,10 +60,10 @@ bool Stage::Initialize(GraphicsDevice* graphicsDevice)
 
 	if (m_gateModel)
 	{
-		float gateX = (static_cast<float>(m_exitX) + 0.1f) * PATH_WIDTH;
+		float gateX = (static_cast<float>(m_exitX) + 0.5f) * PATH_WIDTH;
 		float gateZ = (static_cast<float>(m_exitY) + 0.1f) * PATH_WIDTH;
 
-		m_gateModel->SetScale(PATH_WIDTH, WALL_HEIGHT, PATH_WIDTH);
+		m_gateModel->SetScale(PATH_WIDTH - 1.1f, WALL_HEIGHT, PATH_WIDTH - 1.1f);
 		m_gateModel->SetPosition(gateX, WALL_HEIGHT / 2.0f, gateZ);
 		m_gateModel->SetTexture(gateTexture);
 		m_gateModel->SetNormalMap(gateNormalMap);
