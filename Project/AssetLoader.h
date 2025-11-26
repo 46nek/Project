@@ -18,7 +18,7 @@ public:
 	 * @brief Assimpライブラリを使用してモデルファイルを読み込む
 	 * @return 読み込みに成功した場合はModelのユニークポインタ
 	 */
-	static std::unique_ptr<Model> LoadModelFromFile(ID3D11Device* device, const std::string& filename);
+	static std::unique_ptr<Model> LoadModelFromFile(ID3D11Device* device, const std::string& filename, float uvScale = 1.0f);
 
 	/**
 	 * @brief 迷路データから3Dモデルを生成する

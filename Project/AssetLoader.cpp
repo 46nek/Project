@@ -5,7 +5,7 @@
 #include <assimp/postprocess.h>
 #include <windows.h>
 
-std::unique_ptr<Model> AssetLoader::LoadModelFromFile(ID3D11Device* device, const std::string& filename)
+std::unique_ptr<Model> AssetLoader::LoadModelFromFile(ID3D11Device* device, const std::string& filename,float uvScale)
 {
 	Assimp::Importer importer;
 	// aiProcess_CalcTangentSpace フラグを追加
@@ -29,7 +29,7 @@ std::unique_ptr<Model> AssetLoader::LoadModelFromFile(ID3D11Device* device, cons
 				vertex.Normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
 			}
 			if (mesh->HasTextureCoords(0)) {
-				vertex.Tex = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
+				vertex.Tex = { mesh->mTextureCoords[0][i].x * uvScale, mesh->mTextureCoords[0][i].y * uvScale };
 			}
 			if (mesh->HasTangentsAndBitangents()) { // 接線と従法線のデータを取得
 				vertex.Tangent = { mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z };

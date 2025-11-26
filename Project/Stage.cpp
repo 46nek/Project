@@ -15,13 +15,18 @@ bool Stage::Initialize(GraphicsDevice* graphicsDevice)
 
 	m_mazeGenerator->SetCell(m_exitX, m_exitY, MazeGenerator::Path);
 
-	// AssetLoader::LoadTexture は unique_ptr を返しますが、shared_ptr に代入することで所有権を共有可能にします
 	std::shared_ptr<Texture> wallTexture = AssetLoader::LoadTexture(graphicsDevice->GetDevice(), L"Assets/wall.png");
 	if (!wallTexture) { MessageBox(nullptr, L"Failed to load wall.png", L"Error", MB_OK); return false; }
 
 	std::shared_ptr<Texture> wallNormalMap = AssetLoader::LoadTexture(graphicsDevice->GetDevice(), L"Assets/wall_normal.png");
 	if (!wallNormalMap) { MessageBox(nullptr, L"Failed to load wall_normal.png", L"Error", MB_OK); return false; }
+	
+	std::shared_ptr<Texture> gateTexture = AssetLoader::LoadTexture(graphicsDevice->GetDevice(), L"Assets/gate.jpg");
+	if (!gateTexture) { MessageBox(nullptr, L"Failed to load gate.jpg", L"Error", MB_OK); return false; }
 
+	std::shared_ptr<Texture> gateNormalMap = AssetLoader::LoadTexture(graphicsDevice->GetDevice(), L"Assets/gate_normal.png");
+	if (!gateNormalMap) { MessageBox(nullptr, L"Failed to load gate_normal.png", L"Error", MB_OK); return false; }
+	
 	// モデルの生成
 	auto wallModel1 = AssetLoader::CreateMazeModel(graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT / 2.0f, MeshGenerator::MeshType::Wall);
 	if (!wallModel1) return false;
@@ -51,20 +56,21 @@ bool Stage::Initialize(GraphicsDevice* graphicsDevice)
 	floorModel->SetNormalMap(wallNormalMap);  // 共通ノーマルマップ
 	m_models.push_back(std::move(floorModel));
 
-	m_mazeGenerator->SetCell(m_exitX, m_exitY, MazeGenerator::Wall);
+	m_gateModel = AssetLoader::LoadModelFromFile(graphicsDevice->GetDevice(), "Assets/cube.fbx", 6.0f);
 
-	m_gateModel = AssetLoader::LoadModelFromFile(graphicsDevice->GetDevice(), "Assets/cube.fbx"); // cube.objでも可
 	if (m_gateModel)
 	{
-		float gateX = (static_cast<float>(m_exitX) + 0.5f) * PATH_WIDTH;
-		float gateZ = (static_cast<float>(m_exitY) + 0.5f) * PATH_WIDTH;
+		float gateX = (static_cast<float>(m_exitX) + 0.1f) * PATH_WIDTH;
+		float gateZ = (static_cast<float>(m_exitY) + 0.1f) * PATH_WIDTH;
 
 		m_gateModel->SetScale(PATH_WIDTH, WALL_HEIGHT, PATH_WIDTH);
 		m_gateModel->SetPosition(gateX, WALL_HEIGHT / 2.0f, gateZ);
-		m_gateModel->SetTexture(wallTexture);
-		m_gateModel->SetNormalMap(wallNormalMap);
+		m_gateModel->SetTexture(gateTexture);
+		m_gateModel->SetNormalMap(gateNormalMap);
 	}
 
+	m_mazeGenerator->SetCell(m_exitX, m_exitY, MazeGenerator::Wall);
+	
 	return true;
 }
 

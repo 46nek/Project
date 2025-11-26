@@ -47,7 +47,6 @@ void Player::Initialize(const DirectX::XMFLOAT3& startPosition) {
 void Player::Update(float deltaTime, Input* input, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth) {
 	m_isMoving = false;
 
-	// 各機能ごとにメソッドに分割して呼び出す
 	UpdateStamina(deltaTime, input);
 	UpdateMovement(deltaTime, input, mazeData, pathWidth);
 	UpdateAudio(deltaTime);
