@@ -20,6 +20,9 @@ public:
 
 	void Initialize(const DirectX::XMFLOAT3& startPosition);
 	void Update(float deltaTime, Input* input, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth);
+	void UpdateStamina(float deltaTime, Input* input);
+	void UpdateMovement(float deltaTime, Input* input, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth);
+	void UpdateAudio(float deltaTime);
 	void Turn(int mouseX, int mouseY, float deltaTime);
 
 	void SetFootstepSounds(DirectX::SoundEffect* walkSound, DirectX::SoundEffect* runSound);
