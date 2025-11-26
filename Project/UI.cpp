@@ -159,3 +159,9 @@ Minimap* UI::GetMinimap() const
 {
 	return m_minimap.get();
 }
+
+void UI::SetMinimapZoom(float zoomLevel) {
+	if (m_minimap) {
+		m_minimap->SetZoom(zoomLevel);
+	}
+}

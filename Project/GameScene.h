@@ -31,6 +31,8 @@ private:
 	bool InitializeEnemies();
 	bool InitializeOrbs();
 	bool InitializeSpecialOrbs();
+	
+	void UpdateVignette(float staminaPercentage);
 
 	static constexpr float PLAYER_HEIGHT = 4.0f;
 	static constexpr int NUM_ENEMIES = 2;

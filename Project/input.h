@@ -6,6 +6,8 @@
 class Input
 {
 public:
+	static constexpr int KEY_COUNT = 256;
+
 	Input();
 	~Input();
 
@@ -32,7 +34,7 @@ public:
 	void GetMouseDelta(int& x, int& y);
 
 private:
-	bool m_keys[256];
-	bool m_previousKeys[256];
+	bool m_keys[KEY_COUNT];
+	bool m_previousKeys[KEY_COUNT];
 	int m_mouseX, m_mouseY;
 };

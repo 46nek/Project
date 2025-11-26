@@ -1,6 +1,8 @@
 #include "Input.h"
+#include <algorithm> 
+#include <iterator>
 
-Input::Input()
+Input::Input() : m_mouseX(0), m_mouseY(0)
 {
 }
 
@@ -10,12 +12,9 @@ Input::~Input()
 
 void Input::Initialize()
 {
-	// すべてのキーの状態を '押されていない' (false) で初期化
-	for (int i = 0; i < 256; i++)
-	{
-		m_keys[i] = false;
-		m_previousKeys[i] = false; // <<< 追加
-	}
+	std::fill(std::begin(m_keys), std::end(m_keys), false);
+	std::fill(std::begin(m_previousKeys), std::end(m_previousKeys), false);
+
 	// マウス移動量を0で初期化
 	m_mouseX = 0;
 	m_mouseY = 0;
@@ -23,8 +22,7 @@ void Input::Initialize()
 
 void Input::EndFrame()
 {
-	// 現在のキー入力を前のフレームの入力としてコピー
-	for (int i = 0; i < 256; i++) // <<< 追加
+	for (int i = 0; i < KEY_COUNT; i++)
 	{
 		m_previousKeys[i] = m_keys[i];
 	}

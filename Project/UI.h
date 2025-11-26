@@ -23,8 +23,9 @@ public:
 	void Shutdown();
 	void Update(float deltaTime, int remainingOrbs, int totalOrbs, float staminaPercentage, bool showEnemiesOnMinimap);
 	void Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs, const std::vector<std::unique_ptr<Orb>>& specialOrbs);
+	
 	Minimap* GetMinimap() const;
-
+	void SetMinimapZoom(float zoomLevel);
 private:
 	GraphicsDevice* m_graphicsDevice;
 	std::unique_ptr<Minimap> m_minimap;

@@ -5,16 +5,62 @@
 #include <tuple>
 #include <algorithm>
 
+namespace {
+	// === 定数定義 ===
+
+	// オーブ・敵の生成設定
+	constexpr int SPAWN_ROOM_SIZE = 3;
+	constexpr int SPAWN_CORNER_OFFSET = 1;
+	constexpr float SPAWN_CHECK_DISTANCE = 2.0f; // 既存オーブとの最小距離
+
+	// ライト設定 (Color: R, G, B, A)
+	const DirectX::XMFLOAT4 COLOR_NORMAL_ORB = { 0.8f, 0.8f, 1.0f, 1.0f };
+	const DirectX::XMFLOAT4 COLOR_ZOOM_ORB = { 0.2f, 1.0f, 0.2f, 1.0f }; // 緑
+	const DirectX::XMFLOAT4 COLOR_RADAR_ORB = { 1.0f, 0.2f, 0.2f, 1.0f }; // 赤
+	const DirectX::XMFLOAT4 COLOR_GOAL_ORB = { 1.0f, 0.8f, 0.0f, 1.0f }; // ゴールド
+
+	constexpr float ORB_LIGHT_RANGE = 5.0f;
+	constexpr float ORB_LIGHT_INTENSITY = 1.0f;
+	constexpr float SPECIAL_ORB_INTENSITY = 1.5f;
+	constexpr float GOAL_LIGHT_RANGE = 10.0f;
+	constexpr float GOAL_LIGHT_INTENSITY = 2.0f;
+
+	// サウンドパス
+	const wchar_t* PATH_SOUND_COLLECT = L"Assets/orb_get.wav";
+	const wchar_t* PATH_SOUND_WALK = L"Assets/walk.wav";
+	
+	// ビネット効果設定
+	constexpr float VIGNETTE_MIN_INTENSITY = 1.1f;
+	constexpr float VIGNETTE_MAX_INTENSITY = 2.0f;
+	constexpr float VIGNETTE_WARNING_THRESHOLD = 0.3f;
+
+	// その他
+	constexpr float MINIMAP_ZOOM_OUT_LEVEL = 2.0f;
+	constexpr float RADAR_DURATION = 20.0f;
+
+	// カメラの揺れ（ボブ）パラメータ
+	struct BobbingParams {
+		float speed, amount, swaySpeed, swayAmount, rollSpeed;
+	};
+	constexpr BobbingParams BOB_WALK = { 14.0f, 0.03f, 7.0f, 0.05f, 7.0f };
+	constexpr BobbingParams BOB_RUN = { 18.0f, 0.05f, 10.0f, 0.08f, 9.0f };
+}
+
 GameScene::GameScene()
 	: m_vignetteIntensity(0.0f),
 	m_remainingOrbs(0),
-	m_totalOrbs(0)
+	m_totalOrbs(0),
+	m_enemyRadarTimer(0.0f),
+	m_goalSpawned(false),
+	m_escapeMode(false)
 {
 }
 
 GameScene::~GameScene() {}
+
 bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine)
 {
+	// 各フェーズの初期化を実行
 	if (!InitializePhase1(graphicsDevice, input, audioEngine)) return false;
 	if (!InitializePhase2()) return false;
 	if (!InitializePhase3()) return false;
@@ -61,8 +107,7 @@ bool GameScene::InitializePhase2()
 
 bool GameScene::InitializePhase3()
 {
-	if (!InitializeEnemies()) return false;
-	return true;
+	return InitializeEnemies();
 }
 
 bool GameScene::InitializePhase4()
@@ -76,17 +121,16 @@ bool GameScene::InitializePhase5()
 {
 	try
 	{
-		m_collectSound = std::make_unique<DirectX::SoundEffect>(m_audioEngine, L"Assets/orb_get.wav");
-		m_walkSoundEffect = std::make_unique<DirectX::SoundEffect>(m_audioEngine, L"Assets/walk.wav");
-		m_runSoundEffect = std::make_unique<DirectX::SoundEffect>(m_audioEngine, L"Assets/walk.wav");
+		m_collectSound = std::make_unique<DirectX::SoundEffect>(m_audioEngine, PATH_SOUND_COLLECT);
+		m_walkSoundEffect = std::make_unique<DirectX::SoundEffect>(m_audioEngine, PATH_SOUND_WALK);
+		// 走る音が別にあればそれを指定。なければ歩く音を使い回し
+		m_runSoundEffect = std::make_unique<DirectX::SoundEffect>(m_audioEngine, PATH_SOUND_WALK);
 
-		// プレイヤーに音をセット
 		if (m_player)
 		{
 			m_player->SetFootstepSounds(m_walkSoundEffect.get(), m_runSoundEffect.get());
 		}
 	}
-
 	catch (const std::exception& e)
 	{
 		MessageBoxA(nullptr, e.what(), "Sound Error", MB_OK);
@@ -104,6 +148,7 @@ bool GameScene::InitializeEnemies()
 		{1, Stage::MAZE_HEIGHT - 4},
 		{Stage::MAZE_WIDTH - 4, Stage::MAZE_HEIGHT - 4}
 	};
+
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::shuffle(spawnRooms.begin(), spawnRooms.end(), gen);
@@ -133,15 +178,13 @@ bool GameScene::InitializeOrbs()
 	std::random_device rd;
 	std::mt19937 gen(rd());
 
-	const int roomSize = 3;
-	const int cornerOffset = 1;
 	using Rect = std::tuple<int, int, int, int>;
 	const std::vector<Rect> rooms = {
-		std::make_tuple(cornerOffset, cornerOffset, roomSize, roomSize),
-		std::make_tuple(Stage::MAZE_WIDTH - cornerOffset - roomSize, cornerOffset, roomSize, roomSize),
-		std::make_tuple(cornerOffset, Stage::MAZE_HEIGHT - cornerOffset - roomSize, roomSize, roomSize),
-		std::make_tuple(Stage::MAZE_WIDTH - cornerOffset - roomSize, Stage::MAZE_HEIGHT - cornerOffset - roomSize, roomSize, roomSize),
-		std::make_tuple((Stage::MAZE_WIDTH - roomSize) / 2, (Stage::MAZE_HEIGHT - roomSize) / 2, roomSize, roomSize)
+		std::make_tuple(SPAWN_CORNER_OFFSET, SPAWN_CORNER_OFFSET, SPAWN_ROOM_SIZE, SPAWN_ROOM_SIZE),
+		std::make_tuple(Stage::MAZE_WIDTH - SPAWN_CORNER_OFFSET - SPAWN_ROOM_SIZE, SPAWN_CORNER_OFFSET, SPAWN_ROOM_SIZE, SPAWN_ROOM_SIZE),
+		std::make_tuple(SPAWN_CORNER_OFFSET, Stage::MAZE_HEIGHT - SPAWN_CORNER_OFFSET - SPAWN_ROOM_SIZE, SPAWN_ROOM_SIZE, SPAWN_ROOM_SIZE),
+		std::make_tuple(Stage::MAZE_WIDTH - SPAWN_CORNER_OFFSET - SPAWN_ROOM_SIZE, Stage::MAZE_HEIGHT - SPAWN_CORNER_OFFSET - SPAWN_ROOM_SIZE, SPAWN_ROOM_SIZE, SPAWN_ROOM_SIZE),
+		std::make_tuple((Stage::MAZE_WIDTH - SPAWN_ROOM_SIZE) / 2, (Stage::MAZE_HEIGHT - SPAWN_ROOM_SIZE) / 2, SPAWN_ROOM_SIZE, SPAWN_ROOM_SIZE)
 	};
 
 	for (size_t y = 1; y < mazeData.size() - 1; ++y)
@@ -175,7 +218,6 @@ bool GameScene::InitializeOrbs()
 	}
 
 	std::shuffle(possibleSpawns.begin(), possibleSpawns.end(), gen);
-
 	std::vector<std::pair<int, int>> spawnedOrbPositions;
 
 	for (const auto& spawnPos : possibleSpawns)
@@ -185,7 +227,7 @@ bool GameScene::InitializeOrbs()
 		bool canSpawn = true;
 		for (const auto& spawnedPos : spawnedOrbPositions)
 		{
-			if (std::abs(spawnPos.first - spawnedPos.first) + std::abs(spawnPos.second - spawnedPos.second) <= 2)
+			if (std::abs(spawnPos.first - spawnedPos.first) + std::abs(spawnPos.second - spawnedPos.second) <= SPAWN_CHECK_DISTANCE)
 			{
 				canSpawn = false;
 				break;
@@ -198,10 +240,7 @@ bool GameScene::InitializeOrbs()
 			float orbZ = (static_cast<float>(spawnPos.second) + 0.5f) * pathWidth;
 			DirectX::XMFLOAT3 orbPos = { orbX, 2.0f, orbZ };
 
-			DirectX::XMFLOAT4 orbColor = { 0.8f, 0.8f, 1.0f, 1.0f };
-			float orbRange = 5.0f;
-			float orbIntensity = 1.0f;
-			int lightIndex = m_lightManager->AddPointLight(orbPos, orbColor, orbRange, orbIntensity);
+			int lightIndex = m_lightManager->AddPointLight(orbPos, COLOR_NORMAL_ORB, ORB_LIGHT_RANGE, ORB_LIGHT_INTENSITY);
 
 			if (lightIndex != -1)
 			{
@@ -233,13 +272,12 @@ bool GameScene::InitializeSpecialOrbs()
 	std::mt19937 gen(rd());
 	std::shuffle(cornerRooms.begin(), cornerRooms.end(), gen);
 
-	// オーブの種類リスト
 	std::vector<OrbType> specialOrbTypes = { OrbType::MinimapZoomOut, OrbType::EnemyRadar, OrbType::EnemyRadar };
 
 	for (size_t i = 0; i < specialOrbTypes.size(); ++i)
 	{
 		std::pair<int, int> room = cornerRooms[i];
-		float orbX = (static_cast<float>(room.first) + 1.5f) * pathWidth; // 部屋の中心あたり
+		float orbX = (static_cast<float>(room.first) + 1.5f) * pathWidth;
 		float orbZ = (static_cast<float>(room.second) + 1.5f) * pathWidth;
 		DirectX::XMFLOAT3 orbPos = { orbX, 2.0f, orbZ };
 
@@ -247,18 +285,12 @@ bool GameScene::InitializeSpecialOrbs()
 		OrbType type = specialOrbTypes[i];
 		switch (type)
 		{
-		case OrbType::MinimapZoomOut:
-			orbColor = { 0.2f, 1.0f, 0.2f, 1.0f }; // 緑
-			break;
-		case OrbType::EnemyRadar:
-			orbColor = { 1.0f, 0.2f, 0.2f, 1.0f }; // 赤
-			break;
-		default:
-			orbColor = { 1.0f, 1.0f, 1.0f, 1.0f };
-			break;
+		case OrbType::MinimapZoomOut: orbColor = COLOR_ZOOM_ORB; break;
+		case OrbType::EnemyRadar:     orbColor = COLOR_RADAR_ORB; break;
+		default:                      orbColor = COLOR_NORMAL_ORB; break;
 		}
 
-		int lightIndex = m_lightManager->AddPointLight(orbPos, orbColor, 5.0f, 1.5f);
+		int lightIndex = m_lightManager->AddPointLight(orbPos, orbColor, ORB_LIGHT_RANGE, SPECIAL_ORB_INTENSITY);
 
 		if (lightIndex != -1)
 		{
@@ -274,47 +306,36 @@ bool GameScene::InitializeSpecialOrbs()
 
 void GameScene::Shutdown()
 {
-	if (m_player)
-	{
-		m_player->SetFootstepSounds(nullptr, nullptr);
-	}
+	if (m_player) m_player->SetFootstepSounds(nullptr, nullptr);
 	if (m_ui) m_ui->Shutdown();
+
 	for (auto& orb : m_orbs) if (orb) orb->Shutdown();
 	m_orbs.clear();
+
 	for (auto& enemy : m_enemies) if (enemy) enemy->Shutdown();
 	m_enemies.clear();
+
 	if (m_stage) m_stage->Shutdown();
 }
 
 void GameScene::Update(float deltaTime)
 {
+	// プレイヤー更新
 	int mouseX, mouseY;
 	m_input->GetMouseDelta(mouseX, mouseY);
 	m_player->Turn(mouseX, mouseY, deltaTime);
 	m_player->Update(deltaTime, m_input, m_stage->GetMazeData(), m_stage->GetPathWidth());
 
-	float staminaPercentage = m_player->GetStaminaPercentage();
+	// ビネット効果更新（分離した関数）
+	UpdateVignette(m_player->GetStaminaPercentage());
 
-	const float minIntensity = 1.1f;
-	const float maxIntensity = 2.0f;
-	const float warningThreshold = 0.3f;
-
-	if (staminaPercentage > warningThreshold)
-	{
-		m_vignetteIntensity = minIntensity;
-	}
-	else
-	{
-		float factorInWarningZone = staminaPercentage / warningThreshold;
-		float intensityFactor = 1.0f - factorInWarningZone;
-		m_vignetteIntensity = minIntensity + (maxIntensity - minIntensity) * intensityFactor;
-	}
-
+	// 敵更新
 	for (auto& enemy : m_enemies) enemy->Update(deltaTime, m_player.get(), m_stage->GetMazeData(), m_stage->GetPathWidth());
+
+	// 通常オーブ更新
 	for (auto& orb : m_orbs)
 	{
-		// 収集済みでなければ更新処理をかける
-		if (orb && !orb->IsCollected()) //
+		if (orb && !orb->IsCollected())
 		{
 			bool justCollected = orb->Update(deltaTime, m_player.get(), m_lightManager.get(), m_collectSound.get());
 			if (justCollected)
@@ -323,23 +344,23 @@ void GameScene::Update(float deltaTime)
 			}
 		}
 	}
-	// 特殊オーブの更新と当たり判定
+
+	// 特殊オーブ更新
 	for (auto it = m_specialOrbs.begin(); it != m_specialOrbs.end(); )
 	{
 		(*it)->Update(deltaTime, m_player.get(), m_lightManager.get(), m_collectSound.get());
 		if ((*it)->IsCollected())
 		{
-			// オーブの効果を発動
 			switch ((*it)->GetType())
 			{
 			case OrbType::MinimapZoomOut:
-				if (m_ui) m_ui->GetMinimap()->SetZoom(2.0f); // ズームアウト（値は適宜調整）
+				if (m_ui) m_ui->SetMinimapZoom(MINIMAP_ZOOM_OUT_LEVEL);
 				break;
 			case OrbType::EnemyRadar:
-				m_enemyRadarTimer = 20.0f; // 20秒タイマーセット
+				m_enemyRadarTimer = RADAR_DURATION;
 				break;
 			}
-			it = m_specialOrbs.erase(it); // 取得したオーブをリストから削除
+			it = m_specialOrbs.erase(it);
 		}
 		else
 		{
@@ -347,81 +368,83 @@ void GameScene::Update(float deltaTime)
 		}
 	}
 
+	// ゴール出現判定
 	if (m_remainingOrbs <= 0 && !m_goalSpawned)
 	{
-		// スタート地点にゴールオーブを出現させる
 		std::pair<int, int> startPos = m_stage->GetStartPosition();
 		float pathWidth = m_stage->GetPathWidth();
 		float goalX = (static_cast<float>(startPos.first) + 0.5f) * pathWidth;
 		float goalZ = (static_cast<float>(startPos.second) + 0.5f) * pathWidth;
 
-		// 目立つように強い光を放つ
-		int lightIndex = m_lightManager->AddPointLight({ goalX, 2.0f, goalZ }, { 1.0f, 0.8f, 0.0f, 1.0f }, 10.0f, 2.0f);
+		int lightIndex = m_lightManager->AddPointLight({ goalX, 2.0f, goalZ }, COLOR_GOAL_ORB, GOAL_LIGHT_RANGE, GOAL_LIGHT_INTENSITY);
 
 		m_goalOrb = std::make_unique<Orb>();
 		m_goalOrb->Initialize(m_graphicsDevice->GetDevice(), { goalX, 2.0f, goalZ }, lightIndex, OrbType::Goal);
 
 		m_goalSpawned = true;
-
-		// ここで「脱出への道が開かれるぞ！」などの音やメッセージを出すと良いでしょう
 	}
 
-	// ▼▼▼ 追加: ゴールオーブの更新と壁開放 ▼▼▼
+	// ゴールオーブ更新と脱出判定
 	if (m_goalSpawned && m_goalOrb && !m_goalOrb->IsCollected())
 	{
 		if (m_goalOrb->Update(deltaTime, m_player.get(), m_lightManager.get(), m_collectSound.get()))
 		{
-			// ゴールオーブを取得した！ -> 出口を開ける
 			m_stage->OpenExit();
 			m_escapeMode = true;
-			// ここでBGMをチェイス曲に変えるなどの演出を入れる
 		}
 	}
 
 	if (m_escapeMode)
 	{
-		// 出口座標（Z=0付近）に到達したかチェック
 		DirectX::XMFLOAT3 pPos = m_player->GetPosition();
 		if (pPos.z < m_stage->GetPathWidth() * 0.8f)
 		{
-			// MessageBoxA(nullptr, "ESCAPED! YOU WIN!", "CONGRATULATIONS", MB_OK);
-			// ▼ 修正: リザルトシーンへ遷移
 			m_nextScene = SceneState::Result;
 		}
 	}
 
-	// 敵レーダーのタイマー更新
 	if (m_enemyRadarTimer > 0.0f)
 	{
 		m_enemyRadarTimer -= deltaTime;
 	}
 
+	// カメラ更新
 	DirectX::XMFLOAT3 playerPos = m_player->GetPosition();
 	DirectX::XMFLOAT3 playerRot = m_player->GetRotation();
 	m_camera->SetPosition(playerPos.x, playerPos.y, playerPos.z);
 	m_camera->SetRotation(playerRot.x, playerRot.y, playerRot.z);
 
-	m_camera->SetBobbingParameters(
-		m_player->IsRunning() ? 18.0f : 14.0f, // bobbingSpeed
-		m_player->IsRunning() ? 0.05f : 0.03f, // bobbingAmount
-		m_player->IsRunning() ? 10.0f : 7.0f,  // swaySpeed
-		m_player->IsRunning() ? 0.08f : 0.05f, // swayAmount
-		m_player->IsRunning() ? 9.0f : 7.0f   // rollSpeed
-	);
+	const BobbingParams& bp = m_player->IsRunning() ? BOB_RUN : BOB_WALK;
+	m_camera->SetBobbingParameters(bp.speed, bp.amount, bp.swaySpeed, bp.swayAmount, bp.rollSpeed);
 
 	m_camera->UpdateBobbing(deltaTime, m_player->IsMoving());
 	m_camera->Update();
 
+	// ライト・UI更新
 	DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
-
 	m_lightManager->Update(deltaTime, m_camera->GetViewMatrix(), projectionMatrix, m_camera->GetPosition(), m_camera->GetRotation());
 	m_ui->Update(deltaTime, m_remainingOrbs, m_totalOrbs, m_player->GetStaminaPercentage(), m_enemyRadarTimer > 0.0f);
+}
+
+void GameScene::UpdateVignette(float staminaPercentage)
+{
+	if (staminaPercentage > VIGNETTE_WARNING_THRESHOLD)
+	{
+		m_vignetteIntensity = VIGNETTE_MIN_INTENSITY;
+	}
+	else
+	{
+		float factorInWarningZone = staminaPercentage / VIGNETTE_WARNING_THRESHOLD;
+		float intensityFactor = 1.0f - factorInWarningZone;
+		m_vignetteIntensity = VIGNETTE_MIN_INTENSITY + (VIGNETTE_MAX_INTENSITY - VIGNETTE_MIN_INTENSITY) * intensityFactor;
+	}
 }
 
 void GameScene::Render()
 {
 	m_cachedDynamicModels.clear();
-	m_cachedDynamicModels.reserve(m_enemies.size() + m_orbs.size() + m_specialOrbs.size());
+	size_t dynamicCount = m_enemies.size() + m_orbs.size() + m_specialOrbs.size() + (m_goalOrb ? 1 : 0) + 1;
+	m_cachedDynamicModels.reserve(dynamicCount);
 
 	for (const auto& enemy : m_enemies) m_cachedDynamicModels.push_back(enemy->GetModel());
 	for (const auto& orb : m_orbs) if (Model* orbModel = orb->GetModel()) m_cachedDynamicModels.push_back(orbModel);
@@ -432,7 +455,6 @@ void GameScene::Render()
 		if (Model* gModel = m_goalOrb->GetModel()) m_cachedDynamicModels.push_back(gModel);
 	}
 
-	// OpenExit()が呼ばれるとGetGateModelはnullptrを返すか、Shutdownされて描画されなくなります
 	if (Model* gate = m_stage->GetGateModel())
 	{
 		m_cachedDynamicModels.push_back(gate);
@@ -447,7 +469,6 @@ void GameScene::Render()
 		m_stage->GetPathWidth()
 	);
 	m_renderer->RenderFinalPass(m_camera.get(), m_vignetteIntensity);
-	// UIの描画（ミニマップとOrb UIの両方を描画）
 	m_ui->Render(m_camera.get(), m_enemies, m_orbs, m_specialOrbs);
 
 	m_graphicsDevice->EndScene();

@@ -1,9 +1,17 @@
 #include "Player.h"
-#include <Audio.h>
-#include <cstdlib>
-#include <ctime>
+#include "Audio.h"
 #include <cmath>
 #include <algorithm>
+#include <random> 
+
+namespace {
+	// 定数定義
+	constexpr int KEY_SHIFT = 0x10;
+	constexpr int KEY_MOVE_FORWARD = 'W';
+	constexpr int KEY_MOVE_BACKWARD = 'S';
+	constexpr int KEY_MOVE_LEFT = 'A';
+	constexpr int KEY_MOVE_RIGHT = 'D';
+}
 
 Player::Player()
 	: m_position({ 0.0f, 0.0f, 0.0f }),
@@ -39,7 +47,7 @@ Player::~Player() {
 }
 
 void Player::Initialize(const DirectX::XMFLOAT3& startPosition) {
-	srand(static_cast<unsigned int>(time(nullptr)));
+	// srand は不要になりました
 	m_position = startPosition;
 	m_stamina = m_maxStamina;
 }
@@ -53,7 +61,7 @@ void Player::Update(float deltaTime, Input* input, const std::vector<std::vector
 }
 
 void Player::UpdateStamina(float deltaTime, Input* input) {
-	bool isTryingToRun = input->IsKeyDown(0x10); // Shift Key
+	bool isTryingToRun = input->IsKeyDown(KEY_SHIFT);
 	m_isRunning = isTryingToRun && !m_isStaminaExhausted;
 
 	if (m_staminaRegenCoolDown > 0.0f) {
@@ -77,7 +85,11 @@ void Player::UpdateStamina(float deltaTime, Input* input) {
 	}
 	else {
 		if (m_staminaRegenCoolDown <= 0.0f) {
-			bool isWalking = input->IsKeyDown('W') || input->IsKeyDown('S') || input->IsKeyDown('A') || input->IsKeyDown('D');
+			bool isWalking = input->IsKeyDown(KEY_MOVE_FORWARD) ||
+				input->IsKeyDown(KEY_MOVE_BACKWARD) ||
+				input->IsKeyDown(KEY_MOVE_LEFT) ||
+				input->IsKeyDown(KEY_MOVE_RIGHT);
+
 			if (m_isStaminaExhausted || isWalking) {
 				m_stamina += m_staminaRegenRate * 0.5f * deltaTime;
 			}
@@ -109,10 +121,10 @@ void Player::UpdateMovement(float deltaTime, Input* input, const std::vector<std
 	DirectX::XMFLOAT3 desiredMove = { 0, 0, 0 };
 	float yaw = m_rotation.y * (DirectX::XM_PI / 180.0f);
 
-	if (input->IsKeyDown('W')) { desiredMove.z += cosf(yaw); desiredMove.x += sinf(yaw); }
-	if (input->IsKeyDown('S')) { desiredMove.z -= cosf(yaw); desiredMove.x -= sinf(yaw); }
-	if (input->IsKeyDown('A')) { desiredMove.z += sinf(yaw); desiredMove.x -= cosf(yaw); }
-	if (input->IsKeyDown('D')) { desiredMove.z -= sinf(yaw); desiredMove.x += cosf(yaw); }
+	if (input->IsKeyDown(KEY_MOVE_FORWARD)) { desiredMove.z += cosf(yaw); desiredMove.x += sinf(yaw); }
+	if (input->IsKeyDown(KEY_MOVE_BACKWARD)) { desiredMove.z -= cosf(yaw); desiredMove.x -= sinf(yaw); }
+	if (input->IsKeyDown(KEY_MOVE_LEFT)) { desiredMove.z += sinf(yaw); desiredMove.x -= cosf(yaw); }
+	if (input->IsKeyDown(KEY_MOVE_RIGHT)) { desiredMove.z -= sinf(yaw); desiredMove.x += cosf(yaw); }
 
 	if (desiredMove.x != 0.0f || desiredMove.z != 0.0f) {
 		DirectX::XMVECTOR moveVec = DirectX::XMLoadFloat3(&desiredMove);
@@ -142,7 +154,12 @@ void Player::UpdateAudio(float deltaTime) {
 		m_stepTimer -= deltaTime;
 
 		if (m_stepTimer <= 0.0f) {
-			float randomPitch = ((float)rand() / RAND_MAX) * 1.0f - 0.5f;
+			// ランダムなピッチ生成に <random> を使用
+			static std::random_device rd;
+			static std::mt19937 gen(rd());
+			std::uniform_real_distribution<float> dist(-0.5f, 0.5f);
+
+			float randomPitch = dist(gen);
 			float volume = 0.3f;
 
 			if (m_isRunning && !m_isStaminaExhausted) {
