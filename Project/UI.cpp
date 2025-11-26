@@ -79,7 +79,6 @@ void UI::Update(float deltaTime, int remainingOrbs, int totalOrbs, float stamina
 	m_showEnemiesOnMinimap = showEnemiesOnMinimap;
 }
 
-
 void UI::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs, const std::vector<std::unique_ptr<Orb>>& specialOrbs)
 {
 	m_minimap->Render(camera, enemies, orbs, specialOrbs, m_showEnemiesOnMinimap);
@@ -130,7 +129,6 @@ void UI::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>&
 
 	// RenderFill に色指定のオーバーロードがないため、色を付けて描画します
 	m_staminaBarFill->RenderFill(m_spriteBatch.get(), fillRect, fillColor);
-
 
 	// 描画終了
 	m_spriteBatch->End();

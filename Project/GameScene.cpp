@@ -67,7 +67,7 @@ bool GameScene::InitializePhase3()
 
 bool GameScene::InitializePhase4()
 {
-	if (!InitializeOrbs()) return false; 
+	if (!InitializeOrbs()) return false;
 	if (!InitializeSpecialOrbs()) return false;
 	return true;
 }
@@ -292,7 +292,7 @@ void GameScene::Update(float deltaTime)
 	m_input->GetMouseDelta(mouseX, mouseY);
 	m_player->Turn(mouseX, mouseY, deltaTime);
 	m_player->Update(deltaTime, m_input, m_stage->GetMazeData(), m_stage->GetPathWidth());
-	
+
 	float staminaPercentage = m_player->GetStaminaPercentage();
 
 	const float minIntensity = 1.1f;
@@ -309,9 +309,9 @@ void GameScene::Update(float deltaTime)
 		float intensityFactor = 1.0f - factorInWarningZone;
 		m_vignetteIntensity = minIntensity + (maxIntensity - minIntensity) * intensityFactor;
 	}
-	
+
 	for (auto& enemy : m_enemies) enemy->Update(deltaTime, m_player.get(), m_stage->GetMazeData(), m_stage->GetPathWidth());
-	for (auto& orb : m_orbs) 
+	for (auto& orb : m_orbs)
 	{
 		// 収集済みでなければ更新処理をかける
 		if (orb && !orb->IsCollected()) //
@@ -377,7 +377,7 @@ void GameScene::Update(float deltaTime)
 			// ここでBGMをチェイス曲に変えるなどの演出を入れる
 		}
 	}
-	
+
 	if (m_escapeMode)
 	{
 		// 出口座標（Z=0付近）に到達したかチェック
@@ -400,7 +400,7 @@ void GameScene::Update(float deltaTime)
 	DirectX::XMFLOAT3 playerRot = m_player->GetRotation();
 	m_camera->SetPosition(playerPos.x, playerPos.y, playerPos.z);
 	m_camera->SetRotation(playerRot.x, playerRot.y, playerRot.z);
-	
+
 	m_camera->SetBobbingParameters(
 		m_player->IsRunning() ? 18.0f : 14.0f, // bobbingSpeed
 		m_player->IsRunning() ? 0.05f : 0.03f, // bobbingAmount
@@ -417,7 +417,6 @@ void GameScene::Update(float deltaTime)
 	m_lightManager->Update(deltaTime, m_camera->GetViewMatrix(), projectionMatrix, m_camera->GetPosition(), m_camera->GetRotation());
 	m_ui->Update(deltaTime, m_remainingOrbs, m_totalOrbs, m_player->GetStaminaPercentage(), m_enemyRadarTimer > 0.0f);
 }
-
 
 void GameScene::Render()
 {

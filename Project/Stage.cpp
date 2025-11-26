@@ -9,12 +9,12 @@ bool Stage::Initialize(GraphicsDevice* graphicsDevice)
 {
 	m_mazeGenerator = std::make_unique<MazeGenerator>();
 	m_mazeGenerator->Generate(MAZE_WIDTH, MAZE_HEIGHT);
-	
+
 	m_exitX = (MAZE_WIDTH - 1) / 2;
 	m_exitY = 0;
 
 	m_mazeGenerator->SetCell(m_exitX, m_exitY, MazeGenerator::Path);
-	
+
 	// AssetLoader::LoadTexture は unique_ptr を返しますが、shared_ptr に代入することで所有権を共有可能にします
 	std::shared_ptr<Texture> wallTexture = AssetLoader::LoadTexture(graphicsDevice->GetDevice(), L"Assets/wall.png");
 	if (!wallTexture) { MessageBox(nullptr, L"Failed to load wall.png", L"Error", MB_OK); return false; }
@@ -44,7 +44,7 @@ bool Stage::Initialize(GraphicsDevice* graphicsDevice)
 	ceilingModel->SetNormalMap(wallNormalMap);  // 共通ノーマルマップ
 	m_models.push_back(std::move(ceilingModel));
 
-	// 床 
+	// 床
 	auto floorModel = AssetLoader::CreateMazeModel(graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT, MeshGenerator::MeshType::Floor);
 	if (!floorModel) return false;
 	floorModel->SetTexture(wallTexture);      // 共通テクスチャ
@@ -91,7 +91,7 @@ void Stage::Shutdown()
 	for (auto& model : m_models) {
 		if (model) model->Shutdown();
 	}
-	m_models.clear(); 
+	m_models.clear();
 	if (m_gateModel) m_gateModel->Shutdown();
 }
 

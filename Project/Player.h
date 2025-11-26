@@ -3,7 +3,7 @@
 #include <vector>
 #include "Input.h"
 #include "MazeGenerator.h"
-#include <algorithm> 
+#include <algorithm>
 #include <memory> // unique_ptr—p
 
 // ‘O•ûéŒ¾

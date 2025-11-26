@@ -1,8 +1,8 @@
 #include "AStar.h"
 #include <algorithm>
 #include <cmath>
-#include <queue> 
-#include <vector> 
+#include <queue>
+#include <vector>
 
 // 座標を保持するためのシンプルな構造体
 struct Coord

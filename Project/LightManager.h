@@ -38,7 +38,6 @@ private:
 
 	bool CheckOcclusion(const DirectX::XMFLOAT3& start, const DirectX::XMFLOAT3& end, float range);
 
-
 	std::vector<Light> m_lights;
 	LightBufferType m_lightBuffer;
 

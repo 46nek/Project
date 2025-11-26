@@ -18,7 +18,7 @@ bool SceneManager::Initialize(GraphicsDevice* graphicsDevice, Input* input, Dire
 {
 	m_graphicsDevice = graphicsDevice;
 	m_input = input;
-	m_audioEngine = audioEngine; 
+	m_audioEngine = audioEngine;
 	// 最初のシーンとしてタイトルシーンを設定
 	return ChangeScene(SceneState::Title);
 }
@@ -55,70 +55,70 @@ void SceneManager::Render()
 
 bool SceneManager::ChangeScene(SceneState nextState)
 {
-    // 次のシーンがNoneなら何もしない
-    if (nextState == SceneState::None)
-    {
-        return true;
-    }
+	// 次のシーンがNoneなら何もしない
+	if (nextState == SceneState::None)
+	{
+		return true;
+	}
 
-    // GameSceneへの遷移を特別に処理
-    if (nextState == SceneState::Game)
-    {
-        // 現在のシーンがLoadingSceneかチェック
-        LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(m_currentScene.get());
-        if (loadingScene)
-        {
-            // ローディング済みのGameSceneの所有権を取得
-            std::unique_ptr<Scene> nextScene = loadingScene->GetGameScene();
+	// GameSceneへの遷移を特別に処理
+	if (nextState == SceneState::Game)
+	{
+		// 現在のシーンがLoadingSceneかチェック
+		LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(m_currentScene.get());
+		if (loadingScene)
+		{
+			// ローディング済みのGameSceneの所有権を取得
+			std::unique_ptr<Scene> nextScene = loadingScene->GetGameScene();
 
-            // 現在のシーン（LoadingScene）を破棄
-            m_currentScene->Shutdown();
-            m_currentScene = nullptr;
+			// 現在のシーン（LoadingScene）を破棄
+			m_currentScene->Shutdown();
+			m_currentScene = nullptr;
 
-            // 次のシーンをセット（このGameSceneは初期化済み）
-            m_currentScene = std::move(nextScene);
-            return true;
-        }
-    }
+			// 次のシーンをセット（このGameSceneは初期化済み）
+			m_currentScene = std::move(nextScene);
+			return true;
+		}
+	}
 
-    // 通常のシーン遷移
-    if (m_currentScene)
-    {
-        m_currentScene->Shutdown();
-        m_currentScene = nullptr;
-    }
+	// 通常のシーン遷移
+	if (m_currentScene)
+	{
+		m_currentScene->Shutdown();
+		m_currentScene = nullptr;
+	}
 
-    switch (nextState)
-    {
-    case SceneState::Title:
-        m_currentScene = std::make_unique<TitleScene>();
-        break;
-    case SceneState::Loading:
-        m_currentScene = std::make_unique<LoadingScene>();
-        break;
-    case SceneState::Game:
-        // LoadingSceneを介さずに直接GameSceneを生成する場合
-        m_currentScene = std::make_unique<GameScene>();
-        break;
-    case SceneState::Result: 
-        m_currentScene = std::make_unique<ResultScene>();
-        break;
-    default:
-        return false;
-    }
+	switch (nextState)
+	{
+	case SceneState::Title:
+		m_currentScene = std::make_unique<TitleScene>();
+		break;
+	case SceneState::Loading:
+		m_currentScene = std::make_unique<LoadingScene>();
+		break;
+	case SceneState::Game:
+		// LoadingSceneを介さずに直接GameSceneを生成する場合
+		m_currentScene = std::make_unique<GameScene>();
+		break;
+	case SceneState::Result:
+		m_currentScene = std::make_unique<ResultScene>();
+		break;
+	default:
+		return false;
+	}
 
-    // 新しいシーンを初期化
-    if (m_currentScene)
-    {
-        if (!m_currentScene->Initialize(m_graphicsDevice, m_input, m_audioEngine))
-        {
-            return false;
-        }
-    }
-    else
-    {
-        return false;
-    }
+	// 新しいシーンを初期化
+	if (m_currentScene)
+	{
+		if (!m_currentScene->Initialize(m_graphicsDevice, m_input, m_audioEngine))
+		{
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
 
-    return true;
+	return true;
 }

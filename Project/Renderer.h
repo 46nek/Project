@@ -5,7 +5,7 @@
 #include "Model.h"
 #include "LightManager.h"
 #include "Camera.h"
-#include "Frustum.h" 
+#include "Frustum.h"
 #include "MazeGenerator.h"
 
 /**
@@ -21,8 +21,8 @@ public:
 	// 1. シーンをテクスチャにレンダリングする
 	void RenderSceneToTexture(
 		const std::vector<Model*>& stageModels,
-		const std::vector<Model*>& dynamicModels, 
-		const Camera* camera, 
+		const std::vector<Model*>& dynamicModels,
+		const Camera* camera,
 		LightManager* lightManager,
 		const std::vector<std::vector<MazeGenerator::CellType>>& mazeData,
 		float pathWidth
@@ -33,19 +33,19 @@ private:
 	// シャドウマップ生成パス
 	void RenderDepthPass(
 		const std::vector<Model*>& stageModels,
-		const std::vector<Model*>& dynamicModels, 
+		const std::vector<Model*>& dynamicModels,
 		LightManager* lightManager
 	);
 	// 通常の描画パス
 	void RenderMainPass(
 		const std::vector<Model*>& stageModels,
 		const std::vector<Model*>& dynamicModels,
-		const Camera* camera, 
+		const Camera* camera,
 		LightManager* lightManager,
 		const std::vector<std::vector<MazeGenerator::CellType>>& mazeData,
 		float pathWidth
 	);
-	
+
 	GraphicsDevice* m_graphicsDevice;
 	std::unique_ptr<Frustum> m_frustum;
 };

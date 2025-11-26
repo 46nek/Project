@@ -1,13 +1,13 @@
 #pragma once
 #include "GraphicsDevice.h"
 #include "Input.h"
-#include "Audio.h" 
+#include "Audio.h"
 
 // ƒV[ƒ“‚Ìó‘Ô
 enum class SceneState
 {
 	None,
-	Title, 
+	Title,
 	Loading,
 	Game,
 	Result,

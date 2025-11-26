@@ -30,14 +30,13 @@ private:
 	std::unique_ptr<Sprite> m_playerSprite;
 	std::unique_ptr<Sprite> m_enemySprite;
 	std::unique_ptr<Sprite> m_orbSprite;
-	std::unique_ptr<Sprite> m_frameSprite; 
+	std::unique_ptr<Sprite> m_frameSprite;
 	std::unique_ptr<Sprite> m_orbArrowSprite;
 
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_scissorRasterizerState;
 
 	const std::vector<std::vector<MazeGenerator::CellType>>* m_mazeData;
 	std::vector<std::vector<bool>> m_visitedCells;
-
 
 	float m_pathWidth;
 

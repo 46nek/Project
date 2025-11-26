@@ -5,14 +5,14 @@
 
 LightManager::LightManager()
 	: m_flashlightIndex(-1),
-	m_flashlightBaseIntensity(0.0f), 
+	m_flashlightBaseIntensity(0.0f),
 	m_flickerTimer(0.0f),
 	m_nextFlickerTime(0.0f),
 	m_isFlickering(false),
-	m_rng(std::random_device{}()), 
+	m_rng(std::random_device{}()),
 	m_currentFlashlightPos(0.0f, 0.0f, 0.0f),
-	m_currentFlashlightDir(0.0f, 0.0f, 1.0f) ,
-	m_flashlightLagSpeed(5.0f), 
+	m_currentFlashlightDir(0.0f, 0.0f, 1.0f),
+	m_flashlightLagSpeed(5.0f),
 	m_isFlashlightInitialized(false)
 {
 }
@@ -61,10 +61,10 @@ void LightManager::Initialize(const std::vector<std::vector<MazeGenerator::CellT
 	Light flashlight = {};
 	flashlight.Enabled = true;
 	flashlight.Type = SpotLight;
-	flashlight.Color = { 1.0f, 1.0f, 0.9f, 1.0f }; m_flashlightBaseIntensity = 1.2f; 
+	flashlight.Color = { 1.0f, 1.0f, 0.9f, 1.0f }; m_flashlightBaseIntensity = 1.2f;
 	flashlight.Intensity = m_flashlightBaseIntensity;
-	flashlight.Range = 30.0f; 
-	flashlight.SpotAngle = 0.9f; 
+	flashlight.Range = 30.0f;
+	flashlight.SpotAngle = 0.9f;
 	flashlight.Attenuation = { 1.0f, 0.08f, 0.01f };
 	m_lights.push_back(flashlight);
 	m_flashlightIndex = static_cast<int>(m_lights.size()) - 1;

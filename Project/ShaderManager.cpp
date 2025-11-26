@@ -74,7 +74,6 @@ bool ShaderManager::Initialize(ID3D11Device* device)
 	hr = device->CreatePixelShader(simplePsBlob->GetBufferPointer(), simplePsBlob->GetBufferSize(), nullptr, &m_simplePixelShader);
 	if (FAILED(hr)) { simplePsBlob->Release(); return false; }
 
-
 	// ▼▼▼ ここが重要な修正点 ▼▼▼
 	// インプットレイアウトの作成 (vsBlobはこの後不要になる)
 	D3D11_INPUT_ELEMENT_DESC layout[] = {
