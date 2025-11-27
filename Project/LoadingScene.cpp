@@ -16,18 +16,26 @@ bool LoadingScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, Dire
 	m_input = input;
 	m_audioEngine = audioEngine;
 
-	// GameSceneのインスタンスを作成
-	m_gameScene = std::make_unique<GameScene>();
+	if (GameScene::s_transferInstance)
+	{
+		m_gameScene = std::move(GameScene::s_transferInstance);
+		// Phase1(迷路生成)は終わっているので、次はPhase2から
+		m_loadingPhase = 1;
+	}
+	else
+	{
+		// 引き継ぎがない場合（デバッグ起動など）は通常通り作成
+		m_gameScene = std::make_unique<GameScene>();
+		m_loadingPhase = 0;
+	}
 
 	// フォントの初期化
 	HRESULT hr = FW1CreateFactory(FW1_VERSION, &m_fontFactory);
 	if (FAILED(hr)) return false;
 
-	// 'device' を 'm_graphicsDevice->GetDevice()' に修正
 	hr = m_fontFactory->CreateFontWrapper(m_graphicsDevice->GetDevice(), L"Impact", &m_fontWrapper);
 	if (FAILED(hr))
 	{
-		// 'device' を 'm_graphicsDevice->GetDevice()' に修正
 		hr = m_fontFactory->CreateFontWrapper(m_graphicsDevice->GetDevice(), L"Arial", &m_fontWrapper);
 		if (FAILED(hr)) return false;
 	}
@@ -72,10 +80,10 @@ void LoadingScene::Update(float deltaTime)
 		}
 		break;
 	case 5:
+		m_gameScene->BeginOpening();
+
 		// すべての初期化が完了したので、SceneManagerにGameSceneを渡して遷移する
 		m_nextScene = SceneState::Game;
-		// SceneManager側でスマートポインタを管理するように所有権を移す
-		// この処理はSceneManagerの修正時に実装します
 		break;
 	}
 	m_loadingPhase++;
@@ -84,6 +92,15 @@ void LoadingScene::Update(float deltaTime)
 void LoadingScene::Render()
 {
 	m_graphicsDevice->BeginScene(0.0f, 0.0f, 0.1f, 1.0f);
+
+	if (m_gameScene)
+	{
+		// ZバッファをONにして3D描画
+		m_graphicsDevice->GetSwapChain()->TurnZBufferOn(m_graphicsDevice->GetDeviceContext());
+		m_gameScene->RenderStageOnly(); // 背景のみ
+		// ZバッファをOFFに戻して2D(文字)描画へ
+		m_graphicsDevice->GetSwapChain()->TurnZBufferOff(m_graphicsDevice->GetDeviceContext());
+	}
 
 	if (m_fontWrapper)
 	{

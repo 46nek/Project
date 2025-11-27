@@ -5,6 +5,8 @@
 #include <tuple>
 #include <algorithm>
 
+std::unique_ptr<GameScene> GameScene::s_transferInstance = nullptr;
+
 namespace {
 	// === 定数定義 ===
 
@@ -52,7 +54,10 @@ GameScene::GameScene()
 	m_totalOrbs(0),
 	m_enemyRadarTimer(0.0f),
 	m_goalSpawned(false),
-	m_escapeMode(false)
+	m_escapeMode(false), 
+	m_isOpening(false),        
+	m_openingTimer(0.0f),      
+	m_openingDuration(2.0f)
 {
 }
 
@@ -60,6 +65,54 @@ GameScene::~GameScene() {}
 
 bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine)
 {
+	if (s_transferInstance)
+	{
+		// リソース（ポインタ類）の所有権を移動
+		m_graphicsDevice = graphicsDevice; // 引数で更新
+		m_input = input;
+		m_audioEngine = audioEngine;
+
+		m_stage = std::move(s_transferInstance->m_stage);
+		m_player = std::move(s_transferInstance->m_player);
+		m_camera = std::move(s_transferInstance->m_camera);
+		m_lightManager = std::move(s_transferInstance->m_lightManager);
+		m_renderer = std::move(s_transferInstance->m_renderer);
+		m_ui = std::move(s_transferInstance->m_ui);
+
+		m_enemies = std::move(s_transferInstance->m_enemies);
+		m_orbs = std::move(s_transferInstance->m_orbs);
+		m_specialOrbs = std::move(s_transferInstance->m_specialOrbs);
+		m_goalOrb = std::move(s_transferInstance->m_goalOrb);
+
+		m_collectSound = std::move(s_transferInstance->m_collectSound);
+		m_walkSoundEffect = std::move(s_transferInstance->m_walkSoundEffect);
+		m_runSoundEffect = std::move(s_transferInstance->m_runSoundEffect);
+
+		// パラメータのコピー
+		m_cachedStageModels = s_transferInstance->m_cachedStageModels;
+		m_cachedDynamicModels = s_transferInstance->m_cachedDynamicModels;
+		m_remainingOrbs = s_transferInstance->m_remainingOrbs;
+		m_totalOrbs = s_transferInstance->m_totalOrbs;
+		m_goalSpawned = s_transferInstance->m_goalSpawned;
+		m_escapeMode = s_transferInstance->m_escapeMode;
+		m_enemyRadarTimer = s_transferInstance->m_enemyRadarTimer;
+		m_vignetteIntensity = s_transferInstance->m_vignetteIntensity;
+
+		// オープニング演出用のパラメータコピー
+		m_isOpening = s_transferInstance->m_isOpening;
+		m_openingTimer = s_transferInstance->m_openingTimer;
+		m_openingDuration = s_transferInstance->m_openingDuration;
+		m_titleCamPos = s_transferInstance->m_titleCamPos;
+		m_titleCamRot = s_transferInstance->m_titleCamRot;
+		m_startCamPos = s_transferInstance->m_startCamPos;
+		m_startCamRot = s_transferInstance->m_startCamRot;
+
+		// 引き継ぎ完了したので元は削除
+		s_transferInstance.reset();
+
+		// 初期化済みとしてリターン
+		return true;
+	}
 	// 各フェーズの初期化を実行
 	if (!InitializePhase1(graphicsDevice, input, audioEngine)) return false;
 	if (!InitializePhase2()) return false;
@@ -84,7 +137,11 @@ bool GameScene::InitializePhase1(GraphicsDevice* graphicsDevice, Input* input, D
 	float startZ = (static_cast<float>(startPos.second) + 0.5f) * pathWidth;
 
 	m_player = std::make_unique<Player>();
-	m_camera = std::make_unique<Camera>(startX, PLAYER_HEIGHT, startZ);
+	
+	m_camera = std::make_unique<Camera>(startX, PLAYER_HEIGHT, startZ);	
+	m_startCamPos = { startX, PLAYER_HEIGHT, startZ };
+	m_startCamRot = { 0.0f, 0.0f, 0.0f };
+
 	m_lightManager = std::make_unique<LightManager>();
 	m_lightManager->Initialize(m_stage->GetMazeData(), m_stage->GetPathWidth(), Stage::WALL_HEIGHT);
 	m_renderer = std::make_unique<Renderer>(m_graphicsDevice);
@@ -137,6 +194,88 @@ bool GameScene::InitializePhase5()
 		return false;
 	}
 	return true;
+}
+
+void GameScene::SetCameraForTitle()
+{
+	if (!m_stage || !m_camera) return;
+
+	// 迷路の中央（ゴール予定地）を取得
+	std::pair<int, int> startPos = m_stage->GetStartPosition();
+	float pathWidth = m_stage->GetPathWidth();
+	float centerX = (static_cast<float>(startPos.first) + 0.5f) * pathWidth;
+	float centerZ = (static_cast<float>(startPos.second) + 0.5f) * pathWidth;
+
+	float titleX = centerX;
+	float titleY = 4.0f; // プレイヤーと同じくらいの高さ（通路の中）
+	float titleZ = centerZ - 8.0f; // ゴールの少し手前
+
+	m_camera->SetPosition(titleX, titleY, titleZ);
+	m_camera->SetRotation(10.0f, 0.0f, 0.0f); // ほんの少し見上げるか、正面を向く
+
+	m_camera->Update();
+
+	// 現在の状態をタイトル用座標として保存
+	m_titleCamPos = { titleX, titleY, titleZ };
+	m_titleCamRot = { 10.0f, 0.0f, 0.0f };
+
+	if (m_lightManager)
+	{
+		DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
+
+		// LightManagerを強制更新
+		// deltaTimeに0を渡しても、初回更新なら懐中電灯は瞬時にカメラ位置に移動します
+		m_lightManager->Update(100.0f, m_camera->GetViewMatrix(), projectionMatrix, m_camera->GetPosition(), m_camera->GetRotation());
+	}
+}
+
+void GameScene::BeginOpening()
+{
+	m_isOpening = true;
+	m_openingTimer = 0.0f;
+
+	// 現在のカメラ位置をタイトルのものとして再設定（念のため）
+	if (m_camera)
+	{
+		m_camera->SetPosition(m_titleCamPos.x, m_titleCamPos.y, m_titleCamPos.z);
+		m_camera->SetRotation(m_titleCamRot.x, m_titleCamRot.y, m_titleCamRot.z);
+	}
+}
+
+void GameScene::UpdateOpening(float deltaTime)
+{
+	m_openingTimer += deltaTime;
+	float t = m_openingTimer / m_openingDuration;
+
+	if (t >= 1.0f)
+	{
+		t = 1.0f;
+		m_isOpening = false; // 演出終了
+	}
+
+	// イージング関数 (EaseOutCubic: 最初は速く、最後はゆっくり)
+	float easeT = 1.0f - powf(1.0f - t, 3.0f);
+
+	// 位置の補間
+	float x = m_titleCamPos.x + (m_startCamPos.x - m_titleCamPos.x) * easeT;
+	float y = m_titleCamPos.y + (m_startCamPos.y - m_titleCamPos.y) * easeT;
+	float z = m_titleCamPos.z + (m_startCamPos.z - m_titleCamPos.z) * easeT;
+
+	// 回転の補間
+	float rx = m_titleCamRot.x + (m_startCamRot.x - m_titleCamRot.x) * easeT;
+	float ry = m_titleCamRot.y + (m_startCamRot.y - m_titleCamRot.y) * easeT;
+	float rz = m_titleCamRot.z + (m_startCamRot.z - m_titleCamRot.z) * easeT;
+
+	m_camera->SetPosition(x, y, z);
+	m_camera->SetRotation(rx, ry, rz);
+	m_camera->Update(); // 行列更新のみ、ボビング等はしない
+
+	if (m_lightManager)
+	{
+		DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
+		// deltaTimeに大きな値を渡してスナップさせる
+		m_lightManager->Update(100.0f, m_camera->GetViewMatrix(), projectionMatrix, m_camera->GetPosition(), m_camera->GetRotation());
+	}
 }
 
 bool GameScene::InitializeEnemies()
@@ -320,6 +459,17 @@ void GameScene::Shutdown()
 
 void GameScene::Update(float deltaTime)
 {
+	if (m_isOpening)
+	{
+		UpdateOpening(deltaTime);
+
+		// ライトなどの環境更新は行う
+		DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
+		m_lightManager->Update(deltaTime, m_camera->GetViewMatrix(), projectionMatrix, m_camera->GetPosition(), m_camera->GetRotation());
+
+		return;
+	}
+
 	// プレイヤー更新
 	int mouseX, mouseY;
 	m_input->GetMouseDelta(mouseX, mouseY);
@@ -440,9 +590,10 @@ void GameScene::UpdateVignette(float staminaPercentage)
 	}
 }
 
-void GameScene::Render()
+void GameScene::RenderStageOnly()
 {
 	m_cachedDynamicModels.clear();
+	// タイトル画面などでは敵やオーブが生成されていない場合があるためチェック
 	size_t dynamicCount = m_enemies.size() + m_orbs.size() + m_specialOrbs.size() + (m_goalOrb ? 1 : 0) + 1;
 	m_cachedDynamicModels.reserve(dynamicCount);
 
@@ -469,7 +620,17 @@ void GameScene::Render()
 		m_stage->GetPathWidth()
 	);
 	m_renderer->RenderFinalPass(m_camera.get(), m_vignetteIntensity);
-	m_ui->Render(m_camera.get(), m_enemies, m_orbs, m_specialOrbs);
+}
+
+void GameScene::Render()
+{
+	// 通常描画（背景＋UI＋EndScene）
+	RenderStageOnly();
+
+	if (m_ui)
+	{
+		m_ui->Render(m_camera.get(), m_enemies, m_orbs, m_specialOrbs);
+	}
 
 	m_graphicsDevice->EndScene();
 }

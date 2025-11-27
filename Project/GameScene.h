@@ -17,6 +17,8 @@ public:
 	GameScene();
 	~GameScene();
 
+	static std::unique_ptr<GameScene> s_transferInstance;
+
 	bool Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine) override;
 	bool InitializePhase1(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine);
 	bool InitializePhase2();
@@ -27,12 +29,18 @@ public:
 	void Update(float deltaTime) override;
 	void Render() override;
 
+	void RenderStageOnly();
+	void SetCameraForTitle();
+	void BeginOpening();
+
 private:
 	bool InitializeEnemies();
 	bool InitializeOrbs();
 	bool InitializeSpecialOrbs();
 	
 	void UpdateVignette(float staminaPercentage);
+	
+	void UpdateOpening(float deltaTime);
 
 	static constexpr float PLAYER_HEIGHT = 4.0f;
 	static constexpr int NUM_ENEMIES = 2;
@@ -65,4 +73,12 @@ private:
 	std::unique_ptr<Orb> m_goalOrb;
 	bool m_goalSpawned;
 	bool m_escapeMode;
+
+	bool m_isOpening;           // オープニング演出中か
+	float m_openingTimer;       // 演出経過時間
+	float m_openingDuration;    // 演出にかける時間
+	DirectX::XMFLOAT3 m_titleCamPos; // タイトル画面のカメラ位置
+	DirectX::XMFLOAT3 m_titleCamRot; // タイトル画面のカメラ回転
+	DirectX::XMFLOAT3 m_startCamPos; // ゲーム開始時のカメラ位置
+	DirectX::XMFLOAT3 m_startCamRot; // ゲーム開始時のカメラ回転
 };
