@@ -302,6 +302,8 @@ void GameScene::UpdateOpening(float deltaTime)
 	m_camera->SetRotation(rx, ry, rz);
 	m_camera->Update();
 
+	m_vignetteIntensity = t * VIGNETTE_MIN_INTENSITY;
+
 	if (m_lightManager)
 	{
 		DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
@@ -493,10 +495,6 @@ void GameScene::Update(float deltaTime)
 	if (m_isOpening)
 	{
 		UpdateOpening(deltaTime);
-
-		// ライトなどの環境更新は行う
-		DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
-		m_lightManager->Update(deltaTime, m_camera->GetViewMatrix(), projectionMatrix, m_camera->GetPosition(), m_camera->GetRotation());
 
 		return;
 	}
