@@ -2,6 +2,7 @@
 #include "AssetLoader.h"
 #include "Game.h"
 #include "Easing.h"
+#include "AssetPaths.h"
 #include <random>
 #include <tuple>
 #include <algorithm>
@@ -27,10 +28,6 @@ namespace {
 	constexpr float SPECIAL_ORB_INTENSITY = 1.5f;
 	constexpr float GOAL_LIGHT_RANGE = 10.0f;
 	constexpr float GOAL_LIGHT_INTENSITY = 2.0f;
-
-	// サウンドパス
-	const wchar_t* PATH_SOUND_COLLECT = L"Assets/orb_get.wav";
-	const wchar_t* PATH_SOUND_WALK = L"Assets/walk.wav";
 
 	// ビネット効果設定
 	constexpr float VIGNETTE_MIN_INTENSITY = 1.1f;
@@ -196,9 +193,9 @@ bool GameScene::InitializePhase5()
 {
 	try
 	{
-		m_collectSound = std::make_unique<DirectX::SoundEffect>(m_audioEngine, PATH_SOUND_COLLECT);
-		m_walkSoundEffect = std::make_unique<DirectX::SoundEffect>(m_audioEngine, PATH_SOUND_WALK);
-		m_runSoundEffect = std::make_unique<DirectX::SoundEffect>(m_audioEngine, PATH_SOUND_WALK);
+		m_collectSound = std::make_unique<DirectX::SoundEffect>(m_audioEngine, AssetPaths::SOUND_ORB_GET);
+		m_walkSoundEffect = std::make_unique<DirectX::SoundEffect>(m_audioEngine, AssetPaths::SOUND_WALK);
+		m_runSoundEffect = std::make_unique<DirectX::SoundEffect>(m_audioEngine, AssetPaths::SOUND_WALK);
 
 		if (m_player)
 		{

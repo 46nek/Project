@@ -1,11 +1,11 @@
 #include "Enemy.h"
 #include "AssetLoader.h"
+#include "AssetPaths.h"
 #include <random>
 #include <cmath>
 
 namespace {
 	constexpr float PATH_COOLDOWN_TIME = 2.0f;
-	const char* ENEMY_MODEL_PATH = "Assets/cube.obj";
 }
 
 // コンストラクタ
@@ -22,7 +22,7 @@ Enemy::~Enemy() {}
 bool Enemy::Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& startPosition, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData)
 {
 	m_position = startPosition;
-	m_model = AssetLoader::LoadModelFromFile(device, ENEMY_MODEL_PATH);
+	m_model = AssetLoader::LoadModelFromFile(device, AssetPaths::MODEL_CUBE_OBJ);
 	if (!m_model) return false;
 
 	m_model->SetPosition(startPosition.x, startPosition.y, startPosition.z);

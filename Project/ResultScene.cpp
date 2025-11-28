@@ -1,6 +1,7 @@
 #include "ResultScene.h"
 #include "framework.h"
 #include "Game.h"
+#include "AssetPaths.h"
 
 ResultScene::ResultScene()
 	: m_clearTextScale(1.0f), m_pressEnterScale(1.0f)
@@ -20,18 +21,14 @@ bool ResultScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, Direc
 	ID3D11Device* device = m_graphicsDevice->GetDevice();
 	m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_graphicsDevice->GetDeviceContext());
 
-	// 背景の読み込み (タイトルと同じものを使用する例)
 	m_background = std::make_unique<Sprite>();
-	if (!m_background->Initialize(device, L"Assets/background.png")) return false;
+	if (!m_background->Initialize(device, AssetPaths::TEX_BACKGROUND)) return false;
 
-	// クリア画像の読み込み (※Assetsフォルダに clear.png を用意してください)
 	m_clearText = std::make_unique<Sprite>();
-	// 用意がない場合はここを L"Assets/title.png" などに変えてください
-	if (!m_clearText->Initialize(device, L"Assets/title.png")) return false;
+	if (!m_clearText->Initialize(device, AssetPaths::TEX_TITLE)) return false;
 
-	// ボタン画像の読み込み (タイトルと同じものを使用)
 	m_pressEnter = std::make_unique<Sprite>();
-	if (!m_pressEnter->Initialize(device, L"Assets/button.png")) return false;
+	if (!m_pressEnter->Initialize(device, AssetPaths::TEX_BUTTON)) return false;
 
 	// スケール調整
 	const float desiredTextWidth = 600.0f;

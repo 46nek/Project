@@ -248,6 +248,9 @@
     <ClInclude Include="Easing.h">
       <Filter>Source\05_System</Filter>
     </ClInclude>
+    <ClInclude Include="AssetPaths.h">
+      <Filter>Source\06_Other</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\background.png">

@@ -1,7 +1,6 @@
-// Orb.cpp (‚±‚Ì“à—e‚ÅŠ®‘S‚É’u‚«Š·‚¦‚Ä‚­‚¾‚³‚¢)
-
 #include "Orb.h"
 #include "AssetLoader.h"
+#include "AssetPaths.h"
 #include <cmath>
 
 Orb::Orb()
@@ -22,7 +21,7 @@ bool Orb::Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& position, in
 	m_lightIndex = lightIndex;
 	m_type = type;
 
-	m_model = AssetLoader::LoadModelFromFile(device, "Assets/cube.obj");
+	m_model = AssetLoader::LoadModelFromFile(device, AssetPaths::MODEL_CUBE_OBJ);
 	if (!m_model)
 	{
 		return false;

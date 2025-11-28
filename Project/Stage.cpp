@@ -1,15 +1,9 @@
 #include "Stage.h"
 #include "AssetLoader.h"
+#include "AssetPaths.h"
 #include <windows.h>
 
 namespace {
-	// === アセットパス定義 ===
-	const wchar_t* PATH_TEX_WALL = L"Assets/wall.png";
-	const wchar_t* PATH_TEX_WALL_NORMAL = L"Assets/wall_normal.png";
-	const wchar_t* PATH_TEX_GATE = L"Assets/gate.jpg";
-	const wchar_t* PATH_TEX_GATE_NORMAL = L"Assets/gate_normal.png";
-	const char* PATH_MODEL_GATE = "Assets/cube.fbx";
-
 	// === ゲート調整用パラメータ ===
 	constexpr float GATE_MODEL_SCALE_BASE = 6.0f; // FBXロード時の基準スケール
 	constexpr float GATE_POS_Z_OFFSET = 0.1f;     // 配置時の微調整
@@ -30,16 +24,16 @@ bool Stage::Initialize(GraphicsDevice* graphicsDevice)
 	m_mazeGenerator->SetCell(m_exitX, m_exitY, MazeGenerator::Path);
 
 	// 定数化したパスを使用
-	std::shared_ptr<Texture> wallTexture = AssetLoader::LoadTexture(graphicsDevice->GetDevice(), PATH_TEX_WALL);
+	std::shared_ptr<Texture> wallTexture = AssetLoader::LoadTexture(graphicsDevice->GetDevice(), AssetPaths::TEX_WALL);
 	if (!wallTexture) { MessageBox(nullptr, L"Failed to load wall texture", L"Error", MB_OK); return false; }
 
-	std::shared_ptr<Texture> wallNormalMap = AssetLoader::LoadTexture(graphicsDevice->GetDevice(), PATH_TEX_WALL_NORMAL);
+	std::shared_ptr<Texture> wallNormalMap = AssetLoader::LoadTexture(graphicsDevice->GetDevice(), AssetPaths::TEX_WALL_NORMAL);
 	if (!wallNormalMap) { MessageBox(nullptr, L"Failed to load wall normal map", L"Error", MB_OK); return false; }
 
-	std::shared_ptr<Texture> gateTexture = AssetLoader::LoadTexture(graphicsDevice->GetDevice(), PATH_TEX_GATE);
+	std::shared_ptr<Texture> gateTexture = AssetLoader::LoadTexture(graphicsDevice->GetDevice(), AssetPaths::TEX_GATE);
 	if (!gateTexture) { MessageBox(nullptr, L"Failed to load gate texture", L"Error", MB_OK); return false; }
 
-	std::shared_ptr<Texture> gateNormalMap = AssetLoader::LoadTexture(graphicsDevice->GetDevice(), PATH_TEX_GATE_NORMAL);
+	std::shared_ptr<Texture> gateNormalMap = AssetLoader::LoadTexture(graphicsDevice->GetDevice(), AssetPaths::TEX_GATE_NORMAL);
 	if (!gateNormalMap) { MessageBox(nullptr, L"Failed to load gate normal map", L"Error", MB_OK); return false; }
 
 	// 壁モデル (1段目)
@@ -72,7 +66,7 @@ bool Stage::Initialize(GraphicsDevice* graphicsDevice)
 	m_models.push_back(std::move(floorModel));
 
 	// ゲートモデル
-	m_gateModel = AssetLoader::LoadModelFromFile(graphicsDevice->GetDevice(), PATH_MODEL_GATE, GATE_MODEL_SCALE_BASE);
+	m_gateModel = AssetLoader::LoadModelFromFile(graphicsDevice->GetDevice(), AssetPaths::MODEL_CUBE_OBJ, GATE_MODEL_SCALE_BASE);
 
 	if (m_gateModel)
 	{

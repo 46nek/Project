@@ -2,6 +2,7 @@
 #include "framework.h"
 #include "Game.h"
 #include "AssetLoader.h"
+#include "AssetPaths.h"
 
 TitleScene::TitleScene()
 	: m_titleLogoScale(1.0f), m_pressEnterScale(1.0f)
@@ -27,12 +28,11 @@ bool TitleScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, Direct
 	// カメラをタイトル画面用の位置（ゴール付近俯瞰）に設定
 	m_gameScene->SetCameraForTitle();
 
-
 	m_titleLogo = std::make_unique<Sprite>();
-	if (!m_titleLogo->Initialize(device, L"Assets/title.png")) return false;
+	if (!m_titleLogo->Initialize(device,AssetPaths::TEX_TITLE)) return false;
 
 	m_pressEnter = std::make_unique<Sprite>();
-	if (!m_pressEnter->Initialize(device, L"Assets/button.png")) return false;
+	if (!m_pressEnter->Initialize(device, AssetPaths::TEX_BUTTON)) return false;
 
 	// 目標の幅を設定
 	const float desiredTitleWidth = 800.0f;

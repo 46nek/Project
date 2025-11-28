@@ -160,6 +160,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AssetLoader.h" />
+    <ClInclude Include="AssetPaths.h" />
     <ClInclude Include="AStar.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Easing.h" />

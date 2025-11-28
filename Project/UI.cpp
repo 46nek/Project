@@ -5,6 +5,7 @@
 #include "Enemy.h"
 #include "Orb.h"
 #include "Game.h"
+#include "AssetPaths.h"
 #include <string>
 
 // (コンストラクタ等は変更なし)
@@ -46,17 +47,17 @@ bool UI::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::vecto
 
 	m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_graphicsDevice->GetDeviceContext());
 	m_orbIcon = std::make_unique<Sprite>();
-	if (!m_orbIcon->Initialize(device, L"Assets/minimap_orb.png"))
+	if (!m_orbIcon->Initialize(device, AssetPaths::TEX_MINIMAP_ORB))
 	{
 		return false;
 	}
 
 	m_staminaBarFrame = std::make_unique<Sprite>();
-	if (!m_staminaBarFrame->Initialize(device, L"Assets/minimap_frame.png")) return false;
+	if (!m_staminaBarFrame->Initialize(device, AssetPaths::TEX_MINIMAP_FRAME)) return false;
 
 	m_staminaBarFill = std::make_unique<Sprite>();
-	if (!m_staminaBarFill->Initialize(device, L"Assets/minimap_path.png")) return false;
-
+	if (!m_staminaBarFill->Initialize(device, AssetPaths::TEX_MINIMAP_PATH)) return false;
+	
 	return true;
 }
 
