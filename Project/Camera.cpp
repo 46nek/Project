@@ -34,6 +34,10 @@ Camera::~Camera()
 void Camera::SetPosition(float x, float y, float z)
 {
 	m_basePosition = { x, y, z };
+
+	m_positionX = x;
+	m_positionY = y;
+	m_positionZ = z;
 }
 
 void Camera::SetRotation(float x, float y, float z)

@@ -47,10 +47,23 @@ void LoadingScene::Shutdown()
 {
 	if (m_fontWrapper) m_fontWrapper->Release();
 	if (m_fontFactory) m_fontFactory->Release();
+
+	// シーン終了時に次（GameScene）へ渡す
+	// 修正: これでLoading画面の最後のフレームまでm_gameSceneが存在する
+	if (m_gameScene)
+	{
+		GameScene::s_transferInstance = std::move(m_gameScene);
+	}
 }
 
 void LoadingScene::Update(float deltaTime)
 {
+	// ロード中も背景のライトや演出を動かす
+	if (m_gameScene)
+	{
+		m_gameScene->UpdateTitleLoop(deltaTime);
+	}
+
 	// フレームごとにGameSceneの初期化処理を１段階ずつ進める
 	switch (m_loadingPhase)
 	{
@@ -84,6 +97,7 @@ void LoadingScene::Update(float deltaTime)
 
 		// すべての初期化が完了したので、SceneManagerにGameSceneを渡して遷移する
 		m_nextScene = SceneState::Game;
+		// moveはShutdownで行う
 		break;
 	}
 	m_loadingPhase++;

@@ -29,6 +29,8 @@ public:
 	void Update(float deltaTime) override;
 	void Render() override;
 
+	void UpdateTitleLoop(float deltaTime);
+
 	void RenderStageOnly();
 	void SetCameraForTitle();
 	void BeginOpening();
@@ -81,4 +83,6 @@ private:
 	DirectX::XMFLOAT3 m_titleCamRot; // タイトル画面のカメラ回転
 	DirectX::XMFLOAT3 m_startCamPos; // ゲーム開始時のカメラ位置
 	DirectX::XMFLOAT3 m_startCamRot; // ゲーム開始時のカメラ回転
+
+	float m_titleTimer;
 };

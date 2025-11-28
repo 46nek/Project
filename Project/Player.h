@@ -9,7 +9,7 @@
 // ëOï˚êÈåæ
 namespace DirectX {
 	class SoundEffect;
-	class SoundEffectInstance; // í«â¡
+	class SoundEffectInstance; 
 }
 
 class Player
@@ -25,6 +25,7 @@ public:
 	void UpdateAudio(float deltaTime);
 	void Turn(int mouseX, int mouseY, float deltaTime);
 
+	void SetRotation(const DirectX::XMFLOAT3& rotation);
 	void SetFootstepSounds(DirectX::SoundEffect* walkSound, DirectX::SoundEffect* runSound);
 
 	DirectX::XMFLOAT3 GetPosition() const { return m_position; }

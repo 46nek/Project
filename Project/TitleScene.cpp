@@ -53,22 +53,25 @@ bool TitleScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, Direct
 
 void TitleScene::Shutdown()
 {
-	// m_background->Shutdown();
 	m_titleLogo->Shutdown();
 	m_pressEnter->Shutdown();
 
+	// ƒV[ƒ“I—¹Žž‚ÉŽŸ‚Ö“n‚·
+	if (m_gameScene)
+	{
+		GameScene::s_transferInstance = std::move(m_gameScene);
+	}
 }
 
 void TitleScene::Update(float deltaTime)
 {
+	if (m_gameScene)
+	{
+		m_gameScene->UpdateTitleLoop(deltaTime);
+	}
+
 	if (m_input->IsKeyPressed(VK_RETURN)) {
 		m_nextScene = SceneState::Loading;
-
-		if (m_gameScene)
-		{
-			GameScene::s_transferInstance = std::move(m_gameScene);
-		}
-
 	}
 }
 

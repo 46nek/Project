@@ -47,9 +47,10 @@ Player::~Player() {
 }
 
 void Player::Initialize(const DirectX::XMFLOAT3& startPosition) {
-	// srand は不要になりました
 	m_position = startPosition;
 	m_stamina = m_maxStamina;
+	// rotationはここではリセットせず、SetRotationで制御するか、0初期化のままにする
+	// GameScene側でSetRotationを呼ぶ設計にします
 }
 
 void Player::Update(float deltaTime, Input* input, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth) {
@@ -154,7 +155,6 @@ void Player::UpdateAudio(float deltaTime) {
 		m_stepTimer -= deltaTime;
 
 		if (m_stepTimer <= 0.0f) {
-			// ランダムなピッチ生成に <random> を使用
 			static std::random_device rd;
 			static std::mt19937 gen(rd());
 			std::uniform_real_distribution<float> dist(-0.5f, 0.5f);
@@ -163,7 +163,6 @@ void Player::UpdateAudio(float deltaTime) {
 			float volume = 0.3f;
 
 			if (m_isRunning && !m_isStaminaExhausted) {
-				// 走る音
 				if (m_runInstance) {
 					m_runInstance->Stop();
 					m_runInstance->SetVolume(volume);
@@ -173,7 +172,6 @@ void Player::UpdateAudio(float deltaTime) {
 				m_stepTimer = m_runInterval;
 			}
 			else {
-				// 歩く音
 				if (m_walkInstance) {
 					m_walkInstance->Stop();
 					m_walkInstance->SetVolume(volume);
@@ -200,6 +198,11 @@ void Player::Turn(int mouseX, int mouseY, float deltaTime) {
 	m_rotation.x += (float)mouseY * m_rotationSpeed;
 	if (m_rotation.x > 90.0f) m_rotation.x = 90.0f;
 	if (m_rotation.x < -90.0f) m_rotation.x = -90.0f;
+}
+
+// 追加実装
+void Player::SetRotation(const DirectX::XMFLOAT3& rotation) {
+	m_rotation = rotation;
 }
 
 void Player::SetFootstepSounds(DirectX::SoundEffect* walkSound, DirectX::SoundEffect* runSound) {

@@ -30,7 +30,7 @@ namespace {
 	// サウンドパス
 	const wchar_t* PATH_SOUND_COLLECT = L"Assets/orb_get.wav";
 	const wchar_t* PATH_SOUND_WALK = L"Assets/walk.wav";
-	
+
 	// ビネット効果設定
 	constexpr float VIGNETTE_MIN_INTENSITY = 1.1f;
 	constexpr float VIGNETTE_MAX_INTENSITY = 2.0f;
@@ -54,10 +54,11 @@ GameScene::GameScene()
 	m_totalOrbs(0),
 	m_enemyRadarTimer(0.0f),
 	m_goalSpawned(false),
-	m_escapeMode(false), 
-	m_isOpening(false),        
-	m_openingTimer(0.0f),      
-	m_openingDuration(2.0f)
+	m_escapeMode(false),
+	m_isOpening(false),
+	m_openingTimer(0.0f),
+	m_openingDuration(2.5f),
+	m_titleTimer(0.0f) // 初期化
 {
 }
 
@@ -106,14 +107,14 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX
 		m_titleCamRot = s_transferInstance->m_titleCamRot;
 		m_startCamPos = s_transferInstance->m_startCamPos;
 		m_startCamRot = s_transferInstance->m_startCamRot;
+		m_titleTimer = s_transferInstance->m_titleTimer;
 
 		// 引き継ぎ完了したので元は削除
 		s_transferInstance.reset();
 
-		// 初期化済みとしてリターン
 		return true;
 	}
-	// 各フェーズの初期化を実行
+
 	if (!InitializePhase1(graphicsDevice, input, audioEngine)) return false;
 	if (!InitializePhase2()) return false;
 	if (!InitializePhase3()) return false;
@@ -131,21 +132,27 @@ bool GameScene::InitializePhase1(GraphicsDevice* graphicsDevice, Input* input, D
 	m_stage = std::make_unique<Stage>();
 	if (!m_stage->Initialize(graphicsDevice)) return false;
 
+	// スタート位置：迷路の上端
 	std::pair<int, int> startPos = m_stage->GetStartPosition();
 	float pathWidth = m_stage->GetPathWidth();
 	float startX = (static_cast<float>(startPos.first) + 0.5f) * pathWidth;
 	float startZ = (static_cast<float>(startPos.second) + 0.5f) * pathWidth;
 
 	m_player = std::make_unique<Player>();
-	
-	m_camera = std::make_unique<Camera>(startX, PLAYER_HEIGHT, startZ);	
+
+	m_camera = std::make_unique<Camera>(startX, PLAYER_HEIGHT, startZ);
+
+	// スタート時のカメラ向き：180度（Zマイナス方向＝ゴール方向）
 	m_startCamPos = { startX, PLAYER_HEIGHT, startZ };
-	m_startCamRot = { 0.0f, 0.0f, 0.0f };
+	m_startCamRot = { 0.0f, 180.0f, 0.0f };
+	m_camera->SetRotation(0.0f, 180.0f, 0.0f);
 
 	m_lightManager = std::make_unique<LightManager>();
 	m_lightManager->Initialize(m_stage->GetMazeData(), m_stage->GetPathWidth(), Stage::WALL_HEIGHT);
 	m_renderer = std::make_unique<Renderer>(m_graphicsDevice);
+
 	m_player->Initialize({ startX, PLAYER_HEIGHT, startZ });
+	m_player->SetRotation({ 0.0f, 180.0f, 0.0f });
 
 	m_cachedStageModels.clear();
 	m_cachedStageModels.reserve(m_stage->GetModels().size());
@@ -180,7 +187,6 @@ bool GameScene::InitializePhase5()
 	{
 		m_collectSound = std::make_unique<DirectX::SoundEffect>(m_audioEngine, PATH_SOUND_COLLECT);
 		m_walkSoundEffect = std::make_unique<DirectX::SoundEffect>(m_audioEngine, PATH_SOUND_WALK);
-		// 走る音が別にあればそれを指定。なければ歩く音を使い回し
 		m_runSoundEffect = std::make_unique<DirectX::SoundEffect>(m_audioEngine, PATH_SOUND_WALK);
 
 		if (m_player)
@@ -200,32 +206,44 @@ void GameScene::SetCameraForTitle()
 {
 	if (!m_stage || !m_camera) return;
 
-	// 迷路の中央（ゴール予定地）を取得
 	std::pair<int, int> startPos = m_stage->GetStartPosition();
 	float pathWidth = m_stage->GetPathWidth();
 	float centerX = (static_cast<float>(startPos.first) + 0.5f) * pathWidth;
-	float centerZ = (static_cast<float>(startPos.second) + 0.5f) * pathWidth;
 
+	// ゴール（出口）は Y=0付近
+	// 初期位置設定: ゴールから適度に離れた位置
 	float titleX = centerX;
-	float titleY = 4.0f; // プレイヤーと同じくらいの高さ（通路の中）
-	float titleZ = centerZ - 8.0f; // ゴールの少し手前
+	float titleY = 5.0f; // 地面より少し高い位置（プレイヤーの目線より少し上）
+	float titleZ = 4.5f * pathWidth;
 
 	m_camera->SetPosition(titleX, titleY, titleZ);
-	m_camera->SetRotation(10.0f, 0.0f, 0.0f); // ほんの少し見上げるか、正面を向く
 
+	// 回転: 完全に水平(0.0f)で、後ろ(180.0f)を向く = ゲートを正面に捉える
+	m_camera->SetRotation(0.0f, 180.0f, 0.0f);
+
+	// 【重要】モーションブラー対策
+	// カメラをワープさせた直後は「前回の位置」との差が大きく、激しいブラーが発生します。
+	// Updateを「2回」呼ぶことで、「前回位置」と「現在位置」を一致させ、ブラーを無効化します。
+	m_camera->Update();
 	m_camera->Update();
 
-	// 現在の状態をタイトル用座標として保存
+	// 現在の状態をタイトル用として保存
 	m_titleCamPos = { titleX, titleY, titleZ };
-	m_titleCamRot = { 10.0f, 0.0f, 0.0f };
+	m_titleCamRot = { 0.0f, 180.0f, 0.0f };
 
-	if (m_lightManager)
+	// 更新処理を一度呼んでライト等をセットアップ
+	UpdateTitleLoop(0.0f);
+}
+
+// タイトル画面・ロード画面用の更新メソッド
+void GameScene::UpdateTitleLoop(float deltaTime)
+{
+	m_titleTimer += deltaTime;
+
+	if (m_lightManager && m_camera)
 	{
 		DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
-
-		// LightManagerを強制更新
-		// deltaTimeに0を渡しても、初回更新なら懐中電灯は瞬時にカメラ位置に移動します
-		m_lightManager->Update(100.0f, m_camera->GetViewMatrix(), projectionMatrix, m_camera->GetPosition(), m_camera->GetRotation());
+		m_lightManager->Update(deltaTime, m_camera->GetViewMatrix(), projectionMatrix, m_camera->GetPosition(), m_camera->GetRotation());
 	}
 }
 
@@ -234,7 +252,6 @@ void GameScene::BeginOpening()
 	m_isOpening = true;
 	m_openingTimer = 0.0f;
 
-	// 現在のカメラ位置をタイトルのものとして再設定（念のため）
 	if (m_camera)
 	{
 		m_camera->SetPosition(m_titleCamPos.x, m_titleCamPos.y, m_titleCamPos.z);
@@ -250,30 +267,34 @@ void GameScene::UpdateOpening(float deltaTime)
 	if (t >= 1.0f)
 	{
 		t = 1.0f;
-		m_isOpening = false; // 演出終了
+		m_isOpening = false;
 	}
 
-	// イージング関数 (EaseOutCubic: 最初は速く、最後はゆっくり)
-	float easeT = 1.0f - powf(1.0f - t, 3.0f);
+	float easeT = (t == 1.0f) ? 1.0f : 1.0f - powf(2.0f, -10.0f * t);
 
-	// 位置の補間
 	float x = m_titleCamPos.x + (m_startCamPos.x - m_titleCamPos.x) * easeT;
 	float y = m_titleCamPos.y + (m_startCamPos.y - m_titleCamPos.y) * easeT;
 	float z = m_titleCamPos.z + (m_startCamPos.z - m_titleCamPos.z) * easeT;
 
-	// 回転の補間
+	// 回転の補間（最短経路をとるように調整が必要だが、ここでは単純補間）
+	float currentYaw = m_titleCamRot.y;
+	float targetYaw = m_startCamRot.y;
+
+	// 角度の補正（350度→10度などのケース対応）
+	if (targetYaw - currentYaw > 180.0f) currentYaw += 360.0f;
+	if (targetYaw - currentYaw < -180.0f) currentYaw -= 360.0f;
+
 	float rx = m_titleCamRot.x + (m_startCamRot.x - m_titleCamRot.x) * easeT;
-	float ry = m_titleCamRot.y + (m_startCamRot.y - m_titleCamRot.y) * easeT;
+	float ry = currentYaw + (targetYaw - currentYaw) * easeT;
 	float rz = m_titleCamRot.z + (m_startCamRot.z - m_titleCamRot.z) * easeT;
 
 	m_camera->SetPosition(x, y, z);
 	m_camera->SetRotation(rx, ry, rz);
-	m_camera->Update(); // 行列更新のみ、ボビング等はしない
+	m_camera->Update();
 
 	if (m_lightManager)
 	{
 		DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
-		// deltaTimeに大きな値を渡してスナップさせる
 		m_lightManager->Update(100.0f, m_camera->GetViewMatrix(), projectionMatrix, m_camera->GetPosition(), m_camera->GetRotation());
 	}
 }
