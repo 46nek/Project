@@ -39,14 +39,17 @@ private:
 	bool InitializeEnemies();
 	bool InitializeOrbs();
 	bool InitializeSpecialOrbs();
-	
+
 	void UpdateVignette(float staminaPercentage);
-	
+
 	void UpdateOpening(float deltaTime);
 
 	static constexpr float PLAYER_HEIGHT = 4.0f;
 	static constexpr int NUM_ENEMIES = 2;
 	static constexpr int NUM_ORBS = 1;
+
+	// UIフェードインにかける時間（秒）
+	static constexpr float UI_FADE_DURATION = 0.5f;
 
 	std::unique_ptr<DirectX::SoundEffect> m_collectSound;
 	std::unique_ptr<DirectX::SoundEffect> m_walkSoundEffect;
@@ -85,4 +88,5 @@ private:
 	DirectX::XMFLOAT3 m_startCamRot; // ゲーム開始時のカメラ回転
 
 	float m_titleTimer;
+	float m_uiFadeTimer;        // UIフェードイン用のタイマー
 };

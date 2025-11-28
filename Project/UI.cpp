@@ -4,9 +4,10 @@
 #include "Camera.h"
 #include "Enemy.h"
 #include "Orb.h"
-#include "Game.h" // Game::SCREEN_WIDTH/HEIGHT のために追加
+#include "Game.h"
 #include <string>
 
+// (コンストラクタ等は変更なし)
 UI::UI()
 	: m_graphicsDevice(nullptr),
 	m_fontFactory(nullptr),
@@ -23,6 +24,7 @@ UI::~UI()
 
 bool UI::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth)
 {
+	// (変更なし)
 	m_graphicsDevice = graphicsDevice;
 	ID3D11Device* device = m_graphicsDevice->GetDevice();
 
@@ -49,8 +51,6 @@ bool UI::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::vecto
 		return false;
 	}
 
-	// スタミナゲージ用のスプライトを初期化
-	// Assets/minimap_frame.png と Assets/minimap_path.png をゲージの画像として再利用します。
 	m_staminaBarFrame = std::make_unique<Sprite>();
 	if (!m_staminaBarFrame->Initialize(device, L"Assets/minimap_frame.png")) return false;
 
@@ -62,6 +62,7 @@ bool UI::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::vecto
 
 void UI::Shutdown()
 {
+	// (変更なし)
 	if (m_minimap) m_minimap->Shutdown();
 	if (m_orbIcon) m_orbIcon->Shutdown();
 	if (m_staminaBarFrame) m_staminaBarFrame->Shutdown();
@@ -73,24 +74,27 @@ void UI::Shutdown()
 
 void UI::Update(float deltaTime, int remainingOrbs, int totalOrbs, float staminaPercentage, bool showEnemiesOnMinimap)
 {
+	// (変更なし)
 	m_remainingOrbs = remainingOrbs;
 	m_totalOrbs = totalOrbs;
 	m_staminaPercentage = staminaPercentage;
 	m_showEnemiesOnMinimap = showEnemiesOnMinimap;
 }
 
-void UI::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs, const std::vector<std::unique_ptr<Orb>>& specialOrbs)
+void UI::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs, const std::vector<std::unique_ptr<Orb>>& specialOrbs, float alpha)
 {
-	m_minimap->Render(camera, enemies, orbs, specialOrbs, m_showEnemiesOnMinimap);
+	// 透明度が0以下なら描画しない
+	if (alpha <= 0.0f) return;
+
+	// ミニマップにAlphaを渡す
+	m_minimap->Render(camera, enemies, orbs, specialOrbs, m_showEnemiesOnMinimap, alpha);
 
 	// オーブカウンターとスタミナゲージの描画開始
-	m_spriteBatch->Begin();
+	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_graphicsDevice->GetAlphaBlendState());
 
 	// --- オーブカウンターのアイコン描画 ---
 	const DirectX::XMFLOAT2 iconPosition = { 280.0f, 40.0f };
-	// ▼▼▼ エラー箇所を修正 ▼▼▼
-	m_orbIcon->Render(m_spriteBatch.get(), iconPosition, 0.5f);
-	// ▲▲▲ 修正ここまで ▲▲▲
+	m_orbIcon->Render(m_spriteBatch.get(), iconPosition, 0.5f, 0.0f, { 1.0f, 1.0f, 1.0f, alpha });
 
 	// --- スタミナゲージの描画 ---
 	const float barWidth = 200.0f;
@@ -107,12 +111,9 @@ void UI::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>&
 		(LONG)(barPosition.x + barWidth),
 		(LONG)(barPosition.y + barHeight)
 	};
-	// ▼▼▼ エラー箇所を修正 ▼▼▼
-	m_staminaBarFrame->RenderFill(m_spriteBatch.get(), frameRect);
-	// ▲▲▲ 修正ここまで ▲▲▲
+	m_staminaBarFrame->RenderFill(m_spriteBatch.get(), frameRect, { 1.0f, 1.0f, 1.0f, alpha });
 
 	// 塗りつぶし部分
-	// スタミナの割合に応じて幅を変える
 	RECT fillRect = {
 		(LONG)barPosition.x,
 		(LONG)barPosition.y,
@@ -120,14 +121,12 @@ void UI::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>&
 		(LONG)(barPosition.y + barHeight)
 	};
 
-	// スタミナ残量に応じて色を変える
-	DirectX::XMFLOAT4 fillColor = { 0.0f, 1.0f, 0.0f, 1.0f }; // 緑
+	DirectX::XMFLOAT4 fillColor = { 0.0f, 1.0f, 0.0f, alpha }; // 緑
 	if (m_staminaPercentage < 0.3f)
 	{
-		fillColor = { 0.8f, 0.2f, 0.2f, 1.0f }; // 赤
+		fillColor = { 0.8f, 0.2f, 0.2f, alpha }; // 赤
 	}
 
-	// RenderFill に色指定のオーバーロードがないため、色を付けて描画します
 	m_staminaBarFill->RenderFill(m_spriteBatch.get(), fillRect, fillColor);
 
 	// 描画終了
@@ -141,7 +140,9 @@ void UI::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>&
 		float fontSize = 32.0f;
 		float textPosX = iconPosition.x + 30.0f;
 		float textPosY = iconPosition.y;
-		UINT32 textColor = 0xFFFFFFFF; // 白
+
+		UINT32 alphaInt = static_cast<UINT32>(alpha * 255.0f);
+		UINT32 textColor = (alphaInt << 24) | 0x00FFFFFF;
 
 		m_fontWrapper->DrawString(
 			m_graphicsDevice->GetDeviceContext(),

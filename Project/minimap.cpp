@@ -24,11 +24,11 @@ Minimap::~Minimap()
 
 bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth)
 {
+	// 変更なし
 	m_graphicsDevice = graphicsDevice;
 	m_mazeData = &mazeData;
 	m_pathWidth = pathWidth;
 
-	// 訪問済みセル配列の初期化 (迷路サイズに合わせ、全てfalseで初期化)
 	if (!m_mazeData->empty())
 	{
 		m_visitedCells.assign(m_mazeData->size(), std::vector<bool>((*m_mazeData)[0].size(), false));
@@ -37,7 +37,6 @@ bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::
 	ID3D11Device* device = m_graphicsDevice->GetDevice();
 	m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_graphicsDevice->GetDeviceContext());
 
-	// アセットの読み込み
 	if (!m_pathSprite) m_pathSprite = std::make_unique<Sprite>();
 	if (!m_pathSprite->Initialize(device, L"Assets/minimap_path.png")) return false;
 
@@ -56,14 +55,12 @@ bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::
 	if (!m_orbArrowSprite) m_orbArrowSprite = std::make_unique<Sprite>();
 	if (!m_orbArrowSprite->Initialize(device, L"Assets/orb_arrow.png")) return false;
 
-	// 各スプライトのスケールを個別に計算
 	m_pathSpriteScale = m_cellSize / m_pathSprite->GetWidth();
 	m_playerSpriteScale = m_cellSize / m_playerSprite->GetWidth();
 	m_enemySpriteScale = m_cellSize / m_enemySprite->GetWidth();
 	m_orbSpriteScale = m_cellSize / m_orbSprite->GetWidth();
 	m_orbArrowSpriteScale = m_cellSize / m_orbArrowSprite->GetWidth();
 
-	// 描画領域外を切り取るための設定を作成
 	D3D11_RASTERIZER_DESC rasterDesc = {};
 	rasterDesc.FillMode = D3D11_FILL_SOLID;
 	rasterDesc.CullMode = D3D11_CULL_BACK;
@@ -77,6 +74,7 @@ bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::
 
 void Minimap::Shutdown()
 {
+	// 変更なし
 	if (m_pathSprite) m_pathSprite->Shutdown();
 	if (m_playerSprite) m_playerSprite->Shutdown();
 	if (m_enemySprite) m_enemySprite->Shutdown();
@@ -87,8 +85,9 @@ void Minimap::Shutdown()
 	m_visitedCells.clear();
 }
 
-void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs, const std::vector<std::unique_ptr<Orb>>& specialOrbs, bool showEnemies)
+void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs, const std::vector<std::unique_ptr<Orb>>& specialOrbs, bool showEnemies, float alpha)
 {
+	if (alpha <= 0.0f) return;
 	if (!m_graphicsDevice || !m_mazeData || !camera) return;
 	if (m_visitedCells.empty()) return;
 
@@ -114,7 +113,6 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 	int playerGridX = static_cast<int>(playerWorldPos.x / m_pathWidth);
 	int playerGridZ = static_cast<int>(playerWorldPos.z / m_pathWidth);
 
-	// プレイヤーの通った道を訪問済みに更新
 	int viewRange = 0.5;
 	for (int z = playerGridZ - viewRange; z <= playerGridZ + viewRange; ++z)
 	{
@@ -143,21 +141,19 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 	};
 
 	// --- 1. フレーム(背景) ---
-	m_spriteBatch->Begin();
-	m_frameSprite->RenderFill(m_spriteBatch.get(), scissorRect);
+	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_graphicsDevice->GetAlphaBlendState());
+	m_frameSprite->RenderFill(m_spriteBatch.get(), scissorRect, { 1.0f, 1.0f, 1.0f, alpha });
 	m_spriteBatch->End();
 
 	// --- 2. マップ要素 (クリッピング有効) ---
 	deviceContext->RSSetScissorRects(1, &scissorRect);
 
-	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, nullptr, nullptr, nullptr, m_scissorRasterizerState.Get(), nullptr, transform);
+	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_graphicsDevice->GetAlphaBlendState(), nullptr, nullptr, m_scissorRasterizerState.Get(), nullptr, transform);
 
-	// 迷路の描画 (訪問済みのみ)
 	for (size_t y = 0; y < m_mazeData->size(); ++y)
 	{
 		for (size_t x = 0; x < (*m_mazeData)[y].size(); ++x)
 		{
-			// 未訪問エリアは描画しない (道は隠す)
 			if (!m_visitedCells[y][x]) continue;
 
 			if ((*m_mazeData)[y][x] == MazeGenerator::CellType::Path)
@@ -166,12 +162,11 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 					x * m_cellSize + m_cellSize * 0.5f,
 					(mapHeightInCells - y) * m_cellSize - m_cellSize * 0.5f
 				};
-				m_pathSprite->Render(m_spriteBatch.get(), cellPos, m_pathSpriteScale);
+				m_pathSprite->Render(m_spriteBatch.get(), cellPos, m_pathSpriteScale, 0.0f, { 1.0f, 1.0f, 1.0f, alpha });
 			}
 		}
 	}
 
-	// 敵の描画 (常に表示に変更)
 	for (const auto& enemy : enemies)
 	{
 		if (enemy)
@@ -180,22 +175,19 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 			int enemyGridX = static_cast<int>(enemyWorldPos.x / m_pathWidth);
 			int enemyGridZ = static_cast<int>(enemyWorldPos.z / m_pathWidth);
 
-			// 敵に関しては isVisible チェックを行わず常に描画する
 			DirectX::XMFLOAT2 enemyMapPixelPos = {
 				(float)enemyGridX * m_cellSize + m_cellSize * 0.5f,
 				(mapHeightInCells - (float)enemyGridZ) * m_cellSize - m_cellSize * 0.5f
 			};
-			m_enemySprite->Render(m_spriteBatch.get(), enemyMapPixelPos, m_enemySpriteScale * 0.5f, 0.0f, { 1.0f, 0.2f, 0.2f, 1.0f });
+			m_enemySprite->Render(m_spriteBatch.get(), enemyMapPixelPos, m_enemySpriteScale * 0.5f, 0.0f, { 1.0f, 0.2f, 0.2f, alpha });
 		}
 	}
 
-	// オーブの描画 (常に表示)
 	for (const auto& orb : orbs)
 	{
 		if (orb && !orb->IsCollected())
 		{
 			DirectX::XMFLOAT3 orbWorldPos = orb->GetPosition();
-
 			int orbGridX = static_cast<int>(orbWorldPos.x / m_pathWidth);
 			int orbGridZ = static_cast<int>(orbWorldPos.z / m_pathWidth);
 
@@ -203,8 +195,7 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 				(float)orbGridX * m_cellSize + m_cellSize * 0.5f,
 				(mapHeightInCells - (float)orbGridZ) * m_cellSize - m_cellSize * 0.5f
 			};
-
-			m_orbSprite->Render(m_spriteBatch.get(), orbMapPixelPos, m_orbSpriteScale * 0.4f, 0.0f, { 0.6f, 0.8f, 1.0f, 1.0f });
+			m_orbSprite->Render(m_spriteBatch.get(), orbMapPixelPos, m_orbSpriteScale * 0.4f, 0.0f, { 0.6f, 0.8f, 1.0f, alpha });
 		}
 	}
 
@@ -215,7 +206,6 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 	DirectX::XMFLOAT3 targetPos = {};
 	bool foundTarget = false;
 
-	// ヘルパーラムダ式
 	auto CheckClosestOrb = [&](const auto& orbList) {
 		for (const auto& orb : orbList)
 		{
@@ -238,48 +228,36 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 	CheckClosestOrb(orbs);
 	CheckClosestOrb(specialOrbs);
 
-	// --- 矢印の描画 (プレイヤーの下、または周囲に描画) ---
+	// --- 矢印の描画 ---
 	if (foundTarget)
 	{
 		float dx = targetPos.x - playerWorldPos.x;
 		float dz = targetPos.z - playerWorldPos.z;
-
-		// プレイヤーの回転を考慮した角度計算
 		float angleToOrb = atan2f(dx, dz);
 		float arrowRotation = angleToOrb - playerRotation;
 
-		// --- 変更点: オーブが画面外にあるかどうかの判定 ---
-
-		// オーブまでのミニマップ上でのピクセル距離を計算
-		// ワールド距離 / パス幅 * セルサイズ * ズーム倍率
 		float distPixels = sqrtf(minDistanceSq) / m_pathWidth * m_cellSize * m_zoomFactor;
-
-		// プレイヤーを中心としたミニマップ上の相対座標を計算
-		// (arrowRotationは画面上の上方向(0度)からの回転)
 		float relativeX = distPixels * sinf(arrowRotation);
 		float relativeY = -distPixels * cosf(arrowRotation);
-
 		float limitX = m_viewSize.x * 0.5f;
 		float limitY = m_viewSize.y * 0.5f;
 
-		// 相対座標がビューサイズ（の半分）を超えている場合のみ矢印を描画
 		if (fabsf(relativeX) > limitX || fabsf(relativeY) > limitY)
 		{
-			// 矢印を表示する位置（プレイヤーの中心から少し離す）
-			float radius = 15.0f; // 中心からの距離(ピクセル)
+			float radius = 15.0f;
 			DirectX::XMFLOAT2 arrowPos = minimapCenter;
 			arrowPos.x += sinf(arrowRotation) * radius;
 			arrowPos.y -= cosf(arrowRotation) * radius;
 
-			m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, nullptr, nullptr, nullptr, m_scissorRasterizerState.Get());
-			m_orbArrowSprite->Render(m_spriteBatch.get(), arrowPos, m_orbArrowSpriteScale * 1.2f, arrowRotation);
+			m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_graphicsDevice->GetAlphaBlendState(), nullptr, nullptr, m_scissorRasterizerState.Get());
+			m_orbArrowSprite->Render(m_spriteBatch.get(), arrowPos, m_orbArrowSpriteScale * 1.2f, arrowRotation, { 1.0f, 1.0f, 1.0f, alpha });
 			m_spriteBatch->End();
 		}
 	}
 
 	// プレイヤーの描画 (常に中央)
-	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, nullptr, nullptr, nullptr, m_scissorRasterizerState.Get());
-	m_playerSprite->Render(m_spriteBatch.get(), minimapCenter, m_playerSpriteScale * m_zoomFactor * 0.3f, 0.0f);
+	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_graphicsDevice->GetAlphaBlendState(), nullptr, nullptr, m_scissorRasterizerState.Get());
+	m_playerSprite->Render(m_spriteBatch.get(), minimapCenter, m_playerSpriteScale * m_zoomFactor * 0.3f, 0.0f, { 1.0f, 1.0f, 1.0f, alpha });
 	m_spriteBatch->End();
 
 	// --- 後処理 ---

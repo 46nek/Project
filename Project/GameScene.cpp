@@ -59,7 +59,8 @@ GameScene::GameScene()
 	m_isOpening(false),
 	m_openingTimer(0.0f),
 	m_openingDuration(2.5f),
-	m_titleTimer(0.0f) // 初期化
+	m_titleTimer(0.0f),
+	m_uiFadeTimer(0.0f) // 初期化
 {
 }
 
@@ -67,6 +68,8 @@ GameScene::~GameScene() {}
 
 bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine)
 {
+	m_uiFadeTimer = 0.0f; // タイマーリセット
+
 	if (s_transferInstance)
 	{
 		// リソース（ポインタ類）の所有権を移動
@@ -109,6 +112,13 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX
 		m_startCamPos = s_transferInstance->m_startCamPos;
 		m_startCamRot = s_transferInstance->m_startCamRot;
 		m_titleTimer = s_transferInstance->m_titleTimer;
+
+		// ゲーム開始時にオープニングを開始する（タイトルから遷移してきた場合）
+		// タイトルカメラ位置が設定されていればオープニングが必要と判断
+		if (m_titleCamPos.y != 0.0f)
+		{
+			BeginOpening();
+		}
 
 		// 引き継ぎ完了したので元は削除
 		s_transferInstance.reset();
@@ -252,6 +262,7 @@ void GameScene::BeginOpening()
 {
 	m_isOpening = true;
 	m_openingTimer = 0.0f;
+	m_uiFadeTimer = 0.0f; // オープニング開始時にフェードタイマーをリセット
 
 	if (m_camera)
 	{
@@ -268,7 +279,8 @@ void GameScene::UpdateOpening(float deltaTime)
 	if (t >= 1.0f)
 	{
 		t = 1.0f;
-		m_isOpening = false;
+		m_isOpening = false; // オープニング終了
+		m_uiFadeTimer = 0.0f; // UIフェードイン開始
 	}
 
 	float easeT = Easing::GetValue(EasingType::EaseInOutExpo, t);
@@ -492,6 +504,13 @@ void GameScene::Update(float deltaTime)
 		return;
 	}
 
+	// オープニング終了後のUIフェード処理
+	if (m_uiFadeTimer < UI_FADE_DURATION)
+	{
+		m_uiFadeTimer += deltaTime;
+		if (m_uiFadeTimer > UI_FADE_DURATION) m_uiFadeTimer = UI_FADE_DURATION;
+	}
+
 	// プレイヤー更新
 	int mouseX, mouseY;
 	m_input->GetMouseDelta(mouseX, mouseY);
@@ -651,7 +670,20 @@ void GameScene::Render()
 
 	if (m_ui)
 	{
-		m_ui->Render(m_camera.get(), m_enemies, m_orbs, m_specialOrbs);
+		// UIの透明度計算
+		float uiAlpha = 1.0f;
+		if (m_isOpening)
+		{
+			uiAlpha = 0.0f; // オープニング中は非表示
+		}
+		else
+		{
+			// フェードイン計算
+			uiAlpha = m_uiFadeTimer / UI_FADE_DURATION;
+			if (uiAlpha > 1.0f) uiAlpha = 1.0f;
+		}
+
+		m_ui->Render(m_camera.get(), m_enemies, m_orbs, m_specialOrbs, uiAlpha);
 	}
 
 	m_graphicsDevice->EndScene();
