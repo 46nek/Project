@@ -162,6 +162,7 @@
     <ClInclude Include="AssetLoader.h" />
     <ClInclude Include="AStar.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Easing.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Frustum.h" />
@@ -202,6 +203,7 @@
     <ClCompile Include="AssetLoader.cpp" />
     <ClCompile Include="AStar.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Easing.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Frustum.cpp" />
     <ClCompile Include="Game.cpp" />

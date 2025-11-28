@@ -126,6 +126,9 @@
     <ClCompile Include="ResultScene.cpp">
       <Filter>Source\01_Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Easing.cpp">
+      <Filter>Source\05_System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -241,6 +244,9 @@
     </ClInclude>
     <ClInclude Include="ResultScene.h">
       <Filter>Source\01_Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Easing.h">
+      <Filter>Source\05_System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

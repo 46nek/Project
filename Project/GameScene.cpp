@@ -1,6 +1,7 @@
 ﻿#include "GameScene.h"
 #include "AssetLoader.h"
 #include "Game.h"
+#include "Easing.h"
 #include <random>
 #include <tuple>
 #include <algorithm>
@@ -270,7 +271,7 @@ void GameScene::UpdateOpening(float deltaTime)
 		m_isOpening = false;
 	}
 
-	float easeT = (t == 1.0f) ? 1.0f : 1.0f - powf(2.0f, -10.0f * t);
+	float easeT = Easing::GetValue(EasingType::EaseInOutExpo, t);
 
 	float x = m_titleCamPos.x + (m_startCamPos.x - m_titleCamPos.x) * easeT;
 	float y = m_titleCamPos.y + (m_startCamPos.y - m_titleCamPos.y) * easeT;
