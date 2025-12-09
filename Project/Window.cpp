@@ -61,9 +61,6 @@ bool Window::Initialize(HINSTANCE hInstance, Input* input)
 	SetForegroundWindow(m_hwnd);
 	SetFocus(m_hwnd);
 
-	// ▼▼▼ 修正: 初期状態ではカーソルを表示するように変更 ▼▼▼
-	ShowCursor(true);
-
 	return true;
 }
 
@@ -153,7 +150,6 @@ LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPA
 		return 0;
 
 	case WM_SETCURSOR:
-		// ▼▼▼ 修正: カーソルを消す条件を厳密化 ▼▼▼
 		// 「ゲームが存在する」かつ「カーソルロックが有効(ゲーム中)」かつ「ポーズ中でない」場合のみカーソルを消す
 		if (g_game && g_game->m_cursorLockEnabled && !g_game->IsPaused())
 		{
