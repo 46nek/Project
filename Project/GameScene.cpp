@@ -56,12 +56,8 @@ GameScene::~GameScene() {}
 
 bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine)
 {
-	// ▼▼▼ ゲームプレイ開始：カーソルロックを有効にする ▼▼▼
-	if (g_game) {
-		g_game->m_cursorLockEnabled = true;
-		// カーソルを隠す
-		while (ShowCursor(false) >= 0);
-	}
+	// ゲーム開始時：カーソルを消して中央固定
+	input->SetCursorLock(true);
 
 	m_uiFadeTimer = 0.0f;
 
@@ -122,10 +118,6 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX
 	if (!InitializePhase5()) return false;
 	return true;
 }
-
-// 以下、他のメソッドは変更ありませんが、ファイルの完全性のために省略せずに記述する場合もあります。
-// 今回はInitialize以降の変更はないため、Initializeメソッドの変更のみ適用してください。
-// 下記は既存コードの続きです（変更なし）
 
 bool GameScene::InitializePhase1(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine)
 {

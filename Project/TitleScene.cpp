@@ -23,12 +23,8 @@ bool TitleScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, Direct
 	m_input = input;
 	m_audioEngine = audioEngine;
 
-	// ▼▼▼ タイトル画面設定：カーソルロック無効 ▼▼▼
-	if (g_game) {
-		g_game->m_cursorLockEnabled = false;
-	}
-	// 初期化時に念のためカーソルを表示させる
-	while (ShowCursor(true) < 0);
+	// タイトル画面：カーソルを表示してロック解除
+	input->SetCursorLock(false);
 
 	std::srand(static_cast<unsigned int>(time(nullptr)));
 
@@ -92,10 +88,6 @@ void TitleScene::Shutdown()
 
 void TitleScene::Update(float deltaTime)
 {
-	// ▼▼▼ カーソル強制表示 ▼▼▼
-	// 何らかの理由でカーソルが消えてしまうのを防ぐため、タイトル画面では常に表示状態にします
-	while (ShowCursor(true) < 0);
-
 	if (m_gameScene)
 	{
 		m_gameScene->UpdateTitleLoop(deltaTime);

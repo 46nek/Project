@@ -2,8 +2,8 @@
 #include <comdef.h>
 
 // Gameのコンストラクタ
-// タイトル画面から始まるため、ポーズは解除、カーソルロックは無効で初期化
-Game::Game() : m_isPaused(false), m_cursorLockEnabled(false) {
+// m_cursorLockEnabled は Inputクラス側で管理するため削除
+Game::Game() : m_isPaused(false) {
 }
 
 Game::~Game() {
@@ -13,8 +13,10 @@ void Game::SetPaused(bool isPaused) {
 	m_isPaused = isPaused;
 
 	if (m_isPaused) {
-		// ポーズ中: カーソルを表示する（メニュー操作のため）
-		while (ShowCursor(true) < 0);
+		// ポーズ中: カーソルを表示する
+		// (ロックフラグ自体は変更せず、一時的に表示だけ許可するイメージでも良いが、
+		//  ここではシンプルに「ロックを一時解除」ではなく「表示」だけ制御します)
+		m_input->SetCursorVisible(true);
 
 		// オーディオを一時停止
 		if (m_audioEngine) {
@@ -22,14 +24,10 @@ void Game::SetPaused(bool isPaused) {
 		}
 	}
 	else {
-		// ポーズ解除（ゲームプレイ再開）
-		// もしゲームプレイ中（カーソルロック有効）なら、カーソルを消す
-		if (m_cursorLockEnabled) {
-			while (ShowCursor(false) >= 0);
-		}
-		else {
-			// タイトル画面などなら、カーソルを表示したままにする
-			while (ShowCursor(true) < 0);
+		// ポーズ解除
+		// 元々ロック状態（ゲーム中）だったなら、カーソルを再度非表示にする
+		if (m_input->IsCursorLocked()) {
+			m_input->SetCursorVisible(false);
 		}
 
 		// オーディオを再開
@@ -75,8 +73,7 @@ bool Game::Initialize(HINSTANCE hInstance) {
 		return false;
 	}
 
-	// 初期状態の設定
-	// ここでカーソル表示状態などが適用されます
+	// 初期設定を反映
 	SetPaused(m_isPaused);
 
 	return true;
@@ -120,25 +117,24 @@ bool Game::Update() {
 	}
 
 	// ESCキーでポーズ切り替え
-	// 「カーソルロックが有効（＝ゲームシーン）」の場合のみ、ESCでポーズ＆カーソル表示を行う
+	// カーソルロックが有効（＝ゲームプレイ中）の場合のみポーズ可能にする
 	if (m_input->IsKeyPressed(VK_ESCAPE)) {
-		if (m_cursorLockEnabled) {
+		if (m_input->IsCursorLocked()) {
 			SetPaused(!m_isPaused);
 		}
 	}
 
 	if (!m_isPaused) {
-		m_sceneManager->Update(m_timer->GetDeltaTime());
+		// Inputの更新（ここでカーソル中央固定が実行されます）
+		// ウィンドウハンドルを渡して、中心位置を計算させます
+		m_input->Update(m_window->GetHwnd());
 
-		// カーソルロックが有効で、かつポーズ中でない場合のみ、マウスを画面中央に固定する
-		if (m_cursorLockEnabled) {
-			HWND hwnd = m_window->GetHwnd();
-			if (GetFocus() == hwnd) {
-				POINT centerPoint = { SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 };
-				ClientToScreen(hwnd, &centerPoint);
-				SetCursorPos(centerPoint.x, centerPoint.y);
-			}
-		}
+		m_sceneManager->Update(m_timer->GetDeltaTime());
+	}
+	else
+	{
+		// ポーズ中はカーソルロック処理（Input::Update）を呼ばないことで、
+		// マウスカーソルを自由に動かせるようにします。
 	}
 
 	m_input->EndFrame();

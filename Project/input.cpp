@@ -2,7 +2,9 @@
 #include <algorithm> 
 #include <iterator>
 
-Input::Input() : m_mouseX(0), m_mouseY(0), m_absMouseX(0), m_absMouseY(0)
+Input::Input() :
+	m_mouseX(0), m_mouseY(0), m_absMouseX(0), m_absMouseY(0),
+	m_isCursorLocked(false), m_isCursorVisible(true) // 初期化
 {
 }
 
@@ -32,6 +34,28 @@ void Input::EndFrame()
 	// 次のフレームのためにマウス移動量をリセット
 	m_mouseX = 0;
 	m_mouseY = 0;
+}
+
+void Input::Update(HWND hwnd)
+{
+	// カーソルロックが有効なら、カーソルを画面中央に戻す
+	if (m_isCursorLocked && hwnd)
+	{
+		// ウィンドウがアクティブな場合のみ実行（非アクティブ時にマウスを奪わないように）
+		if (GetForegroundWindow() == hwnd)
+		{
+			// ウィンドウの中央座標を計算
+			RECT rect;
+			GetClientRect(hwnd, &rect);
+			POINT center;
+			center.x = (rect.right - rect.left) / 2;
+			center.y = (rect.bottom - rect.top) / 2;
+
+			// スクリーン座標に変換してセット
+			ClientToScreen(hwnd, &center);
+			SetCursorPos(center.x, center.y);
+		}
+	}
 }
 
 void Input::KeyDown(unsigned int input)
@@ -81,4 +105,34 @@ void Input::GetMouseDelta(int& x, int& y)
 {
 	x = m_mouseX;
 	y = m_mouseY;
+}
+
+void Input::SetCursorVisible(bool visible)
+{
+	// 状態が変わる場合のみAPIを呼ぶ（ShowCursorは内部カウンタを持つため）
+	if (m_isCursorVisible != visible)
+	{
+		::ShowCursor(visible ? TRUE : FALSE);
+		m_isCursorVisible = visible;
+	}
+}
+
+void Input::SetCursorLock(bool lock)
+{
+	m_isCursorLocked = lock;
+
+	// ロックするときはカーソルを消すのが一般的
+	if (lock)
+	{
+		SetCursorVisible(false);
+	}
+	else
+	{
+		SetCursorVisible(true);
+	}
+}
+
+bool Input::IsCursorLocked() const
+{
+	return m_isCursorLocked;
 }
