@@ -21,6 +21,16 @@ public:
 	void MouseMove(int x, int y);
 
 	/**
+	 * @brief マウスの絶対座標を設定
+	*/
+	void SetMousePosition(int x, int y);
+
+	/**
+	 * @brief マウスの絶対座標を取得
+	 */
+	void GetMousePosition(int& x, int& y);
+
+	/**
 	 * @brief 指定キーが現在押されているか
 	 */
 	bool IsKeyDown(unsigned int key);
@@ -37,4 +47,5 @@ private:
 	bool m_keys[KEY_COUNT];
 	bool m_previousKeys[KEY_COUNT];
 	int m_mouseX, m_mouseY;
+	int m_absMouseX, m_absMouseY;
 };

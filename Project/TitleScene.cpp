@@ -5,10 +5,10 @@
 #include "AssetPaths.h"
 
 TitleScene::TitleScene()
-	: m_pressEnterScale(1.0f),
-	m_fontFactory(nullptr),
+	: m_fontFactory(nullptr),
 	m_glitchTimer(0.0f),
-	m_glitchUpdateInterval(0.1f)
+	m_glitchUpdateInterval(0.1f),
+	m_isPlayHovered(false)
 {
 }
 
@@ -39,11 +39,11 @@ bool TitleScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, Direct
 
 	// 使用するフォント名のリスト (0番目がメイン、残りがグリッチ候補)
 	const wchar_t* fontNames[] = {
-		L"Impact",          // メイン: インパクトのある太字
-		L"Times New Roman", // グリッチ: セリフ体
-		L"Courier New",     // グリッチ: 等幅
-		L"Comic Sans MS",   // グリッチ: 手書き風
-		L"Arial Black"      // グリッチ: 極太
+		L"Impact",          // メイン
+		L"Times New Roman", // グリッチ用
+		L"Courier New",     // グリッチ用
+		L"Comic Sans MS",   // グリッチ用
+		L"Arial Black"      // グリッチ用
 	};
 
 	// 各フォントのラッパーを作成
@@ -54,34 +54,23 @@ bool TitleScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, Direct
 			m_fonts.push_back(wrapper);
 		}
 	}
-	// 少なくとも1つ（メイン）がないと失敗
 	if (m_fonts.empty()) return false;
 
 	// タイトルテキストの設定
 	m_titleText = L"THE UNSEEN";
-
-	// 各文字の状態を初期化
 	m_charStates.resize(m_titleText.length());
-	for (auto& state : m_charStates) {
-		state.fontIndex = 0;
-	}
+	for (auto& state : m_charStates) state.fontIndex = 0;
 
-	m_pressEnter = std::make_unique<Sprite>();
-	if (!m_pressEnter->Initialize(device, AssetPaths::TEX_BUTTON)) return false;
-
-	const float desiredButtonWidth = 400.0f;
-	if (m_pressEnter->GetWidth() > 0)
-	{
-		m_pressEnterScale = desiredButtonWidth / m_pressEnter->GetWidth();
-	}
+	// PLAYボタンテキストの設定
+	m_playText = L"PLAY";
+	m_playCharStates.resize(m_playText.length());
+	for (auto& state : m_playCharStates) state.fontIndex = 0;
 
 	return true;
 }
 
 void TitleScene::Shutdown()
 {
-	m_pressEnter->Shutdown();
-
 	// フォントリソースの解放
 	for (auto* wrapper : m_fonts) {
 		if (wrapper) wrapper->Release();
@@ -107,17 +96,50 @@ void TitleScene::Update(float deltaTime)
 		m_gameScene->UpdateTitleLoop(deltaTime);
 	}
 
+	// --- マウス判定 ---
+	int mx, my;
+	m_input->GetMousePosition(mx, my);
+
+	// PLAYボタンの大まかな矩形を定義 (レンダリング位置と合わせる)
+	// フォントサイズ60、画面中央、Y座標600付近を想定
+	float playFontSize = 60.0f;
+	float playY = 600.0f;
+
+	// 幅の計算 (簡易的にメインフォントで計測)
+	FW1_RECTF rect = { 0, 0, 0, 0 };
+	m_fonts[0]->MeasureString(m_playText.c_str(), nullptr, playFontSize, &rect, 0);
+	float playWidth = rect.Right - rect.Left;
+	float playX = (Game::SCREEN_WIDTH - playWidth) / 2.0f;
+	float playHeight = playFontSize; // 近似値
+
+	// 当たり判定 (少し余裕を持たせる)
+	if (mx >= playX - 20 && mx <= playX + playWidth + 20 &&
+		my >= playY && my <= playY + playHeight)
+	{
+		m_isPlayHovered = true;
+	}
+	else
+	{
+		m_isPlayHovered = false;
+	}
+
 	// --- グリッチ更新処理 ---
 	m_glitchTimer += deltaTime;
 	if (m_glitchTimer > m_glitchUpdateInterval)
 	{
 		m_glitchTimer = 0.0f;
 
-		// 文字ごとに確率でフォントを変更
+		// タイトルのグリッチ
 		for (auto& state : m_charStates)
 		{
-			// 90%の確率でメインフォント(0)に戻す、10%でランダムなフォントに変化
-			if ((std::rand() % 100) < 10)
+			if ((std::rand() % 100) < 10) state.fontIndex = std::rand() % m_fonts.size();
+			else state.fontIndex = 0;
+		}
+
+		// PLAYボタンのグリッチ (ホバー中のみ)
+		for (auto& state : m_playCharStates)
+		{
+			if (m_isPlayHovered && (std::rand() % 100) < 30) // タイトルより少し激しく
 			{
 				state.fontIndex = std::rand() % m_fonts.size();
 			}
@@ -128,7 +150,14 @@ void TitleScene::Update(float deltaTime)
 		}
 	}
 
-	if (m_input->IsKeyPressed(VK_RETURN)) {
+	// ホバーしていないときは即座にフォントを戻す
+	if (!m_isPlayHovered)
+	{
+		for (auto& state : m_playCharStates) state.fontIndex = 0;
+	}
+
+	// クリックでゲーム開始 (左クリック: VK_LBUTTON)
+	if (m_isPlayHovered && m_input->IsKeyPressed(VK_LBUTTON)) {
 		m_nextScene = SceneState::Loading;
 	}
 }
@@ -140,88 +169,71 @@ void TitleScene::Render()
 
 	if (m_gameScene)
 	{
-		// ZバッファをONにして3D描画
 		m_graphicsDevice->GetSwapChain()->TurnZBufferOn(m_graphicsDevice->GetDeviceContext());
 		m_gameScene->RenderStageOnly();
-		// 再びZバッファをOFFにして2D描画
 		m_graphicsDevice->GetSwapChain()->TurnZBufferOff(m_graphicsDevice->GetDeviceContext());
 	}
 
-	// SpriteBatchのBeginにアルファブレンド用のステートを渡す
-	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_graphicsDevice->GetAlphaBlendState());
-	m_pressEnter->Render(m_spriteBatch.get(), { Game::SCREEN_WIDTH / 2.0f, 600.0f }, m_pressEnterScale);
-	m_spriteBatch->End();
-
 	if (!m_fonts.empty())
 	{
-		float fontSize = 120.0f; // タイトルのフォントサイズ
-		float startY = 150.0f;   // Y座標
-
-		// 全体の幅を計算してセンタリングする
-		float totalWidth = 0.0f;
-		std::vector<float> charWidths;
-
-		for (size_t i = 0; i < m_titleText.length(); ++i)
-		{
-			wchar_t c = m_titleText[i];
-			float w = 0.0f;
-
-			// スペースの場合は手動で幅を設定 (フォントサイズの30%程度)
-			if (c == L' ') {
-				w = fontSize * 0.3f;
-			}
-			else {
-				wchar_t str[2] = { c, L'\0' };
-				FW1_RECTF rect = { 0, 0, 0, 0 };
-
-				// MeasureStringには描画フラグ(RESTORESTATE)ではなく 0 を渡すのが無難
-				m_fonts[m_charStates[i].fontIndex]->MeasureString(str, nullptr, fontSize, &rect, 0);
-
-				w = rect.Right - rect.Left;
-
-				// 幅が取得できなかった場合の安全策 (最低限の幅を確保)
-				if (w <= 0.1f) {
-					w = fontSize * 0.5f;
-				}
-				else {
-					// インクの幅ぴったりだとくっつきすぎるため、少し余白(パディング)を足す
-					w += fontSize * 0.1f;
-				}
-			}
-
-			charWidths.push_back(w);
-			totalWidth += w;
-		}
-
-		// 描画開始X位置 (画面中央 - 文字列全体の半分)
-		float currentX = (Game::SCREEN_WIDTH - totalWidth) / 2.0f;
-
-		// 1文字ずつ描画
-		for (size_t i = 0; i < m_titleText.length(); ++i)
-		{
-			wchar_t str[2] = { m_titleText[i], L'\0' };
-			int fontIdx = m_charStates[i].fontIndex;
-			float charW = charWidths[i];
-
-			// スペース以外を描画
-			if (m_titleText[i] != L' ')
+		// ヘルパーラムダ式: 文字列を描画する
+		auto DrawGlitchText = [&](const std::wstring& text, std::vector<CharState>& states, float fontSize, float startY)
 			{
-				// 文字ごとの中心位置を調整して描画したほうがブレが少ないが、
-				// グリッチ感を出すために左寄せ(currentX)で描画
-				m_fonts[fontIdx]->DrawString(
-					m_graphicsDevice->GetDeviceContext(),
-					str,
-					fontSize,
-					currentX,
-					startY,
-					0xFFFFFFFF, // 白
-					FW1_RESTORESTATE
-				);
-			}
+				float totalWidth = 0.0f;
+				std::vector<float> charWidths;
 
-			// 次の文字のためにX座標を進める
-			currentX += charW;
-		}
+				// 幅計算
+				for (size_t i = 0; i < text.length(); ++i)
+				{
+					wchar_t c = text[i];
+					float w = 0.0f;
+					if (c == L' ') {
+						w = fontSize * 0.3f;
+					}
+					else {
+						wchar_t str[2] = { c, L'\0' };
+						FW1_RECTF rect = { 0, 0, 0, 0 };
+						m_fonts[states[i].fontIndex]->MeasureString(str, nullptr, fontSize, &rect, 0);
+						w = rect.Right - rect.Left;
+						if (w <= 0.1f) w = fontSize * 0.5f;
+						else w += fontSize * 0.1f;
+					}
+					charWidths.push_back(w);
+					totalWidth += w;
+				}
+
+				// 描画
+				float currentX = (Game::SCREEN_WIDTH - totalWidth) / 2.0f;
+				for (size_t i = 0; i < text.length(); ++i)
+				{
+					wchar_t str[2] = { text[i], L'\0' };
+					int fontIdx = states[i].fontIndex;
+
+					// 文字色設定
+					UINT32 color = 0xFFFFFFFF; // 白
+
+					if (text[i] != L' ')
+					{
+						m_fonts[fontIdx]->DrawString(
+							m_graphicsDevice->GetDeviceContext(),
+							str,
+							fontSize,
+							currentX,
+							startY,
+							color,
+							FW1_RESTORESTATE
+						);
+					}
+					currentX += charWidths[i];
+				}
+			};
+
+		// タイトルの描画
+		DrawGlitchText(m_titleText, m_charStates, 120.0f, 150.0f);
+
+		// PLAYボタンの描画 (色はホバー時に少し変えるなどの演出も可能ですが、今回はグリッチのみ)
+		// ホバー時は少しだけフォントサイズを変えるなどの演出を入れても面白いです
+		DrawGlitchText(m_playText, m_playCharStates, 60.0f, 600.0f);
 	}
 
 	m_graphicsDevice->GetSwapChain()->TurnZBufferOn(m_graphicsDevice->GetDeviceContext());

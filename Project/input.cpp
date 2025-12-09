@@ -2,7 +2,7 @@
 #include <algorithm> 
 #include <iterator>
 
-Input::Input() : m_mouseX(0), m_mouseY(0)
+Input::Input() : m_mouseX(0), m_mouseY(0), m_absMouseX(0), m_absMouseY(0)
 {
 }
 
@@ -18,6 +18,8 @@ void Input::Initialize()
 	// マウス移動量を0で初期化
 	m_mouseX = 0;
 	m_mouseY = 0;
+	m_absMouseX = 0;
+	m_absMouseY = 0;
 }
 
 void Input::EndFrame()
@@ -44,6 +46,25 @@ void Input::KeyUp(unsigned int input)
 	m_keys[input] = false;
 }
 
+void Input::MouseMove(int x, int y)
+{
+	// 前のフレームからの移動量を加算
+	m_mouseX += x;
+	m_mouseY += y;
+}
+
+void Input::SetMousePosition(int x, int y)
+{
+	m_absMouseX = x;
+	m_absMouseY = y;
+}
+
+void Input::GetMousePosition(int& x, int& y)
+{
+	x = m_absMouseX;
+	y = m_absMouseY;
+}
+
 bool Input::IsKeyDown(unsigned int key)
 {
 	// 指定されたキーが押されているかどうかの状態を返す
@@ -54,12 +75,6 @@ bool Input::IsKeyPressed(unsigned int key)
 {
 	// 現在は押されていて、前のフレームでは押されていなかった場合にtrueを返す
 	return m_keys[key] && !m_previousKeys[key];
-}
-void Input::MouseMove(int x, int y)
-{
-	// 前のフレームからの移動量を加算
-	m_mouseX += x;
-	m_mouseY += y;
 }
 
 void Input::GetMouseDelta(int& x, int& y)

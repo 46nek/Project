@@ -1,5 +1,6 @@
 #include "Window.h"
 #include "Game.h"
+#include <windowsx.h>
 
 extern Game* g_game;
 
@@ -158,6 +159,10 @@ LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPA
 		}
 		// ポーズ中なら、OSのデフォルト処理に任せて矢印カーソルを描画させる
 		break;
+
+	case WM_MOUSEMOVE:
+		// inputインスタンスへ現在のマウス位置を渡す
+		m_input->SetMousePosition(GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam));
 	}
 
 	// 上記で処理されなかったメッセージは、OSの標準処理に任せる
