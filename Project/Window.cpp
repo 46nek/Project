@@ -108,7 +108,8 @@ LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPA
 		if (wparam == FALSE) // 非アクティブになった
 		{
 			// ゲーム中で、かつカーソルロックが有効な場合のみ自動ポーズ
-			if (g_game && !g_game->IsPaused() && g_game->m_cursorLockEnabled)
+			// 修正: Inputクラスの状態を確認する
+			if (g_game && !g_game->IsPaused() && m_input && m_input->IsCursorLocked())
 			{
 				g_game->SetPaused(true);
 			}
@@ -150,8 +151,7 @@ LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPA
 		return 0;
 
 	case WM_SETCURSOR:
-		// 「ゲームが存在する」かつ「カーソルロックが有効(ゲーム中)」かつ「ポーズ中でない」場合のみカーソルを消す
-		if (g_game && g_game->m_cursorLockEnabled && !g_game->IsPaused())
+		if (g_game && m_input && m_input->IsCursorLocked() && !g_game->IsPaused())
 		{
 			SetCursor(NULL);
 			return true;
