@@ -67,7 +67,6 @@ float4 PS(VS_OUTPUT input) : SV_Target
         textureColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
     }
     
-    // Å•Å•Å• Ç±Ç±Ç©ÇÁèCê≥ Å•Å•Å•
     float3 finalNormal;
     if (UseNormalMap)
     {
@@ -80,9 +79,8 @@ float4 PS(VS_OUTPUT input) : SV_Target
     {
         finalNormal = normalize(input.Normal);
     }
-    // Å£Å£Å£ èCê≥Ç±Ç±Ç‹Ç≈ Å£Å£Å£
 
-    float4 ambient = textureColor * float4(0.3f, 0.3f, 0.3f, 1.0f);
+    float4 ambient = textureColor * float4(0.35f, 0.35f, 0.35f, 1.0f);
     float4 totalDiffuse = float4(0, 0, 0, 0);
     float4 totalSpecular = float4(0, 0, 0, 0);
     float3 viewDir = normalize(CameraPosition - input.WorldPos);
