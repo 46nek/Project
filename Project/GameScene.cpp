@@ -9,36 +9,27 @@
 
 std::unique_ptr<GameScene> GameScene::s_transferInstance = nullptr;
 
-namespace {
-	// === 定数定義 ===
+// グローバル変数のGameインスタンスを参照
+extern Game* g_game;
 
-	// オーブ・敵の生成設定
+namespace {
 	constexpr int SPAWN_ROOM_SIZE = 3;
 	constexpr int SPAWN_CORNER_OFFSET = 1;
-	constexpr float SPAWN_CHECK_DISTANCE = 2.0f; // 既存オーブとの最小距離
-
-	// ライト設定 (Color: R, G, B, A)
+	constexpr float SPAWN_CHECK_DISTANCE = 2.0f;
 	const DirectX::XMFLOAT4 COLOR_NORMAL_ORB = { 0.8f, 0.8f, 1.0f, 1.0f };
-	const DirectX::XMFLOAT4 COLOR_ZOOM_ORB = { 0.2f, 1.0f, 0.2f, 1.0f }; // 緑
-	const DirectX::XMFLOAT4 COLOR_RADAR_ORB = { 1.0f, 0.2f, 0.2f, 1.0f }; // 赤
-	const DirectX::XMFLOAT4 COLOR_GOAL_ORB = { 1.0f, 0.8f, 0.0f, 1.0f }; // ゴールド
-
+	const DirectX::XMFLOAT4 COLOR_ZOOM_ORB = { 0.2f, 1.0f, 0.2f, 1.0f };
+	const DirectX::XMFLOAT4 COLOR_RADAR_ORB = { 1.0f, 0.2f, 0.2f, 1.0f };
+	const DirectX::XMFLOAT4 COLOR_GOAL_ORB = { 1.0f, 0.8f, 0.0f, 1.0f };
 	constexpr float ORB_LIGHT_RANGE = 5.0f;
 	constexpr float ORB_LIGHT_INTENSITY = 1.0f;
 	constexpr float SPECIAL_ORB_INTENSITY = 1.5f;
 	constexpr float GOAL_LIGHT_RANGE = 10.0f;
 	constexpr float GOAL_LIGHT_INTENSITY = 2.0f;
-
-	// ビネット効果設定
 	constexpr float VIGNETTE_MIN_INTENSITY = 1.1f;
 	constexpr float VIGNETTE_MAX_INTENSITY = 2.0f;
 	constexpr float VIGNETTE_WARNING_THRESHOLD = 0.3f;
-
-	// その他
 	constexpr float MINIMAP_ZOOM_OUT_LEVEL = 2.0f;
 	constexpr float RADAR_DURATION = 20.0f;
-
-	// カメラの揺れ（ボブ）パラメータ
 	struct BobbingParams {
 		float speed, amount, swaySpeed, swayAmount, rollSpeed;
 	};
@@ -57,7 +48,7 @@ GameScene::GameScene()
 	m_openingTimer(0.0f),
 	m_openingDuration(2.5f),
 	m_titleTimer(0.0f),
-	m_uiFadeTimer(0.0f) // 初期化
+	m_uiFadeTimer(0.0f)
 {
 }
 
@@ -65,12 +56,18 @@ GameScene::~GameScene() {}
 
 bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine)
 {
-	m_uiFadeTimer = 0.0f; // タイマーリセット
+	// ▼▼▼ ゲームプレイ開始：カーソルロックを有効にする ▼▼▼
+	if (g_game) {
+		g_game->m_cursorLockEnabled = true;
+		// カーソルを隠す
+		while (ShowCursor(false) >= 0);
+	}
+
+	m_uiFadeTimer = 0.0f;
 
 	if (s_transferInstance)
 	{
-		// リソース（ポインタ類）の所有権を移動
-		m_graphicsDevice = graphicsDevice; // 引数で更新
+		m_graphicsDevice = graphicsDevice;
 		m_input = input;
 		m_audioEngine = audioEngine;
 
@@ -90,7 +87,6 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX
 		m_walkSoundEffect = std::move(s_transferInstance->m_walkSoundEffect);
 		m_runSoundEffect = std::move(s_transferInstance->m_runSoundEffect);
 
-		// パラメータのコピー
 		m_cachedStageModels = s_transferInstance->m_cachedStageModels;
 		m_cachedDynamicModels = s_transferInstance->m_cachedDynamicModels;
 		m_remainingOrbs = s_transferInstance->m_remainingOrbs;
@@ -100,7 +96,6 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX
 		m_enemyRadarTimer = s_transferInstance->m_enemyRadarTimer;
 		m_vignetteIntensity = s_transferInstance->m_vignetteIntensity;
 
-		// オープニング演出用のパラメータコピー
 		m_isOpening = s_transferInstance->m_isOpening;
 		m_openingTimer = s_transferInstance->m_openingTimer;
 		m_openingDuration = s_transferInstance->m_openingDuration;
@@ -110,14 +105,11 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX
 		m_startCamRot = s_transferInstance->m_startCamRot;
 		m_titleTimer = s_transferInstance->m_titleTimer;
 
-		// ゲーム開始時にオープニングを開始する（タイトルから遷移してきた場合）
-		// タイトルカメラ位置が設定されていればオープニングが必要と判断
 		if (m_titleCamPos.y != 0.0f)
 		{
 			BeginOpening();
 		}
 
-		// 引き継ぎ完了したので元は削除
 		s_transferInstance.reset();
 
 		return true;
@@ -131,6 +123,10 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX
 	return true;
 }
 
+// 以下、他のメソッドは変更ありませんが、ファイルの完全性のために省略せずに記述する場合もあります。
+// 今回はInitialize以降の変更はないため、Initializeメソッドの変更のみ適用してください。
+// 下記は既存コードの続きです（変更なし）
+
 bool GameScene::InitializePhase1(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine)
 {
 	m_graphicsDevice = graphicsDevice;
@@ -140,7 +136,6 @@ bool GameScene::InitializePhase1(GraphicsDevice* graphicsDevice, Input* input, D
 	m_stage = std::make_unique<Stage>();
 	if (!m_stage->Initialize(graphicsDevice)) return false;
 
-	// スタート位置：迷路の上端
 	std::pair<int, int> startPos = m_stage->GetStartPosition();
 	float pathWidth = m_stage->GetPathWidth();
 	float startX = (static_cast<float>(startPos.first) + 0.5f) * pathWidth;
@@ -150,7 +145,6 @@ bool GameScene::InitializePhase1(GraphicsDevice* graphicsDevice, Input* input, D
 
 	m_camera = std::make_unique<Camera>(startX, PLAYER_HEIGHT, startZ);
 
-	// スタート時のカメラ向き：180度（Zマイナス方向＝ゴール方向）
 	m_startCamPos = { startX, PLAYER_HEIGHT, startZ };
 	m_startCamRot = { 0.0f, 180.0f, 0.0f };
 	m_camera->SetRotation(0.0f, 180.0f, 0.0f);
@@ -218,32 +212,22 @@ void GameScene::SetCameraForTitle()
 	float pathWidth = m_stage->GetPathWidth();
 	float centerX = (static_cast<float>(startPos.first) + 0.5f) * pathWidth;
 
-	// ゴール（出口）は Y=0付近
-	// 初期位置設定: ゴールから適度に離れた位置
 	float titleX = centerX;
-	float titleY = 5.0f; // 地面より少し高い位置（プレイヤーの目線より少し上）
+	float titleY = 5.0f;
 	float titleZ = 4.5f * pathWidth;
 
 	m_camera->SetPosition(titleX, titleY, titleZ);
-
-	// 回転: 完全に水平(0.0f)で、後ろ(180.0f)を向く = ゲートを正面に捉える
 	m_camera->SetRotation(0.0f, 180.0f, 0.0f);
 
-	// 【重要】モーションブラー対策
-	// カメラをワープさせた直後は「前回の位置」との差が大きく、激しいブラーが発生します。
-	// Updateを「2回」呼ぶことで、「前回位置」と「現在位置」を一致させ、ブラーを無効化します。
 	m_camera->Update();
 	m_camera->Update();
 
-	// 現在の状態をタイトル用として保存
 	m_titleCamPos = { titleX, titleY, titleZ };
 	m_titleCamRot = { 0.0f, 180.0f, 0.0f };
 
-	// 更新処理を一度呼んでライト等をセットアップ
 	UpdateTitleLoop(0.0f);
 }
 
-// タイトル画面・ロード画面用の更新メソッド
 void GameScene::UpdateTitleLoop(float deltaTime)
 {
 	m_titleTimer += deltaTime;
@@ -259,7 +243,7 @@ void GameScene::BeginOpening()
 {
 	m_isOpening = true;
 	m_openingTimer = 0.0f;
-	m_uiFadeTimer = 0.0f; // オープニング開始時にフェードタイマーをリセット
+	m_uiFadeTimer = 0.0f;
 
 	if (m_camera)
 	{
@@ -276,8 +260,8 @@ void GameScene::UpdateOpening(float deltaTime)
 	if (t >= 1.0f)
 	{
 		t = 1.0f;
-		m_isOpening = false; // オープニング終了
-		m_uiFadeTimer = 0.0f; // UIフェードイン開始
+		m_isOpening = false;
+		m_uiFadeTimer = 0.0f;
 	}
 
 	float easeT = Easing::GetValue(EasingType::EaseInOutExpo, t);
@@ -286,11 +270,9 @@ void GameScene::UpdateOpening(float deltaTime)
 	float y = m_titleCamPos.y + (m_startCamPos.y - m_titleCamPos.y) * easeT;
 	float z = m_titleCamPos.z + (m_startCamPos.z - m_titleCamPos.z) * easeT;
 
-	// 回転の補間（最短経路をとるように調整が必要だが、ここでは単純補間）
 	float currentYaw = m_titleCamRot.y;
 	float targetYaw = m_startCamRot.y;
 
-	// 角度の補正（350度→10度などのケース対応）
 	if (targetYaw - currentYaw > 180.0f) currentYaw += 360.0f;
 	if (targetYaw - currentYaw < -180.0f) currentYaw -= 360.0f;
 
@@ -499,26 +481,21 @@ void GameScene::Update(float deltaTime)
 		return;
 	}
 
-	// オープニング終了後のUIフェード処理
 	if (m_uiFadeTimer < UI_FADE_DURATION)
 	{
 		m_uiFadeTimer += deltaTime;
 		if (m_uiFadeTimer > UI_FADE_DURATION) m_uiFadeTimer = UI_FADE_DURATION;
 	}
 
-	// プレイヤー更新
 	int mouseX, mouseY;
 	m_input->GetMouseDelta(mouseX, mouseY);
 	m_player->Turn(mouseX, mouseY, deltaTime);
 	m_player->Update(deltaTime, m_input, m_stage->GetMazeData(), m_stage->GetPathWidth());
 
-	// ビネット効果更新（分離した関数）
 	UpdateVignette(m_player->GetStaminaPercentage());
 
-	// 敵更新
 	for (auto& enemy : m_enemies) enemy->Update(deltaTime, m_player.get(), m_stage->GetMazeData(), m_stage->GetPathWidth());
 
-	// 通常オーブ更新
 	for (auto& orb : m_orbs)
 	{
 		if (orb && !orb->IsCollected())
@@ -531,7 +508,6 @@ void GameScene::Update(float deltaTime)
 		}
 	}
 
-	// 特殊オーブ更新
 	for (auto it = m_specialOrbs.begin(); it != m_specialOrbs.end(); )
 	{
 		(*it)->Update(deltaTime, m_player.get(), m_lightManager.get(), m_collectSound.get());
@@ -554,7 +530,6 @@ void GameScene::Update(float deltaTime)
 		}
 	}
 
-	// ゴール出現判定
 	if (m_remainingOrbs <= 0 && !m_goalSpawned)
 	{
 		std::pair<int, int> startPos = m_stage->GetStartPosition();
@@ -570,7 +545,6 @@ void GameScene::Update(float deltaTime)
 		m_goalSpawned = true;
 	}
 
-	// ゴールオーブ更新と脱出判定
 	if (m_goalSpawned && m_goalOrb && !m_goalOrb->IsCollected())
 	{
 		if (m_goalOrb->Update(deltaTime, m_player.get(), m_lightManager.get(), m_collectSound.get()))
@@ -594,7 +568,6 @@ void GameScene::Update(float deltaTime)
 		m_enemyRadarTimer -= deltaTime;
 	}
 
-	// カメラ更新
 	DirectX::XMFLOAT3 playerPos = m_player->GetPosition();
 	DirectX::XMFLOAT3 playerRot = m_player->GetRotation();
 	m_camera->SetPosition(playerPos.x, playerPos.y, playerPos.z);
@@ -606,7 +579,6 @@ void GameScene::Update(float deltaTime)
 	m_camera->UpdateBobbing(deltaTime, m_player->IsMoving());
 	m_camera->Update();
 
-	// ライト・UI更新
 	DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
 	m_lightManager->Update(deltaTime, m_camera->GetViewMatrix(), projectionMatrix, m_camera->GetPosition(), m_camera->GetRotation());
 	m_ui->Update(deltaTime, m_remainingOrbs, m_totalOrbs, m_player->GetStaminaPercentage(), m_enemyRadarTimer > 0.0f);
@@ -629,7 +601,6 @@ void GameScene::UpdateVignette(float staminaPercentage)
 void GameScene::RenderStageOnly()
 {
 	m_cachedDynamicModels.clear();
-	// タイトル画面などでは敵やオーブが生成されていない場合があるためチェック
 	size_t dynamicCount = m_enemies.size() + m_orbs.size() + m_specialOrbs.size() + (m_goalOrb ? 1 : 0) + 1;
 	m_cachedDynamicModels.reserve(dynamicCount);
 
@@ -660,20 +631,17 @@ void GameScene::RenderStageOnly()
 
 void GameScene::Render()
 {
-	// 通常描画（背景＋UI＋EndScene）
 	RenderStageOnly();
 
 	if (m_ui)
 	{
-		// UIの透明度計算
 		float uiAlpha = 1.0f;
 		if (m_isOpening)
 		{
-			uiAlpha = 0.0f; // オープニング中は非表示
+			uiAlpha = 0.0f;
 		}
 		else
 		{
-			// フェードイン計算
 			uiAlpha = m_uiFadeTimer / UI_FADE_DURATION;
 			if (uiAlpha > 1.0f) uiAlpha = 1.0f;
 		}

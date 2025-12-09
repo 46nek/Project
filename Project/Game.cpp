@@ -1,8 +1,9 @@
 #include "Game.h"
 #include <comdef.h>
 
-// Gameのコンストラクタで、ゲーム開始時にポーズ状態にする
-Game::Game() : m_isPaused(true) {
+// Gameのコンストラクタ
+// タイトル画面から始まるため、ポーズは解除、カーソルロックは無効で初期化
+Game::Game() : m_isPaused(false), m_cursorLockEnabled(false) {
 }
 
 Game::~Game() {
@@ -10,20 +11,28 @@ Game::~Game() {
 
 void Game::SetPaused(bool isPaused) {
 	m_isPaused = isPaused;
+
 	if (m_isPaused) {
-		// カーソルが表示されるまで ShowCursor(true) を呼び出し続ける
+		// ポーズ中: カーソルを表示する（メニュー操作のため）
 		while (ShowCursor(true) < 0);
 
-		// ▼▼▼ オーディオを一時停止 ▼▼▼
+		// オーディオを一時停止
 		if (m_audioEngine) {
 			m_audioEngine->Suspend();
 		}
 	}
 	else {
-		// カーソルが非表示になるまで ShowCursor(false) を呼び出し続ける
-		while (ShowCursor(false) >= 0);
+		// ポーズ解除（ゲームプレイ再開）
+		// もしゲームプレイ中（カーソルロック有効）なら、カーソルを消す
+		if (m_cursorLockEnabled) {
+			while (ShowCursor(false) >= 0);
+		}
+		else {
+			// タイトル画面などなら、カーソルを表示したままにする
+			while (ShowCursor(true) < 0);
+		}
 
-		// ▼▼▼ オーディオを再開 ▼▼▼
+		// オーディオを再開
 		if (m_audioEngine) {
 			m_audioEngine->Resume();
 		}
@@ -35,10 +44,8 @@ bool Game::IsPaused() const {
 }
 
 bool Game::Initialize(HINSTANCE hInstance) {
-	// ▼▼▼ COMライブラリを初期化 ▼▼▼
 	HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 	if (FAILED(hr)) {
-		// エラー処理
 		return false;
 	}
 
@@ -68,7 +75,8 @@ bool Game::Initialize(HINSTANCE hInstance) {
 		return false;
 	}
 
-	// SetPausedを呼び出して初期カーソル状態とオーディオ状態を確定させる
+	// 初期状態の設定
+	// ここでカーソル表示状態などが適用されます
 	SetPaused(m_isPaused);
 
 	return true;
@@ -78,7 +86,7 @@ void Game::Shutdown() {
 	if (m_audioEngine) {
 		m_audioEngine->Suspend();
 	}
-	m_audioEngine.reset(); // スマートポインタを解放
+	m_audioEngine.reset();
 
 	if (m_sceneManager) m_sceneManager->Shutdown();
 	if (m_graphicsDevice) m_graphicsDevice->Shutdown();
@@ -107,24 +115,29 @@ bool Game::Update() {
 	m_timer->Tick();
 
 	if (m_audioEngine && !m_audioEngine->Update()) {
-		// オーディオデバイスが失われた場合などのエラー処理
 		if (m_audioEngine->IsCriticalError()) {
-			// エラーメッセージを表示するなど
 		}
 	}
 
+	// ESCキーでポーズ切り替え
+	// 「カーソルロックが有効（＝ゲームシーン）」の場合のみ、ESCでポーズ＆カーソル表示を行う
 	if (m_input->IsKeyPressed(VK_ESCAPE)) {
-		SetPaused(!m_isPaused);
+		if (m_cursorLockEnabled) {
+			SetPaused(!m_isPaused);
+		}
 	}
 
 	if (!m_isPaused) {
 		m_sceneManager->Update(m_timer->GetDeltaTime());
 
-		HWND hwnd = m_window->GetHwnd();
-		if (GetFocus() == hwnd) {
-			POINT centerPoint = { SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 };
-			ClientToScreen(hwnd, &centerPoint);
-			SetCursorPos(centerPoint.x, centerPoint.y);
+		// カーソルロックが有効で、かつポーズ中でない場合のみ、マウスを画面中央に固定する
+		if (m_cursorLockEnabled) {
+			HWND hwnd = m_window->GetHwnd();
+			if (GetFocus() == hwnd) {
+				POINT centerPoint = { SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 };
+				ClientToScreen(hwnd, &centerPoint);
+				SetCursorPos(centerPoint.x, centerPoint.y);
+			}
 		}
 	}
 

@@ -60,7 +60,9 @@ bool Window::Initialize(HINSTANCE hInstance, Input* input)
 	ShowWindow(m_hwnd, SW_SHOW);
 	SetForegroundWindow(m_hwnd);
 	SetFocus(m_hwnd);
-	ShowCursor(false);
+
+	// ▼▼▼ 修正: 初期状態ではカーソルを表示するように変更 ▼▼▼
+	ShowCursor(true);
 
 	return true;
 }
@@ -108,13 +110,13 @@ LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPA
 	case WM_ACTIVATEAPP: // アプリケーションのフォーカスが切り替わった
 		if (wparam == FALSE) // 非アクティブになった
 		{
-			if (g_game && !g_game->IsPaused())
+			// ゲーム中で、かつカーソルロックが有効な場合のみ自動ポーズ
+			if (g_game && !g_game->IsPaused() && g_game->m_cursorLockEnabled)
 			{
-				// ゲーム中だったら、自動的にポーズする
 				g_game->SetPaused(true);
 			}
 		}
-		break; // breakに変更し、デフォルト処理も通す
+		break;
 
 	case WM_LBUTTONDOWN: // マウスの左クリック
 		if (g_game && g_game->IsPaused())
@@ -151,20 +153,19 @@ LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPA
 		return 0;
 
 	case WM_SETCURSOR:
-		// ポーズ中でなければOSにカーソルを描画させない(NULLを設定)
-		if (g_game && !g_game->IsPaused())
+		// ▼▼▼ 修正: カーソルを消す条件を厳密化 ▼▼▼
+		// 「ゲームが存在する」かつ「カーソルロックが有効(ゲーム中)」かつ「ポーズ中でない」場合のみカーソルを消す
+		if (g_game && g_game->m_cursorLockEnabled && !g_game->IsPaused())
 		{
 			SetCursor(NULL);
 			return true;
 		}
-		// ポーズ中なら、OSのデフォルト処理に任せて矢印カーソルを描画させる
+		// タイトル画面やポーズ中は、OSのデフォルト処理に任せて矢印カーソルを描画させる
 		break;
 
 	case WM_MOUSEMOVE:
-		// inputインスタンスへ現在のマウス位置を渡す
 		m_input->SetMousePosition(GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam));
 	}
 
-	// 上記で処理されなかったメッセージは、OSの標準処理に任せる
 	return DefWindowProc(hwnd, umsg, wparam, lparam);
 }

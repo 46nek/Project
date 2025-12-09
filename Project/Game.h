@@ -49,6 +49,9 @@ public:
 	 */
 	bool IsPaused() const;
 
+	// trueならゲームプレイ中としてカーソルを隠し、falseならカーソルを表示します
+	bool m_cursorLockEnabled;
+
 private:
 	/**
 	 * @brief フレームごとの更新処理
