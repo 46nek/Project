@@ -10,7 +10,6 @@ namespace AssetPaths {
 
 	// === テクスチャ (WIC/DirectX用: wchar_t*) ===
 	// UI関連
-	const wchar_t* const TEX_TITLE = L"Assets/title.png";
 	const wchar_t* const TEX_BUTTON = L"Assets/button.png";
 	const wchar_t* const TEX_BACKGROUND = L"Assets/background.png";
 

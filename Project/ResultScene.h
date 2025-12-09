@@ -20,7 +20,6 @@ public:
 
 private:
 	std::unique_ptr<Sprite> m_background;
-	std::unique_ptr<Sprite> m_clearText;    // "GAME CLEAR" などの画像
 	std::unique_ptr<Sprite> m_pressEnter;   // "Press Enter" などの画像（タイトルのを使い回せます）
 	std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
 
