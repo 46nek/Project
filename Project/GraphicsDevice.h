@@ -1,5 +1,3 @@
-// GraphicsDevice.h (この内容で完全に置き換えてください)
-
 #pragma once
 #include <d3d11.h>
 #include <DirectXMath.h>
@@ -39,15 +37,20 @@ struct MaterialBufferType
 	BOOL UseNormalMap;
 	DirectX::XMFLOAT2 Padding;
 };
+
 /**
  * @struct PostProcessBufferType
- * @brief ポストプロセスエフェクト用のパラメータをシェーダーに渡すための構造体
+ * @brief ポストプロセスおよびフォグ等のエフェクト用パラメータ
  */
 struct PostProcessBufferType
 {
 	float VignetteIntensity;
-	DirectX::XMFLOAT3 Padding; // 16バイトアラインメントのためのパディング
+	float FogStart;          // フォグの開始距離
+	float FogEnd;            // フォグの終了距離（この距離で完全にフォグ色になる）
+	float Padding;           // アライメント用パディング
+	DirectX::XMFLOAT4 FogColor; // フォグの色
 };
+
 struct LightBufferType;
 
 class GraphicsDevice

@@ -1,3 +1,5 @@
+// PixelShader.hlsl (この内容で完全に置き換えてください)
+
 #define MAX_LIGHTS 64
 
 Texture2D shaderTexture : register(t0);
@@ -10,14 +12,19 @@ cbuffer MaterialBuffer : register(b2)
 {
     float4 EmissiveColor;
     bool UseTexture;
-    bool UseNormalMap; 
+    bool UseNormalMap;
     float2 Padding;
 };
+
 cbuffer PostProcessBuffer : register(b3)
 {
     float VignetteIntensity;
-    float3 PostProcessPadding;
+    float FogStart;
+    float FogEnd;
+    float PostProcessPadding;
+    float4 FogColor;
 };
+
 #define DIRECTIONAL_LIGHT 0
 #define POINT_LIGHT 1
 #define SPOT_LIGHT 2
@@ -33,7 +40,7 @@ struct Light
     int Type;
     bool Enabled;
     float Intensity;
-    float2 Padding;
+    float2 Padding_Light;
 };
 
 cbuffer LightBuffer : register(b1)
@@ -80,15 +87,17 @@ float4 PS(VS_OUTPUT input) : SV_Target
         finalNormal = normalize(input.Normal);
     }
 
-    float4 ambient = textureColor * float4(0.35f, 0.35f, 0.35f, 1.0f);
+    float4 ambient = textureColor * float4(0.4f, 0.4f, 0.4f, 1.0f);
     float4 totalDiffuse = float4(0, 0, 0, 0);
     float4 totalSpecular = float4(0, 0, 0, 0);
     float3 viewDir = normalize(CameraPosition - input.WorldPos);
+    float distToCamera = distance(CameraPosition, input.WorldPos);
     
     float shadowFactor = 1.0f;
     float2 projectTexCoord;
     projectTexCoord.x = input.LightViewPos.x / input.LightViewPos.w / 2.0f + 0.5f;
     projectTexCoord.y = -input.LightViewPos.y / input.LightViewPos.w / 2.0f + 0.5f;
+    
     if ((saturate(projectTexCoord.x) == projectTexCoord.x) && (saturate(projectTexCoord.y) == projectTexCoord.y))
     {
         shadowFactor = shadowMapTexture.SampleCmpLevelZero(ShadowSampleType, projectTexCoord, input.LightViewPos.z / input.LightViewPos.w);
@@ -98,19 +107,20 @@ float4 PS(VS_OUTPUT input) : SV_Target
     {
         if (!Lights[i].Enabled)
             continue;
+            
         float3 lightDir;
-        float distance;
+        float distanceToLight;
 
         if (Lights[i].Type == DIRECTIONAL_LIGHT)
         {
             lightDir = -normalize(Lights[i].Direction);
-            distance = 0.0f;
+            distanceToLight = 0.0f;
         }
         else
         {
             lightDir = normalize(Lights[i].Position - input.WorldPos);
-            distance = length(Lights[i].Position - input.WorldPos);
-            if (distance > Lights[i].Range)
+            distanceToLight = length(Lights[i].Position - input.WorldPos);
+            if (distanceToLight > Lights[i].Range)
             {
                 continue;
             }
@@ -119,8 +129,8 @@ float4 PS(VS_OUTPUT input) : SV_Target
         float attenuation = 1.0f;
         if (Lights[i].Type != DIRECTIONAL_LIGHT)
         {
-            attenuation = 1.0f / (Lights[i].Attenuation.x + Lights[i].Attenuation.y * distance + Lights[i].Attenuation.z * (distance * distance));
-            float fade = saturate(1.0 - distance / Lights[i].Range);
+            attenuation = 1.0f / (Lights[i].Attenuation.x + Lights[i].Attenuation.y * distanceToLight + Lights[i].Attenuation.z * (distanceToLight * distanceToLight));
+            float fade = saturate(1.0 - distanceToLight / Lights[i].Range);
             float falloff = fade * fade;
             attenuation *= falloff;
         }
@@ -135,11 +145,11 @@ float4 PS(VS_OUTPUT input) : SV_Target
             spotFactor = smoothstep(outerConeCos, innerConeCos, spotCos);
         }
 
-        float diffuseIntensity = saturate(dot(finalNormal, lightDir)); // finalNormal を使用
+        float diffuseIntensity = saturate(dot(finalNormal, lightDir));
         totalDiffuse += Lights[i].Color * diffuseIntensity * Lights[i].Intensity * attenuation * spotFactor * shadowFactor;
-
+        
         float3 halfwayDir = normalize(lightDir + viewDir);
-        float specAngle = saturate(dot(finalNormal, halfwayDir)); // finalNormal を使用
+        float specAngle = saturate(dot(finalNormal, halfwayDir));
         float specular = pow(specAngle, 32.0f);
         totalSpecular += float4(1.0f, 1.0f, 1.0f, 1.0f) * specular * Lights[i].Intensity * attenuation * spotFactor * shadowFactor;
     }
@@ -147,6 +157,10 @@ float4 PS(VS_OUTPUT input) : SV_Target
     float4 finalColor = (textureColor * (totalDiffuse + ambient)) + totalSpecular;
     finalColor += EmissiveColor;
     finalColor.a = textureColor.a;
+
+    // --- Fog Effect ---
+    float fogFactor = saturate((distToCamera - FogStart) / (FogEnd - FogStart));
+    finalColor.rgb = lerp(finalColor.rgb, FogColor.rgb, fogFactor);
 
     // Vignette Effect
     float2 screenCenter = float2(0.5f, 0.5f);

@@ -74,8 +74,7 @@ bool GraphicsDevice::Initialize(HWND hWnd, int screenWidth, int screenHeight)
 	hr = m_d3dDevice->CreateBuffer(&materialBufferDesc, NULL, &m_materialBuffer);
 	if (FAILED(hr)) return false;
 
-	hr = m_d3dDevice->CreateBuffer(&materialBufferDesc, NULL, &m_materialBuffer);
-	if (FAILED(hr)) return false;
+	// 重複削除済み
 
 	D3D11_BUFFER_DESC postProcessBufferDesc = {};
 	postProcessBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -209,6 +208,17 @@ bool GraphicsDevice::UpdateMaterialBuffer(const MaterialBufferType& materialBuff
 	return true;
 }
 
+bool GraphicsDevice::UpdatePostProcessBuffer(const PostProcessBufferType& postProcessBuffer)
+{
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	if (FAILED(m_immediateContext->Map(m_postProcessBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) return false;
+	PostProcessBufferType* dataPtr = (PostProcessBufferType*)mappedResource.pData;
+	*dataPtr = postProcessBuffer;
+	m_immediateContext->Unmap(m_postProcessBuffer, 0);
+	m_immediateContext->PSSetConstantBuffers(3, 1, &m_postProcessBuffer);
+	return true;
+}
+
 ID3D11BlendState* GraphicsDevice::GetAlphaBlendState() const
 {
 	return m_alphaBlendState;
@@ -222,15 +232,4 @@ ID3D11BlendState* GraphicsDevice::GetDefaultBlendState() const
 ID3D11RasterizerState* GraphicsDevice::GetDefaultRasterizerState() const
 {
 	return m_defaultRasterizerState;
-}
-bool GraphicsDevice::UpdatePostProcessBuffer(const PostProcessBufferType& postProcessBuffer)
-{
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	if (FAILED(m_immediateContext->Map(m_postProcessBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) return false;
-	PostProcessBufferType* dataPtr = (PostProcessBufferType*)mappedResource.pData;
-	*dataPtr = postProcessBuffer;
-	m_immediateContext->Unmap(m_postProcessBuffer, 0);
-	// スロット(b3)にバッファを設定
-	m_immediateContext->PSSetConstantBuffers(3, 1, &m_postProcessBuffer);
-	return true;
 }

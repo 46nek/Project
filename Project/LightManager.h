@@ -1,6 +1,4 @@
-﻿// LightManager.h
-
-#pragma once
+﻿#pragma once
 #include <DirectXMath.h>
 #include <vector>
 #include <random>
@@ -34,6 +32,7 @@ public:
 
 private:
 	void UpdateFlashlight(float deltaTime, const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT3& rotation);
+	void UpdatePlayerLight(const DirectX::XMFLOAT3& position); // 追加
 	void ApplyFlicker(int lightIndex, float deltaTime);
 
 	bool CheckOcclusion(const DirectX::XMFLOAT3& start, const DirectX::XMFLOAT3& end, float range);
@@ -45,6 +44,7 @@ private:
 	DirectX::XMMATRIX m_lightProjectionMatrix;
 
 	int m_flashlightIndex;
+	int m_playerLightIndex; 
 	float m_flashlightBaseIntensity;
 	float m_flickerTimer;
 	float m_nextFlickerTime;

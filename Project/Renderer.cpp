@@ -22,7 +22,7 @@ void Renderer::RenderSceneToTexture(
 
 	RenderTarget* renderTarget = m_graphicsDevice->GetRenderTarget();
 	renderTarget->SetRenderTarget(m_graphicsDevice->GetDeviceContext());
-	renderTarget->ClearRenderTarget(m_graphicsDevice->GetDeviceContext(), 0.1f, 0.2f, 0.4f, 1.0f);
+	renderTarget->ClearRenderTarget(m_graphicsDevice->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f); // 背景を黒に変更（フォグに合わせる）
 
 	RenderDepthPass(stageModels, dynamicModels, lightManager);
 
@@ -36,8 +36,12 @@ void Renderer::RenderFinalPass(const Camera* camera, float vignetteIntensity) {
 	ShaderManager* shaderManager = m_graphicsDevice->GetShaderManager();
 
 	// ポストプロセス用の定数バッファを更新
+	// フォグの値はここでは使われませんが、バッファ全体を更新する必要があります
 	PostProcessBufferType postProcessBuffer;
 	postProcessBuffer.VignetteIntensity = vignetteIntensity;
+	postProcessBuffer.FogStart = 0.0f;
+	postProcessBuffer.FogEnd = 0.0f;
+	postProcessBuffer.FogColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 	m_graphicsDevice->UpdatePostProcessBuffer(postProcessBuffer);
 
 	m_graphicsDevice->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
@@ -93,7 +97,6 @@ void Renderer::RenderDepthPass(
 	deviceContext->VSSetShader(shaderManager->GetDepthVertexShader(), nullptr, 0);
 	deviceContext->PSSetShader(nullptr, nullptr, 0);
 
-	// ラムダ式で描画処理を共通化
 	auto renderDepth = [&](Model* model) {
 		if (!model) return;
 
@@ -151,6 +154,15 @@ void Renderer::RenderMainPass(
 	deviceContext->PSSetShader(shaderManager->GetPixelShader(), nullptr, 0);
 
 	m_graphicsDevice->UpdateLightBuffer(lightManager->GetLightBuffer());
+
+	// --- フォグの設定をここで送信 ---
+	PostProcessBufferType fogParams;
+	fogParams.VignetteIntensity = 0.8f; // PixelShaderで使われるデフォルト値
+	fogParams.FogStart = 15.0f;          // フォグがかかり始める距離（プレイヤーのすぐ近く）
+	fogParams.FogEnd = 60.0f;           // 完全にフォグ色になる距離（視界の限界）
+	fogParams.FogColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f); // 黒い霧（闇）
+	m_graphicsDevice->UpdatePostProcessBuffer(fogParams);
+	// --------------------------------
 
 	ID3D11SamplerState* samplerState = m_graphicsDevice->GetSamplerState();
 	deviceContext->PSSetSamplers(0, 1, &samplerState);

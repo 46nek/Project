@@ -1,5 +1,3 @@
-// PostProcessVertexShader.hlsl (この内容で完全に置き換えてください)
-
 // 3Dモデルと同じ、完全な頂点構造を入力として受け取る
 struct VS_INPUT
 {
