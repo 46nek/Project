@@ -472,7 +472,17 @@ void GameScene::Update(float deltaTime)
 
 		return;
 	}
-
+	// ESCキーが押されたらカーソルを表示（ロック解除）
+	if (m_input->IsKeyPressed(VK_ESCAPE))
+	{
+		m_input->SetCursorLock(false);
+	}
+	// 左クリックされたらカーソルを非表示（ロック）
+	// Inputクラスでクリックが取れない場合に備え、GetAsyncKeyStateも併用
+	else if (m_input->IsKeyPressed(VK_LBUTTON) || (GetAsyncKeyState(VK_LBUTTON) & 0x8000))
+	{
+		m_input->SetCursorLock(true);
+	}
 	if (m_uiFadeTimer < UI_FADE_DURATION)
 	{
 		m_uiFadeTimer += deltaTime;

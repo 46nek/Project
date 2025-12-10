@@ -44,9 +44,9 @@ private:
 
 	void UpdateOpening(float deltaTime);
 
-	static constexpr float PLAYER_HEIGHT = 4.0f;
+	static constexpr float PLAYER_HEIGHT = 3.0f;
 	static constexpr int NUM_ENEMIES = 2;
-	static constexpr int NUM_ORBS = 1;
+	static constexpr int NUM_ORBS = 20;
 
 	// UIフェードインにかける時間（秒）
 	static constexpr float UI_FADE_DURATION = 0.5f;
