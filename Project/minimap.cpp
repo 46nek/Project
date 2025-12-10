@@ -226,7 +226,6 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 		};
 
 	CheckClosestOrb(orbs);
-	CheckClosestOrb(specialOrbs);
 
 	// --- –îˆó‚Ì•`‰æ ---
 	if (foundTarget)
