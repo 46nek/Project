@@ -146,7 +146,6 @@ void TitleScene::Update(float deltaTime)
 		for (auto& state : m_playCharStates) state.fontIndex = 0;
 	}
 
-	// ▼▼▼ クリック判定の修正 ▼▼▼
 	// Inputクラスの判定に加え、Windows標準のAPIでもチェックします（Inputクラスの仕様差異対策）
 	bool isLeftClicked = m_input->IsKeyPressed(VK_LBUTTON) || (GetAsyncKeyState(VK_LBUTTON) & 0x8000);
 	bool isEnterPressed = m_input->IsKeyPressed(VK_RETURN);
@@ -154,6 +153,7 @@ void TitleScene::Update(float deltaTime)
 	// PLAYボタンクリック または Enterキー で開始
 	if ((m_isPlayHovered && isLeftClicked) || isEnterPressed) {
 		m_nextScene = SceneState::Loading;
+		m_input->SetCursorVisible(false);
 	}
 }
 

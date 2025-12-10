@@ -108,7 +108,6 @@ LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPA
 		if (wparam == FALSE) // 非アクティブになった
 		{
 			// ゲーム中で、かつカーソルロックが有効な場合のみ自動ポーズ
-			// 修正: Inputクラスの状態を確認する
 			if (g_game && !g_game->IsPaused() && m_input && m_input->IsCursorLocked())
 			{
 				g_game->SetPaused(true);
@@ -153,10 +152,10 @@ LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPA
 	case WM_SETCURSOR:
 		if (g_game && m_input && m_input->IsCursorLocked() && !g_game->IsPaused())
 		{
-			SetCursor(NULL);
-			return true;
+			SetCursor(NULL); // カーソル画像を「なし」にする（＝描画されない）
+			return true;     // 処理完了（OSのデフォルト処理をさせない）
 		}
-		// タイトル画面やポーズ中は、OSのデフォルト処理に任せて矢印カーソルを描画させる
+		// タイトル画面やポーズ中はbreakして、OSのデフォルト処理(DefWindowProc)に任せることで矢印カーソルが描画される
 		break;
 
 	case WM_MOUSEMOVE:
