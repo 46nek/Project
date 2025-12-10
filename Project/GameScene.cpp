@@ -210,9 +210,9 @@ void GameScene::SetCameraForTitle()
 
 	m_camera->SetPosition(titleX, titleY, titleZ);
 	m_camera->SetRotation(0.0f, 180.0f, 0.0f);
-
-	m_camera->Update();
-	m_camera->Update();
+	
+	m_camera->Update(0.0f);
+	m_camera->Update(0.0f);
 
 	m_titleCamPos = { titleX, titleY, titleZ };
 	m_titleCamRot = { 0.0f, 180.0f, 0.0f };
@@ -274,7 +274,7 @@ void GameScene::UpdateOpening(float deltaTime)
 
 	m_camera->SetPosition(x, y, z);
 	m_camera->SetRotation(rx, ry, rz);
-	m_camera->Update();
+	m_camera->Update(deltaTime);
 
 	m_vignetteIntensity = t * VIGNETTE_MIN_INTENSITY;
 
@@ -495,6 +495,16 @@ void GameScene::Update(float deltaTime)
 	m_player->Update(deltaTime, m_input, m_stage->GetMazeData(), m_stage->GetPathWidth());
 
 	UpdateVignette(m_player->GetStaminaPercentage());
+	
+	float baseFov = DirectX::XM_PI / 4.0f; 
+	float runFov = DirectX::XM_PI / 3.0f;
+	
+	if (m_player->IsRunning()) {
+		m_camera->SetTargetFOV(runFov);
+	}
+	else {
+		m_camera->SetTargetFOV(baseFov);
+	}
 
 	for (auto& enemy : m_enemies) enemy->Update(deltaTime, m_player.get(), m_stage->GetMazeData(), m_stage->GetPathWidth());
 
@@ -579,7 +589,7 @@ void GameScene::Update(float deltaTime)
 	m_camera->SetBobbingParameters(bp.speed, bp.amount, bp.swaySpeed, bp.swayAmount, bp.rollSpeed);
 
 	m_camera->UpdateBobbing(deltaTime, m_player->IsMoving());
-	m_camera->Update();
+	m_camera->Update(deltaTime);
 
 	DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
 	m_lightManager->Update(deltaTime, m_camera->GetViewMatrix(), projectionMatrix, m_camera->GetPosition(), m_camera->GetRotation());

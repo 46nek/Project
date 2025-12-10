@@ -59,7 +59,7 @@ void Renderer::RenderFinalPass(const Camera* camera, float vignetteIntensity) {
 		blurAmount = 0.0f;
 	}
 
-	DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
+	DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(camera->GetFOV(), (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
 	DirectX::XMMATRIX prevViewProj = previousView * projectionMatrix;
 	DirectX::XMMATRIX currentViewProj = currentView * projectionMatrix;
 	DirectX::XMMATRIX currentViewProjInv = DirectX::XMMatrixInverse(nullptr, currentViewProj);
@@ -134,7 +134,7 @@ void Renderer::RenderMainPass(
 	ShadowMapper* shadowMapper = m_graphicsDevice->GetShadowMapper();
 
 	DirectX::XMMATRIX viewMatrix = camera->GetViewMatrix();
-	DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
+	DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(camera->GetFOV(), (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
 	m_frustum->ConstructFrustum(viewMatrix, projectionMatrix);
 
 	D3D11_VIEWPORT vp = {};

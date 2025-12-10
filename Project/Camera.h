@@ -1,4 +1,3 @@
-// Camera.h (Š®‘Sã‘‚«)
 #pragma once
 #include <DirectXMath.h>
 
@@ -13,10 +12,13 @@ public:
 	DirectX::XMFLOAT3 GetPosition() const;
 	DirectX::XMFLOAT3 GetRotation() const;
 
-	void Update();
+	void Update(float deltaTime);
+
+	void SetTargetFOV(float fov); // –Ú•WFOV‚ğİ’è
+	float GetFOV() const;         // Œ»İ‚ÌFOV‚ğæ“¾
 
 	DirectX::XMMATRIX GetViewMatrix() const;
-	DirectX::XMMATRIX GetPreviousViewMatrix() const; // <--- ’Ç‰Á
+	DirectX::XMMATRIX GetPreviousViewMatrix() const;
 
 	void MoveForward(float deltaTime);
 	void MoveBackward(float deltaTime);
@@ -36,6 +38,9 @@ private:
 
 	float m_moveSpeed;
 	float m_rotationSpeed;
+
+	float m_fov;            // Œ»İ‚ÌFOV
+	float m_targetFov;      // –Ú•W‚ÌFOV
 
 	float m_bobbingTimer;
 	float m_bobbingAmount;

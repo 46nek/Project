@@ -1,6 +1,11 @@
 #include "Camera.h"
 #include <cmath>
 
+template<typename T>
+T Lerp(T a, T b, T t) {
+	return a + (b - a) * t;
+}
+
 Camera::Camera(float x, float y, float z)
 {
 	m_positionX = x;
@@ -25,6 +30,9 @@ Camera::Camera(float x, float y, float z)
 	m_bobbingSpeed = 14.0f;
 	m_swaySpeed = 7.0f;
 	m_rollSpeed = 7.0f;
+
+	m_fov = DirectX::XM_PI / 4.0f;
+	m_targetFov = m_fov;
 }
 
 Camera::~Camera()
@@ -56,11 +64,23 @@ DirectX::XMFLOAT3 Camera::GetRotation() const
 {
 	return DirectX::XMFLOAT3(m_rotationX, m_rotationY, m_rotationZ);
 }
-
-void Camera::Update()
+void Camera::SetTargetFOV(float fov)
 {
-	// 現在のビュー行列を前のフレームのものとして保存
-	m_previousViewMatrix = m_viewMatrix; 
+	m_targetFov = fov;
+}
+
+float Camera::GetFOV() const
+{
+	return m_fov;
+}
+void Camera::Update(float deltaTime)
+{
+	// 現在のビュー行列を保存
+	m_previousViewMatrix = m_viewMatrix;
+
+	// FOVの滑らかな補間処理
+	float fovSpeed = 5.0f * deltaTime;
+	m_fov = Lerp(m_fov, m_targetFov, fovSpeed);
 
 	DirectX::XMFLOAT3 up, position, lookAt;
 	DirectX::XMVECTOR upVector, positionVector, lookAtVector;
