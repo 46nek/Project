@@ -7,9 +7,9 @@
 #include "LightManager.h"
 #include "Renderer.h"
 #include "Stage.h"
-#include "Enemy.h"
-#include "Orb.h"
 #include "UI.h"
+#include "GameObjectManager.h"
+#include "CameraDirector.h" 
 
 class GameScene : public Scene
 {
@@ -29,26 +29,14 @@ public:
 	void Update(float deltaTime) override;
 	void Render() override;
 
+	// TitleSceneから呼ばれる関数（中身はDirectorに丸投げします）
 	void UpdateTitleLoop(float deltaTime);
-
 	void RenderStageOnly();
 	void SetCameraForTitle();
 	void BeginOpening();
 
 private:
-	bool InitializeEnemies();
-	bool InitializeOrbs();
-	bool InitializeSpecialOrbs();
-
-	void UpdateVignette(float staminaPercentage);
-
-	void UpdateOpening(float deltaTime);
-
 	static constexpr float PLAYER_HEIGHT = 3.0f;
-	static constexpr int NUM_ENEMIES = 2;
-	static constexpr int NUM_ORBS = 20;
-
-	// UIフェードインにかける時間（秒）
 	static constexpr float UI_FADE_DURATION = 0.5f;
 
 	std::unique_ptr<DirectX::SoundEffect> m_collectSound;
@@ -56,37 +44,19 @@ private:
 	std::unique_ptr<DirectX::SoundEffect> m_runSoundEffect;
 
 	std::unique_ptr<Stage> m_stage;
-	std::unique_ptr<Camera> m_camera;
+	std::shared_ptr<Camera> m_camera; // ★ unique_ptr から shared_ptr に変更（Directorと共有するため）
 	std::unique_ptr<LightManager> m_lightManager;
 	std::unique_ptr<Renderer> m_renderer;
 
 	std::unique_ptr<Player> m_player;
-	std::vector<std::unique_ptr<Enemy>> m_enemies;
-	std::vector<std::unique_ptr<Orb>> m_orbs;
-	std::vector<std::unique_ptr<Orb>> m_specialOrbs; // 特殊オーブのリスト
-	float m_enemyRadarTimer; // 敵レーダーの効果時間タイマー
 	std::unique_ptr<UI> m_ui;
+
+	// マネージャークラス
+	std::unique_ptr<GameObjectManager> m_gameObjectManager;
+	std::unique_ptr<CameraDirector> m_cameraDirector; // ★ 追加
 
 	std::vector<Model*> m_cachedStageModels;
 	std::vector<Model*> m_cachedDynamicModels;
 
-	float m_vignetteIntensity;
-
-	int m_remainingOrbs;
-	int m_totalOrbs;
-
-	std::unique_ptr<Orb> m_goalOrb;
-	bool m_goalSpawned;
-	bool m_escapeMode;
-
-	bool m_isOpening;           // オープニング演出中か
-	float m_openingTimer;       // 演出経過時間
-	float m_openingDuration;    // 演出にかける時間
-	DirectX::XMFLOAT3 m_titleCamPos; // タイトル画面のカメラ位置
-	DirectX::XMFLOAT3 m_titleCamRot; // タイトル画面のカメラ回転
-	DirectX::XMFLOAT3 m_startCamPos; // ゲーム開始時のカメラ位置
-	DirectX::XMFLOAT3 m_startCamRot; // ゲーム開始時のカメラ回転
-
-	float m_titleTimer;
-	float m_uiFadeTimer;        // UIフェードイン用のタイマー
+	float m_uiFadeTimer;
 };

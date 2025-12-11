@@ -129,6 +129,12 @@
     <ClCompile Include="Easing.cpp">
       <Filter>Source\05_System</Filter>
     </ClCompile>
+    <ClCompile Include="GameObjectManager.cpp">
+      <Filter>Source\04_GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraDirector.cpp">
+      <Filter>Source\04_GamePlay</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -250,6 +256,12 @@
     </ClInclude>
     <ClInclude Include="AssetPaths.h">
       <Filter>Source\06_Other</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObjectManager.h">
+      <Filter>Source\04_GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraDirector.h">
+      <Filter>Source\04_GamePlay</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

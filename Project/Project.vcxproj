@@ -163,11 +163,13 @@
     <ClInclude Include="AssetPaths.h" />
     <ClInclude Include="AStar.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CameraDirector.h" />
     <ClInclude Include="Easing.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Frustum.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameObjectManager.h" />
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="Light.h" />
@@ -204,10 +206,12 @@
     <ClCompile Include="AssetLoader.cpp" />
     <ClCompile Include="AStar.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CameraDirector.cpp" />
     <ClCompile Include="Easing.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Frustum.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameObjectManager.cpp" />
     <ClCompile Include="GameScene.cpp" />
     <ClCompile Include="GraphicsDevice.cpp" />
     <ClCompile Include="input.cpp" />
