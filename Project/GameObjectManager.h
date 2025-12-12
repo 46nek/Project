@@ -28,6 +28,8 @@ public:
     // 描画に必要なモデルをリストに追加して返す
     void CollectRenderModels(std::vector<Model*>& models);
 
+    bool CheckAndResetZoomRequest();
+
     // ゲッター
     int GetRemainingOrbs() const { return m_remainingOrbs; }
     int GetTotalOrbs() const { return m_totalOrbs; }
@@ -59,6 +61,7 @@ private:
     int m_totalOrbs;
     bool m_goalSpawned;
     bool m_escapeMode;
+    bool m_requestZoomOut;
     float m_enemyRadarTimer;
 
     // ゲーム内でのみ使う定数などはcpp側に置くか、ここに追加

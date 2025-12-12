@@ -8,6 +8,10 @@ std::unique_ptr<GameScene> GameScene::s_transferInstance = nullptr;
 // グローバル変数のGameインスタンスを参照
 extern Game* g_game;
 
+namespace {
+	constexpr float MINIMAP_ZOOM_OUT_LEVEL = 2.0f;
+}
+
 GameScene::GameScene()
 	: m_uiFadeTimer(0.0f)
 {
@@ -249,6 +253,12 @@ void GameScene::Update(float deltaTime)
 
 	DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
 	m_lightManager->Update(deltaTime, m_camera->GetViewMatrix(), projectionMatrix, m_camera->GetPosition(), m_camera->GetRotation());
+
+	if (m_gameObjectManager->CheckAndResetZoomRequest())
+	{
+		// MINIMAP_ZOOM_OUT_LEVEL は GameScene.cpp 上部の無名名前空間にあるはずです
+		m_ui->SetMinimapZoom(MINIMAP_ZOOM_OUT_LEVEL);
+	}
 
 	m_ui->Update(deltaTime,
 		m_gameObjectManager->GetRemainingOrbs(),

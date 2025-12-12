@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <tuple>
 
-// GameScene.cppにあった定数を移動
 namespace {
     constexpr int SPAWN_ROOM_SIZE = 3;
     constexpr int SPAWN_CORNER_OFFSET = 1;
@@ -23,7 +22,8 @@ namespace {
 
 GameObjectManager::GameObjectManager()
     : m_remainingOrbs(0), m_totalOrbs(0), m_goalSpawned(false),
-    m_escapeMode(false), m_enemyRadarTimer(0.0f)
+    m_escapeMode(false), m_enemyRadarTimer(0.0f),
+	m_requestZoomOut(false)
 {
 }
 
@@ -252,13 +252,15 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
     for (auto it = m_specialOrbs.begin(); it != m_specialOrbs.end(); ) {
         (*it)->Update(deltaTime, player, lightManager, collectSound);
         if ((*it)->IsCollected()) {
-            switch ((*it)->GetType()) {
-                // UI操作が必要なMinimapZoomOutはGameScene側で検知するか、ここでフラグを立てる設計にします。
-                // 今回は単純化のため、レーダーのみここで処理します。
-            case OrbType::EnemyRadar:
-                m_enemyRadarTimer = RADAR_DURATION;
-                break;
-            }
+			switch ((*it)->GetType()) {
+			case OrbType::MinimapZoomOut:
+				m_requestZoomOut = true; 
+				break;
+
+			case OrbType::EnemyRadar:
+				m_enemyRadarTimer = RADAR_DURATION;
+				break;
+			}
             // 削除せず、Collected状態にするだけに留めるのが一般的ですが、元のロジックに従い削除等の処理を入れます
             it = m_specialOrbs.erase(it);
         }
@@ -291,4 +293,12 @@ void GameObjectManager::CollectRenderModels(std::vector<Model*>& models) {
     for (const auto& orb : m_orbs) if (Model* m = orb->GetModel()) models.push_back(m);
     for (const auto& orb : m_specialOrbs) if (Model* m = orb->GetModel()) models.push_back(m);
     if (m_goalOrb) if (Model* m = m_goalOrb->GetModel()) models.push_back(m);
+}
+
+bool GameObjectManager::CheckAndResetZoomRequest() {
+	if (m_requestZoomOut) {
+		m_requestZoomOut = false; // フラグをリセット（1回だけ反応させるため）
+		return true;
+	}
+	return false;
 }
