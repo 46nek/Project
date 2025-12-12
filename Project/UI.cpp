@@ -5,6 +5,7 @@
 #include "Game.h"
 #include "AssetPaths.h"
 #include <string>
+#include <cstdio> // swprintf_s用
 
 UI::UI()
 	: m_graphicsDevice(nullptr),
@@ -12,7 +13,9 @@ UI::UI()
 	m_fontWrapper(nullptr),
 	m_remainingOrbs(0),
 	m_totalOrbs(0),
-	m_staminaPercentage(1.0f) {
+	m_skillDuration(0.0f),
+	m_skillCooldown(0.0f),
+	m_isSkillActive(false) {
 }
 
 UI::~UI() {
@@ -42,91 +45,47 @@ bool UI::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::vecto
 		return false;
 	}
 
-	m_staminaBarFrame = std::make_unique<Sprite>();
-	if (!m_staminaBarFrame->Initialize(device, AssetPaths::TEX_MINIMAP_FRAME)) { return false; }
-
-	m_staminaBarFill = std::make_unique<Sprite>();
-	if (!m_staminaBarFill->Initialize(device, AssetPaths::TEX_MINIMAP_PATH)) { return false; }
-
 	return true;
 }
 
 void UI::Shutdown() {
 	if (m_minimap) { m_minimap->Shutdown(); }
 	if (m_orbIcon) { m_orbIcon->Shutdown(); }
-	if (m_staminaBarFrame) { m_staminaBarFrame->Shutdown(); }
-	if (m_staminaBarFill) { m_staminaBarFill->Shutdown(); }
 
 	if (m_fontWrapper) { m_fontWrapper->Release(); }
 	if (m_fontFactory) { m_fontFactory->Release(); }
 }
 
-void UI::Update(float deltaTime, int remainingOrbs, int totalOrbs, float staminaPercentage, bool showEnemiesOnMinimap) {
+void UI::Update(float deltaTime, int remainingOrbs, int totalOrbs, float skillDuration, float skillCooldown, bool isSkillActive, bool showEnemiesOnMinimap) {
 	m_remainingOrbs = remainingOrbs;
 	m_totalOrbs = totalOrbs;
-	m_staminaPercentage = staminaPercentage;
+	m_skillDuration = skillDuration;
+	m_skillCooldown = skillCooldown;
+	m_isSkillActive = isSkillActive;
 	m_showEnemiesOnMinimap = showEnemiesOnMinimap;
 }
 
 void UI::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs, const std::vector<std::unique_ptr<Orb>>& specialOrbs, float alpha) {
-	// 透明度が0以下なら描画しない
 	if (alpha <= 0.0f) { return; }
 
-	// ミニマップにAlphaを渡す
 	m_minimap->Render(camera, enemies, orbs, specialOrbs, m_showEnemiesOnMinimap, alpha);
 
-	// オーブカウンターとスタミナゲージの描画開始
 	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_graphicsDevice->GetAlphaBlendState());
 
-	// --- オーブカウンターのアイコン描画 ---
 	const DirectX::XMFLOAT2 iconPosition = { 280.0f, 40.0f };
 	m_orbIcon->Render(m_spriteBatch.get(), iconPosition, 0.5f, 0.0f, { 1.0f, 1.0f, 1.0f, alpha });
 
-	// --- スタミナゲージの描画 ---
-	const float barWidth = 200.0f;
-	const float barHeight = 20.0f;
-	const DirectX::XMFLOAT2 barPosition = {
-		(Game::SCREEN_WIDTH - barWidth) / 2.0f,
-		Game::SCREEN_HEIGHT - 50.0f
-	};
-
-	// 背景（フレーム）
-	RECT frameRect = {
-		(LONG)barPosition.x,
-		(LONG)barPosition.y,
-		(LONG)(barPosition.x + barWidth),
-		(LONG)(barPosition.y + barHeight)
-	};
-	m_staminaBarFrame->RenderFill(m_spriteBatch.get(), frameRect, { 1.0f, 1.0f, 1.0f, alpha });
-
-	// 塗りつぶし部分
-	RECT fillRect = {
-		(LONG)barPosition.x,
-		(LONG)barPosition.y,
-		(LONG)(barPosition.x + barWidth * m_staminaPercentage),
-		(LONG)(barPosition.y + barHeight)
-	};
-
-	DirectX::XMFLOAT4 fillColor = { 0.0f, 1.0f, 0.0f, alpha }; // 緑
-	if (m_staminaPercentage < 0.3f) {
-		fillColor = { 0.8f, 0.2f, 0.2f, alpha }; // 赤
-	}
-
-	m_staminaBarFill->RenderFill(m_spriteBatch.get(), fillRect, fillColor);
-
-	// 描画終了
 	m_spriteBatch->End();
 
-	// オーブカウンターのテキスト描画
 	if (m_fontWrapper) {
-		std::wstring remainingText = std::to_wstring(m_remainingOrbs);
+		UINT32 alphaInt = static_cast<UINT32>(alpha * 255.0f);
 
+		// --- オーブ数テキスト ---
+		std::wstring remainingText = std::to_wstring(m_remainingOrbs);
 		float fontSize = 32.0f;
 		float textPosX = iconPosition.x + 30.0f;
 		float textPosY = iconPosition.y;
-
-		UINT32 alphaInt = static_cast<UINT32>(alpha * 255.0f);
-		UINT32 textColor = (alphaInt << 24) | 0x00FFFFFF;
+		UINT32 orbColor = (alphaInt << 24) | 0x00FFFFFF;
 
 		m_fontWrapper->DrawString(
 			m_graphicsDevice->GetDeviceContext(),
@@ -134,8 +93,42 @@ void UI::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>&
 			fontSize,
 			textPosX,
 			textPosY,
-			textColor,
+			orbColor,
 			FW1_VCENTER | FW1_RESTORESTATE
+		);
+
+		// --- スキル状態テキスト ---
+		wchar_t skillBuffer[64];
+		UINT32 skillColor;
+
+		// 色とテキストの決定
+		if (m_isSkillActive) {
+			// 発動中（オレンジ）
+			swprintf_s(skillBuffer, L"DASH TIME: %.1fs", m_skillDuration);
+			skillColor = (alphaInt << 24) | 0x0000A5FF; // ABGR (Orange)
+		}
+		else if (m_skillCooldown > 0.0f) {
+			// クールダウン中（グレー）
+			swprintf_s(skillBuffer, L"COOLDOWN: %.1fs", m_skillCooldown);
+			skillColor = (alphaInt << 24) | 0x00AAAAAA; // ABGR (Gray)
+		}
+		else {
+			// 使用可能（緑/シアン）
+			swprintf_s(skillBuffer, L"DASH READY");
+			skillColor = (alphaInt << 24) | 0x00FFFF00; // ABGR (Cyan)
+		}
+
+		float skillTextX = iconPosition.x;
+		float skillTextY = iconPosition.y + 40.0f; // アイコンの下に表示
+
+		m_fontWrapper->DrawString(
+			m_graphicsDevice->GetDeviceContext(),
+			skillBuffer,
+			24.0f,
+			skillTextX,
+			skillTextY,
+			skillColor,
+			FW1_LEFT | FW1_TOP | FW1_RESTORESTATE
 		);
 	}
 }

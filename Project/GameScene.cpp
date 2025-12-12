@@ -200,7 +200,6 @@ void GameScene::Update(float deltaTime) {
 
     if (m_gameObjectManager->IsEscapeMode()) {
         DirectX::XMFLOAT3 pPos = m_player->GetPosition();
-        // ゴール判定の0.8fも定数化の余地がありますが、文脈依存のため今回はそのまま
         if (pPos.z < m_environment->GetStage()->GetPathWidth() * 0.8f) {
             m_nextScene = SceneState::Result;
         }
@@ -215,10 +214,11 @@ void GameScene::Update(float deltaTime) {
     m_ui->Update(deltaTime,
         m_gameObjectManager->GetRemainingOrbs(),
         m_gameObjectManager->GetTotalOrbs(),
-        m_player->GetStaminaPercentage(),
+        m_player->GetSkillDurationTimer(), // 残り走行時間
+        m_player->GetSkillCooldownTimer(), // クールダウン時間
+        m_player->IsSkillActive(),         // 走行中かどうか
         m_gameObjectManager->GetEnemyRadarTimer() > 0.0f);
 }
-
 void GameScene::RenderStageOnly() {
     m_cachedDynamicModels.clear();
 

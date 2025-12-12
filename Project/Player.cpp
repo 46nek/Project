@@ -17,19 +17,12 @@ Player::Player()
 	: m_position({ 0.0f, 0.0f, 0.0f }),
 	m_rotation({ 0.0f, 0.0f, 0.0f }),
 	m_moveSpeed(5.0f),
-	m_runSpeed(8.5f),
+	m_runSpeed(12.0f), 
 	m_rotationSpeed(0.1f),
 	m_isMoving(false),
 	m_isRunning(false),
-	m_maxStamina(100.0f),
-	m_stamina(100.0f),
-	m_staminaDepletionRate(20.0f),
-	m_staminaRegenRate(15.0f),
-	m_isStaminaExhausted(false),
-	m_staminaRechargeThreshold(30.0f),
-	m_staminaWarningThreshhold(30.0f),
-	m_slowDepletionFactor(0.6f),
-	m_staminaRegenCoolDown(0.0f),
+	m_skillDurationTimer(0.0f),
+	m_skillCoolDownTimer(0.0f),
 	m_walkSound(nullptr),
 	m_runSound(nullptr),
 	m_stepTimer(0.0f),
@@ -39,7 +32,7 @@ Player::Player()
 
 Player::~Player() {
 	if (m_walkInstance) {
-		m_walkInstance->Stop(true); // true = 即時停止
+		m_walkInstance->Stop(true);
 	}
 	if (m_runInstance) {
 		m_runInstance->Stop(true);
@@ -48,70 +41,47 @@ Player::~Player() {
 
 void Player::Initialize(const DirectX::XMFLOAT3& startPosition) {
 	m_position = startPosition;
-	m_stamina = m_maxStamina;
-	// rotationはここではリセットせず、SetRotationで制御するか、0初期化のままにする
-	// GameScene側でSetRotationを呼ぶ設計にします
+	m_skillDurationTimer = 0.0f;
+	m_skillCoolDownTimer = 0.0f;
+	m_isRunning = false;
 }
 
 void Player::Update(float deltaTime, Input* input, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth) {
 	m_isMoving = false;
 
-	UpdateStamina(deltaTime, input);
+	UpdateSkill(deltaTime, input);
 	UpdateMovement(deltaTime, input, mazeData, pathWidth);
 	UpdateAudio(deltaTime);
 }
 
-void Player::UpdateStamina(float deltaTime, Input* input) {
-	bool isTryingToRun = input->IsKeyDown(KEY_SHIFT);
-	m_isRunning = isTryingToRun && !m_isStaminaExhausted;
-
-	if (m_staminaRegenCoolDown > 0.0f) {
-		m_staminaRegenCoolDown -= deltaTime;
+void Player::UpdateSkill(float deltaTime, Input* input) {
+	// クールダウン経過
+	if (m_skillCoolDownTimer > 0.0f) {
+		m_skillCoolDownTimer -= deltaTime;
+		if (m_skillCoolDownTimer < 0.0f) m_skillCoolDownTimer = 0.0f;
 	}
 
+	// 効果時間経過
 	if (m_isRunning) {
-		m_staminaRegenCoolDown = 0.5f;
-		float currentDepletionRate = m_staminaDepletionRate;
-		if (m_stamina <= m_staminaWarningThreshhold) {
-			currentDepletionRate *= m_slowDepletionFactor;
-		}
-		m_stamina -= currentDepletionRate * deltaTime;
-
-		if (m_stamina <= 0.0f) {
-			m_stamina = 0.0f;
+		m_skillDurationTimer -= deltaTime;
+		if (m_skillDurationTimer <= 0.0f) {
 			m_isRunning = false;
-			m_isStaminaExhausted = true;
-			m_staminaRegenCoolDown = 1.0f;
+			m_skillDurationTimer = 0.0f;
 		}
 	}
-	else {
-		if (m_staminaRegenCoolDown <= 0.0f) {
-			bool isWalking = input->IsKeyDown(KEY_MOVE_FORWARD) ||
-				input->IsKeyDown(KEY_MOVE_BACKWARD) ||
-				input->IsKeyDown(KEY_MOVE_LEFT) ||
-				input->IsKeyDown(KEY_MOVE_RIGHT);
 
-			if (m_isStaminaExhausted || isWalking) {
-				m_stamina += m_staminaRegenRate * 0.5f * deltaTime;
-			}
-			else {
-				m_stamina += m_staminaRegenRate * deltaTime;
-			}
-
-			m_stamina = (std::min)(m_stamina, m_maxStamina);
-			if (m_isStaminaExhausted && m_stamina >= m_staminaRechargeThreshold) {
-				m_isStaminaExhausted = false;
-			}
-		}
+	// 発動判定 (クールダウン0 かつ Shiftキーを押した瞬間)
+	if (m_skillCoolDownTimer <= 0.0f && input->IsKeyPressed(KEY_SHIFT)) {
+		m_isRunning = true;
+		m_skillDurationTimer = RUN_SKILL_DURATION;
+		m_skillCoolDownTimer = RUN_SKILL_COOLDOWN; // 発動した瞬間にクールダウン開始（10秒）
 	}
 }
 
 void Player::UpdateMovement(float deltaTime, Input* input, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth) {
 	float currentSpeed;
-	if (m_isStaminaExhausted) {
-		currentSpeed = m_moveSpeed * 0.6f;
-	}
-	else if (m_isRunning) {
+
+	if (m_isRunning) {
 		currentSpeed = m_runSpeed;
 	}
 	else {
@@ -132,7 +102,6 @@ void Player::UpdateMovement(float deltaTime, Input* input, const std::vector<std
 		moveVec = DirectX::XMVector3Normalize(moveVec);
 		DirectX::XMStoreFloat3(&desiredMove, DirectX::XMVectorScale(moveVec, moveAmount));
 
-		// X軸方向の移動と衝突判定
 		DirectX::XMFLOAT3 nextPosition = m_position;
 		nextPosition.x += desiredMove.x;
 		if (!IsCollidingWithWall(nextPosition, COLLISION_RADIUS, mazeData, pathWidth)) {
@@ -140,7 +109,6 @@ void Player::UpdateMovement(float deltaTime, Input* input, const std::vector<std
 			m_isMoving = true;
 		}
 
-		// Z軸方向の移動と衝突判定
 		nextPosition = m_position;
 		nextPosition.z += desiredMove.z;
 		if (!IsCollidingWithWall(nextPosition, COLLISION_RADIUS, mazeData, pathWidth)) {
@@ -162,7 +130,7 @@ void Player::UpdateAudio(float deltaTime) {
 			float randomPitch = dist(gen);
 			float volume = 0.3f;
 
-			if (m_isRunning && !m_isStaminaExhausted) {
+			if (m_isRunning) {
 				if (m_runInstance) {
 					m_runInstance->Stop();
 					m_runInstance->SetVolume(volume);
@@ -178,13 +146,7 @@ void Player::UpdateAudio(float deltaTime) {
 					m_walkInstance->SetPitch(randomPitch);
 					m_walkInstance->Play();
 				}
-
-				if (m_isStaminaExhausted) {
-					m_stepTimer = 0.7f;
-				}
-				else {
-					m_stepTimer = m_walkInterval;
-				}
+				m_stepTimer = m_walkInterval;
 			}
 		}
 	}
@@ -200,7 +162,6 @@ void Player::Turn(int mouseX, int mouseY, float deltaTime) {
 	if (m_rotation.x < -90.0f) m_rotation.x = -90.0f;
 }
 
-// 追加実装
 void Player::SetRotation(const DirectX::XMFLOAT3& rotation) {
 	m_rotation = rotation;
 }
@@ -233,9 +194,4 @@ bool Player::IsCollidingWithWall(const DirectX::XMFLOAT3& position, float radius
 		}
 	}
 	return false;
-}
-
-float Player::GetStaminaPercentage() const {
-	if (m_maxStamina <= 0.0f) return 0.0f;
-	return m_stamina / m_maxStamina;
 }
