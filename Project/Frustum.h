@@ -1,14 +1,12 @@
 #pragma once
 #include <DirectXMath.h>
 
-struct Plane
-{
+struct Plane {
 	DirectX::XMFLOAT3 normal;
 	float distance;
 };
 
-class Frustum
-{
+class Frustum {
 public:
 	Frustum();
 	~Frustum();

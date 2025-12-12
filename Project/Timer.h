@@ -4,8 +4,7 @@
 /**
  * @brief 時間計測を行い、デルタタイムを管理するクラス
  */
-class Timer
-{
+class Timer {
 public:
 	Timer();
 	~Timer();

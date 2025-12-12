@@ -11,17 +11,17 @@ Window::Window(LPCWSTR applicationName, int screenWidth, int screenHeight)
 	: m_applicationName(applicationName),
 	m_screenWidth(screenWidth),
 	m_screenHeight(screenHeight),
-	m_hinstance(nullptr),
-	m_hwnd(nullptr),
+	m_hInstance(nullptr),
+	m_hWnd(nullptr),
 	m_input(nullptr) {
 }
 
-Window::~Window() {}
+Window::~Window() {
+}
 
-bool Window::Initialize(HINSTANCE hInstance, Input* input)
-{
+bool Window::Initialize(HINSTANCE hInstance, Input* input) {
 	g_windowHandle = this;
-	m_hinstance = hInstance;
+	m_hInstance = hInstance;
 	m_input = input;
 
 	WNDCLASSEX wc = {};
@@ -29,12 +29,12 @@ bool Window::Initialize(HINSTANCE hInstance, Input* input)
 	wc.lpfnWndProc = WndProc;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
-	wc.hInstance = m_hinstance;
-	wc.hIcon = LoadIcon(NULL, IDI_WINLOGO);
+	wc.hInstance = m_hInstance;
+	wc.hIcon = LoadIcon(nullptr, IDI_WINLOGO);
 	wc.hIconSm = wc.hIcon;
-	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
-	wc.lpszMenuName = NULL;
+	wc.lpszMenuName = nullptr;
 	wc.lpszClassName = m_applicationName;
 	wc.cbSize = sizeof(WNDCLASSEX);
 
@@ -42,11 +42,11 @@ bool Window::Initialize(HINSTANCE hInstance, Input* input)
 		return false;
 	}
 
-	m_hwnd = CreateWindowEx(WS_EX_APPWINDOW, m_applicationName, m_applicationName,
+	m_hWnd = CreateWindowEx(WS_EX_APPWINDOW, m_applicationName, m_applicationName,
 		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT, m_screenWidth, m_screenHeight, NULL, NULL, m_hinstance, NULL);
+		CW_USEDEFAULT, CW_USEDEFAULT, m_screenWidth, m_screenHeight, nullptr, nullptr, m_hInstance, nullptr);
 
-	if (!m_hwnd) {
+	if (!m_hWnd) {
 		return false;
 	}
 
@@ -54,37 +54,34 @@ bool Window::Initialize(HINSTANCE hInstance, Input* input)
 	rid.usUsagePage = 0x01; // Generic Desktop
 	rid.usUsage = 0x02;     // Mouse
 	rid.dwFlags = 0;
-	rid.hwndTarget = m_hwnd;
+	rid.hwndTarget = m_hWnd;
 	RegisterRawInputDevices(&rid, 1, sizeof(rid));
 
-	ShowWindow(m_hwnd, SW_SHOW);
-	SetForegroundWindow(m_hwnd);
-	SetFocus(m_hwnd);
+	ShowWindow(m_hWnd, SW_SHOW);
+	SetForegroundWindow(m_hWnd);
+	SetFocus(m_hWnd);
 
 	return true;
 }
 
-void Window::Shutdown()
-{
+void Window::Shutdown() {
 	ShowCursor(true);
-	if (m_hwnd) {
-		DestroyWindow(m_hwnd);
-		m_hwnd = nullptr;
+	if (m_hWnd) {
+		DestroyWindow(m_hWnd);
+		m_hWnd = nullptr;
 	}
-	if (m_hinstance) {
-		UnregisterClass(m_applicationName, m_hinstance);
-		m_hinstance = nullptr;
+	if (m_hInstance) {
+		UnregisterClass(m_applicationName, m_hInstance);
+		m_hInstance = nullptr;
 	}
 	g_windowHandle = nullptr;
 }
 
-HWND Window::GetHwnd() const
-{
-	return m_hwnd;
+HWND Window::GetHwnd() const {
+	return m_hWnd;
 }
 
-LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
-{
+LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam) {
 	switch (umessage) {
 	case WM_DESTROY:
 	case WM_CLOSE:
@@ -100,29 +97,23 @@ LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM
 	}
 }
 
-LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
-{
-	switch (umsg)
-	{
+LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam) {
+	switch (umsg) {
 	case WM_ACTIVATEAPP: // アプリケーションのフォーカスが切り替わった
-		if (wparam == FALSE) // 非アクティブになった
-		{
+		if (wparam == FALSE) { // 非アクティブになった
 			// ゲーム中で、かつカーソルロックが有効な場合のみ自動ポーズ
-			if (g_game && !g_game->IsPaused() && m_input && m_input->IsCursorLocked())
-			{
+			if (g_game && !g_game->IsPaused() && m_input && m_input->IsCursorLocked()) {
 				g_game->SetPaused(true);
 			}
 		}
 		break;
 
 	case WM_LBUTTONDOWN: // マウスの左クリック
-		if (g_game && g_game->IsPaused())
-		{
+		if (g_game && g_game->IsPaused()) {
 			POINT p = { LOWORD(lparam), HIWORD(lparam) };
 			RECT clientRect;
 			GetClientRect(hwnd, &clientRect);
-			if (PtInRect(&clientRect, p))
-			{
+			if (PtInRect(&clientRect, p)) {
 				// ポーズ中に画面内をクリックしたら、ポーズ解除
 				g_game->SetPaused(false);
 			}
@@ -150,9 +141,8 @@ LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPA
 		return 0;
 
 	case WM_SETCURSOR:
-		if (g_game && m_input && m_input->IsCursorLocked() && !g_game->IsPaused())
-		{
-			SetCursor(NULL); // カーソル画像を「なし」にする（＝描画されない）
+		if (g_game && m_input && m_input->IsCursorLocked() && !g_game->IsPaused()) {
+			SetCursor(nullptr); // カーソル画像を「なし」にする（＝描画されない）
 			return true;     // 処理完了（OSのデフォルト処理をさせない）
 		}
 		// タイトル画面やポーズ中はbreakして、OSのデフォルト処理(DefWindowProc)に任せることで矢印カーソルが描画される

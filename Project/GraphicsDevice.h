@@ -8,8 +8,7 @@
 #include "RenderTarget.h"
 #include "OrthoWindow.h"
 
-struct MatrixBufferType
-{
+struct MatrixBufferType {
 	DirectX::XMMATRIX world;
 	DirectX::XMMATRIX view;
 	DirectX::XMMATRIX projection;
@@ -18,8 +17,7 @@ struct MatrixBufferType
 	DirectX::XMMATRIX lightProjection;
 };
 
-struct MotionBlurBufferType
-{
+struct MotionBlurBufferType {
 	DirectX::XMMATRIX previousViewProjection;
 	DirectX::XMMATRIX currentViewProjectionInverse;
 	float blurAmount;
@@ -30,31 +28,28 @@ struct MotionBlurBufferType
  * @struct MaterialBufferType
  * @brief マテリアル情報をシェーダーに渡すための構造体
  */
-struct MaterialBufferType
-{
-	DirectX::XMFLOAT4 EmissiveColor;
-	BOOL UseTexture;
-	BOOL UseNormalMap;
-	DirectX::XMFLOAT2 Padding;
+struct MaterialBufferType {
+	DirectX::XMFLOAT4 emissiveColor;
+	BOOL useTexture;
+	BOOL useNormalMap;
+	DirectX::XMFLOAT2 padding;
 };
 
 /**
  * @struct PostProcessBufferType
  * @brief ポストプロセスおよびフォグ等のエフェクト用パラメータ
  */
-struct PostProcessBufferType
-{
-	float VignetteIntensity;
-	float FogStart;          // フォグの開始距離
-	float FogEnd;            // フォグの終了距離（この距離で完全にフォグ色になる）
-	float Padding;           // アライメント用パディング
-	DirectX::XMFLOAT4 FogColor; // フォグの色
+struct PostProcessBufferType {
+	float vignetteIntensity;
+	float fogStart;          // フォグの開始距離
+	float fogEnd;            // フォグの終了距離（この距離で完全にフォグ色になる）
+	float padding;           // アライメント用パディング
+	DirectX::XMFLOAT4 fogColor; // フォグの色
 };
 
 struct LightBufferType;
 
-class GraphicsDevice
-{
+class GraphicsDevice {
 public:
 	GraphicsDevice();
 	~GraphicsDevice();

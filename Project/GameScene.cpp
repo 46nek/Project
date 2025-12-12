@@ -57,10 +57,10 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX
     }
 
     // 新規初期化フロー
-    if (!InitializeEnvironment(graphicsDevice, input, audioEngine)) return false;
-    if (!InitializeUI()) return false;
-    if (!InitializeGameObjects()) return false;
-    if (!InitializeAudio()) return false;
+    if (!InitializeEnvironment(graphicsDevice, input, audioEngine)) { return false; }
+    if (!InitializeUI()) { return false; }
+    if (!InitializeGameObjects()) { return false; }
+    if (!InitializeAudio()) { return false; }
 
     return true;
 }
@@ -71,7 +71,7 @@ bool GameScene::InitializeEnvironment(GraphicsDevice* graphicsDevice, Input* inp
     m_audioEngine = audioEngine;
 
     m_environment = std::make_unique<GameEnvironment>();
-    if (!m_environment->Initialize(graphicsDevice)) return false;
+    if (!m_environment->Initialize(graphicsDevice)) { return false; }
 
     Stage* stage = m_environment->GetStage();
     std::pair<int, int> startPos = stage->GetStartPosition();
@@ -98,13 +98,13 @@ bool GameScene::InitializeEnvironment(GraphicsDevice* graphicsDevice, Input* inp
 bool GameScene::InitializeUI() {
     m_ui = std::make_unique<UI>();
     Stage* stage = m_environment->GetStage();
-    if (!m_ui->Initialize(m_graphicsDevice, stage->GetMazeData(), stage->GetPathWidth())) return false;
+    if (!m_ui->Initialize(m_graphicsDevice, stage->GetMazeData(), stage->GetPathWidth())) { return false; }
     return true;
 }
 
 bool GameScene::InitializeGameObjects() {
     m_gameObjectManager = std::make_unique<GameObjectManager>();
-    if (!m_gameObjectManager->Initialize(m_graphicsDevice, m_environment->GetStage(), m_environment->GetLightManager())) return false;
+    if (!m_gameObjectManager->Initialize(m_graphicsDevice, m_environment->GetStage(), m_environment->GetLightManager())) { return false; }
     return true;
 }
 
@@ -157,9 +157,9 @@ void GameScene::BeginOpening() {
 }
 
 void GameScene::Shutdown() {
-    if (m_player) m_player->SetFootstepSounds(nullptr, nullptr);
-    if (m_ui) m_ui->Shutdown();
-    if (m_gameObjectManager) m_gameObjectManager->Shutdown();
+    if (m_player) { m_player->SetFootstepSounds(nullptr, nullptr); }
+    if (m_ui) { m_ui->Shutdown(); }
+    if (m_gameObjectManager) { m_gameObjectManager->Shutdown(); }
 }
 
 void GameScene::Update(float deltaTime) {
@@ -172,7 +172,7 @@ void GameScene::Update(float deltaTime) {
         return;
     }
 
-    if (!m_gameObjectManager) return;
+    if (!m_gameObjectManager) { return; }
 
     if (m_input->IsKeyPressed(VK_ESCAPE)) {
         m_input->SetCursorLock(false);
@@ -183,7 +183,7 @@ void GameScene::Update(float deltaTime) {
 
     if (m_uiFadeTimer < UI_FADE_DURATION) {
         m_uiFadeTimer += deltaTime;
-        if (m_uiFadeTimer > UI_FADE_DURATION) m_uiFadeTimer = UI_FADE_DURATION;
+        if (m_uiFadeTimer > UI_FADE_DURATION) { m_uiFadeTimer = UI_FADE_DURATION; }
     }
 
     int mouseX, mouseY;
@@ -243,7 +243,7 @@ void GameScene::RenderStageOnly() {
 }
 
 void GameScene::Render() {
-    if (!m_gameObjectManager) return;
+    if (!m_gameObjectManager) { return; }
 
     RenderStageOnly();
 
@@ -254,7 +254,7 @@ void GameScene::Render() {
         }
         else {
             uiAlpha = m_uiFadeTimer / UI_FADE_DURATION;
-            if (uiAlpha > 1.0f) uiAlpha = 1.0f;
+            if (uiAlpha > 1.0f) { uiAlpha = 1.0f; }
         }
 
         m_ui->Render(m_camera.get(),

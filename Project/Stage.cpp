@@ -13,8 +13,7 @@ namespace {
 Stage::Stage() : m_exitX(0), m_exitY(0) {} // メンバー初期化子リストを使用
 Stage::~Stage() {}
 
-bool Stage::Initialize(GraphicsDevice* graphicsDevice)
-{
+bool Stage::Initialize(GraphicsDevice* graphicsDevice) {
 	m_mazeGenerator = std::make_unique<MazeGenerator>();
 	m_mazeGenerator->Generate(MAZE_WIDTH, MAZE_HEIGHT);
 
@@ -38,14 +37,14 @@ bool Stage::Initialize(GraphicsDevice* graphicsDevice)
 
 	// 壁モデル (1段目)
 	auto wallModel1 = AssetLoader::CreateMazeModel(graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT / 2.0f, MeshGenerator::MeshType::Wall);
-	if (!wallModel1) return false;
+	if (!wallModel1) { return false; }
 	wallModel1->SetTexture(wallTexture);
 	wallModel1->SetNormalMap(wallNormalMap);
 	m_models.push_back(std::move(wallModel1));
 
 	// 壁モデル (2段目)
 	auto wallModel2 = AssetLoader::CreateMazeModel(graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT / 2.0f, MeshGenerator::MeshType::Wall);
-	if (!wallModel2) return false;
+	if (!wallModel2) { return false; }
 	wallModel2->SetTexture(wallTexture);
 	wallModel2->SetNormalMap(wallNormalMap);
 	wallModel2->SetPosition(0.0f, WALL_HEIGHT / 2.0f, 0.0f);
@@ -53,14 +52,14 @@ bool Stage::Initialize(GraphicsDevice* graphicsDevice)
 
 	// 天井
 	auto ceilingModel = AssetLoader::CreateMazeModel(graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT, MeshGenerator::MeshType::Ceiling);
-	if (!ceilingModel) return false;
+	if (!ceilingModel) { return false; }
 	ceilingModel->SetTexture(wallTexture);
 	ceilingModel->SetNormalMap(wallNormalMap);
 	m_models.push_back(std::move(ceilingModel));
 
 	// 床
 	auto floorModel = AssetLoader::CreateMazeModel(graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT, MeshGenerator::MeshType::Floor);
-	if (!floorModel) return false;
+	if (!floorModel) { return false; }
 	floorModel->SetTexture(wallTexture);
 	floorModel->SetNormalMap(wallNormalMap);
 	m_models.push_back(std::move(floorModel));
@@ -68,8 +67,7 @@ bool Stage::Initialize(GraphicsDevice* graphicsDevice)
 	// ゲートモデル
 	m_gateModel = AssetLoader::LoadModelFromFile(graphicsDevice->GetDevice(), AssetPaths::MODEL_CUBE_OBJ, GATE_MODEL_SCALE_BASE);
 
-	if (m_gateModel)
-	{
+	if (m_gateModel) {
 		float gateX = (static_cast<float>(m_exitX) + 0.5f) * PATH_WIDTH;
 		float gateZ = (static_cast<float>(m_exitY) + GATE_POS_Z_OFFSET) * PATH_WIDTH;
 
@@ -84,31 +82,27 @@ bool Stage::Initialize(GraphicsDevice* graphicsDevice)
 	return true;
 }
 
-void Stage::OpenExit()
-{
+void Stage::OpenExit() {
 	// 迷路データ上で出口を「道」にする（プレイヤーが通れるようになる）
 	m_mazeGenerator->SetCell(m_exitX, m_exitY, MazeGenerator::Path);
 
 	// ゲートモデルを消す（nullptrにして描画・更新しないようにする）
-	if (m_gateModel)
-	{
+	if (m_gateModel) {
 		m_gateModel->Shutdown();
 		m_gateModel.reset();
 	}
 }
 
-Model* Stage::GetGateModel() const
-{
+Model* Stage::GetGateModel() const {
 	return m_gateModel.get();
 }
 
-void Stage::Shutdown()
-{
+void Stage::Shutdown() {
 	for (auto& model : m_models) {
-		if (model) model->Shutdown();
+		if (model) { model->Shutdown(); }
 	}
 	m_models.clear();
-	if (m_gateModel) m_gateModel->Shutdown();
+	if (m_gateModel) { m_gateModel->Shutdown(); }
 }
 
 const std::vector<std::unique_ptr<Model>>& Stage::GetModels() const { return m_models; }

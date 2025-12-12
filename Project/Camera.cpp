@@ -6,8 +6,7 @@ T Lerp(T a, T b, T t) {
 	return a + (b - a) * t;
 }
 
-Camera::Camera(float x, float y, float z)
-{
+Camera::Camera(float x, float y, float z) {
 	m_positionX = x;
 	m_positionY = y;
 	m_positionZ = z;
@@ -18,7 +17,7 @@ Camera::Camera(float x, float y, float z)
 	m_rotationZ = 0.0f;
 
 	m_viewMatrix = DirectX::XMMatrixIdentity();
-	m_previousViewMatrix = DirectX::XMMatrixIdentity(); 
+	m_previousViewMatrix = DirectX::XMMatrixIdentity();
 
 	m_moveSpeed = 5.0f;
 	m_rotationSpeed = 5.0f;
@@ -35,12 +34,10 @@ Camera::Camera(float x, float y, float z)
 	m_targetFov = m_fov;
 }
 
-Camera::~Camera()
-{
+Camera::~Camera() {
 }
 
-void Camera::SetPosition(float x, float y, float z)
-{
+void Camera::SetPosition(float x, float y, float z) {
 	m_basePosition = { x, y, z };
 
 	m_positionX = x;
@@ -48,33 +45,29 @@ void Camera::SetPosition(float x, float y, float z)
 	m_positionZ = z;
 }
 
-void Camera::SetRotation(float x, float y, float z)
-{
+void Camera::SetRotation(float x, float y, float z) {
 	m_rotationX = x;
 	m_rotationY = y;
 	m_rotationZ = z;
 }
 
-DirectX::XMFLOAT3 Camera::GetPosition() const
-{
+DirectX::XMFLOAT3 Camera::GetPosition() const {
 	return DirectX::XMFLOAT3(m_positionX, m_positionY, m_positionZ);
 }
 
-DirectX::XMFLOAT3 Camera::GetRotation() const
-{
+DirectX::XMFLOAT3 Camera::GetRotation() const {
 	return DirectX::XMFLOAT3(m_rotationX, m_rotationY, m_rotationZ);
 }
-void Camera::SetTargetFOV(float fov)
-{
+
+void Camera::SetTargetFOV(float fov) {
 	m_targetFov = fov;
 }
 
-float Camera::GetFOV() const
-{
+float Camera::GetFOV() const {
 	return m_fov;
 }
-void Camera::Update(float deltaTime)
-{
+
+void Camera::Update(float deltaTime) {
 	// åªç›ÇÃÉrÉÖÅ[çsóÒÇï€ë∂
 	m_previousViewMatrix = m_viewMatrix;
 
@@ -109,46 +102,39 @@ void Camera::Update(float deltaTime)
 	m_viewMatrix = DirectX::XMMatrixLookAtLH(positionVector, lookAtVector, upVector);
 }
 
-DirectX::XMMATRIX Camera::GetViewMatrix() const
-{
+DirectX::XMMATRIX Camera::GetViewMatrix() const {
 	return m_viewMatrix;
 }
 
-DirectX::XMMATRIX Camera::GetPreviousViewMatrix() const
-{
+DirectX::XMMATRIX Camera::GetPreviousViewMatrix() const {
 	return m_previousViewMatrix;
 }
 
-void Camera::MoveForward(float deltaTime)
-{
+void Camera::MoveForward(float deltaTime) {
 	float radians = m_rotationY * 0.0174532925f;
 	m_positionX += sinf(radians) * m_moveSpeed * deltaTime;
 	m_positionZ += cosf(radians) * m_moveSpeed * deltaTime;
 }
 
-void Camera::MoveBackward(float deltaTime)
-{
+void Camera::MoveBackward(float deltaTime) {
 	float radians = m_rotationY * 0.0174532925f;
 	m_positionX -= sinf(radians) * m_moveSpeed * deltaTime;
 	m_positionZ -= cosf(radians) * m_moveSpeed * deltaTime;
 }
 
-void Camera::MoveLeft(float deltaTime)
-{
+void Camera::MoveLeft(float deltaTime) {
 	float radians = (m_rotationY - 90.0f) * 0.0174532925f;
 	m_positionX += sinf(radians) * m_moveSpeed * deltaTime;
 	m_positionZ += cosf(radians) * m_moveSpeed * deltaTime;
 }
 
-void Camera::MoveRight(float deltaTime)
-{
+void Camera::MoveRight(float deltaTime) {
 	float radians = (m_rotationY + 90.0f) * 0.0174532925f;
 	m_positionX += sinf(radians) * m_moveSpeed * deltaTime;
 	m_positionZ += cosf(radians) * m_moveSpeed * deltaTime;
 }
 
-void Camera::Turn(int mouseX, int mouseY, float deltaTime)
-{
+void Camera::Turn(int mouseX, int mouseY, float deltaTime) {
 	float yaw = (float)mouseX * m_rotationSpeed * deltaTime;
 	float pitch = (float)mouseY * m_rotationSpeed * deltaTime;
 
@@ -159,8 +145,7 @@ void Camera::Turn(int mouseX, int mouseY, float deltaTime)
 	if (m_rotationX < -90.0f) m_rotationX = -90.0f;
 }
 
-void Camera::SetBobbingParameters(float bobbingSpeed, float bobbingAmount, float swaySpeed, float swayAmount, float rollSpeed)
-{
+void Camera::SetBobbingParameters(float bobbingSpeed, float bobbingAmount, float swaySpeed, float swayAmount, float rollSpeed) {
 	m_bobbingSpeed = bobbingSpeed;
 	m_bobbingAmount = bobbingAmount;
 	m_swaySpeed = swaySpeed;
@@ -168,12 +153,10 @@ void Camera::SetBobbingParameters(float bobbingSpeed, float bobbingAmount, float
 	m_rollSpeed = rollSpeed;
 }
 
-void Camera::UpdateBobbing(float deltaTime, bool isMoving)
-{
+void Camera::UpdateBobbing(float deltaTime, bool isMoving) {
 	DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationY(m_rotationY * (DirectX::XM_PI / 180.0f));
 
-	if (isMoving)
-	{
+	if (isMoving) {
 		m_bobbingTimer += deltaTime;
 		float bobOffset = sinf(m_bobbingTimer * m_bobbingSpeed) * m_bobbingAmount;
 		float swayOffset = sinf(m_bobbingTimer * m_swaySpeed) * m_swayAmount;
@@ -183,8 +166,7 @@ void Camera::UpdateBobbing(float deltaTime, bool isMoving)
 		m_positionY = m_basePosition.y + DirectX::XMVectorGetY(worldOffset);
 		m_positionZ = m_basePosition.z + DirectX::XMVectorGetZ(worldOffset);
 	}
-	else
-	{
+	else {
 		m_bobbingTimer = 0.0f;
 		m_positionX += (m_basePosition.x - m_positionX) * 0.1f;
 		m_positionY += (m_basePosition.y - m_positionY) * 0.1f;

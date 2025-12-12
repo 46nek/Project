@@ -6,8 +6,7 @@
 #include "Input.h"
 #include "Audio.h"
 
-class SceneManager
-{
+class SceneManager {
 public:
 	SceneManager();
 	~SceneManager();

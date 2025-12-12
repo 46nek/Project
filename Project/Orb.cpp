@@ -7,31 +7,26 @@ Orb::Orb()
 	: m_isCollected(false),
 	m_lightIndex(-1),
 	m_animationTimer(0.0f),
-	m_type(OrbType::Normal)
-{
+	m_type(OrbType::Normal) {
 }
 
-Orb::~Orb()
-{
+Orb::~Orb() {
 }
 
-bool Orb::Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& position, int lightIndex, OrbType type)
-{
+bool Orb::Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& position, int lightIndex, OrbType type) {
 	m_position = position;
 	m_lightIndex = lightIndex;
 	m_type = type;
 
 	m_model = AssetLoader::LoadModelFromFile(device, AssetPaths::MODEL_CUBE_OBJ);
-	if (!m_model)
-	{
+	if (!m_model) {
 		return false;
 	}
 	m_model->SetScale(0.3f, 0.3f, 0.3f);
 	m_model->SetPosition(m_position.x, m_position.y, m_position.z);
 
 	// オーブの種類に応じて色を変える
-	switch (m_type)
-	{
+	switch (m_type) {
 	case OrbType::MinimapZoomOut:
 		m_model->SetEmissiveColor({ 0.2f, 1.0f, 0.2f, 1.0f }); // 緑
 		break;
@@ -54,18 +49,14 @@ bool Orb::Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& position, in
 	return true;
 }
 
-void Orb::Shutdown()
-{
-	if (m_model)
-	{
+void Orb::Shutdown() {
+	if (m_model) {
 		m_model->Shutdown();
 	}
 }
 
-bool Orb::Update(float deltaTime, Player* player, LightManager* lightManager, DirectX::SoundEffect* collectSound)
-{
-	if (m_isCollected)
-	{
+bool Orb::Update(float deltaTime, Player* player, LightManager* lightManager, DirectX::SoundEffect* collectSound) {
+	if (m_isCollected) {
 		return false; // すでに収集済みなら false を返す
 	}
 
@@ -81,16 +72,13 @@ bool Orb::Update(float deltaTime, Player* player, LightManager* lightManager, Di
 	float collisionRadius = 1.0f;
 	float collisionRadiusSq = collisionRadius * collisionRadius;
 
-	if (distanceSq < collisionRadiusSq)
-	{
+	if (distanceSq < collisionRadiusSq) {
 		m_isCollected = true;
 
-		if (lightManager && m_lightIndex != -1)
-		{
+		if (lightManager && m_lightIndex != -1) {
 			lightManager->SetLightEnabled(m_lightIndex, false);
 		}
-		if (collectSound)
-		{
+		if (collectSound) {
 			collectSound->Play();
 		}
 
@@ -100,22 +88,18 @@ bool Orb::Update(float deltaTime, Player* player, LightManager* lightManager, Di
 	return false; // 収集されなかった場合は false を返す
 }
 
-Model* Orb::GetModel()
-{
+Model* Orb::GetModel() {
 	return m_isCollected ? nullptr : m_model.get();
 }
 
-bool Orb::IsCollected() const
-{
+bool Orb::IsCollected() const {
 	return m_isCollected;
 }
 
-DirectX::XMFLOAT3 Orb::GetPosition() const
-{
+DirectX::XMFLOAT3 Orb::GetPosition() const {
 	return m_position;
 }
 
-OrbType Orb::GetType() const
-{
+OrbType Orb::GetType() const {
 	return m_type;
 }

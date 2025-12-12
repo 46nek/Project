@@ -1,7 +1,7 @@
 #include "CameraDirector.h"
 #include "Game.h"
 #include "Easing.h"
-#include "Stage.h" // ★cpp側でインクルード
+#include "Stage.h" 
 #include <cmath>
 
 namespace {
@@ -26,8 +26,7 @@ CameraDirector::CameraDirector(std::shared_ptr<Camera> camera)
     m_titleCamPos(0, 0, 0),
     m_titleCamRot(0, 0, 0),
     m_startCamPos(0, 0, 0),
-    m_startCamRot(0, 0, 0)
-{
+    m_startCamRot(0, 0, 0) {
 }
 
 void CameraDirector::Initialize() {
@@ -36,7 +35,7 @@ void CameraDirector::Initialize() {
 }
 
 void CameraDirector::SetCameraForTitle(Stage* stage) {
-    if (!stage || !m_camera) return;
+    if (!stage || !m_camera) { return; }
 
     std::pair<int, int> startPos = stage->GetStartPosition();
     float pathWidth = stage->GetPathWidth();
@@ -128,7 +127,7 @@ void CameraDirector::UpdateOpening(float deltaTime) {
 }
 
 void CameraDirector::UpdateGameplay(float deltaTime, Player* player) {
-    if (!player) return;
+    if (!player) { return; }
 
     // FOV制御
     float baseFov = DirectX::XM_PI / 4.0f;

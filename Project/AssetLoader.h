@@ -11,8 +11,7 @@
  * @class AssetLoader
  * @brief 3Dモデルやテクスチャなどのアセットをファイルから読み込む静的クラス
  */
-class AssetLoader
-{
+class AssetLoader {
 public:
 	/**
 	 * @brief Assimpライブラリを使用してモデルファイルを読み込む

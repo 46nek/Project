@@ -8,8 +8,7 @@
  * @class Sprite
  * @brief 2Dスプライトのテクスチャ読み込みと描画を管理
  */
-class Sprite
-{
+class Sprite {
 public:
 	Sprite();
 	~Sprite();

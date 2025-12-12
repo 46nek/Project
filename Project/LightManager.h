@@ -6,15 +6,13 @@
 #include "MazeGenerator.h"
 #include "Frustum.h"
 
-struct LightBufferType
-{
-	Light               Lights[MAX_LIGHTS];
-	int                 NumLights;
-	DirectX::XMFLOAT3   CameraPosition;
+struct LightBufferType {
+	Light               lights[MAX_LIGHTS]; // Lights -> lights
+	int                 numLights;          // NumLights -> numLights
+	DirectX::XMFLOAT3   cameraPosition;     // CameraPosition -> cameraPosition
 };
 
-class LightManager
-{
+class LightManager {
 public:
 	LightManager();
 	~LightManager();
@@ -32,7 +30,7 @@ public:
 
 private:
 	void UpdateFlashlight(float deltaTime, const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT3& rotation);
-	void UpdatePlayerLight(const DirectX::XMFLOAT3& position); // 追加
+	void UpdatePlayerLight(const DirectX::XMFLOAT3& position); 
 	void ApplyFlicker(int lightIndex, float deltaTime);
 
 	bool CheckOcclusion(const DirectX::XMFLOAT3& start, const DirectX::XMFLOAT3& end, float range);
@@ -44,7 +42,7 @@ private:
 	DirectX::XMMATRIX m_lightProjectionMatrix;
 
 	int m_flashlightIndex;
-	int m_playerLightIndex; 
+	int m_playerLightIndex;
 	float m_flashlightBaseIntensity;
 	float m_flickerTimer;
 	float m_nextFlickerTime;

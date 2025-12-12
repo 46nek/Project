@@ -4,8 +4,7 @@
 /**
  * @brief キーボードとマウスの入力を管理するクラス
  */
-class Input
-{
+class Input {
 public:
 	static constexpr int KEY_COUNT = 256;
 

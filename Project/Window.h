@@ -6,8 +6,7 @@
 /**
  * @brief ウィンドウの生成と管理を行うクラス
  */
-class Window
-{
+class Window {
 public:
 	Window(LPCWSTR applicationName, int screenWidth, int screenHeight);
 	~Window();
@@ -43,8 +42,8 @@ private:
 	LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
 
 	LPCWSTR m_applicationName;
-	HINSTANCE m_hinstance;
-	HWND m_hwnd;
+	HINSTANCE m_hInstance;
+	HWND m_hWnd;
 	Input* m_input;
 	int m_screenWidth;
 	int m_screenHeight;

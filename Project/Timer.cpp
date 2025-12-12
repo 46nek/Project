@@ -1,34 +1,29 @@
 #include "Timer.h"
 
-namespace
-{
+namespace {
 	// 1秒あたりのミリ秒数を表す定数
-	constexpr float MillisecondsPerSecond = 1000.0f;
+	constexpr float MILLISECONDS_PER_SECOND = 1000.0f;
 }
 
 Timer::Timer()
 	: m_frequency(0),
 	m_ticksPerMillisecond(0.0f),
 	m_startTime(0),
-	m_deltaTime(0.0f)
-{
+	m_deltaTime(0.0f) {
 }
 
-Timer::~Timer()
-{
+Timer::~Timer() {
 }
 
-bool Timer::Initialize()
-{
+bool Timer::Initialize() {
 	// CPUのクロック周波数（ティック/秒）を取得
 	QueryPerformanceFrequency((LARGE_INTEGER*)&m_frequency);
-	if (m_frequency == 0)
-	{
+	if (m_frequency == 0) {
 		return false;
 	}
 
 	// 1ミリ秒あたりのティック数を計算
-	m_ticksPerMillisecond = static_cast<float>(m_frequency) / MillisecondsPerSecond;
+	m_ticksPerMillisecond = static_cast<float>(m_frequency) / MILLISECONDS_PER_SECOND;
 
 	// 開始時間を記録
 	QueryPerformanceCounter((LARGE_INTEGER*)&m_startTime);
@@ -36,8 +31,7 @@ bool Timer::Initialize()
 	return true;
 }
 
-void Timer::Tick()
-{
+void Timer::Tick() {
 	INT64 currentTime;
 
 	// 現在の時間を取得
@@ -53,8 +47,7 @@ void Timer::Tick()
 	m_startTime = currentTime;
 }
 
-float Timer::GetDeltaTime() const
-{
+float Timer::GetDeltaTime() const {
 	// デルタタイムを秒単位で返す
-	return m_deltaTime / MillisecondsPerSecond;
+	return m_deltaTime / MILLISECONDS_PER_SECOND;
 }

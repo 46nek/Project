@@ -18,7 +18,7 @@ void Renderer::RenderSceneToTexture(
 	LightManager* lightManager,
 	const std::vector<std::vector<MazeGenerator::CellType>>& mazeData,
 	float pathWidth) {
-	if (!m_graphicsDevice || !camera || !lightManager) return;
+	if (!m_graphicsDevice || !camera || !lightManager) { return; }
 
 	RenderTarget* renderTarget = m_graphicsDevice->GetRenderTarget();
 	renderTarget->SetRenderTarget(m_graphicsDevice->GetDeviceContext());
@@ -38,10 +38,11 @@ void Renderer::RenderFinalPass(const Camera* camera, float vignetteIntensity) {
 	// ポストプロセス用の定数バッファを更新
 	// フォグの値はここでは使われませんが、バッファ全体を更新する必要があります
 	PostProcessBufferType postProcessBuffer;
-	postProcessBuffer.VignetteIntensity = vignetteIntensity;
-	postProcessBuffer.FogStart = 0.0f;
-	postProcessBuffer.FogEnd = 0.0f;
-	postProcessBuffer.FogColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	postProcessBuffer.vignetteIntensity = vignetteIntensity; // 修正: VignetteIntensity -> vignetteIntensity
+	postProcessBuffer.fogStart = 0.0f;                       // 修正: FogStart -> fogStart
+	postProcessBuffer.fogEnd = 0.0f;                         // 修正: FogEnd -> fogEnd
+	postProcessBuffer.fogColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f); // 修正: FogColor -> fogColor
+	postProcessBuffer.padding = 0.0f; // 追加: 初期化
 	m_graphicsDevice->UpdatePostProcessBuffer(postProcessBuffer);
 
 	m_graphicsDevice->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
@@ -98,7 +99,7 @@ void Renderer::RenderDepthPass(
 	deviceContext->PSSetShader(nullptr, nullptr, 0);
 
 	auto renderDepth = [&](Model* model) {
-		if (!model) return;
+		if (!model) { return; }
 
 		if (!m_frustum->CheckSphere(model->GetBoundingSphereCenter(), model->GetBoundingSphereRadius())) {
 			return;
@@ -157,10 +158,11 @@ void Renderer::RenderMainPass(
 
 	// --- フォグの設定をここで送信 ---
 	PostProcessBufferType fogParams;
-	fogParams.VignetteIntensity = 0.8f; // PixelShaderで使われるデフォルト値
-	fogParams.FogStart = 15.0f;          // フォグがかかり始める距離（プレイヤーのすぐ近く）
-	fogParams.FogEnd = 60.0f;           // 完全にフォグ色になる距離（視界の限界）
-	fogParams.FogColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f); // 黒い霧（闇）
+	fogParams.vignetteIntensity = 0.8f; // 修正
+	fogParams.fogStart = 15.0f;          // 修正
+	fogParams.fogEnd = 60.0f;           // 修正
+	fogParams.fogColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f); // 修正
+	fogParams.padding = 0.0f; // 追加
 	m_graphicsDevice->UpdatePostProcessBuffer(fogParams);
 	// --------------------------------
 
@@ -173,38 +175,39 @@ void Renderer::RenderMainPass(
 	deviceContext->PSSetSamplers(1, 1, &shadowSampler);
 
 	struct CurrentMaterialState {
-		DirectX::XMFLOAT4 EmissiveColor;
-		int UseTexture;
-		int UseNormalMap;
-		bool IsValid = false;
+		DirectX::XMFLOAT4 emissiveColor; // EmissiveColor -> emissiveColor
+		int useTexture;     // UseTexture -> useTexture
+		int useNormalMap;   // UseNormalMap -> useNormalMap
+		bool isValid = false; // IsValid -> isValid
 	} currentState;
 
 	auto renderModel = [&](Model* model) {
-		if (!model) return;
+		if (!model) { return; }
 
-		bool needUpdate = !currentState.IsValid;
-		if (currentState.IsValid) {
+		bool needUpdate = !currentState.isValid;
+		if (currentState.isValid) {
 			auto ec = model->GetEmissiveColor();
-			if (ec.x != currentState.EmissiveColor.x ||
-				ec.y != currentState.EmissiveColor.y ||
-				ec.z != currentState.EmissiveColor.z ||
-				model->GetUseTexture() != currentState.UseTexture ||
-				(model->HasNormalMap() && model->GetUseNormalMap()) != currentState.UseNormalMap) {
+			if (ec.x != currentState.emissiveColor.x ||
+				ec.y != currentState.emissiveColor.y ||
+				ec.z != currentState.emissiveColor.z ||
+				model->GetUseTexture() != currentState.useTexture ||
+				(model->HasNormalMap() && model->GetUseNormalMap()) != currentState.useNormalMap) {
 				needUpdate = true;
 			}
 		}
 
 		if (needUpdate) {
 			MaterialBufferType materialBuffer;
-			materialBuffer.EmissiveColor = model->GetEmissiveColor();
-			materialBuffer.UseTexture = model->GetUseTexture();
-			materialBuffer.UseNormalMap = model->HasNormalMap() && model->GetUseNormalMap();
+			materialBuffer.emissiveColor = model->GetEmissiveColor(); // 修正
+			materialBuffer.useTexture = model->GetUseTexture();       // 修正
+			materialBuffer.useNormalMap = model->HasNormalMap() && model->GetUseNormalMap(); // 修正
+			materialBuffer.padding = DirectX::XMFLOAT2(0, 0); // 追加: 初期化
 			m_graphicsDevice->UpdateMaterialBuffer(materialBuffer);
 
-			currentState.EmissiveColor = materialBuffer.EmissiveColor;
-			currentState.UseTexture = materialBuffer.UseTexture;
-			currentState.UseNormalMap = materialBuffer.UseNormalMap;
-			currentState.IsValid = true;
+			currentState.emissiveColor = materialBuffer.emissiveColor;
+			currentState.useTexture = materialBuffer.useTexture;
+			currentState.useNormalMap = materialBuffer.useNormalMap;
+			currentState.isValid = true;
 		}
 
 		m_graphicsDevice->UpdateMatrixBuffer(

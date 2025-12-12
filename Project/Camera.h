@@ -1,8 +1,7 @@
 #pragma once
 #include <DirectXMath.h>
 
-class Camera
-{
+class Camera {
 public:
 	Camera(float x = 0.0f, float y = 0.0f, float z = 0.0f);
 	~Camera();

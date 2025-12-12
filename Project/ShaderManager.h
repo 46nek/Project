@@ -1,13 +1,10 @@
-// ShaderManager.h
-
 #pragma once
 #include <d3d11.h>
 #include <d3dcompiler.h>
 
 #pragma comment(lib, "d3dcompiler.lib")
 
-class ShaderManager
-{
+class ShaderManager {
 public:
 	ShaderManager();
 	~ShaderManager();
@@ -23,10 +20,8 @@ public:
 	ID3D11VertexShader* GetDepthVertexShader() const { return m_depthVertexShader; }
 	ID3D11InputLayout* GetInputLayout() const { return m_inputLayout; }
 
-	// Å•Å•Å• à»â∫Çí«â¡ Å•Å•Å•
 	ID3D11VertexShader* GetSimpleVertexShader() const { return m_simpleVertexShader; }
 	ID3D11PixelShader* GetSimplePixelShader() const { return m_simplePixelShader; }
-	// Å£Å£Å£ í«â¡Ç±Ç±Ç‹Ç≈ Å£Å£Å£
 
 private:
 	ID3D11VertexShader* m_vertexShader;

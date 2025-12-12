@@ -6,8 +6,7 @@
  * @class Texture
  * @brief WIC (Windows Imaging Component) を使用したテクスチャの読み込みと管理
  */
-class Texture
-{
+class Texture {
 public:
 	Texture();
 	~Texture();

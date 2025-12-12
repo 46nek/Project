@@ -1,15 +1,12 @@
 #include "Frustum.h"
 
-Frustum::Frustum()
-{
+Frustum::Frustum() {
 }
 
-Frustum::~Frustum()
-{
+Frustum::~Frustum() {
 }
 
-void Frustum::ConstructFrustum(const DirectX::XMMATRIX& viewMatrix, const DirectX::XMMATRIX& projectionMatrix)
-{
+void Frustum::ConstructFrustum(const DirectX::XMMATRIX& viewMatrix, const DirectX::XMMATRIX& projectionMatrix) {
 	DirectX::XMMATRIX viewProjMatrix = DirectX::XMMatrixMultiply(viewMatrix, projectionMatrix);
 
 	// ç∂ïΩñ 
@@ -49,10 +46,9 @@ void Frustum::ConstructFrustum(const DirectX::XMMATRIX& viewMatrix, const Direct
 	m_planes[5].distance = viewProjMatrix.r[3].m128_f32[3] - viewProjMatrix.r[3].m128_f32[2];
 
 	// ïΩñ Çê≥ãKâª
-	for (int i = 0; i < 6; i++)
-	{
+	for (int i = 0; i < 6; i++) {
 		float length = sqrtf((m_planes[i].normal.x * m_planes[i].normal.x) + (m_planes[i].normal.y * m_planes[i].normal.y) + (m_planes[i].normal.z * m_planes[i].normal.z));
-		if (length == 0.0f) continue; // É[ÉçèúéZÇñhé~
+		if (length == 0.0f) { continue; } // É[ÉçèúéZÇñhé~
 		m_planes[i].normal.x /= length;
 		m_planes[i].normal.y /= length;
 		m_planes[i].normal.z /= length;
@@ -60,30 +56,20 @@ void Frustum::ConstructFrustum(const DirectX::XMMATRIX& viewMatrix, const Direct
 	}
 }
 
-bool Frustum::CheckPoint(const DirectX::XMFLOAT3& point) const
-{
-	for (int i = 0; i < 6; i++)
-	{
-		// --- Ç±Ç±Ç©ÇÁèCê≥ ---
+bool Frustum::CheckPoint(const DirectX::XMFLOAT3& point) const {
+	for (int i = 0; i < 6; i++) {
 		DirectX::XMFLOAT4 plane(m_planes[i].normal.x, m_planes[i].normal.y, m_planes[i].normal.z, m_planes[i].distance);
-		if (DirectX::XMVectorGetX(DirectX::XMPlaneDotCoord(DirectX::XMLoadFloat4(&plane), DirectX::XMLoadFloat3(&point))) < 0.0f)
-			// --- èCê≥Ç±Ç±Ç‹Ç≈ ---
-		{
+		if (DirectX::XMVectorGetX(DirectX::XMPlaneDotCoord(DirectX::XMLoadFloat4(&plane), DirectX::XMLoadFloat3(&point))) < 0.0f) {
 			return false;
 		}
 	}
 	return true;
 }
 
-bool Frustum::CheckSphere(const DirectX::XMFLOAT3& center, float radius) const
-{
-	for (int i = 0; i < 6; i++)
-	{
-		// --- Ç±Ç±Ç©ÇÁèCê≥ ---
+bool Frustum::CheckSphere(const DirectX::XMFLOAT3& center, float radius) const {
+	for (int i = 0; i < 6; i++) {
 		DirectX::XMFLOAT4 plane(m_planes[i].normal.x, m_planes[i].normal.y, m_planes[i].normal.z, m_planes[i].distance);
-		if (DirectX::XMVectorGetX(DirectX::XMPlaneDotCoord(DirectX::XMLoadFloat4(&plane), DirectX::XMLoadFloat3(&center))) < -radius)
-			// --- èCê≥Ç±Ç±Ç‹Ç≈ ---
-		{
+		if (DirectX::XMVectorGetX(DirectX::XMPlaneDotCoord(DirectX::XMLoadFloat4(&plane), DirectX::XMLoadFloat3(&center))) < -radius) {
 			return false;
 		}
 	}

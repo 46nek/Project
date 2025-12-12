@@ -8,16 +8,13 @@ SceneManager::SceneManager()
 	: m_currentScene(nullptr),
 	m_graphicsDevice(nullptr),
 	m_input(nullptr),
-	m_audioEngine(nullptr)
-{
+	m_audioEngine(nullptr) {
 }
 
-SceneManager::~SceneManager()
-{
+SceneManager::~SceneManager() {
 }
 
-bool SceneManager::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine)
-{
+bool SceneManager::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine) {
 	m_graphicsDevice = graphicsDevice;
 	m_input = input;
 	m_audioEngine = audioEngine;
@@ -25,49 +22,38 @@ bool SceneManager::Initialize(GraphicsDevice* graphicsDevice, Input* input, Dire
 	return ChangeScene(SceneState::Title);
 }
 
-void SceneManager::Shutdown()
-{
-	if (m_currentScene)
-	{
+void SceneManager::Shutdown() {
+	if (m_currentScene) {
 		m_currentScene->Shutdown();
 		m_currentScene.reset();
 	}
 }
 
-void SceneManager::Update(float deltaTime)
-{
-	if (m_currentScene)
-	{
+void SceneManager::Update(float deltaTime) {
+	if (m_currentScene) {
 		m_currentScene->Update(deltaTime);
 		SceneState nextScene = m_currentScene->GetNextScene();
-		if (nextScene != SceneState::None)
-		{
+		if (nextScene != SceneState::None) {
 			ChangeScene(nextScene);
 		}
 	}
 }
 
-void SceneManager::Render()
-{
-	if (m_currentScene)
-	{
+void SceneManager::Render() {
+	if (m_currentScene) {
 		m_currentScene->Render();
 	}
 }
 
-bool SceneManager::ChangeScene(SceneState nextState)
-{
-	if (nextState == SceneState::None)
-	{
+bool SceneManager::ChangeScene(SceneState nextState) {
+	if (nextState == SceneState::None) {
 		return true;
 	}
 
 	// LoadingSceneからGameSceneへの遷移（データの受け渡しが必要な場合）
-	if (nextState == SceneState::Game)
-	{
+	if (nextState == SceneState::Game) {
 		LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(m_currentScene.get());
-		if (loadingScene)
-		{
+		if (loadingScene) {
 			// ローディング済みのGameSceneの所有権を取得
 			std::unique_ptr<Scene> nextScene = loadingScene->GetGameScene();
 
@@ -82,14 +68,12 @@ bool SceneManager::ChangeScene(SceneState nextState)
 	}
 
 	// 通常のシーン遷移
-	if (m_currentScene)
-	{
+	if (m_currentScene) {
 		m_currentScene->Shutdown();
 		m_currentScene = nullptr;
 	}
 
-	switch (nextState)
-	{
+	switch (nextState) {
 	case SceneState::Title:
 		m_currentScene = std::make_unique<TitleScene>();
 		break;
@@ -106,15 +90,12 @@ bool SceneManager::ChangeScene(SceneState nextState)
 		return false;
 	}
 
-	if (m_currentScene)
-	{
-		if (!m_currentScene->Initialize(m_graphicsDevice, m_input, m_audioEngine))
-		{
+	if (m_currentScene) {
+		if (!m_currentScene->Initialize(m_graphicsDevice, m_input, m_audioEngine)) {
 			return false;
 		}
 	}
-	else
-	{
+	else {
 		return false;
 	}
 

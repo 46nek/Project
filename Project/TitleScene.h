@@ -9,8 +9,7 @@
 /**
  * @brief タイトル画面のシーンを管理するクラス
  */
-class TitleScene : public Scene
-{
+class TitleScene : public Scene {
 public:
 	TitleScene();
 	~TitleScene();

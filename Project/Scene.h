@@ -4,8 +4,7 @@
 #include "Audio.h"
 
 // シーンの状態
-enum class SceneState
-{
+enum class SceneState {
 	None,
 	Title,
 	Loading,
@@ -16,8 +15,7 @@ enum class SceneState
 /**
  * @brief 各シーンの基底となる抽象クラス
  */
-class Scene
-{
+class Scene {
 public:
 	Scene() : m_graphicsDevice(nullptr), m_input(nullptr), m_audioEngine(nullptr), m_nextScene(SceneState::None) {}
 	virtual ~Scene() = default;

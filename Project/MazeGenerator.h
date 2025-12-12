@@ -2,11 +2,9 @@
 #include <vector>
 #include <random>
 
-class MazeGenerator
-{
+class MazeGenerator {
 public:
-	enum CellType
-	{
+	enum CellType {
 		Path,
 		Wall
 	};

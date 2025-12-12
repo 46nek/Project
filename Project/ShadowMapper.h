@@ -1,5 +1,3 @@
-// ShadowMapper.h
-
 #pragma once
 #include <d3d11.h>
 
@@ -7,8 +5,7 @@
  * @class ShadowMapper
  * @brief シャドウマッピング用の深度テクスチャと関連リソースを管理
  */
-class ShadowMapper
-{
+class ShadowMapper {
 public:
 	static constexpr int SHADOWMAP_WIDTH = 2;
 	static constexpr int SHADOWMAP_HEIGHT = 2;

@@ -5,8 +5,7 @@
 #include "SpriteBatch.h"
 #include "FW1FontWrapper.h"
 
-class LoadingScene : public Scene
-{
+class LoadingScene : public Scene {
 public:
 	LoadingScene();
 	~LoadingScene();

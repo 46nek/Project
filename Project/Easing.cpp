@@ -1,12 +1,10 @@
 #include "Easing.h"
 
-float Easing::GetValue(EasingType type, float t)
-{
+float Easing::GetValue(EasingType type, float t) {
     // t‚Ì”ÍˆÍ‚ğ0.0`1.0‚ÉƒNƒ‰ƒ“ƒv
     t = std::max(0.0f, std::min(t, 1.0f));
 
-    switch (type)
-    {
+    switch (type) {
     case EasingType::Linear: return t;
     case EasingType::EaseInQuad: return EaseInQuad(t);
     case EasingType::EaseOutQuad: return EaseOutQuad(t);
@@ -71,9 +69,9 @@ float Easing::EaseInOutSine(float t) { return -(cosf(PI * t) - 1) / 2; }
 float Easing::EaseInExpo(float t) { return t == 0 ? 0 : powf(2, 10 * (t - 1)); }
 float Easing::EaseOutExpo(float t) { return t == 1 ? 1 : 1 - powf(2, -10 * t); }
 float Easing::EaseInOutExpo(float t) {
-    if (t == 0) return 0;
-    if (t == 1) return 1;
-    if ((t *= 2) < 1) return 0.5f * powf(2, 10 * (t - 1));
+    if (t == 0) { return 0; }
+    if (t == 1) { return 1; }
+    if ((t *= 2) < 1) { return 0.5f * powf(2, 10 * (t - 1)); }
     return 0.5f * (-powf(2, -10 * --t) + 2);
 }
 
@@ -81,7 +79,7 @@ float Easing::EaseInOutExpo(float t) {
 float Easing::EaseInCirc(float t) { return 1 - sqrtf(1 - t * t); }
 float Easing::EaseOutCirc(float t) { return sqrtf(1 - (t - 1) * (t - 1)); }
 float Easing::EaseInOutCirc(float t) {
-    if ((t *= 2) < 1) return -0.5f * (sqrtf(1 - t * t) - 1);
+    if ((t *= 2) < 1) { return -0.5f * (sqrtf(1 - t * t) - 1); }
     return 0.5f * (sqrtf(1 - (t - 2) * (t - 2)) + 1);
 }
 

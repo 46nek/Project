@@ -10,8 +10,7 @@
 /**
  * @brief ゲーム全体の管理を行うメインクラス
  */
-class Game
-{
+class Game {
 public:
 	// 定数
 	static constexpr int SCREEN_WIDTH = 1280;

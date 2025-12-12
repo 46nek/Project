@@ -1,15 +1,10 @@
-// Project/AStar.h (この内容で完全に置き換えてください)
-
 #pragma once
 
 #include <vector>
 #include <DirectXMath.h>
 #include "MazeGenerator.h"
 
-// ノード構造体は AStar.cpp へ移動
-
-class AStar
-{
+class AStar {
 public:
 	AStar(const std::vector<std::vector<MazeGenerator::CellType>>& mazeData);
 	~AStar();
@@ -19,9 +14,8 @@ public:
 	int GetMazeWidth() const;
 	int GetMazeHeight() const;
 
-	// ノード情報を保持する構造体 (AStar.cpp から参照するため public にする)
-	struct NodeInfo
-	{
+	// ノード情報を保持する構造体
+	struct NodeInfo {
 		int g = 0; // スタートからの移動コスト
 		int h = 0; // ゴールまでの推定コスト
 		DirectX::XMFLOAT2 parent = { -1, -1 };
@@ -32,13 +26,12 @@ public:
 
 		int f() const { return g + h; }
 
-		void ResetValue()
-		{
+		void ResetValue() {
 			g = 0;
 			h = 0;
-			parent = { -1, -1 };   // 修正: 型名を削除
-			inOpenList = false;    // 修正: 型名を削除
-			inClosedList = false;  // 修正: 型名を削除
+			parent = { -1, -1 };  
+			inOpenList = false;  
+			inClosedList = false; 
 		}
 
 		void Reset() { ResetValue(); searchId = 0; }

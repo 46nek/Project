@@ -1,5 +1,3 @@
-// GraphicsDevice.cpp (この内容で完全に置き換えてください)
-
 #include "GraphicsDevice.h"
 #include "LightManager.h"
 
@@ -8,14 +6,15 @@ GraphicsDevice::GraphicsDevice()
 	m_matrixBuffer(nullptr), m_lightBuffer(nullptr), m_motionBlurBuffer(nullptr),
 	m_materialBuffer(nullptr), m_postProcessBuffer(nullptr),
 	m_samplerState(nullptr),
-	m_defaultRasterizerState(nullptr)
-{
+	m_alphaBlendState(nullptr),
+	m_defaultBlendState(nullptr),
+	m_defaultRasterizerState(nullptr) {
 }
 
-GraphicsDevice::~GraphicsDevice() {}
+GraphicsDevice::~GraphicsDevice() {
+}
 
-bool GraphicsDevice::Initialize(HWND hWnd, int screenWidth, int screenHeight)
-{
+bool GraphicsDevice::Initialize(HWND hWnd, int screenWidth, int screenHeight) {
 	UINT createDeviceFlags = 0;
 #ifdef _DEBUG
 	createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
@@ -25,64 +24,62 @@ bool GraphicsDevice::Initialize(HWND hWnd, int screenWidth, int screenHeight)
 	HRESULT hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, createDeviceFlags,
 		featureLevels, ARRAYSIZE(featureLevels), D3D11_SDK_VERSION,
 		&m_d3dDevice, nullptr, &m_immediateContext);
-	if (FAILED(hr)) return false;
+	if (FAILED(hr)) { return false; }
 
 	m_swapChain = std::make_unique<SwapChain>();
-	if (!m_swapChain->Initialize(m_d3dDevice, hWnd, screenWidth, screenHeight)) return false;
+	if (!m_swapChain->Initialize(m_d3dDevice, hWnd, screenWidth, screenHeight)) { return false; }
 
 	m_shaderManager = std::make_unique<ShaderManager>();
-	if (!m_shaderManager->Initialize(m_d3dDevice)) return false;
+	if (!m_shaderManager->Initialize(m_d3dDevice)) { return false; }
 
 	m_shadowMapper = std::make_unique<ShadowMapper>();
-	if (!m_shadowMapper->Initialize(m_d3dDevice)) return false;
+	if (!m_shadowMapper->Initialize(m_d3dDevice)) { return false; }
 
 	m_renderTarget = std::make_unique<RenderTarget>();
-	if (!m_renderTarget->Initialize(m_d3dDevice, screenWidth, screenHeight, true)) return false;
+	if (!m_renderTarget->Initialize(m_d3dDevice, screenWidth, screenHeight, true)) { return false; }
 
 	m_orthoWindow = std::make_unique<OrthoWindow>();
-	if (!m_orthoWindow->Initialize(m_d3dDevice, screenWidth, screenHeight)) return false;
+	if (!m_orthoWindow->Initialize(m_d3dDevice, screenWidth, screenHeight)) { return false; }
 
 	D3D11_BUFFER_DESC matrixBufferDesc = {};
 	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
 	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	hr = m_d3dDevice->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
-	if (FAILED(hr)) return false;
+	hr = m_d3dDevice->CreateBuffer(&matrixBufferDesc, nullptr, &m_matrixBuffer);
+	if (FAILED(hr)) { return false; }
 
 	D3D11_BUFFER_DESC lightBufferDesc = {};
 	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	lightBufferDesc.ByteWidth = sizeof(LightBufferType);
 	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	hr = m_d3dDevice->CreateBuffer(&lightBufferDesc, NULL, &m_lightBuffer);
-	if (FAILED(hr)) return false;
+	hr = m_d3dDevice->CreateBuffer(&lightBufferDesc, nullptr, &m_lightBuffer);
+	if (FAILED(hr)) { return false; }
 
 	D3D11_BUFFER_DESC motionBlurBufferDesc = {};
 	motionBlurBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	motionBlurBufferDesc.ByteWidth = sizeof(MotionBlurBufferType);
 	motionBlurBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	motionBlurBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	hr = m_d3dDevice->CreateBuffer(&motionBlurBufferDesc, NULL, &m_motionBlurBuffer);
-	if (FAILED(hr)) return false;
+	hr = m_d3dDevice->CreateBuffer(&motionBlurBufferDesc, nullptr, &m_motionBlurBuffer);
+	if (FAILED(hr)) { return false; }
 
 	D3D11_BUFFER_DESC materialBufferDesc = {};
 	materialBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	materialBufferDesc.ByteWidth = sizeof(MaterialBufferType);
 	materialBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	materialBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	hr = m_d3dDevice->CreateBuffer(&materialBufferDesc, NULL, &m_materialBuffer);
-	if (FAILED(hr)) return false;
-
-	// 重複削除済み
+	hr = m_d3dDevice->CreateBuffer(&materialBufferDesc, nullptr, &m_materialBuffer);
+	if (FAILED(hr)) { return false; }
 
 	D3D11_BUFFER_DESC postProcessBufferDesc = {};
 	postProcessBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	postProcessBufferDesc.ByteWidth = sizeof(PostProcessBufferType);
 	postProcessBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	postProcessBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	hr = m_d3dDevice->CreateBuffer(&postProcessBufferDesc, NULL, &m_postProcessBuffer);
-	if (FAILED(hr)) return false;
+	hr = m_d3dDevice->CreateBuffer(&postProcessBufferDesc, nullptr, &m_postProcessBuffer);
+	if (FAILED(hr)) { return false; }
 
 	D3D11_SAMPLER_DESC samplerDesc = {};
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -92,7 +89,7 @@ bool GraphicsDevice::Initialize(HWND hWnd, int screenWidth, int screenHeight)
 	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	hr = m_d3dDevice->CreateSamplerState(&samplerDesc, &m_samplerState);
-	if (FAILED(hr)) return false;
+	if (FAILED(hr)) { return false; }
 
 	D3D11_RASTERIZER_DESC rasterDesc = {};
 	rasterDesc.FillMode = D3D11_FILL_SOLID;
@@ -106,13 +103,13 @@ bool GraphicsDevice::Initialize(HWND hWnd, int screenWidth, int screenHeight)
 	rasterDesc.MultisampleEnable = false;
 	rasterDesc.AntialiasedLineEnable = false;
 	hr = m_d3dDevice->CreateRasterizerState(&rasterDesc, &m_defaultRasterizerState);
-	if (FAILED(hr)) return false;
+	if (FAILED(hr)) { return false; }
 
 	D3D11_BLEND_DESC blendDesc = {};
 	blendDesc.RenderTarget[0].BlendEnable = FALSE;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 	hr = m_d3dDevice->CreateBlendState(&blendDesc, &m_defaultBlendState);
-	if (FAILED(hr)) return false;
+	if (FAILED(hr)) { return false; }
 
 	blendDesc.RenderTarget[0].BlendEnable = TRUE;
 	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
@@ -122,13 +119,12 @@ bool GraphicsDevice::Initialize(HWND hWnd, int screenWidth, int screenHeight)
 	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	hr = m_d3dDevice->CreateBlendState(&blendDesc, &m_alphaBlendState);
-	if (FAILED(hr)) return false;
+	if (FAILED(hr)) { return false; }
 
 	return true;
 }
 
-void GraphicsDevice::Shutdown()
-{
+void GraphicsDevice::Shutdown() {
 	if (m_defaultRasterizerState) m_defaultRasterizerState->Release();
 	if (m_alphaBlendState) m_alphaBlendState->Release();
 	if (m_defaultBlendState) m_defaultBlendState->Release();
@@ -147,20 +143,17 @@ void GraphicsDevice::Shutdown()
 	if (m_d3dDevice) m_d3dDevice->Release();
 }
 
-void GraphicsDevice::BeginScene(float r, float g, float b, float a)
-{
+void GraphicsDevice::BeginScene(float r, float g, float b, float a) {
 	m_swapChain->BeginScene(m_immediateContext, r, g, b, a);
 }
 
-void GraphicsDevice::EndScene()
-{
+void GraphicsDevice::EndScene() {
 	m_swapChain->EndScene();
 }
 
-bool GraphicsDevice::UpdateMatrixBuffer(const DirectX::XMMATRIX& world, const DirectX::XMMATRIX& view, const DirectX::XMMATRIX& projection, const DirectX::XMMATRIX& lightView, const DirectX::XMMATRIX& lightProjection)
-{
+bool GraphicsDevice::UpdateMatrixBuffer(const DirectX::XMMATRIX& world, const DirectX::XMMATRIX& view, const DirectX::XMMATRIX& projection, const DirectX::XMMATRIX& lightView, const DirectX::XMMATRIX& lightProjection) {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	if (FAILED(m_immediateContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) return false;
+	if (FAILED(m_immediateContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) { return false; }
 	MatrixBufferType* dataPtr = (MatrixBufferType*)mappedResource.pData;
 	dataPtr->world = DirectX::XMMatrixTranspose(world);
 	dataPtr->view = DirectX::XMMatrixTranspose(view);
@@ -173,10 +166,9 @@ bool GraphicsDevice::UpdateMatrixBuffer(const DirectX::XMMATRIX& world, const Di
 	return true;
 }
 
-bool GraphicsDevice::UpdateLightBuffer(const LightBufferType& lightBuffer)
-{
+bool GraphicsDevice::UpdateLightBuffer(const LightBufferType& lightBuffer) {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	if (FAILED(m_immediateContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) return false;
+	if (FAILED(m_immediateContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) { return false; }
 	LightBufferType* dataPtr = (LightBufferType*)mappedResource.pData;
 	*dataPtr = lightBuffer;
 	m_immediateContext->Unmap(m_lightBuffer, 0);
@@ -184,10 +176,9 @@ bool GraphicsDevice::UpdateLightBuffer(const LightBufferType& lightBuffer)
 	return true;
 }
 
-bool GraphicsDevice::UpdateMotionBlurBuffer(const DirectX::XMMATRIX& prevViewProj, const DirectX::XMMATRIX& currentViewProjInv, float blurAmount)
-{
+bool GraphicsDevice::UpdateMotionBlurBuffer(const DirectX::XMMATRIX& prevViewProj, const DirectX::XMMATRIX& currentViewProjInv, float blurAmount) {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	if (FAILED(m_immediateContext->Map(m_motionBlurBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) return false;
+	if (FAILED(m_immediateContext->Map(m_motionBlurBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) { return false; }
 	MotionBlurBufferType* dataPtr = (MotionBlurBufferType*)mappedResource.pData;
 	dataPtr->previousViewProjection = DirectX::XMMatrixTranspose(prevViewProj);
 	dataPtr->currentViewProjectionInverse = DirectX::XMMatrixTranspose(currentViewProjInv);
@@ -197,10 +188,9 @@ bool GraphicsDevice::UpdateMotionBlurBuffer(const DirectX::XMMATRIX& prevViewPro
 	return true;
 }
 
-bool GraphicsDevice::UpdateMaterialBuffer(const MaterialBufferType& materialBuffer)
-{
+bool GraphicsDevice::UpdateMaterialBuffer(const MaterialBufferType& materialBuffer) {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	if (FAILED(m_immediateContext->Map(m_materialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) return false;
+	if (FAILED(m_immediateContext->Map(m_materialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) { return false; }
 	MaterialBufferType* dataPtr = (MaterialBufferType*)mappedResource.pData;
 	*dataPtr = materialBuffer;
 	m_immediateContext->Unmap(m_materialBuffer, 0);
@@ -208,10 +198,9 @@ bool GraphicsDevice::UpdateMaterialBuffer(const MaterialBufferType& materialBuff
 	return true;
 }
 
-bool GraphicsDevice::UpdatePostProcessBuffer(const PostProcessBufferType& postProcessBuffer)
-{
+bool GraphicsDevice::UpdatePostProcessBuffer(const PostProcessBufferType& postProcessBuffer) {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	if (FAILED(m_immediateContext->Map(m_postProcessBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) return false;
+	if (FAILED(m_immediateContext->Map(m_postProcessBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) { return false; }
 	PostProcessBufferType* dataPtr = (PostProcessBufferType*)mappedResource.pData;
 	*dataPtr = postProcessBuffer;
 	m_immediateContext->Unmap(m_postProcessBuffer, 0);
@@ -219,17 +208,14 @@ bool GraphicsDevice::UpdatePostProcessBuffer(const PostProcessBufferType& postPr
 	return true;
 }
 
-ID3D11BlendState* GraphicsDevice::GetAlphaBlendState() const
-{
+ID3D11BlendState* GraphicsDevice::GetAlphaBlendState() const {
 	return m_alphaBlendState;
 }
 
-ID3D11BlendState* GraphicsDevice::GetDefaultBlendState() const
-{
+ID3D11BlendState* GraphicsDevice::GetDefaultBlendState() const {
 	return m_defaultBlendState;
 }
 
-ID3D11RasterizerState* GraphicsDevice::GetDefaultRasterizerState() const
-{
+ID3D11RasterizerState* GraphicsDevice::GetDefaultRasterizerState() const {
 	return m_defaultRasterizerState;
 }

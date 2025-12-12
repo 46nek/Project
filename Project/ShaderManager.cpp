@@ -1,5 +1,3 @@
-// ShaderManager.cpp (この内容で完全に置き換えてください)
-
 #include "ShaderManager.h"
 #include <d3dcompiler.h>
 #include <iostream>
@@ -10,27 +8,23 @@ ShaderManager::ShaderManager()
 	: m_vertexShader(nullptr), m_postProcessVertexShader(nullptr), m_pixelShader(nullptr),
 	m_texturePixelShader(nullptr), m_motionBlurPixelShader(nullptr),
 	m_depthVertexShader(nullptr), m_inputLayout(nullptr),
-	m_simpleVertexShader(nullptr), m_simplePixelShader(nullptr)
-{
+	m_simpleVertexShader(nullptr), m_simplePixelShader(nullptr) {
 }
-ShaderManager::~ShaderManager() {}
+ShaderManager::~ShaderManager() {
+}
 
 // エラーメッセージを表示するヘルパー関数
-void OutputShaderError(ID3DBlob* errorMessage, const char* shaderFilename)
-{
-	if (errorMessage)
-	{
-		MessageBoxA(NULL, (char*)errorMessage->GetBufferPointer(), shaderFilename, MB_OK);
+void OutputShaderError(ID3DBlob* errorMessage, const char* shaderFilename) {
+	if (errorMessage) {
+		MessageBoxA(nullptr, (char*)errorMessage->GetBufferPointer(), shaderFilename, MB_OK); // NULL -> nullptr
 		errorMessage->Release();
 	}
-	else
-	{
-		MessageBoxA(NULL, "Shader Compilation Failed (No Error Message)", shaderFilename, MB_OK);
+	else {
+		MessageBoxA(nullptr, "Shader Compilation Failed (No Error Message)", shaderFilename, MB_OK); // NULL -> nullptr
 	}
 }
 
-bool ShaderManager::Initialize(ID3D11Device* device)
-{
+bool ShaderManager::Initialize(ID3D11Device* device) {
 	ID3DBlob* vsBlob = nullptr;
 	ID3DBlob* postProcessVsBlob = nullptr;
 	ID3DBlob* psBlob = nullptr;
@@ -102,8 +96,7 @@ bool ShaderManager::Initialize(ID3D11Device* device)
 	};
 
 	hr = device->CreateInputLayout(layout, ARRAYSIZE(layout), vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), &m_inputLayout);
-	if (FAILED(hr))
-	{
+	if (FAILED(hr)) {
 		vsBlob->Release();
 		postProcessVsBlob->Release();
 		psBlob->Release();
@@ -127,8 +120,7 @@ bool ShaderManager::Initialize(ID3D11Device* device)
 	return true;
 }
 
-void ShaderManager::Shutdown()
-{
+void ShaderManager::Shutdown() {
 	if (m_simplePixelShader) { m_simplePixelShader->Release(); m_simplePixelShader = nullptr; }
 	if (m_simpleVertexShader) { m_simpleVertexShader->Release(); m_simpleVertexShader = nullptr; }
 	if (m_inputLayout) { m_inputLayout->Release(); m_inputLayout = nullptr; }

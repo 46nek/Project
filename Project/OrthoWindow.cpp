@@ -1,12 +1,14 @@
 #include "OrthoWindow.h"
 
-OrthoWindow::OrthoWindow() {}
-OrthoWindow::~OrthoWindow() {}
+OrthoWindow::OrthoWindow() {
+}
 
-bool OrthoWindow::Initialize(ID3D11Device* device, int windowWidth, int windowHeight)
-{
-	std::vector<SimpleVertex> vertices =
-	{
+OrthoWindow::~OrthoWindow() {
+}
+
+bool OrthoWindow::Initialize(ID3D11Device* device, int windowWidth, int windowHeight) {
+	// SimpleVertexÇÃÉÅÉìÉoèáèò: pos, color, tex, normal, tangent, binormal
+	std::vector<SimpleVertex> vertices = {
 		{ { -1.0f,  1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, -1.0f, 0.0f } },
 		{ {  1.0f,  1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, -1.0f, 0.0f } },
 		{ {  1.0f, -1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, -1.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, -1.0f, 0.0f } },
@@ -18,16 +20,13 @@ bool OrthoWindow::Initialize(ID3D11Device* device, int windowWidth, int windowHe
 	return m_quad->Initialize(device, vertices, indices);
 }
 
-void OrthoWindow::Shutdown()
-{
-	if (m_quad)
-	{
+void OrthoWindow::Shutdown() {
+	if (m_quad) {
 		m_quad->Shutdown();
 		m_quad.reset();
 	}
 }
 
-void OrthoWindow::Render(ID3D11DeviceContext* deviceContext)
-{
+void OrthoWindow::Render(ID3D11DeviceContext* deviceContext) {
 	m_quad->Render(deviceContext);
 }

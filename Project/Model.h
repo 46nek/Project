@@ -6,18 +6,16 @@
 #include <memory>
 #include "Texture.h"
 
-struct SimpleVertex
-{
-	DirectX::XMFLOAT3 Pos;
-	DirectX::XMFLOAT4 Color;
-	DirectX::XMFLOAT2 Tex;
-	DirectX::XMFLOAT3 Normal;
-	DirectX::XMFLOAT3 Tangent;
-	DirectX::XMFLOAT3 Binormal;
+struct SimpleVertex {
+	DirectX::XMFLOAT3 pos;      // Pos -> pos
+	DirectX::XMFLOAT4 color;    // Color -> color
+	DirectX::XMFLOAT2 tex;      // Tex -> tex
+	DirectX::XMFLOAT3 normal;   // Normal -> normal
+	DirectX::XMFLOAT3 tangent;  // Tangent -> tangent
+	DirectX::XMFLOAT3 binormal; // Binormal -> binormal
 };
 
-class Model
-{
+class Model {
 public:
 	struct Mesh {
 		ID3D11Buffer* vertexBuffer = nullptr;

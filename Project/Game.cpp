@@ -95,7 +95,7 @@ void Game::Shutdown() {
 void Game::Run() {
 	MSG msg = {};
 	while (msg.message != WM_QUIT) {
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) { // NULL -> nullptr
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
@@ -131,8 +131,7 @@ bool Game::Update() {
 
 		m_sceneManager->Update(m_timer->GetDeltaTime());
 	}
-	else
-	{
+	else {
 		// ポーズ中はカーソルロック処理（Input::Update）を呼ばないことで、
 		// マウスカーソルを自由に動かせるようにします。
 	}

@@ -14,12 +14,10 @@ enum class FaceDirection {
  * @class MeshGenerator
  * @brief 迷路データから壁、床、天井のメッシュを生成する静的クラス
  */
-class MeshGenerator
-{
+class MeshGenerator {
 public:
 	// 生成するメッシュの種類
-	enum class MeshType
-	{
+	enum class MeshType {
 		Wall, Ceiling, Floor
 	};
 

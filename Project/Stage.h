@@ -10,8 +10,7 @@
  * @class Stage
  * @brief ゲームのステージ（迷路、地形モデルなど）の構築と管理を行うクラス
  */
-class Stage
-{
+class Stage {
 public:
 	Stage();
 	~Stage();
@@ -34,7 +33,6 @@ public:
 	static constexpr float WALL_HEIGHT = 8.0f;
 
 private:
-
 	std::unique_ptr<MazeGenerator> m_mazeGenerator;
 	std::vector<std::unique_ptr<Model>> m_models;
 

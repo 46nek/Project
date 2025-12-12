@@ -13,47 +13,43 @@ Minimap::Minimap()
 	m_pathSpriteScale(1.0f),
 	m_playerSpriteScale(0.0f),
 	m_orbSpriteScale(0.0f),
-	m_orbArrowSpriteScale(0.0f)
-{
+	m_orbArrowSpriteScale(0.0f) {
 }
 
-Minimap::~Minimap()
-{
+Minimap::~Minimap() {
 	Shutdown();
 }
 
-bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth)
-{
+bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth) {
 	// •ÏX‚È‚µ
 	m_graphicsDevice = graphicsDevice;
 	m_mazeData = &mazeData;
 	m_pathWidth = pathWidth;
 
-	if (!m_mazeData->empty())
-	{
+	if (!m_mazeData->empty()) {
 		m_visitedCells.assign(m_mazeData->size(), std::vector<bool>((*m_mazeData)[0].size(), false));
 	}
 
 	ID3D11Device* device = m_graphicsDevice->GetDevice();
 	m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_graphicsDevice->GetDeviceContext());
 
-	if (!m_pathSprite) m_pathSprite = std::make_unique<Sprite>();
-	if (!m_pathSprite->Initialize(device, L"Assets/minimap_path.png")) return false;
+	if (!m_pathSprite) { m_pathSprite = std::make_unique<Sprite>(); }
+	if (!m_pathSprite->Initialize(device, L"Assets/minimap_path.png")) { return false; }
 
-	if (!m_playerSprite) m_playerSprite = std::make_unique<Sprite>();
-	if (!m_playerSprite->Initialize(device, L"Assets/minimap_player.png")) return false;
+	if (!m_playerSprite) { m_playerSprite = std::make_unique<Sprite>(); }
+	if (!m_playerSprite->Initialize(device, L"Assets/minimap_player.png")) { return false; }
 
-	if (!m_enemySprite) m_enemySprite = std::make_unique<Sprite>();
-	if (!m_enemySprite->Initialize(device, L"Assets/minimap_enemy.png")) return false;
+	if (!m_enemySprite) { m_enemySprite = std::make_unique<Sprite>(); }
+	if (!m_enemySprite->Initialize(device, L"Assets/minimap_enemy.png")) { return false; }
 
-	if (!m_orbSprite) m_orbSprite = std::make_unique<Sprite>();
-	if (!m_orbSprite->Initialize(device, L"Assets/minimap_orb.png")) return false;
+	if (!m_orbSprite) { m_orbSprite = std::make_unique<Sprite>(); }
+	if (!m_orbSprite->Initialize(device, L"Assets/minimap_orb.png")) { return false; }
 
-	if (!m_frameSprite) m_frameSprite = std::make_unique<Sprite>();
-	if (!m_frameSprite->Initialize(device, L"Assets/minimap_frame.png")) return false;
+	if (!m_frameSprite) { m_frameSprite = std::make_unique<Sprite>(); }
+	if (!m_frameSprite->Initialize(device, L"Assets/minimap_frame.png")) { return false; }
 
-	if (!m_orbArrowSprite) m_orbArrowSprite = std::make_unique<Sprite>();
-	if (!m_orbArrowSprite->Initialize(device, L"Assets/orb_arrow.png")) return false;
+	if (!m_orbArrowSprite) { m_orbArrowSprite = std::make_unique<Sprite>(); }
+	if (!m_orbArrowSprite->Initialize(device, L"Assets/orb_arrow.png")) { return false; }
 
 	m_pathSpriteScale = m_cellSize / m_pathSprite->GetWidth();
 	m_playerSpriteScale = m_cellSize / m_playerSprite->GetWidth();
@@ -67,29 +63,27 @@ bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::
 	rasterDesc.ScissorEnable = TRUE;
 	rasterDesc.DepthClipEnable = TRUE;
 	HRESULT hr = device->CreateRasterizerState(&rasterDesc, m_scissorRasterizerState.GetAddressOf());
-	if (FAILED(hr)) return false;
+	if (FAILED(hr)) { return false; }
 
 	return true;
 }
 
-void Minimap::Shutdown()
-{
+void Minimap::Shutdown() {
 	// •ÏX‚È‚µ
-	if (m_pathSprite) m_pathSprite->Shutdown();
-	if (m_playerSprite) m_playerSprite->Shutdown();
-	if (m_enemySprite) m_enemySprite->Shutdown();
-	if (m_orbSprite) m_orbSprite->Shutdown();
-	if (m_frameSprite) m_frameSprite->Shutdown();
-	if (m_orbArrowSprite) m_orbArrowSprite->Shutdown();
+	if (m_pathSprite) { m_pathSprite->Shutdown(); }
+	if (m_playerSprite) { m_playerSprite->Shutdown(); }
+	if (m_enemySprite) { m_enemySprite->Shutdown(); }
+	if (m_orbSprite) { m_orbSprite->Shutdown(); }
+	if (m_frameSprite) { m_frameSprite->Shutdown(); }
+	if (m_orbArrowSprite) { m_orbArrowSprite->Shutdown(); }
 	m_scissorRasterizerState.Reset();
 	m_visitedCells.clear();
 }
 
-void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs, const std::vector<std::unique_ptr<Orb>>& specialOrbs, bool showEnemies, float alpha)
-{
-	if (alpha <= 0.0f) return;
-	if (!m_graphicsDevice || !m_mazeData || !camera) return;
-	if (m_visitedCells.empty()) return;
+void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs, const std::vector<std::unique_ptr<Orb>>& specialOrbs, bool showEnemies, float alpha) {
+	if (alpha <= 0.0f) { return; }
+	if (!m_graphicsDevice || !m_mazeData || !camera) { return; }
+	if (m_visitedCells.empty()) { return; }
 
 	ID3D11DeviceContext* deviceContext = m_graphicsDevice->GetDeviceContext();
 
@@ -114,13 +108,10 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 	int playerGridZ = static_cast<int>(playerWorldPos.z / m_pathWidth);
 
 	int viewRange = 0.5;
-	for (int z = playerGridZ - viewRange; z <= playerGridZ + viewRange; ++z)
-	{
-		for (int x = playerGridX - viewRange; x <= playerGridX + viewRange; ++x)
-		{
+	for (int z = playerGridZ - viewRange; z <= playerGridZ + viewRange; ++z) {
+		for (int x = playerGridX - viewRange; x <= playerGridX + viewRange; ++x) {
 			if (z >= 0 && z < static_cast<int>(m_visitedCells.size()) &&
-				x >= 0 && x < static_cast<int>(m_visitedCells[z].size()))
-			{
+				x >= 0 && x < static_cast<int>(m_visitedCells[z].size())) {
 				m_visitedCells[z][x] = true;
 			}
 		}
@@ -150,14 +141,11 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 
 	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_graphicsDevice->GetAlphaBlendState(), nullptr, nullptr, m_scissorRasterizerState.Get(), nullptr, transform);
 
-	for (size_t y = 0; y < m_mazeData->size(); ++y)
-	{
-		for (size_t x = 0; x < (*m_mazeData)[y].size(); ++x)
-		{
-			if (!m_visitedCells[y][x]) continue;
+	for (size_t y = 0; y < m_mazeData->size(); ++y) {
+		for (size_t x = 0; x < (*m_mazeData)[y].size(); ++x) {
+			if (!m_visitedCells[y][x]) { continue; }
 
-			if ((*m_mazeData)[y][x] == MazeGenerator::CellType::Path)
-			{
+			if ((*m_mazeData)[y][x] == MazeGenerator::CellType::Path) {
 				DirectX::XMFLOAT2 cellPos = {
 					x * m_cellSize + m_cellSize * 0.5f,
 					(mapHeightInCells - y) * m_cellSize - m_cellSize * 0.5f
@@ -167,10 +155,8 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 		}
 	}
 
-	for (const auto& enemy : enemies)
-	{
-		if (enemy)
-		{
+	for (const auto& enemy : enemies) {
+		if (enemy) {
 			DirectX::XMFLOAT3 enemyWorldPos = enemy->GetPosition();
 			int enemyGridX = static_cast<int>(enemyWorldPos.x / m_pathWidth);
 			int enemyGridZ = static_cast<int>(enemyWorldPos.z / m_pathWidth);
@@ -183,10 +169,8 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 		}
 	}
 
-	for (const auto& orb : orbs)
-	{
-		if (orb && !orb->IsCollected())
-		{
+	for (const auto& orb : orbs) {
+		if (orb && !orb->IsCollected()) {
 			DirectX::XMFLOAT3 orbWorldPos = orb->GetPosition();
 			int orbGridX = static_cast<int>(orbWorldPos.x / m_pathWidth);
 			int orbGridZ = static_cast<int>(orbWorldPos.z / m_pathWidth);
@@ -207,16 +191,13 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 	bool foundTarget = false;
 
 	auto CheckClosestOrb = [&](const auto& orbList) {
-		for (const auto& orb : orbList)
-		{
-			if (orb && !orb->IsCollected())
-			{
+		for (const auto& orb : orbList) {
+			if (orb && !orb->IsCollected()) {
 				DirectX::XMFLOAT3 pos = orb->GetPosition();
 				float dx = pos.x - playerWorldPos.x;
 				float dz = pos.z - playerWorldPos.z;
 				float distSq = dx * dx + dz * dz;
-				if (distSq < minDistanceSq)
-				{
+				if (distSq < minDistanceSq) {
 					minDistanceSq = distSq;
 					targetPos = pos;
 					foundTarget = true;
@@ -228,8 +209,7 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 	CheckClosestOrb(orbs);
 
 	// --- –îˆó‚Ì•`‰æ ---
-	if (foundTarget)
-	{
+	if (foundTarget) {
 		float dx = targetPos.x - playerWorldPos.x;
 		float dz = targetPos.z - playerWorldPos.z;
 		float angleToOrb = atan2f(dx, dz);
@@ -241,8 +221,7 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 		float limitX = m_viewSize.x * 0.5f;
 		float limitY = m_viewSize.y * 0.5f;
 
-		if (fabsf(relativeX) > limitX || fabsf(relativeY) > limitY)
-		{
+		if (fabsf(relativeX) > limitX || fabsf(relativeY) > limitY) {
 			float radius = 15.0f;
 			DirectX::XMFLOAT2 arrowPos = minimapCenter;
 			arrowPos.x += sinf(arrowRotation) * radius;
@@ -269,7 +248,6 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 	m_graphicsDevice->GetSwapChain()->TurnZBufferOn(deviceContext);
 }
 
-void Minimap::SetZoom(float zoomFactor)
-{
+void Minimap::SetZoom(float zoomFactor) {
 	m_zoomFactor = zoomFactor;
 }

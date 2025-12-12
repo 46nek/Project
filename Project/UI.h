@@ -11,8 +11,7 @@ class Camera;
 class Enemy;
 class Orb;
 
-class UI
-{
+class UI {
 public:
 	UI();
 	~UI();

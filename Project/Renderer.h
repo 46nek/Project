@@ -11,8 +11,7 @@
 /**
  * @brief 3Dシーンの描画処理を統括するクラス
  */
-class Renderer
-{
+class Renderer {
 public:
 	Renderer(GraphicsDevice* graphicsDevice);
 	~Renderer();

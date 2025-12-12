@@ -7,10 +7,8 @@
 #include "Player.h"
 #include <d3d11.h>
 
-class Enemy
-{
+class Enemy {
 public:
-
 	Enemy();
 	~Enemy();
 
@@ -21,7 +19,6 @@ public:
 	DirectX::XMFLOAT3 GetPosition() const;
 
 private:
-
 	std::unique_ptr<Model> m_model;
 	DirectX::XMFLOAT3 m_position;
 	float m_speed;

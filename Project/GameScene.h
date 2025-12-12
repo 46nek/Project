@@ -17,7 +17,7 @@ public:
     static std::unique_ptr<GameScene> s_transferInstance;
 
     bool Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine) override;
-        
+
     bool InitializeEnvironment(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine);
     bool InitializeUI();
     bool InitializeGameObjects();

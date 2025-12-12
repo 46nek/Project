@@ -12,15 +12,13 @@
 #include "Enemy.h"
 #include "Orb.h"
 
-class Minimap
-{
+class Minimap {
 public:
 	Minimap();
 	~Minimap();
 
 	bool Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth);
 	void Shutdown();
-	// alphaˆø”‚ğ’Ç‰Á
 	void Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs, const std::vector<std::unique_ptr<Orb>>& specialOrbs, bool showEnemies, float alpha);
 	void SetZoom(float zoomFactor);
 

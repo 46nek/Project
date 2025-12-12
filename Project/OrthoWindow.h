@@ -3,8 +3,7 @@
 #include "Model.h"
 #include <memory>
 
-class OrthoWindow
-{
+class OrthoWindow {
 public:
 	OrthoWindow();
 	~OrthoWindow();

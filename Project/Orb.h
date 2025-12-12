@@ -1,5 +1,3 @@
-// Orb.h (この内容で完全に置き換えてください)
-
 #pragma once
 #include "Model.h"
 #include "Player.h"
@@ -7,16 +5,14 @@
 #include "Audio.h"
 
 // オーブの種類を定義
-enum class OrbType
-{
+enum class OrbType {
 	Normal,
 	MinimapZoomOut,
 	EnemyRadar,
 	Goal
 };
 
-class Orb
-{
+class Orb {
 public:
 	Orb();
 	~Orb();

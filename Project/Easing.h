@@ -6,8 +6,7 @@
 /**
  * @brief イージングの種類を定義する列挙型
  */
-enum class EasingType
-{
+enum class EasingType {
     Linear,
     EaseInQuad, EaseOutQuad, EaseInOutQuad,
     EaseInCubic, EaseOutCubic, EaseInOutCubic,
@@ -24,8 +23,7 @@ enum class EasingType
 /**
  * @brief イージング計算を行う静的クラス
  */
-class Easing
-{
+class Easing {
 public:
     /**
      * @brief 指定されたイージングタイプに基づいて補間値を計算します。

@@ -7,8 +7,7 @@
 /**
  * @brief リザルト画面のシーンを管理するクラス
  */
-class ResultScene : public Scene
-{
+class ResultScene : public Scene {
 public:
 	ResultScene();
 	~ResultScene();
@@ -20,7 +19,7 @@ public:
 
 private:
 	std::unique_ptr<Sprite> m_background;
-	std::unique_ptr<Sprite> m_pressEnter;   // "Press Enter" などの画像（タイトルのを使い回せます）
+	std::unique_ptr<Sprite> m_pressEnter;   
 	std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
 
 	float m_clearTextScale;

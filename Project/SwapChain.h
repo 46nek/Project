@@ -6,8 +6,7 @@
  * @class SwapChain
  * @brief スワップチェイン、レンダーターゲットビュー、深度ステンシルビューを管理
  */
-class SwapChain
-{
+class SwapChain {
 public:
 	SwapChain();
 	~SwapChain();

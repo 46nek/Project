@@ -4,11 +4,10 @@
 GameEnvironment::GameEnvironment() {}
 GameEnvironment::~GameEnvironment() {}
 
-bool GameEnvironment::Initialize(GraphicsDevice* graphicsDevice)
-{
+bool GameEnvironment::Initialize(GraphicsDevice* graphicsDevice) {
     // ステージ生成
     m_stage = std::make_unique<Stage>();
-    if (!m_stage->Initialize(graphicsDevice)) return false;
+    if (!m_stage->Initialize(graphicsDevice)) { return false; }
 
     // ライト管理
     m_lightManager = std::make_unique<LightManager>();
@@ -28,10 +27,8 @@ bool GameEnvironment::Initialize(GraphicsDevice* graphicsDevice)
     return true;
 }
 
-void GameEnvironment::Update(float deltaTime, const Camera* camera)
-{
-    if (m_lightManager && camera)
-    {
+void GameEnvironment::Update(float deltaTime, const Camera* camera) {
+    if (m_lightManager && camera) {
         DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(
             DirectX::XM_PI / 4.0f,
             (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT,
@@ -42,8 +39,7 @@ void GameEnvironment::Update(float deltaTime, const Camera* camera)
     }
 }
 
-void GameEnvironment::Render(const Camera* camera, const std::vector<Model*>& dynamicModels, float vignetteIntensity)
-{
+void GameEnvironment::Render(const Camera* camera, const std::vector<Model*>& dynamicModels, float vignetteIntensity) {
     if (m_renderer && m_stage) {
         m_renderer->RenderSceneToTexture(
             m_cachedStageModels,
