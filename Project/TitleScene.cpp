@@ -33,7 +33,9 @@ bool TitleScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, Direct
 	m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_graphicsDevice->GetDeviceContext());
 
 	m_gameScene = std::make_unique<GameScene>();
-	if (!m_gameScene->InitializePhase1(graphicsDevice, input, audioEngine)) return false;
+
+	// C³: Phase1 -> InitializeEnvironment
+	if (!m_gameScene->InitializeEnvironment(graphicsDevice, input, audioEngine)) return false;
 
 	m_gameScene->SetCameraForTitle();
 

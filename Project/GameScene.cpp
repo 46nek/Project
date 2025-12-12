@@ -5,297 +5,264 @@
 
 std::unique_ptr<GameScene> GameScene::s_transferInstance = nullptr;
 
-// グローバル変数のGameインスタンスを参照
-extern Game* g_game;
-
 namespace {
-	constexpr float MINIMAP_ZOOM_OUT_LEVEL = 2.0f;
+    constexpr float MINIMAP_ZOOM_OUT_LEVEL = 2.0f;
+    constexpr float CELL_CENTER_OFFSET = 0.5f;     // マスの中心へのオフセット
+    constexpr float INITIAL_ROTATION_Y = 180.0f;   // カメラとプレイヤーの初期回転(Y軸)
 }
 
 GameScene::GameScene()
-	: m_uiFadeTimer(0.0f)
-{
+    : m_uiFadeTimer(0.0f) {
 }
 
 GameScene::~GameScene() {}
 
-bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine)
-{
-	// ゲーム開始時：カーソルを消して中央固定
-	input->SetCursorLock(true);
+bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine) {
+    // ゲーム開始時：カーソルを消して中央固定
+    input->SetCursorLock(true);
 
-	m_uiFadeTimer = 0.0f;
+    m_uiFadeTimer = 0.0f;
 
-	if (s_transferInstance)
-	{
-		m_graphicsDevice = graphicsDevice;
-		m_input = input;
-		m_audioEngine = audioEngine;
+    // 前のシーンからのインスタンス引き継ぎ処理
+    if (s_transferInstance) {
+        m_graphicsDevice = graphicsDevice;
+        m_input = input;
+        m_audioEngine = audioEngine;
 
-		m_environment = std::move(s_transferInstance->m_environment);
+        m_environment = std::move(s_transferInstance->m_environment);
 
-		m_player = std::move(s_transferInstance->m_player);
-		m_camera = std::move(s_transferInstance->m_camera);
-		m_ui = std::move(s_transferInstance->m_ui);
+        m_player = std::move(s_transferInstance->m_player);
+        m_camera = std::move(s_transferInstance->m_camera);
+        m_ui = std::move(s_transferInstance->m_ui);
 
-		// マネージャー引き継ぎ
-		m_gameObjectManager = std::move(s_transferInstance->m_gameObjectManager);
-		m_cameraDirector = std::move(s_transferInstance->m_cameraDirector);
+        // マネージャー引き継ぎ
+        m_gameObjectManager = std::move(s_transferInstance->m_gameObjectManager);
+        m_cameraDirector = std::move(s_transferInstance->m_cameraDirector);
 
-		m_collectSound = std::move(s_transferInstance->m_collectSound);
-		m_walkSoundEffect = std::move(s_transferInstance->m_walkSoundEffect);
-		m_runSoundEffect = std::move(s_transferInstance->m_runSoundEffect);
+        m_collectSound = std::move(s_transferInstance->m_collectSound);
+        m_walkSoundEffect = std::move(s_transferInstance->m_walkSoundEffect);
+        m_runSoundEffect = std::move(s_transferInstance->m_runSoundEffect);
 
-		// キャッシュ変数の引き継ぎ
-		m_cachedDynamicModels = s_transferInstance->m_cachedDynamicModels;
+        // キャッシュ変数の引き継ぎ
+        m_cachedDynamicModels = s_transferInstance->m_cachedDynamicModels;
 
-		// オープニング中だったら継続
-		if (m_cameraDirector && m_cameraDirector->IsOpening())
-		{
-			// カメラ位置などはDirectorが持っているので特に処理不要
-		}
+        // オープニング中だったら継続
+        if (m_cameraDirector && m_cameraDirector->IsOpening()) {
+            // カメラ位置などはDirectorが持っているので特に処理不要
+        }
 
-		s_transferInstance.reset();
+        s_transferInstance.reset();
 
-		return true;
-	}
+        return true;
+    }
 
-	if (!InitializePhase1(graphicsDevice, input, audioEngine)) return false;
-	if (!InitializePhase2()) return false;
-	if (!InitializePhase3()) return false;
-	if (!InitializePhase4()) return false;
-	if (!InitializePhase5()) return false;
-	return true;
+    // 新規初期化フロー
+    if (!InitializeEnvironment(graphicsDevice, input, audioEngine)) return false;
+    if (!InitializeUI()) return false;
+    if (!InitializeGameObjects()) return false;
+    if (!InitializeAudio()) return false;
+
+    return true;
 }
 
-bool GameScene::InitializePhase1(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine)
-{
-	m_graphicsDevice = graphicsDevice;
-	m_input = input;
-	m_audioEngine = audioEngine;
+bool GameScene::InitializeEnvironment(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine) {
+    m_graphicsDevice = graphicsDevice;
+    m_input = input;
+    m_audioEngine = audioEngine;
 
-	m_environment = std::make_unique<GameEnvironment>();
-	if (!m_environment->Initialize(graphicsDevice)) return false;
+    m_environment = std::make_unique<GameEnvironment>();
+    if (!m_environment->Initialize(graphicsDevice)) return false;
 
-	Stage* stage = m_environment->GetStage();
-	std::pair<int, int> startPos = stage->GetStartPosition();
-	float pathWidth = stage->GetPathWidth();
-	float startX = (static_cast<float>(startPos.first) + 0.5f) * pathWidth;
-	float startZ = (static_cast<float>(startPos.second) + 0.5f) * pathWidth;
+    Stage* stage = m_environment->GetStage();
+    std::pair<int, int> startPos = stage->GetStartPosition();
+    float pathWidth = stage->GetPathWidth();
 
-	m_player = std::make_unique<Player>();
+    // マスの中心座標を計算
+    float startX = (static_cast<float>(startPos.first) + CELL_CENTER_OFFSET) * pathWidth;
+    float startZ = (static_cast<float>(startPos.second) + CELL_CENTER_OFFSET) * pathWidth;
 
-	m_camera = std::make_shared<Camera>(startX, PLAYER_HEIGHT, startZ);
-	m_camera->SetRotation(0.0f, 180.0f, 0.0f);
+    m_player = std::make_unique<Player>();
 
-	m_cameraDirector = std::make_unique<CameraDirector>(m_camera);
-	m_cameraDirector->Initialize();
+    m_camera = std::make_shared<Camera>(startX, PLAYER_HEIGHT, startZ);
+    m_camera->SetRotation(0.0f, INITIAL_ROTATION_Y, 0.0f);
 
-	m_player->Initialize({ startX, PLAYER_HEIGHT, startZ });
-	m_player->SetRotation({ 0.0f, 180.0f, 0.0f });
+    m_cameraDirector = std::make_unique<CameraDirector>(m_camera);
+    m_cameraDirector->Initialize();
 
-	return true;
+    m_player->Initialize({ startX, PLAYER_HEIGHT, startZ });
+    m_player->SetRotation({ 0.0f, INITIAL_ROTATION_Y, 0.0f });
+
+    return true;
 }
 
-bool GameScene::InitializePhase2()
-{
-	m_ui = std::make_unique<UI>();
-	Stage* stage = m_environment->GetStage();
-	if (!m_ui->Initialize(m_graphicsDevice, stage->GetMazeData(), stage->GetPathWidth())) return false;
-	return true;
+bool GameScene::InitializeUI() {
+    m_ui = std::make_unique<UI>();
+    Stage* stage = m_environment->GetStage();
+    if (!m_ui->Initialize(m_graphicsDevice, stage->GetMazeData(), stage->GetPathWidth())) return false;
+    return true;
 }
 
-bool GameScene::InitializePhase3()
-{
-	m_gameObjectManager = std::make_unique<GameObjectManager>();
-	if (!m_gameObjectManager->Initialize(m_graphicsDevice, m_environment->GetStage(), m_environment->GetLightManager())) return false;
-	return true;
+bool GameScene::InitializeGameObjects() {
+    m_gameObjectManager = std::make_unique<GameObjectManager>();
+    if (!m_gameObjectManager->Initialize(m_graphicsDevice, m_environment->GetStage(), m_environment->GetLightManager())) return false;
+    return true;
 }
 
-bool GameScene::InitializePhase4()
-{
-	return true;
+bool GameScene::InitializeAudio() {
+    try {
+        m_collectSound = std::make_unique<DirectX::SoundEffect>(m_audioEngine, AssetPaths::SOUND_ORB_GET);
+        m_walkSoundEffect = std::make_unique<DirectX::SoundEffect>(m_audioEngine, AssetPaths::SOUND_WALK);
+        m_runSoundEffect = std::make_unique<DirectX::SoundEffect>(m_audioEngine, AssetPaths::SOUND_WALK); // 走る音も同じファイルを使用
+
+        if (m_player) {
+            m_player->SetFootstepSounds(m_walkSoundEffect.get(), m_runSoundEffect.get());
+        }
+    }
+    catch (const std::exception& e) {
+        MessageBoxA(nullptr, e.what(), "Sound Error", MB_OK);
+        return false;
+    }
+    return true;
 }
 
-bool GameScene::InitializePhase5()
-{
-	try
-	{
-		m_collectSound = std::make_unique<DirectX::SoundEffect>(m_audioEngine, AssetPaths::SOUND_ORB_GET);
-		m_walkSoundEffect = std::make_unique<DirectX::SoundEffect>(m_audioEngine, AssetPaths::SOUND_WALK);
-		m_runSoundEffect = std::make_unique<DirectX::SoundEffect>(m_audioEngine, AssetPaths::SOUND_WALK);
-
-		if (m_player)
-		{
-			m_player->SetFootstepSounds(m_walkSoundEffect.get(), m_runSoundEffect.get());
-		}
-	}
-	catch (const std::exception& e)
-	{
-		MessageBoxA(nullptr, e.what(), "Sound Error", MB_OK);
-		return false;
-	}
-	return true;
+void GameScene::SetCameraForTitle() {
+    if (m_cameraDirector && m_environment) {
+        m_cameraDirector->SetCameraForTitle(m_environment->GetStage());
+    }
 }
 
-void GameScene::SetCameraForTitle()
-{
-	if (m_cameraDirector && m_environment)
-	{
-		m_cameraDirector->SetCameraForTitle(m_environment->GetStage());
-	}
+void GameScene::UpdateTitleLoop(float deltaTime) {
+    if (m_cameraDirector) {
+        m_cameraDirector->Update(deltaTime, nullptr, true);
+    }
+
+    if (m_environment && m_camera) {
+        m_environment->Update(deltaTime, m_camera.get());
+    }
 }
 
-void GameScene::UpdateTitleLoop(float deltaTime)
-{
-	if (m_cameraDirector)
-	{
-		m_cameraDirector->Update(deltaTime, nullptr, true);
-	}
+void GameScene::BeginOpening() {
+    if (m_cameraDirector && m_environment) {
+        Stage* stage = m_environment->GetStage();
+        std::pair<int, int> startPos = stage->GetStartPosition();
+        float pathWidth = stage->GetPathWidth();
 
-	if (m_environment && m_camera)
-	{
-		m_environment->Update(deltaTime, m_camera.get());
-	}
+        float startX = (static_cast<float>(startPos.first) + CELL_CENTER_OFFSET) * pathWidth;
+        float startZ = (static_cast<float>(startPos.second) + CELL_CENTER_OFFSET) * pathWidth;
+
+        m_cameraDirector->BeginOpening({ startX, PLAYER_HEIGHT, startZ }, { 0.0f, INITIAL_ROTATION_Y, 0.0f });
+    }
+
+    m_uiFadeTimer = 0.0f;
 }
 
-void GameScene::BeginOpening()
-{
-	if (m_cameraDirector && m_environment)
-	{
-		Stage* stage = m_environment->GetStage();
-		std::pair<int, int> startPos = stage->GetStartPosition();
-		float pathWidth = stage->GetPathWidth();
-		float startX = (static_cast<float>(startPos.first) + 0.5f) * pathWidth;
-		float startZ = (static_cast<float>(startPos.second) + 0.5f) * pathWidth;
-
-		m_cameraDirector->BeginOpening({ startX, PLAYER_HEIGHT, startZ }, { 0.0f, 180.0f, 0.0f });
-	}
-
-	m_uiFadeTimer = 0.0f;
+void GameScene::Shutdown() {
+    if (m_player) m_player->SetFootstepSounds(nullptr, nullptr);
+    if (m_ui) m_ui->Shutdown();
+    if (m_gameObjectManager) m_gameObjectManager->Shutdown();
 }
 
-void GameScene::Shutdown()
-{
-	if (m_player) m_player->SetFootstepSounds(nullptr, nullptr);
-	if (m_ui) m_ui->Shutdown();
-	if (m_gameObjectManager) m_gameObjectManager->Shutdown();
+void GameScene::Update(float deltaTime) {
+    if (m_cameraDirector && m_cameraDirector->IsOpening()) {
+        m_cameraDirector->Update(deltaTime, nullptr, false);
+
+        if (m_environment) {
+            m_environment->Update(100.0f, m_camera.get());
+        }
+        return;
+    }
+
+    if (!m_gameObjectManager) return;
+
+    if (m_input->IsKeyPressed(VK_ESCAPE)) {
+        m_input->SetCursorLock(false);
+    }
+    else if (m_input->IsKeyPressed(VK_LBUTTON) || (GetAsyncKeyState(VK_LBUTTON) & 0x8000)) {
+        m_input->SetCursorLock(true);
+    }
+
+    if (m_uiFadeTimer < UI_FADE_DURATION) {
+        m_uiFadeTimer += deltaTime;
+        if (m_uiFadeTimer > UI_FADE_DURATION) m_uiFadeTimer = UI_FADE_DURATION;
+    }
+
+    int mouseX, mouseY;
+    m_input->GetMouseDelta(mouseX, mouseY);
+    m_player->Turn(mouseX, mouseY, deltaTime);
+
+    m_player->Update(deltaTime, m_input, m_environment->GetStage()->GetMazeData(), m_environment->GetStage()->GetPathWidth());
+
+    if (m_cameraDirector) {
+        m_cameraDirector->Update(deltaTime, m_player.get(), false);
+    }
+
+    m_gameObjectManager->Update(deltaTime, m_player.get(), m_environment->GetStage(), m_environment->GetLightManager(), m_collectSound.get());
+
+    if (m_gameObjectManager->IsEscapeMode()) {
+        DirectX::XMFLOAT3 pPos = m_player->GetPosition();
+        // ゴール判定の0.8fも定数化の余地がありますが、文脈依存のため今回はそのまま
+        if (pPos.z < m_environment->GetStage()->GetPathWidth() * 0.8f) {
+            m_nextScene = SceneState::Result;
+        }
+    }
+
+    m_environment->Update(deltaTime, m_camera.get());
+
+    if (m_gameObjectManager->CheckAndResetZoomRequest()) {
+        m_ui->SetMinimapZoom(MINIMAP_ZOOM_OUT_LEVEL);
+    }
+
+    m_ui->Update(deltaTime,
+        m_gameObjectManager->GetRemainingOrbs(),
+        m_gameObjectManager->GetTotalOrbs(),
+        m_player->GetStaminaPercentage(),
+        m_gameObjectManager->GetEnemyRadarTimer() > 0.0f);
 }
 
-void GameScene::Update(float deltaTime)
-{
-	if (m_cameraDirector && m_cameraDirector->IsOpening())
-	{
-		m_cameraDirector->Update(deltaTime, nullptr, false);
+void GameScene::RenderStageOnly() {
+    m_cachedDynamicModels.clear();
 
-		if (m_environment) {
-			m_environment->Update(100.0f, m_camera.get());
-		}
-		return;
-	}
+    if (m_gameObjectManager) {
+        m_gameObjectManager->CollectRenderModels(m_cachedDynamicModels);
+    }
 
-	if (!m_gameObjectManager) return;
+    if (m_environment) {
+        if (Model* gate = m_environment->GetStage()->GetGateModel()) {
+            m_cachedDynamicModels.push_back(gate);
+        }
+    }
 
-	if (m_input->IsKeyPressed(VK_ESCAPE))
-	{
-		m_input->SetCursorLock(false);
-	}
-	else if (m_input->IsKeyPressed(VK_LBUTTON) || (GetAsyncKeyState(VK_LBUTTON) & 0x8000))
-	{
-		m_input->SetCursorLock(true);
-	}
+    float vignette = 0.0f;
+    if (m_cameraDirector) {
+        vignette = m_cameraDirector->GetVignetteIntensity();
+    }
 
-	if (m_uiFadeTimer < UI_FADE_DURATION)
-	{
-		m_uiFadeTimer += deltaTime;
-		if (m_uiFadeTimer > UI_FADE_DURATION) m_uiFadeTimer = UI_FADE_DURATION;
-	}
-
-	int mouseX, mouseY;
-	m_input->GetMouseDelta(mouseX, mouseY);
-	m_player->Turn(mouseX, mouseY, deltaTime);
-
-	m_player->Update(deltaTime, m_input, m_environment->GetStage()->GetMazeData(), m_environment->GetStage()->GetPathWidth());
-
-	if (m_cameraDirector) {
-		m_cameraDirector->Update(deltaTime, m_player.get(), false);
-	}
-
-	m_gameObjectManager->Update(deltaTime, m_player.get(), m_environment->GetStage(), m_environment->GetLightManager(), m_collectSound.get());
-
-	if (m_gameObjectManager->IsEscapeMode())
-	{
-		DirectX::XMFLOAT3 pPos = m_player->GetPosition();
-		if (pPos.z < m_environment->GetStage()->GetPathWidth() * 0.8f)
-		{
-			m_nextScene = SceneState::Result;
-		}
-	}
-
-	m_environment->Update(deltaTime, m_camera.get());
-
-	if (m_gameObjectManager->CheckAndResetZoomRequest())
-	{
-		m_ui->SetMinimapZoom(MINIMAP_ZOOM_OUT_LEVEL);
-	}
-
-	m_ui->Update(deltaTime,
-		m_gameObjectManager->GetRemainingOrbs(),
-		m_gameObjectManager->GetTotalOrbs(),
-		m_player->GetStaminaPercentage(),
-		m_gameObjectManager->GetEnemyRadarTimer() > 0.0f);
+    if (m_environment) {
+        m_environment->Render(m_camera.get(), m_cachedDynamicModels, vignette);
+    }
 }
 
-void GameScene::RenderStageOnly()
-{
-	m_cachedDynamicModels.clear();
+void GameScene::Render() {
+    if (!m_gameObjectManager) return;
 
-	if (m_gameObjectManager) {
-		m_gameObjectManager->CollectRenderModels(m_cachedDynamicModels);
-	}
+    RenderStageOnly();
 
-	if (m_environment) {
-		if (Model* gate = m_environment->GetStage()->GetGateModel())
-		{
-			m_cachedDynamicModels.push_back(gate);
-		}
-	}
+    if (m_ui) {
+        float uiAlpha = 1.0f;
+        if (m_cameraDirector && m_cameraDirector->IsOpening()) {
+            uiAlpha = 0.0f;
+        }
+        else {
+            uiAlpha = m_uiFadeTimer / UI_FADE_DURATION;
+            if (uiAlpha > 1.0f) uiAlpha = 1.0f;
+        }
 
-	float vignette = 0.0f;
-	if (m_cameraDirector) {
-		vignette = m_cameraDirector->GetVignetteIntensity();
-	}
+        m_ui->Render(m_camera.get(),
+            m_gameObjectManager->GetEnemies(),
+            m_gameObjectManager->GetOrbs(),
+            m_gameObjectManager->GetSpecialOrbs(),
+            uiAlpha);
+    }
 
-	if (m_environment) {
-		m_environment->Render(m_camera.get(), m_cachedDynamicModels, vignette);
-	}
-}
-
-void GameScene::Render()
-{
-	if (!m_gameObjectManager) return;
-
-	RenderStageOnly();
-
-	if (m_ui)
-	{
-		float uiAlpha = 1.0f;
-		if (m_cameraDirector && m_cameraDirector->IsOpening())
-		{
-			uiAlpha = 0.0f;
-		}
-		else
-		{
-			uiAlpha = m_uiFadeTimer / UI_FADE_DURATION;
-			if (uiAlpha > 1.0f) uiAlpha = 1.0f;
-		}
-
-		m_ui->Render(m_camera.get(),
-			m_gameObjectManager->GetEnemies(),
-			m_gameObjectManager->GetOrbs(),
-			m_gameObjectManager->GetSpecialOrbs(),
-			uiAlpha);
-	}
-
-	m_graphicsDevice->EndScene();
+    m_graphicsDevice->EndScene();
 }

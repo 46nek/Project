@@ -19,7 +19,7 @@ bool LoadingScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, Dire
 	if (GameScene::s_transferInstance)
 	{
 		m_gameScene = std::move(GameScene::s_transferInstance);
-		// Phase1(迷路生成)は終わっているので、次はPhase2から
+		// 環境(Phase1相当)は生成済みなので、次はUI(Phase2相当)から
 		m_loadingPhase = 1;
 	}
 	else
@@ -49,7 +49,6 @@ void LoadingScene::Shutdown()
 	if (m_fontFactory) m_fontFactory->Release();
 
 	// シーン終了時に次（GameScene）へ渡す
-	// 修正: これでLoading画面の最後のフレームまでm_gameSceneが存在する
 	if (m_gameScene)
 	{
 		GameScene::s_transferInstance = std::move(m_gameScene);
@@ -68,31 +67,31 @@ void LoadingScene::Update(float deltaTime)
 	switch (m_loadingPhase)
 	{
 	case 0:
-		if (!m_gameScene->InitializePhase1(m_graphicsDevice, m_input, m_audioEngine)) {
+		// 旧 Phase1: 環境構築
+		if (!m_gameScene->InitializeEnvironment(m_graphicsDevice, m_input, m_audioEngine)) {
 			// エラー処理
 		}
 		break;
 	case 1:
-		if (!m_gameScene->InitializePhase2()) {
+		// 旧 Phase2: UI構築
+		if (!m_gameScene->InitializeUI()) {
 			// エラー処理
 		}
 		break;
 	case 2:
-		if (!m_gameScene->InitializePhase3()) {
+		// 旧 Phase3: ゲームオブジェクト(敵など)生成
+		if (!m_gameScene->InitializeGameObjects()) {
 			// エラー処理
 		}
 		break;
 	case 3:
-		if (!m_gameScene->InitializePhase4()) {
+		// 旧 Phase4(空)は削除し、旧 Phase5(Audio)を実行
+		if (!m_gameScene->InitializeAudio()) {
 			// エラー処理
 		}
 		break;
 	case 4:
-		if (!m_gameScene->InitializePhase5()) {
-			// エラー処理
-		}
-		break;
-	case 5:
+		// すべて完了
 		m_gameScene->BeginOpening();
 
 		// すべての初期化が完了したので、SceneManagerにGameSceneを渡して遷移する
