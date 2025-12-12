@@ -169,6 +169,7 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="Frustum.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameEnvironment.h" />
     <ClInclude Include="GameObjectManager.h" />
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="input.h" />
@@ -211,6 +212,7 @@
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Frustum.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameEnvironment.cpp" />
     <ClCompile Include="GameObjectManager.cpp" />
     <ClCompile Include="GameScene.cpp" />
     <ClCompile Include="GraphicsDevice.cpp" />

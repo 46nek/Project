@@ -135,6 +135,9 @@
     <ClCompile Include="CameraDirector.cpp">
       <Filter>Source\04_GamePlay</Filter>
     </ClCompile>
+    <ClCompile Include="GameEnvironment.cpp">
+      <Filter>Source\04_GamePlay</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -261,6 +264,9 @@
       <Filter>Source\04_GamePlay</Filter>
     </ClInclude>
     <ClInclude Include="CameraDirector.h">
+      <Filter>Source\04_GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="GameEnvironment.h">
       <Filter>Source\04_GamePlay</Filter>
     </ClInclude>
   </ItemGroup>

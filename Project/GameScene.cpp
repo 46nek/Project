@@ -32,11 +32,10 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX
 		m_input = input;
 		m_audioEngine = audioEngine;
 
-		m_stage = std::move(s_transferInstance->m_stage);
+		m_environment = std::move(s_transferInstance->m_environment);
+
 		m_player = std::move(s_transferInstance->m_player);
 		m_camera = std::move(s_transferInstance->m_camera);
-		m_lightManager = std::move(s_transferInstance->m_lightManager);
-		m_renderer = std::move(s_transferInstance->m_renderer);
 		m_ui = std::move(s_transferInstance->m_ui);
 
 		// マネージャー引き継ぎ
@@ -47,7 +46,7 @@ bool GameScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX
 		m_walkSoundEffect = std::move(s_transferInstance->m_walkSoundEffect);
 		m_runSoundEffect = std::move(s_transferInstance->m_runSoundEffect);
 
-		m_cachedStageModels = s_transferInstance->m_cachedStageModels;
+		// キャッシュ変数の引き継ぎ
 		m_cachedDynamicModels = s_transferInstance->m_cachedDynamicModels;
 
 		// オープニング中だったら継続
@@ -75,50 +74,41 @@ bool GameScene::InitializePhase1(GraphicsDevice* graphicsDevice, Input* input, D
 	m_input = input;
 	m_audioEngine = audioEngine;
 
-	m_stage = std::make_unique<Stage>();
-	if (!m_stage->Initialize(graphicsDevice)) return false;
+	m_environment = std::make_unique<GameEnvironment>();
+	if (!m_environment->Initialize(graphicsDevice)) return false;
 
-	std::pair<int, int> startPos = m_stage->GetStartPosition();
-	float pathWidth = m_stage->GetPathWidth();
+	Stage* stage = m_environment->GetStage();
+	std::pair<int, int> startPos = stage->GetStartPosition();
+	float pathWidth = stage->GetPathWidth();
 	float startX = (static_cast<float>(startPos.first) + 0.5f) * pathWidth;
 	float startZ = (static_cast<float>(startPos.second) + 0.5f) * pathWidth;
 
 	m_player = std::make_unique<Player>();
 
-	// ★ Cameraをshared_ptrで作成
 	m_camera = std::make_shared<Camera>(startX, PLAYER_HEIGHT, startZ);
 	m_camera->SetRotation(0.0f, 180.0f, 0.0f);
 
-	// ★ CameraDirectorの作成と初期化
 	m_cameraDirector = std::make_unique<CameraDirector>(m_camera);
 	m_cameraDirector->Initialize();
-
-	m_lightManager = std::make_unique<LightManager>();
-	m_lightManager->Initialize(m_stage->GetMazeData(), m_stage->GetPathWidth(), Stage::WALL_HEIGHT);
-	m_renderer = std::make_unique<Renderer>(m_graphicsDevice);
 
 	m_player->Initialize({ startX, PLAYER_HEIGHT, startZ });
 	m_player->SetRotation({ 0.0f, 180.0f, 0.0f });
 
-	m_cachedStageModels.clear();
-	m_cachedStageModels.reserve(m_stage->GetModels().size());
-	for (const auto& model : m_stage->GetModels()) {
-		m_cachedStageModels.push_back(model.get());
-	}
 	return true;
 }
 
 bool GameScene::InitializePhase2()
 {
 	m_ui = std::make_unique<UI>();
-	if (!m_ui->Initialize(m_graphicsDevice, m_stage->GetMazeData(), m_stage->GetPathWidth())) return false;
+	Stage* stage = m_environment->GetStage();
+	if (!m_ui->Initialize(m_graphicsDevice, stage->GetMazeData(), stage->GetPathWidth())) return false;
 	return true;
 }
 
 bool GameScene::InitializePhase3()
 {
 	m_gameObjectManager = std::make_unique<GameObjectManager>();
-	if (!m_gameObjectManager->Initialize(m_graphicsDevice, m_stage.get(), m_lightManager.get())) return false;
+	if (!m_gameObjectManager->Initialize(m_graphicsDevice, m_environment->GetStage(), m_environment->GetLightManager())) return false;
 	return true;
 }
 
@@ -150,35 +140,32 @@ bool GameScene::InitializePhase5()
 
 void GameScene::SetCameraForTitle()
 {
-	// ★ Directorに委譲
-	if (m_cameraDirector && m_stage)
+	if (m_cameraDirector && m_environment)
 	{
-		m_cameraDirector->SetCameraForTitle(m_stage.get());
+		m_cameraDirector->SetCameraForTitle(m_environment->GetStage());
 	}
 }
 
 void GameScene::UpdateTitleLoop(float deltaTime)
 {
-	// ★ Directorに委譲
 	if (m_cameraDirector)
 	{
-		m_cameraDirector->Update(deltaTime, nullptr, true); // isTitle = true
+		m_cameraDirector->Update(deltaTime, nullptr, true);
 	}
 
-	if (m_lightManager && m_camera)
+	if (m_environment && m_camera)
 	{
-		DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
-		m_lightManager->Update(deltaTime, m_camera->GetViewMatrix(), projectionMatrix, m_camera->GetPosition(), m_camera->GetRotation());
+		m_environment->Update(deltaTime, m_camera.get());
 	}
 }
 
 void GameScene::BeginOpening()
 {
-	// ★ Directorに委譲
-	if (m_cameraDirector && m_stage)
+	if (m_cameraDirector && m_environment)
 	{
-		std::pair<int, int> startPos = m_stage->GetStartPosition();
-		float pathWidth = m_stage->GetPathWidth();
+		Stage* stage = m_environment->GetStage();
+		std::pair<int, int> startPos = stage->GetStartPosition();
+		float pathWidth = stage->GetPathWidth();
 		float startX = (static_cast<float>(startPos.first) + 0.5f) * pathWidth;
 		float startZ = (static_cast<float>(startPos.second) + 0.5f) * pathWidth;
 
@@ -193,26 +180,20 @@ void GameScene::Shutdown()
 	if (m_player) m_player->SetFootstepSounds(nullptr, nullptr);
 	if (m_ui) m_ui->Shutdown();
 	if (m_gameObjectManager) m_gameObjectManager->Shutdown();
-	if (m_stage) m_stage->Shutdown();
 }
 
 void GameScene::Update(float deltaTime)
 {
-	// ★ Directorがオープニング中かチェック
 	if (m_cameraDirector && m_cameraDirector->IsOpening())
 	{
-		// オープニング中のカメラ更新
 		m_cameraDirector->Update(deltaTime, nullptr, false);
 
-		if (m_lightManager) {
-			// 光源更新（高速回転など必要なら）
-			DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
-			m_lightManager->Update(100.0f, m_camera->GetViewMatrix(), projectionMatrix, m_camera->GetPosition(), m_camera->GetRotation());
+		if (m_environment) {
+			m_environment->Update(100.0f, m_camera.get());
 		}
 		return;
 	}
 
-	// プレイ中の更新
 	if (!m_gameObjectManager) return;
 
 	if (m_input->IsKeyPressed(VK_ESCAPE))
@@ -233,30 +214,28 @@ void GameScene::Update(float deltaTime)
 	int mouseX, mouseY;
 	m_input->GetMouseDelta(mouseX, mouseY);
 	m_player->Turn(mouseX, mouseY, deltaTime);
-	m_player->Update(deltaTime, m_input, m_stage->GetMazeData(), m_stage->GetPathWidth());
 
-	// ★ Directorによるカメラ更新（ボビング、FOV、ビニエット含む）
+	m_player->Update(deltaTime, m_input, m_environment->GetStage()->GetMazeData(), m_environment->GetStage()->GetPathWidth());
+
 	if (m_cameraDirector) {
 		m_cameraDirector->Update(deltaTime, m_player.get(), false);
 	}
 
-	m_gameObjectManager->Update(deltaTime, m_player.get(), m_stage.get(), m_lightManager.get(), m_collectSound.get());
+	m_gameObjectManager->Update(deltaTime, m_player.get(), m_environment->GetStage(), m_environment->GetLightManager(), m_collectSound.get());
 
 	if (m_gameObjectManager->IsEscapeMode())
 	{
 		DirectX::XMFLOAT3 pPos = m_player->GetPosition();
-		if (pPos.z < m_stage->GetPathWidth() * 0.8f)
+		if (pPos.z < m_environment->GetStage()->GetPathWidth() * 0.8f)
 		{
 			m_nextScene = SceneState::Result;
 		}
 	}
 
-	DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PI / 4.0f, (float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT, 0.1f, 1000.0f);
-	m_lightManager->Update(deltaTime, m_camera->GetViewMatrix(), projectionMatrix, m_camera->GetPosition(), m_camera->GetRotation());
+	m_environment->Update(deltaTime, m_camera.get());
 
 	if (m_gameObjectManager->CheckAndResetZoomRequest())
 	{
-		// MINIMAP_ZOOM_OUT_LEVEL は GameScene.cpp 上部の無名名前空間にあるはずです
 		m_ui->SetMinimapZoom(MINIMAP_ZOOM_OUT_LEVEL);
 	}
 
@@ -275,35 +254,26 @@ void GameScene::RenderStageOnly()
 		m_gameObjectManager->CollectRenderModels(m_cachedDynamicModels);
 	}
 
-	if (m_stage) {
-		if (Model* gate = m_stage->GetGateModel())
+	if (m_environment) {
+		if (Model* gate = m_environment->GetStage()->GetGateModel())
 		{
 			m_cachedDynamicModels.push_back(gate);
 		}
 	}
 
-	// ★ ビネット強度はDirectorから取得
 	float vignette = 0.0f;
 	if (m_cameraDirector) {
 		vignette = m_cameraDirector->GetVignetteIntensity();
 	}
 
-	if (m_renderer && m_stage) {
-		m_renderer->RenderSceneToTexture(
-			m_cachedStageModels,
-			m_cachedDynamicModels,
-			m_camera.get(),
-			m_lightManager.get(),
-			m_stage->GetMazeData(),
-			m_stage->GetPathWidth()
-		);
-		m_renderer->RenderFinalPass(m_camera.get(), vignette);
+	if (m_environment) {
+		m_environment->Render(m_camera.get(), m_cachedDynamicModels, vignette);
 	}
 }
 
 void GameScene::Render()
 {
-	if (!m_gameObjectManager) return; // ここはゲームプレイ中のみ呼ぶ前提なら弾いてOK
+	if (!m_gameObjectManager) return;
 
 	RenderStageOnly();
 
