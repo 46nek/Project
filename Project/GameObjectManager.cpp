@@ -1,5 +1,7 @@
 #include "GameObjectManager.h"
 #include "AssetPaths.h"
+#include "Camera.h"
+#include "Game.h"
 #include <random>
 #include <algorithm>
 #include <tuple>
@@ -270,7 +272,6 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 }
 
 void GameObjectManager::CollectRenderModels(std::vector<Model*>& models) {
-	for (const auto& enemy : m_enemies) { models.push_back(enemy->GetModel()); }
 	for (const auto& orb : m_orbs) { if (Model* m = orb->GetModel()) { models.push_back(m); } }
 	for (const auto& orb : m_specialOrbs) { if (Model* m = orb->GetModel()) { models.push_back(m); } }
 	if (m_goalOrb) { if (Model* m = m_goalOrb->GetModel()) { models.push_back(m); } }
@@ -278,8 +279,33 @@ void GameObjectManager::CollectRenderModels(std::vector<Model*>& models) {
 
 bool GameObjectManager::CheckAndResetZoomRequest() {
 	if (m_requestZoomOut) {
-		m_requestZoomOut = false; // フラグをリセット（1回だけ反応させるため）
+		m_requestZoomOut = false;
 		return true;
 	}
 	return false;
+}
+
+void GameObjectManager::RenderEnemies(GraphicsDevice* graphicsDevice, Camera* camera, LightManager* lightManager) {
+	if (!graphicsDevice || !camera || !lightManager) return;
+
+	// プロジェクション行列を作成
+	DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(
+		camera->GetFOV(),
+		(float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT,
+		0.1f,
+		1000.0f
+	);
+
+	// 全ての敵のRenderを呼び出す
+	for (const auto& enemy : m_enemies) {
+		if (enemy) {
+			enemy->Render(
+				graphicsDevice,
+				camera->GetViewMatrix(),
+				projectionMatrix,
+				lightManager->GetLightViewMatrix(),
+				lightManager->GetLightProjectionMatrix()
+			);
+		}
+	}
 }

@@ -183,6 +183,7 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="Orb.h" />
     <ClInclude Include="OrthoWindow.h" />
+    <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Project.h" />
     <ClInclude Include="Renderer.h" />
@@ -227,6 +228,7 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Orb.cpp" />
     <ClCompile Include="OrthoWindow.cpp" />
+    <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RenderTarget.cpp" />

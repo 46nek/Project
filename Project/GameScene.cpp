@@ -238,7 +238,7 @@ void GameScene::RenderStageOnly() {
     }
 
     if (m_environment) {
-        m_environment->Render(m_camera.get(), m_cachedDynamicModels, vignette);
+        m_environment->Render(m_camera.get(), m_cachedDynamicModels, vignette, m_gameObjectManager.get());
     }
 }
 

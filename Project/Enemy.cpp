@@ -1,6 +1,5 @@
 #include "Enemy.h"
-#include "AssetLoader.h"
-#include "AssetPaths.h"
+#include "GraphicsDevice.h" // 必要であればインクルード
 #include <random>
 #include <cmath>
 
@@ -8,46 +7,36 @@ namespace {
 	constexpr float PATH_COOLDOWN_TIME = 2.0f;
 }
 
-// コンストラクタ
 Enemy::Enemy()
-	: m_speed(4.0f),
-	m_pathIndex(-1),
-	m_pathCooldown(0.0f) {
+	: m_speed(4.0f), m_pathIndex(-1), m_pathCooldown(0.0f) {
 }
 
 Enemy::~Enemy() {
 }
 
-// 初期化
 bool Enemy::Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& startPosition, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData) {
 	m_position = startPosition;
-	m_model = AssetLoader::LoadModelFromFile(device, AssetPaths::MODEL_CUBE_OBJ);
-	if (!m_model) { return false; }
 
-	m_model->SetPosition(startPosition.x, startPosition.y, startPosition.z);
+	m_particleSystem = std::make_unique<ParticleSystem>();
+	if (!m_particleSystem->Initialize(device)) {
+		return false;
+	}
 
-	// A*探索用のインスタンスを作成
 	m_astar = std::make_unique<AStar>(mazeData);
-
 	return true;
 }
 
 void Enemy::Shutdown() {
-	if (m_model) { m_model->Shutdown(); }
+	if (m_particleSystem) { m_particleSystem->Shutdown(); }
 }
 
-// 毎フレームの更新処理
 void Enemy::Update(float deltaTime, const Player* player, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth) {
-	if (!player || !m_model) { return; }
+	if (!player || !m_particleSystem) { return; }
 
-	// プレイヤーとの距離を計算
+	// --- 移動ロジック (既存のまま) ---
 	DirectX::XMFLOAT3 playerPos = player->GetPosition();
-	float dx = playerPos.x - m_position.x;
-	float dz = playerPos.z - m_position.z;
-	// distanceSqは現在使用していませんが、索敵範囲判定などで使用可能です
-
-	// === 状態ごとの行動 ===
 	m_pathCooldown -= deltaTime;
+
 	if (m_pathCooldown <= 0.0f) {
 		int startX = static_cast<int>(m_position.x / pathWidth);
 		int startY = static_cast<int>(m_position.z / pathWidth);
@@ -55,19 +44,14 @@ void Enemy::Update(float deltaTime, const Player* player, const std::vector<std:
 		int goalY = static_cast<int>(playerPos.z / pathWidth);
 
 		m_pathCooldown = PATH_COOLDOWN_TIME;
-
-		// --- 結果を一時変数で受け取る ---
 		std::vector<DirectX::XMFLOAT2> newPath = m_astar->FindPath(startX, startY, goalX, goalY);
 
-		// パスが見つかった場合のみ更新する
 		if (!newPath.empty()) {
 			m_path = newPath;
-			// 新しいパスの 1番目 (0番目は現在地なので次は1番目) を目指す
 			m_pathIndex = (m_path.size() > 1) ? 1 : -1;
 		}
 	}
 
-	// === パスに沿った移動処理 (共通) ===
 	if (m_pathIndex != -1 && m_pathIndex < static_cast<int>(m_path.size())) {
 		DirectX::XMFLOAT2 nextGridPos = m_path[m_pathIndex];
 		DirectX::XMFLOAT3 targetPosition = {
@@ -86,13 +70,23 @@ void Enemy::Update(float deltaTime, const Player* player, const std::vector<std:
 			DirectX::XMVECTOR moveVec = DirectX::XMVector3Normalize(vecToTarget);
 			moveVec = DirectX::XMVectorScale(moveVec, m_speed * deltaTime);
 			DirectX::XMStoreFloat3(&m_position, DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&m_position), moveVec));
-			m_model->SetPosition(m_position.x, m_position.y, m_position.z);
 		}
 	}
+
+	// --- パーティクルの更新 ---
+	m_particleSystem->Update(deltaTime, m_position);
 }
 
-Model* Enemy::GetModel() {
-	return m_model.get();
+// 描画: パーティクルシステムに委譲
+void Enemy::Render(GraphicsDevice* graphicsDevice,
+	const DirectX::XMMATRIX& viewMatrix,
+	const DirectX::XMMATRIX& projectionMatrix,
+	const DirectX::XMMATRIX& lightViewMatrix,
+	const DirectX::XMMATRIX& lightProjectionMatrix) {
+
+	if (m_particleSystem) {
+		m_particleSystem->Render(graphicsDevice, viewMatrix, projectionMatrix, lightViewMatrix, lightProjectionMatrix);
+	}
 }
 
 DirectX::XMFLOAT3 Enemy::GetPosition() const {

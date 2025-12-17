@@ -10,25 +10,23 @@
 #include "Player.h"
 #include "GraphicsDevice.h"
 
-// 敵、オーブ、ゴールなどの動的オブジェクトを一括管理するクラス
+// 前方宣言 (重要)
+class Camera;
+
 class GameObjectManager {
 public:
     GameObjectManager();
     ~GameObjectManager();
 
-    // 初期化：敵やオーブを配置する
     bool Initialize(GraphicsDevice* graphicsDevice, Stage* stage, LightManager* lightManager);
-
-    // 更新：すべてのオブジェクトを動かす
     void Update(float deltaTime, Player* player, Stage* stage, LightManager* lightManager, DirectX::SoundEffect* collectSound);
-
-    // 終了処理
     void Shutdown();
 
-    // 描画に必要なモデルをリストに追加して返す
     void CollectRenderModels(std::vector<Model*>& models);
-
     bool CheckAndResetZoomRequest();
+
+    // ▼▼▼ 追加: 敵のパーティクルを描画する関数 ▼▼▼
+    void RenderEnemies(GraphicsDevice* graphicsDevice, Camera* camera, LightManager* lightManager);
 
     // ゲッター
     int GetRemainingOrbs() const { return m_remainingOrbs; }
@@ -42,13 +40,11 @@ public:
 
 private:
     GraphicsDevice* m_graphicsDevice = nullptr;
-    // 内部処理用の初期化関数
     bool InitializeEnemies(GraphicsDevice* graphicsDevice, Stage* stage);
     bool InitializeOrbs(GraphicsDevice* graphicsDevice, Stage* stage, LightManager* lightManager);
     bool InitializeSpecialOrbs(GraphicsDevice* graphicsDevice, Stage* stage, LightManager* lightManager);
     void SpawnGoal(Stage* stage, LightManager* lightManager);
 
-    // 定数（GameSceneから移動）
     static constexpr int NUM_ENEMIES = 2;
     static constexpr int NUM_ORBS = 20;
 
@@ -63,6 +59,4 @@ private:
     bool m_escapeMode;
     bool m_requestZoomOut;
     float m_enemyRadarTimer;
-
-    // ゲーム内でのみ使う定数などはcpp側に置くか、ここに追加
 };

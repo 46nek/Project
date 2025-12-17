@@ -24,7 +24,10 @@ namespace AssetPaths {
 	const wchar_t* const TEX_MINIMAP_FRAME = L"Assets/minimap_frame.png";
 	const wchar_t* const TEX_MINIMAP_PATH = L"Assets/minimap_path.png";
 
-	// === サウンド (wchar_t*) ===
+	// === サウンド ===
 	const wchar_t* const SOUND_ORB_GET = L"Assets/orb_get.wav";
 	const wchar_t* const SOUND_WALK = L"Assets/walk.wav";
+
+	// === パーティクル ===
+	const wchar_t* const ENEMY_PARTICLE = L"Assets/e_particle.png";
 }

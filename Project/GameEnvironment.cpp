@@ -1,17 +1,20 @@
 #include "GameEnvironment.h"
-#include "Game.h" // 画面サイズ定数などのため
+#include "Game.h" 
+#include "GameObjectManager.h" 
 
 GameEnvironment::GameEnvironment() {}
 GameEnvironment::~GameEnvironment() {}
 
 bool GameEnvironment::Initialize(GraphicsDevice* graphicsDevice) {
+    // 追加: デバイスを保持しておく
+    m_graphicsDevice = graphicsDevice;
+
     // ステージ生成
     m_stage = std::make_unique<Stage>();
     if (!m_stage->Initialize(graphicsDevice)) { return false; }
 
     // ライト管理
     m_lightManager = std::make_unique<LightManager>();
-    // ステージ情報からライト初期化
     m_lightManager->Initialize(m_stage->GetMazeData(), m_stage->GetPathWidth(), Stage::WALL_HEIGHT);
 
     // レンダラー
@@ -19,9 +22,11 @@ bool GameEnvironment::Initialize(GraphicsDevice* graphicsDevice) {
 
     // ステージモデルのキャッシュ
     m_cachedStageModels.clear();
-    m_cachedStageModels.reserve(m_stage->GetModels().size());
+    // ここでモデルへのポインタをキャッシュ
     for (const auto& model : m_stage->GetModels()) {
-        m_cachedStageModels.push_back(model.get());
+        if (model) {
+            m_cachedStageModels.push_back(model.get());
+        }
     }
 
     return true;
@@ -39,8 +44,10 @@ void GameEnvironment::Update(float deltaTime, const Camera* camera) {
     }
 }
 
-void GameEnvironment::Render(const Camera* camera, const std::vector<Model*>& dynamicModels, float vignetteIntensity) {
+// 引数を修正
+void GameEnvironment::Render(const Camera* camera, const std::vector<Model*>& dynamicModels, float vignetteIntensity, GameObjectManager* gameObjectManager) {
     if (m_renderer && m_stage) {
+        // 1. 通常モデルの描画
         m_renderer->RenderSceneToTexture(
             m_cachedStageModels,
             dynamicModels,
@@ -49,6 +56,14 @@ void GameEnvironment::Render(const Camera* camera, const std::vector<Model*>& dy
             m_stage->GetMazeData(),
             m_stage->GetPathWidth()
         );
+
+        // 2. 敵（パーティクル）の描画
+        // シーン描画の後、ポストプロセスの前に実行する
+        if (gameObjectManager && m_graphicsDevice && m_lightManager) {
+            gameObjectManager->RenderEnemies(m_graphicsDevice, const_cast<Camera*>(camera), m_lightManager.get());
+        }
+
+        // 3. 仕上げ（ポストプロセス）
         m_renderer->RenderFinalPass(camera, vignetteIntensity);
     }
 }
