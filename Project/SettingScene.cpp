@@ -22,53 +22,69 @@ void SettingScene::Shutdown() {
     if (m_font) m_font->Release();
     if (m_fontFactory) m_fontFactory->Release();
 }
-
+void SettingScene::UpdateValue(int dir) {
+    if (m_selectedItem == 1) m_settings.motionBlur = !m_settings.motionBlur;
+    if (m_selectedItem == 2) m_settings.brightness = std::clamp(m_settings.brightness + dir * 0.1f, 0.5f, 1.5f);
+    if (m_selectedItem == 3) m_settings.fovIntensity = (m_settings.fovIntensity + dir + 3) % 3;
+}
 void SettingScene::Update(float deltaTime) {
     int mx, my;
     m_input->GetMousePosition(mx, my);
     bool isLeftClicked = m_input->IsKeyPressed(VK_LBUTTON) || (GetAsyncKeyState(VK_LBUTTON) & 0x8000);
     bool isLeftDown = (GetAsyncKeyState(VK_LBUTTON) & 0x8000);
 
+    // --- レイアウト設定 ---
+    float volumeSliderX = 200.0f;
+    float brightSliderX = 650.0f; // 横に並べるためのX座標
+    float sliderY = 215.0f;
+    float sliderWidth = 300.0f;
+
     // --- 1. 音量：シークバー操作 ---
-    if (isLeftClicked && mx >= m_sliderX && mx <= m_sliderX + m_sliderWidth &&
-        my >= m_sliderY - 10 && my <= m_sliderY + 30) {
+    if (isLeftClicked && mx >= volumeSliderX && mx <= volumeSliderX + sliderWidth &&
+        my >= sliderY - 10 && my <= sliderY + 30) {
         m_isDraggingVolume = true;
     }
     if (!isLeftDown) m_isDraggingVolume = false;
 
     if (m_isDraggingVolume) {
-        float norm = std::clamp((mx - m_sliderX) / m_sliderWidth, 0.0f, 1.0f);
+        float norm = std::clamp((mx - volumeSliderX) / sliderWidth, 0.0f, 1.0f);
         m_settings.volume = norm;
         if (m_audioEngine) m_audioEngine->SetMasterVolume(m_settings.volume);
     }
 
-    // --- 2. ◀▶ ボタン判定 ---
-    float itemStartX = 200.0f;
-    float itemStartY = 200.0f;
+    // --- 2. 明るさ：シークバー操作 ---
+    static bool isDraggingBright = false;
+    if (isLeftClicked && mx >= brightSliderX && mx <= brightSliderX + sliderWidth &&
+        my >= sliderY - 10 && my <= sliderY + 30) {
+        isDraggingBright = true;
+    }
+    if (!isLeftDown) isDraggingBright = false;
+
+    if (isDraggingBright) {
+        float norm = std::clamp((mx - brightSliderX) / sliderWidth, 0.0f, 1.0f);
+        m_settings.brightness = 0.5f + norm * 1.0f; // 0.5 ~ 1.5
+    }
+
+    // --- 3. その他のボタン判定 (Y軸を少し下げて配置) ---
+    float itemStartY = 350.0f;
     float stepY = 80.0f;
 
-    for (int i = 1; i <= 3; ++i) { // 音量以外の項目
-        float currentY = itemStartY + i * stepY;
-        // ◀ ボタン (座標はRenderの配置に合わせる)
-        if (isLeftClicked && mx >= 550 && mx <= 590 && my >= currentY && my <= currentY + 40) {
-            m_selectedItem = i; UpdateValue(-1);
+    auto HandleArrowInput = [&](int itemIdx, float y) {
+        if (isLeftClicked && mx >= 550 && mx <= 590 && my >= y && my <= y + 40) {
+            m_selectedItem = itemIdx; UpdateValue(-1);
         }
-        // ▶ ボタン
-        if (isLeftClicked && mx >= 800 && mx <= 840 && my >= currentY && my <= currentY + 40) {
-            m_selectedItem = i; UpdateValue(1);
+        if (isLeftClicked && mx >= 800 && mx <= 840 && my >= y && my <= y + 40) {
+            m_selectedItem = itemIdx; UpdateValue(1);
         }
-    }
+        };
 
-    // BACKボタン
-    if (isLeftClicked && mx >= 100 && mx <= 300 && my >= 800 && my <= 850) {
+    HandleArrowInput(1, itemStartY);           // MOTION BLUR
+    HandleArrowInput(3, itemStartY + stepY);   // FOV INTENSITY
+
+    // BACKボタン (見えやすいように上に配置)
+    if (isLeftClicked && mx >= 100 && mx <= 300 && my >= 600 && my <= 650) {
         m_nextScene = SceneState::Title;
     }
-}
-
-void SettingScene::UpdateValue(int dir) {
-    if (m_selectedItem == 1) m_settings.motionBlur = !m_settings.motionBlur;
-    if (m_selectedItem == 2) m_settings.brightness = std::clamp(m_settings.brightness + dir * 0.1f, 0.5f, 1.5f);
-    if (m_selectedItem == 3) m_settings.fovIntensity = (m_settings.fovIntensity + dir + 3) % 3;
 }
 
 void SettingScene::Render() {
@@ -76,28 +92,36 @@ void SettingScene::Render() {
     if (m_font) {
         m_font->DrawString(m_graphicsDevice->GetDeviceContext(), L"SETTINGS", 60.0f, 100.0f, 80.0f, 0xFFFFFFFF, FW1_RESTORESTATE);
 
-        // 音量描画 (シークバー形式)
-        m_font->DrawString(m_graphicsDevice->GetDeviceContext(), L"VOLUME", 40.0f, 200.0f, 200.0f, 0xFFFFFFFF, FW1_RESTORESTATE);
-        // バーの土台
-        std::wstring bar = L"----------"; // 背景
-        m_font->DrawString(m_graphicsDevice->GetDeviceContext(), bar.c_str(), 40.0f, m_sliderX, m_sliderY, 0xFF444444, FW1_RESTORESTATE);
-        std::wstring indicator = L"I"; // 現在値のつまみ
-        m_font->DrawString(m_graphicsDevice->GetDeviceContext(), indicator.c_str(), 40.0f, m_sliderX + (m_sliderWidth * m_settings.volume), m_sliderY, 0xFF00FFFF, FW1_RESTORESTATE);
+        // --- シークバー描画関数 (ハイフンの数を増やして調整) ---
+        auto DrawSlider = [&](const std::wstring& label, float x, float y, float value, float minVal, float maxVal) {
+            m_font->DrawString(m_graphicsDevice->GetDeviceContext(), label.c_str(), 30.0f, x, y - 40.0f, 0xFFFFFFFF, FW1_RESTORESTATE);
+            // バーの背景（長めにハイフンを引くか、棒状の文字を使用）
+            m_font->DrawString(m_graphicsDevice->GetDeviceContext(), L"------------------", 40.0f, x, y, 0xFF444444, FW1_RESTORESTATE);
 
-        // その他項目
-        auto DrawArrowItem = [&](int idx, const std::wstring& label, const std::wstring& val) {
-            float y = 200.0f + idx * 80.0f;
+            // つまみの位置計算 (300px幅に合わせる)
+            float norm = (value - minVal) / (maxVal - minVal);
+            float sliderWidth = 300.0f;
+            m_font->DrawString(m_graphicsDevice->GetDeviceContext(), L"I", 40.0f, x + (sliderWidth * norm), y, 0xFF00FFFF, FW1_RESTORESTATE);
+            };
+
+        // 音量と明るさを横並びに
+        DrawSlider(L"VOLUME", 200.0f, 215.0f, m_settings.volume, 0.0f, 1.0f);
+        DrawSlider(L"BRIGHTNESS", 650.0f, 215.0f, m_settings.brightness, 0.5f, 1.5f);
+
+        // --- 矢印項目 ---
+        auto DrawArrowItem = [&](int idx, const std::wstring& label, const std::wstring& val, float y) {
             m_font->DrawString(m_graphicsDevice->GetDeviceContext(), label.c_str(), 40.0f, 200.0f, y, 0xFFFFFFFF, FW1_RESTORESTATE);
             m_font->DrawString(m_graphicsDevice->GetDeviceContext(), L"◀", 40.0f, 550.0f, y, 0xFF00FFFF, FW1_RESTORESTATE);
             m_font->DrawString(m_graphicsDevice->GetDeviceContext(), val.c_str(), 40.0f, 620.0f, y, 0xFFFFFFFF, FW1_RESTORESTATE);
             m_font->DrawString(m_graphicsDevice->GetDeviceContext(), L"▶", 40.0f, 800.0f, y, 0xFF00FFFF, FW1_RESTORESTATE);
             };
 
-        DrawArrowItem(1, L"MOTION BLUR", m_settings.motionBlur ? L"ON" : L"OFF");
-        DrawArrowItem(2, L"BRIGHTNESS", std::to_wstring(m_settings.brightness).substr(0, 3));
-        DrawArrowItem(3, L"FOV INTENSITY", (m_settings.fovIntensity == 0 ? L"NONE" : m_settings.fovIntensity == 1 ? L"WEAK" : L"NORMAL"));
+        float arrowY = 350.0f;
+        DrawArrowItem(1, L"MOTION BLUR", m_settings.motionBlur ? L"ON" : L"OFF", arrowY);
+        DrawArrowItem(3, L"FOV INTENSITY", (m_settings.fovIntensity == 0 ? L"NONE" : m_settings.fovIntensity == 1 ? L"WEAK" : L"NORMAL"), arrowY + 80.0f);
 
-        m_font->DrawString(m_graphicsDevice->GetDeviceContext(), L"<- BACK", 40.0f, 100.0f, 700.0f, 0xFF888888, FW1_RESTORESTATE);
+        // BACKボタン (Y=600に配置)
+        m_font->DrawString(m_graphicsDevice->GetDeviceContext(), L"<- BACK", 40.0f, 100.0f, 600.0f, 0xFF888888, FW1_RESTORESTATE);
     }
     m_graphicsDevice->EndScene();
 }

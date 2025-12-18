@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Scene.h"
 #include <vector>
 #include <string>
@@ -8,7 +8,7 @@ struct GameSettings {
     float volume = 0.5f;
     bool motionBlur = true;
     float brightness = 1.0f;
-    int fovIntensity = 2; // 0:‚È‚µ, 1:ã‚ß, 2:’Êí
+    int fovIntensity = 2; // 0:ãªã—, 1:å¼±ã‚, 2:é€šå¸¸
 };
 
 class SettingScene : public Scene {
@@ -28,11 +28,11 @@ private:
     GameSettings m_settings;
     int m_selectedItem; // 0:Volume, 1:Blur, 2:Bright, 3:FOV, 4:BACK
 
-    // ƒV[ƒNƒo[‘€ì—p
+    // ã‚·ãƒ¼ã‚¯ãƒãƒ¼æ“ä½œç”¨
     bool m_isDraggingVolume;
     float m_sliderX, m_sliderY, m_sliderWidth;
 
     void UpdateValue(int direction);
-    void HandleVolumeInput(); // ”šƒL[“ü—Í
+    void HandleVolumeInput(); // æ•°å­—ã‚­ãƒ¼å…¥åŠ›
     std::wstring GetFovText();
 };
