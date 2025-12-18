@@ -7,7 +7,6 @@
 #include <cmath>
 
 namespace {
-	// 密度は高く維持（1万個でもバッチ描画なら軽快に動きます）
 	const int MAX_PARTICLES = 10000;
 	const float SPAWN_INTERVAL = 0.0001f;
 	const float PARTICLE_LIFE = 1.0f;

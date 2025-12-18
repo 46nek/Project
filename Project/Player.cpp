@@ -27,7 +27,7 @@ Player::Player()
 	m_runSound(nullptr),
 	m_stepTimer(0.0f),
 	m_walkInterval(0.5f),
-	m_runInterval(0.3f) {
+	m_runInterval(0.25f) {
 }
 
 Player::~Player() {

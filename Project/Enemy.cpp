@@ -1,5 +1,5 @@
 #include "Enemy.h"
-#include "GraphicsDevice.h" // 必要であればインクルード
+#include "GraphicsDevice.h"
 #include <random>
 #include <cmath>
 
@@ -8,7 +8,7 @@ namespace {
 }
 
 Enemy::Enemy()
-	: m_speed(4.0f), m_pathIndex(-1), m_pathCooldown(0.0f) {
+	: m_speed(6.0f), m_pathIndex(-1), m_pathCooldown(0.0f) {
 }
 
 Enemy::~Enemy() {
@@ -33,7 +33,6 @@ void Enemy::Shutdown() {
 void Enemy::Update(float deltaTime, const Player* player, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth) {
 	if (!player || !m_particleSystem) { return; }
 
-	// --- 移動ロジック (既存のまま) ---
 	DirectX::XMFLOAT3 playerPos = player->GetPosition();
 	m_pathCooldown -= deltaTime;
 

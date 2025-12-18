@@ -138,6 +138,9 @@
     <ClCompile Include="GameEnvironment.cpp">
       <Filter>Source\04_GamePlay</Filter>
     </ClCompile>
+    <ClCompile Include="ParticleSystem.cpp">
+      <Filter>Source\02_Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -268,6 +271,9 @@
     </ClInclude>
     <ClInclude Include="GameEnvironment.h">
       <Filter>Source\04_GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleSystem.h">
+      <Filter>Source\02_Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
