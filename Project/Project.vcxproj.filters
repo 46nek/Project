@@ -141,6 +141,9 @@
     <ClCompile Include="ParticleSystem.cpp">
       <Filter>Source\02_Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="SettingScene.cpp">
+      <Filter>Source\01_Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -274,6 +277,9 @@
     </ClInclude>
     <ClInclude Include="ParticleSystem.h">
       <Filter>Source\02_Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingScene.h">
+      <Filter>Source\01_Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

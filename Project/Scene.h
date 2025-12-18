@@ -7,6 +7,7 @@
 enum class SceneState {
 	None,
 	Title,
+	Setting,
 	Loading,
 	Game,
 	Result,
@@ -30,6 +31,6 @@ public:
 protected:
 	GraphicsDevice* m_graphicsDevice;
 	Input* m_input;
-	DirectX::AudioEngine* m_audioEngine; // <--- ‚±‚Ìs‚ð’Ç‰Á
+	DirectX::AudioEngine* m_audioEngine;
 	SceneState m_nextScene;
 };

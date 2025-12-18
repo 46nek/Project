@@ -46,4 +46,8 @@ private:
 	// グリッチ更新用タイマー
 	float m_glitchTimer;
 	float m_glitchUpdateInterval;
+
+	std::wstring m_settingText;
+	std::vector<CharState> m_settingCharStates;
+	bool m_isSettingHovered;
 };

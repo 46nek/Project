@@ -13,13 +13,13 @@ namespace AssetPaths {
 	const wchar_t* const TEX_BUTTON = L"Assets/button.png";
 	const wchar_t* const TEX_BACKGROUND = L"Assets/background.png";
 
-	// ステージ関連
+	// === ステージ関連 ===
 	const wchar_t* const TEX_WALL = L"Assets/wall.png";
 	const wchar_t* const TEX_WALL_NORMAL = L"Assets/wall_normal.png";
 	const wchar_t* const TEX_GATE = L"Assets/gate.jpg";
 	const wchar_t* const TEX_GATE_NORMAL = L"Assets/gate_normal.png";
 
-	// ミニマップ・HUD関連
+	// === ミニマップ・HUD関連 ===
 	const wchar_t* const TEX_MINIMAP_ORB = L"Assets/minimap_orb.png";
 	const wchar_t* const TEX_MINIMAP_FRAME = L"Assets/minimap_frame.png";
 	const wchar_t* const TEX_MINIMAP_PATH = L"Assets/minimap_path.png";

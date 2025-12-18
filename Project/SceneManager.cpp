@@ -1,5 +1,6 @@
 #include "SceneManager.h"
 #include "TitleScene.h"
+#include "SettingScene.h"
 #include "GameScene.h"
 #include "LoadingScene.h"
 #include "ResultScene.h"
@@ -50,7 +51,6 @@ bool SceneManager::ChangeScene(SceneState nextState) {
 		return true;
 	}
 
-	// LoadingSceneからGameSceneへの遷移（データの受け渡しが必要な場合）
 	if (nextState == SceneState::Game) {
 		LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(m_currentScene.get());
 		if (loadingScene) {
@@ -76,6 +76,9 @@ bool SceneManager::ChangeScene(SceneState nextState) {
 	switch (nextState) {
 	case SceneState::Title:
 		m_currentScene = std::make_unique<TitleScene>();
+		break;
+	case SceneState::Setting:
+		m_currentScene = std::make_unique<SettingScene>();
 		break;
 	case SceneState::Loading:
 		m_currentScene = std::make_unique<LoadingScene>();

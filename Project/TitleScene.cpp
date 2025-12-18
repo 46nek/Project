@@ -33,7 +33,6 @@ bool TitleScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, Direct
 
 	m_gameScene = std::make_unique<GameScene>();
 
-	// 修正: Phase1 -> InitializeEnvironment
 	if (!m_gameScene->InitializeEnvironment(graphicsDevice, input, audioEngine)) { return false; }
 
 	m_gameScene->SetCameraForTitle();
@@ -66,6 +65,10 @@ bool TitleScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, Direct
 	m_playCharStates.resize(m_playText.length());
 	for (auto& state : m_playCharStates) { state.fontIndex = 0; }
 
+	m_settingText = L"SETTINGS";
+	m_settingCharStates.resize(m_settingText.length());
+	for (auto& state : m_settingCharStates) { state.fontIndex = 0; }
+
 	return true;
 }
 
@@ -93,56 +96,58 @@ void TitleScene::Update(float deltaTime) {
 	int mx, my;
 	m_input->GetMousePosition(mx, my);
 
-	float playFontSize = 60.0f;
-	float playY = 600.0f;
-
+	float padding = 40.0f;
 	FW1_RECTF rect = { 0, 0, 0, 0 };
+
+	// --- PLAYボタン判定 ---
+	float playFontSize = 60.0f;
+	float playY = 500.0f;
 	m_fonts[0]->MeasureString(m_playText.c_str(), nullptr, playFontSize, &rect, 0);
 	float playWidth = rect.Right - rect.Left;
 	float playX = (Game::SCREEN_WIDTH - playWidth) / 2.0f;
-	float playHeight = playFontSize;
+	m_isPlayHovered = (mx >= playX - padding && mx <= playX + playWidth + padding &&
+		my >= playY - padding && my <= playY + playFontSize + padding);
 
-	// 当たり判定 (少し広めに取る)
-	float padding = 40.0f;
-	if (mx >= playX - padding && mx <= playX + playWidth + padding &&
-		my >= playY - padding && my <= playY + playHeight + padding) {
-		m_isPlayHovered = true;
-	}
-	else {
-		m_isPlayHovered = false;
-	}
+	// --- SETTINGSボタン判定 ---
+	float setFontSize = 40.0f;
+	float setY = 600.0f; 
+	m_fonts[0]->MeasureString(m_settingText.c_str(), nullptr, setFontSize, &rect, 0);
+	float setWidth = rect.Right - rect.Left;
+	float setX = (Game::SCREEN_WIDTH - setWidth) / 2.0f;
+	m_isSettingHovered = (mx >= setX - padding && mx <= setX + setWidth + padding &&
+		my >= setY - padding && my <= setY + setFontSize + padding);
 
+	// --- グリッチ演出の更新 ---
 	m_glitchTimer += deltaTime;
 	if (m_glitchTimer > m_glitchUpdateInterval) {
 		m_glitchTimer = 0.0f;
 
+		// タイトルロゴ
 		for (auto& state : m_charStates) {
-			if ((std::rand() % 100) < 10) { state.fontIndex = std::rand() % m_fonts.size(); }
-			else { state.fontIndex = 0; }
+			state.fontIndex = (std::rand() % 100 < 10) ? (std::rand() % m_fonts.size()) : 0;
 		}
-
+		// PLAYボタン
 		for (auto& state : m_playCharStates) {
-			if (m_isPlayHovered && (std::rand() % 100) < 30) {
-				state.fontIndex = std::rand() % m_fonts.size();
-			}
-			else {
-				state.fontIndex = 0;
-			}
+			state.fontIndex = (m_isPlayHovered && std::rand() % 100 < 30) ? (std::rand() % m_fonts.size()) : 0;
+		}
+		// SETTINGSボタン
+		for (auto& state : m_settingCharStates) {
+			state.fontIndex = (m_isSettingHovered && std::rand() % 100 < 30) ? (std::rand() % m_fonts.size()) : 0;
 		}
 	}
 
-	if (!m_isPlayHovered) {
-		for (auto& state : m_playCharStates) { state.fontIndex = 0; }
-	}
+	// ホバー外れたらフォントを戻す
+	if (!m_isPlayHovered) { for (auto& state : m_playCharStates) state.fontIndex = 0; }
+	if (!m_isSettingHovered) { for (auto& state : m_settingCharStates) state.fontIndex = 0; }
 
-	// Inputクラスの判定に加え、Windows標準のAPIでもチェックします（Inputクラスの仕様差異対策）
+	// --- 遷移判定 ---
 	bool isLeftClicked = m_input->IsKeyPressed(VK_LBUTTON) || (GetAsyncKeyState(VK_LBUTTON) & 0x8000);
-	bool isEnterPressed = m_input->IsKeyPressed(VK_RETURN);
-
-	// PLAYボタンクリック または Enterキー で開始
-	if ((m_isPlayHovered && isLeftClicked) || isEnterPressed) {
+	if ((m_isPlayHovered && isLeftClicked) || m_input->IsKeyPressed(VK_RETURN)) {
 		m_nextScene = SceneState::Loading;
 		m_input->SetCursorVisible(false);
+	}
+	if (m_isSettingHovered && isLeftClicked) {
+		m_nextScene = SceneState::Setting;
 	}
 }
 
@@ -201,7 +206,8 @@ void TitleScene::Render() {
 			};
 
 		DrawGlitchText(m_titleText, m_charStates, 120.0f, 150.0f);
-		DrawGlitchText(m_playText, m_playCharStates, 60.0f, 600.0f);
+		DrawGlitchText(m_playText, m_playCharStates, 60.0f, 500.0f);
+		DrawGlitchText(m_settingText, m_settingCharStates, 40.0f, 600.0f);
 	}
 
 	m_graphicsDevice->GetSwapChain()->TurnZBufferOn(m_graphicsDevice->GetDeviceContext());
