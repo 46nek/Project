@@ -99,25 +99,36 @@ LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM
 
 LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam) {
 	switch (umsg) {
-	case WM_ACTIVATEAPP: // アプリケーションのフォーカスが切り替わった
-		if (wparam == FALSE) { // 非アクティブになった
-			// ゲーム中で、かつカーソルロックが有効な場合のみ自動ポーズ
+	case WM_ACTIVATEAPP:
+		if (wparam == FALSE) {
 			if (g_game && !g_game->IsPaused() && m_input && m_input->IsCursorLocked()) {
 				g_game->SetPaused(true);
 			}
 		}
 		break;
 
-	case WM_LBUTTONDOWN: // マウスの左クリック
+	case WM_LBUTTONDOWN: // 修正：マウス入力をInputクラスに送る
+		m_input->KeyDown(VK_LBUTTON); // 追加
 		if (g_game && g_game->IsPaused()) {
 			POINT p = { LOWORD(lparam), HIWORD(lparam) };
 			RECT clientRect;
 			GetClientRect(hwnd, &clientRect);
 			if (PtInRect(&clientRect, p)) {
-				// ポーズ中に画面内をクリックしたら、ポーズ解除
 				g_game->SetPaused(false);
 			}
 		}
+		return 0;
+
+	case WM_LBUTTONUP: // 追加：ボタンを離したことも通知
+		m_input->KeyUp(VK_LBUTTON);
+		return 0;
+
+	case WM_RBUTTONDOWN: // 必要であれば右クリックも追加
+		m_input->KeyDown(VK_RBUTTON);
+		return 0;
+
+	case WM_RBUTTONUP:
+		m_input->KeyUp(VK_RBUTTON);
 		return 0;
 
 	case WM_INPUT:

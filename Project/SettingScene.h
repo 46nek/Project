@@ -26,13 +26,21 @@ private:
     IFW1FontWrapper* m_font;
 
     GameSettings m_settings;
-    int m_selectedItem; // 0:Volume, 1:Blur, 2:Bright, 3:FOV, 4:BACK
+    int m_selectedItem;
 
     // シークバー操作用
     bool m_isDraggingVolume;
-    float m_sliderX, m_sliderY, m_sliderWidth;
+    bool m_isDraggingBright; 
 
     void UpdateValue(int direction);
-    void HandleVolumeInput(); // 数字キー入力
     std::wstring GetFovText();
+
+    // レイアウト定数
+    const float SLIDER_WIDTH = 250.0f;
+    const float VOL_X = 200.0f;
+    const float BRIGHT_X = 650.0f;
+    const float SLIDER_Y = 215.0f;
+    const float ARROW_Y_START = 350.0f;
+    const float BACK_X = 100.0f;
+    const float BACK_Y = 600.0f;
 };
