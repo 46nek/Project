@@ -1,10 +1,10 @@
-#include "TitleScene.h"
+ï»¿#include "TitleScene.h"
 #include "framework.h"
 #include "Game.h"
 #include "AssetLoader.h"
 #include "AssetPaths.h"
 
-// ƒOƒ[ƒoƒ‹•Ï”‚ÌGameƒCƒ“ƒXƒ^ƒ“ƒX‚ğQÆ
+// ã‚°ãƒ­ãƒ¼ãƒãƒ«å¤‰æ•°ã®Gameã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’å‚ç…§
 extern Game* g_game;
 
 TitleScene::TitleScene()
@@ -22,7 +22,7 @@ bool TitleScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, Direct
 	m_input = input;
 	m_audioEngine = audioEngine;
 
-	// ƒ^ƒCƒgƒ‹‰æ–ÊFƒJ[ƒ\ƒ‹‚ğ•\¦‚µ‚ÄƒƒbƒN‰ğœ
+	// ã‚¿ã‚¤ãƒˆãƒ«ç”»é¢ï¼šã‚«ãƒ¼ã‚½ãƒ«ã‚’è¡¨ç¤ºã—ã¦ãƒ­ãƒƒã‚¯è§£é™¤
 	input->SetCursorLock(false);
 
 	std::srand(static_cast<unsigned int>(time(nullptr)));
@@ -93,60 +93,89 @@ void TitleScene::Update(float deltaTime) {
 		m_gameScene->UpdateTitleLoop(deltaTime);
 	}
 
-	int mx, my;
-	m_input->GetMousePosition(mx, my);
+	int rawMx, rawMy;
+	m_input->GetMousePosition(rawMx, rawMy);
 
-	float padding = 40.0f;
-	FW1_RECTF rect = { 0, 0, 0, 0 };
+	// --- ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®ç¾åœ¨ã®ã‚µã‚¤ã‚ºã‚’å–å¾—ã—ã¦åº§æ¨™ã‚’å¤‰æ› ---
+	HWND hwnd = g_game->GetWindow()->GetHwnd();
+	RECT clientRect;
+	GetClientRect(hwnd, &clientRect);
+	float actualWidth = static_cast<float>(clientRect.right - clientRect.left);
+	float actualHeight = static_cast<float>(clientRect.bottom - clientRect.top);
 
-	// --- PLAYƒ{ƒ^ƒ“”»’è ---
+	// 0é™¤ç®—é˜²æ­¢
+	if (actualWidth <= 0) actualWidth = 1.0f;
+	if (actualHeight <= 0) actualHeight = 1.0f;
+
+	// ç‰©ç†åº§æ¨™(ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚º)ã‹ã‚‰è«–ç†åº§æ¨™(1280x720)ã¸å¤‰æ›
+	float mx = rawMx * (static_cast<float>(Game::SCREEN_WIDTH) / actualWidth);
+	float my = rawMy * (static_cast<float>(Game::SCREEN_HEIGHT) / actualHeight);
+
+	float padding = 10.0f;
+
+	// --- CalculateGlitchTextWidth ã¯å¤‰æ›´ãªã— ---
+	auto CalculateGlitchTextWidth = [&](const std::wstring& text, float fontSize) {
+		float totalWidth = 0.0f;
+		for (size_t i = 0; i < text.length(); ++i) {
+			wchar_t c = text[i];
+			if (c == L' ') {
+				totalWidth += fontSize * 0.3f;
+			}
+			else {
+				wchar_t str[2] = { c, L'\0' };
+				FW1_RECTF r = { 0, 0, 0, 0 };
+				m_fonts[0]->MeasureString(str, nullptr, fontSize, &r, 0);
+				float w = r.Right - r.Left;
+				if (w <= 0.1f) w = fontSize * 0.5f;
+				else w += fontSize * 0.1f;
+				totalWidth += w;
+			}
+		}
+		return totalWidth;
+		};
+
+	// --- PLAYãƒœã‚¿ãƒ³ (mx, my ã‚’å¤‰æ›å¾Œã® float ç‰ˆã§ä½¿ç”¨) ---
 	float playFontSize = 60.0f;
 	float playY = 500.0f;
-	m_fonts[0]->MeasureString(m_playText.c_str(), nullptr, playFontSize, &rect, 0);
-	float playWidth = rect.Right - rect.Left;
+	float playWidth = CalculateGlitchTextWidth(m_playText, playFontSize);
 	float playX = (Game::SCREEN_WIDTH - playWidth) / 2.0f;
+
 	m_isPlayHovered = (mx >= playX - padding && mx <= playX + playWidth + padding &&
 		my >= playY - padding && my <= playY + playFontSize + padding);
 
-	// --- SETTINGSƒ{ƒ^ƒ“”»’è ---
-	float setFontSize = 40.0f;
-	float setY = 600.0f; 
-	m_fonts[0]->MeasureString(m_settingText.c_str(), nullptr, setFontSize, &rect, 0);
-	float setWidth = rect.Right - rect.Left;
+	// --- SETTINGSãƒœã‚¿ãƒ³ (Renderã¨åˆã‚ã› 60.0f ã‚’ä½¿ç”¨) ---
+	float setFontSize = 60.0f;
+	float setY = 600.0f;
+	float setWidth = CalculateGlitchTextWidth(m_settingText, setFontSize);
 	float setX = (Game::SCREEN_WIDTH - setWidth) / 2.0f;
+
 	m_isSettingHovered = (mx >= setX - padding && mx <= setX + setWidth + padding &&
 		my >= setY - padding && my <= setY + setFontSize + padding);
 
-	// --- ƒOƒŠƒbƒ`‰‰o‚ÌXV ---
+	// --- ã‚°ãƒªãƒƒãƒæ›´æ–°å‡¦ç†ã¨é·ç§»åˆ¤å®š ---
 	m_glitchTimer += deltaTime;
 	if (m_glitchTimer > m_glitchUpdateInterval) {
 		m_glitchTimer = 0.0f;
-
-		// ƒ^ƒCƒgƒ‹ƒƒS
 		for (auto& state : m_charStates) {
 			state.fontIndex = (std::rand() % 100 < 10) ? (std::rand() % m_fonts.size()) : 0;
 		}
-		// PLAYƒ{ƒ^ƒ“
 		for (auto& state : m_playCharStates) {
 			state.fontIndex = (m_isPlayHovered && std::rand() % 100 < 30) ? (std::rand() % m_fonts.size()) : 0;
 		}
-		// SETTINGSƒ{ƒ^ƒ“
 		for (auto& state : m_settingCharStates) {
 			state.fontIndex = (m_isSettingHovered && std::rand() % 100 < 30) ? (std::rand() % m_fonts.size()) : 0;
 		}
 	}
 
-	// ƒzƒo[ŠO‚ê‚½‚çƒtƒHƒ“ƒg‚ğ–ß‚·
 	if (!m_isPlayHovered) { for (auto& state : m_playCharStates) state.fontIndex = 0; }
 	if (!m_isSettingHovered) { for (auto& state : m_settingCharStates) state.fontIndex = 0; }
 
-	// --- ‘JˆÚ”»’è ---
-	bool isLeftClicked = m_input->IsKeyPressed(VK_LBUTTON) || (GetAsyncKeyState(VK_LBUTTON) & 0x8000);
-	if ((m_isPlayHovered && isLeftClicked) || m_input->IsKeyPressed(VK_RETURN)) {
+	// Inputã‚¯ãƒ©ã‚¹ã«çµ±åˆï¼ˆGetAsyncKeyStateã¯å‰Šé™¤ï¼‰
+	if ((m_isPlayHovered && m_input->IsKeyPressed(VK_LBUTTON)) || m_input->IsKeyPressed(VK_RETURN)) {
 		m_nextScene = SceneState::Loading;
 		m_input->SetCursorVisible(false);
 	}
-	if (m_isSettingHovered && isLeftClicked) {
+	if (m_isSettingHovered && m_input->IsKeyPressed(VK_LBUTTON)) {
 		m_nextScene = SceneState::Setting;
 	}
 }
@@ -198,16 +227,16 @@ void TitleScene::Render() {
 						currentX,
 						startY,
 						color,
-						FW1_RESTORESTATE
+						FW1_LEFT | FW1_TOP | FW1_RESTORESTATE
 					);
 				}
 				currentX += charWidths[i];
 			}
-			};
+		};
 
 		DrawGlitchText(m_titleText, m_charStates, 120.0f, 150.0f);
 		DrawGlitchText(m_playText, m_playCharStates, 60.0f, 500.0f);
-		DrawGlitchText(m_settingText, m_settingCharStates, 40.0f, 600.0f);
+		DrawGlitchText(m_settingText, m_settingCharStates, 60.0f, 600.0f);
 	}
 
 	m_graphicsDevice->GetSwapChain()->TurnZBufferOn(m_graphicsDevice->GetDeviceContext());

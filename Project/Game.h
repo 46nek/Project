@@ -48,6 +48,8 @@ public:
 	 */
 	bool IsPaused() const;
 
+	// ウィンドウへのアクセサを追加
+	Window* GetWindow() const { return m_window.get(); }
 private:
 	/**
 	 * @brief フレームごとの更新処理
