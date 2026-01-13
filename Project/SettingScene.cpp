@@ -77,6 +77,10 @@ void SettingScene::Update(float deltaTime) {
     if (!isLeftDown) m_isDraggingVolume = false;
     if (m_isDraggingVolume) {
         float norm = std::clamp((mx - volX) / sliderW, 0.0f, 1.0f);
+
+        // 2. 0.1刻み（10%単位）にスナップさせる処理を追加
+        norm = std::round(norm * 10.0f) / 10.0f;
+
         m_settings.volume = norm;
         if (m_audioEngine) m_audioEngine->SetMasterVolume(m_settings.volume);
     }
@@ -89,6 +93,11 @@ void SettingScene::Update(float deltaTime) {
     if (!isLeftDown) m_isDraggingBright = false;
     if (m_isDraggingBright) {
         float norm = std::clamp((mx - brightX) / sliderW, 0.0f, 1.0f);
+
+        // 2. 0.1刻みにスナップさせる処理を追加
+        norm = std::round(norm * 10.0f) / 10.0f;
+
+        // 明るさは 0.5 + (0.0～1.0) なので、結果として 0.5～1.5 の間で 0.1 刻みになる
         m_settings.brightness = 0.5f + norm * 1.0f;
     }
 
