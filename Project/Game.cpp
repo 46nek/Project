@@ -63,6 +63,10 @@ bool Game::Initialize(HINSTANCE hInstance) {
 
 	m_audioEngine = std::make_unique<DirectX::AudioEngine>(DirectX::AudioEngine_Default);
 
+	if (m_audioEngine) {
+		m_audioEngine->SetMasterVolume(m_settings.volume);
+	}
+
 	m_sceneManager = std::make_unique<SceneManager>();
 	if (!m_sceneManager->Initialize(m_graphicsDevice.get(), m_input.get(), m_audioEngine.get())) {
 		return false;

@@ -281,6 +281,9 @@
     <ClInclude Include="SettingScene.h">
       <Filter>Source\01_Scene</Filter>
     </ClInclude>
+    <ClInclude Include="GameSettings.h">
+      <Filter>Source\00_Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\background.png">

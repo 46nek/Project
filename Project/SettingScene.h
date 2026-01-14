@@ -3,13 +3,7 @@
 #include <vector>
 #include <string>
 #include "FW1FontWrapper.h"
-
-struct GameSettings {
-    float volume = 0.5f;
-    bool motionBlur = true;
-    float brightness = 1.0f;
-    int fovIntensity = 2; // 0:なし, 1:弱め, 2:通常
-};
+#include "GameSettings.h"
 
 class SettingScene : public Scene {
 public:

@@ -4,6 +4,8 @@
 #include "Stage.h" 
 #include <cmath>
 
+extern Game* g_game;
+
 namespace {
     constexpr float VIGNETTE_NORMAL = 1.1f;
     constexpr float VIGNETTE_DASH = 1.5f; // ダッシュ中の演出用
@@ -124,27 +126,39 @@ void CameraDirector::UpdateOpening(float deltaTime) {
 void CameraDirector::UpdateGameplay(float deltaTime, Player* player) {
     if (!player) { return; }
 
-    // FOV制御
-    float baseFov = DirectX::XM_PI / 4.0f;
-    float runFov = DirectX::XM_PI / 2.0f; // 疾走感を出すために広角にする
+    // 設定を取得
+    auto& settings = g_game->GetSettings();
 
+    // 1. 基本となる視野角 (90度)
+    float targetFovDeg = 45.0f;
+
+    // 2. スキル使用中のFOVブースト計算
     if (player->IsSkillActive()) {
-        m_camera->SetTargetFOV(runFov);
-        // ダッシュ中はビネットを少し強めて集中線のような効果を狙う
+        float boost = 0.0f;
+        // 設定(fovIntensity)に応じて走っている時の追加視野角を変える
+        if (settings.fovIntensity == 1)      boost = 20.0f; // 弱め
+        else if (settings.fovIntensity == 2) boost = 45.0f; // 通常
+        // 0 (NONE) の場合は boost = 0.0f のまま
+
+        targetFovDeg += boost;
         m_vignetteIntensity = VIGNETTE_DASH;
     }
     else {
-        m_camera->SetTargetFOV(baseFov);
         m_vignetteIntensity = VIGNETTE_NORMAL;
     }
 
-    // 位置・回転同期
+    // カメラに目標FOVを設定 (度数法からラジアンに変換)
+    if (m_camera) {
+        m_camera->SetTargetFOV(DirectX::XMConvertToRadians(targetFovDeg));
+    }
+
+    // 3. 位置・回転同期
     DirectX::XMFLOAT3 playerPos = player->GetPosition();
     DirectX::XMFLOAT3 playerRot = player->GetRotation();
     m_camera->SetPosition(playerPos.x, playerPos.y, playerPos.z);
     m_camera->SetRotation(playerRot.x, playerRot.y, playerRot.z);
 
-    // ボビング（揺れ）
+    // 4. ボビング（揺れ）
     const BobbingParams& bp = player->IsSkillActive() ? BOB_RUN : BOB_WALK;
     m_camera->SetBobbingParameters(bp.speed, bp.amount, bp.swaySpeed, bp.swayAmount, bp.rollSpeed);
     m_camera->UpdateBobbing(deltaTime, player->IsMoving());

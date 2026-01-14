@@ -6,6 +6,9 @@
 #include "SceneManager.h"
 #include "Timer.h"
 #include "Audio.h"
+#include "GameSettings.h"
+
+class SceneManager;
 
 /**
  * @brief ゲーム全体の管理を行うメインクラス
@@ -48,8 +51,8 @@ public:
 	 */
 	bool IsPaused() const;
 
-	// ウィンドウへのアクセサを追加
 	Window* GetWindow() const { return m_window.get(); }
+	GameSettings& GetSettings() { return m_settings; }
 private:
 	/**
 	 * @brief フレームごとの更新処理
@@ -69,5 +72,7 @@ private:
 	std::unique_ptr<SceneManager> m_sceneManager;
 	std::unique_ptr<Timer> m_timer;
 	std::unique_ptr<DirectX::AudioEngine> m_audioEngine;
+
+	GameSettings m_settings;
 	bool m_isPaused;
 };

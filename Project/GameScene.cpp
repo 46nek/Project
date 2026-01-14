@@ -3,6 +3,8 @@
 #include "Game.h"
 #include "AssetPaths.h"
 
+extern Game* g_game;
+
 std::unique_ptr<GameScene> GameScene::s_transferInstance = nullptr;
 
 namespace {
@@ -219,6 +221,7 @@ void GameScene::Update(float deltaTime) {
         m_player->IsSkillActive(),         // 走行中かどうか
         m_gameObjectManager->GetEnemyRadarTimer() > 0.0f);
 }
+
 void GameScene::RenderStageOnly() {
     m_cachedDynamicModels.clear();
 

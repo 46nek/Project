@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <cmath>
 
+extern Game* g_game;
+
 Renderer::Renderer(GraphicsDevice* graphicsDevice) : m_graphicsDevice(graphicsDevice) {
 	m_frustum = std::make_unique<Frustum>();
 }
@@ -34,15 +36,16 @@ void Renderer::RenderSceneToTexture(
 void Renderer::RenderFinalPass(const Camera* camera, float vignetteIntensity) {
 	ID3D11DeviceContext* deviceContext = m_graphicsDevice->GetDeviceContext();
 	ShaderManager* shaderManager = m_graphicsDevice->GetShaderManager();
+	auto& settings = g_game->GetSettings(); // 設定を取得
 
-	// ポストプロセス用の定数バッファを更新
-	// フォグの値はここでは使われませんが、バッファ全体を更新する必要があります
+	// ポストプロセスバッファの更新
 	PostProcessBufferType postProcessBuffer;
-	postProcessBuffer.vignetteIntensity = vignetteIntensity; // 修正: VignetteIntensity -> vignetteIntensity
-	postProcessBuffer.fogStart = 0.0f;                       // 修正: FogStart -> fogStart
-	postProcessBuffer.fogEnd = 0.0f;                         // 修正: FogEnd -> fogEnd
-	postProcessBuffer.fogColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f); // 修正: FogColor -> fogColor
-	postProcessBuffer.padding = 0.0f; // 追加: 初期化
+	// 明るさ設定を反映 (明るいほどヴィネットを弱くする)
+	postProcessBuffer.vignetteIntensity = vignetteIntensity * (2.0f - settings.brightness);
+	postProcessBuffer.fogStart = 0.0f;
+	postProcessBuffer.fogEnd = 0.0f;
+	postProcessBuffer.fogColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	postProcessBuffer.padding = 0.0f;
 	m_graphicsDevice->UpdatePostProcessBuffer(postProcessBuffer);
 
 	m_graphicsDevice->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
@@ -50,12 +53,17 @@ void Renderer::RenderFinalPass(const Camera* camera, float vignetteIntensity) {
 
 	deviceContext->IASetInputLayout(shaderManager->GetInputLayout());
 	deviceContext->VSSetShader(shaderManager->GetPostProcessVertexShader(), nullptr, 0);
+
+	// シェーダーは常に MotionBlur 用を使用する (ブラー量 0 なら単なるパススルーになる)
 	deviceContext->PSSetShader(shaderManager->GetMotionBlurPixelShader(), nullptr, 0);
 
 	DirectX::XMMATRIX currentView = camera->GetViewMatrix();
 	DirectX::XMMATRIX previousView = camera->GetPreviousViewMatrix();
 
-	float blurAmount = 1.0f;
+	// モーションブラー設定がOFFならブラー量を 0 にする
+	float blurAmount = settings.motionBlur ? 1.0f : 0.0f;
+
+	// カメラが動いていない場合もブラーを 0 にする
 	if (memcmp(&currentView, &previousView, sizeof(DirectX::XMMATRIX)) == 0) {
 		blurAmount = 0.0f;
 	}
@@ -64,6 +72,7 @@ void Renderer::RenderFinalPass(const Camera* camera, float vignetteIntensity) {
 	DirectX::XMMATRIX prevViewProj = previousView * projectionMatrix;
 	DirectX::XMMATRIX currentViewProj = currentView * projectionMatrix;
 	DirectX::XMMATRIX currentViewProjInv = DirectX::XMMatrixInverse(nullptr, currentViewProj);
+
 	m_graphicsDevice->UpdateMotionBlurBuffer(prevViewProj, currentViewProjInv, blurAmount);
 
 	DirectX::XMMATRIX identity = DirectX::XMMatrixIdentity();
@@ -155,16 +164,15 @@ void Renderer::RenderMainPass(
 	deviceContext->PSSetShader(shaderManager->GetPixelShader(), nullptr, 0);
 
 	m_graphicsDevice->UpdateLightBuffer(lightManager->GetLightBuffer());
+	auto& settings = g_game->GetSettings();
 
-	// --- フォグの設定をここで送信 ---
 	PostProcessBufferType fogParams;
-	fogParams.vignetteIntensity = 0.8f; // 修正
-	fogParams.fogStart = 15.0f;          // 修正
-	fogParams.fogEnd = 60.0f;           // 修正
-	fogParams.fogColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f); // 修正
-	fogParams.padding = 0.0f; // 追加
+	fogParams.vignetteIntensity = 0.8f * (2.0f - settings.brightness); // 明るいほど周辺減光を弱く
+	fogParams.fogStart = 15.0f;
+	fogParams.fogEnd = 60.0f * settings.brightness; // 明るいほど遠くまで見えるように
+	fogParams.fogColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	fogParams.padding = 0.0f;
 	m_graphicsDevice->UpdatePostProcessBuffer(fogParams);
-	// --------------------------------
 
 	ID3D11SamplerState* samplerState = m_graphicsDevice->GetSamplerState();
 	deviceContext->PSSetSamplers(0, 1, &samplerState);
