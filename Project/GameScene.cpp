@@ -174,6 +174,34 @@ void GameScene::Update(float deltaTime) {
         return;
     }
 
+    // --- ESCキーでポーズの切り替え ---
+    if (m_input->IsKeyPressed(VK_ESCAPE)) {
+        m_isPaused = !m_isPaused;
+        m_input->SetCursorLock(!m_isPaused); // ポーズ中はカーソルを表示
+    }
+
+    // --- ポーズ中のロジック ---
+    if (m_isPaused) {
+        // 上下での移動 (0~6)
+        if (m_input->IsKeyPressed(VK_UP)) {
+            m_pauseSelectIndex = (m_pauseSelectIndex > 0) ? m_pauseSelectIndex - 1 : 6;
+        }
+        if (m_input->IsKeyPressed(VK_DOWN)) {
+            m_pauseSelectIndex = (m_pauseSelectIndex < 6) ? m_pauseSelectIndex + 1 : 0;
+        }
+
+        if (m_input->IsKeyPressed(VK_RETURN)) {
+            if (m_pauseSelectIndex == 5) { // RETURN TO GAME
+                m_isPaused = false;
+                m_input->SetCursorLock(true);
+            }
+            else if (m_pauseSelectIndex == 6) { // BACK TO TITLE
+                m_nextScene = SceneState::Title;
+            }
+        }
+        return; // ゲーム停止
+    }
+
     if (!m_gameObjectManager) { return; }
 
     if (m_input->IsKeyPressed(VK_ESCAPE)) {
@@ -248,23 +276,29 @@ void GameScene::RenderStageOnly() {
 void GameScene::Render() {
     if (!m_gameObjectManager) { return; }
 
+    // 3D空間（ステージやキャラクター）の描画
     RenderStageOnly();
 
     if (m_ui) {
-        float uiAlpha = 1.0f;
-        if (m_cameraDirector && m_cameraDirector->IsOpening()) {
-            uiAlpha = 0.0f;
+        if (m_isPaused) {
+            m_ui->RenderPauseMenu(m_pauseSelectIndex, 1280, 720);
         }
         else {
-            uiAlpha = m_uiFadeTimer / UI_FADE_DURATION;
-            if (uiAlpha > 1.0f) { uiAlpha = 1.0f; }
-        }
+            float uiAlpha = 1.0f;
+            if (m_cameraDirector && m_cameraDirector->IsOpening()) {
+                uiAlpha = 0.0f;
+            }
+            else {
+                uiAlpha = m_uiFadeTimer / UI_FADE_DURATION;
+                if (uiAlpha > 1.0f) { uiAlpha = 1.0f; }
+            }
 
-        m_ui->Render(m_camera.get(),
-            m_gameObjectManager->GetEnemies(),
-            m_gameObjectManager->GetOrbs(),
-            m_gameObjectManager->GetSpecialOrbs(),
-            uiAlpha);
+            m_ui->Render(m_camera.get(),
+                m_gameObjectManager->GetEnemies(),
+                m_gameObjectManager->GetOrbs(),
+                m_gameObjectManager->GetSpecialOrbs(),
+                uiAlpha);
+        }
     }
 
     m_graphicsDevice->EndScene();

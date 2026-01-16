@@ -1,11 +1,11 @@
-#include "UI.h"
+ï»¿#include "UI.h"
 #include "Camera.h"
 #include "Enemy.h"
 #include "Orb.h"
 #include "Game.h"
 #include "AssetPaths.h"
 #include <string>
-#include <cstdio> // swprintf_s—p
+#include <cstdio> // swprintf_sç”¨
 
 UI::UI()
 	: m_graphicsDevice(nullptr),
@@ -80,7 +80,7 @@ void UI::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>&
 	if (m_fontWrapper) {
 		UINT32 alphaInt = static_cast<UINT32>(alpha * 255.0f);
 
-		// --- ƒI[ƒu”ƒeƒLƒXƒg ---
+		// --- ã‚ªãƒ¼ãƒ–æ•°ãƒ†ã‚­ã‚¹ãƒˆ ---
 		std::wstring remainingText = std::to_wstring(m_remainingOrbs);
 		float fontSize = 32.0f;
 		float textPosX = iconPosition.x + 30.0f;
@@ -97,29 +97,29 @@ void UI::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>&
 			FW1_VCENTER | FW1_RESTORESTATE
 		);
 
-		// --- ƒXƒLƒ‹ó‘ÔƒeƒLƒXƒg ---
+		// --- ã‚¹ã‚­ãƒ«çŠ¶æ…‹ãƒ†ã‚­ã‚¹ãƒˆ ---
 		wchar_t skillBuffer[64];
 		UINT32 skillColor;
 
-		// F‚ÆƒeƒLƒXƒg‚ÌŒˆ’è
+		// è‰²ã¨ãƒ†ã‚­ã‚¹ãƒˆã®æ±ºå®š
 		if (m_isSkillActive) {
-			// ”­“®’†iƒIƒŒƒ“ƒWj
+			// ç™ºå‹•ä¸­ï¼ˆã‚ªãƒ¬ãƒ³ã‚¸ï¼‰
 			swprintf_s(skillBuffer, L"DASH TIME: %.1fs", m_skillDuration);
 			skillColor = (alphaInt << 24) | 0x0000A5FF; // ABGR (Orange)
 		}
 		else if (m_skillCooldown > 0.0f) {
-			// ƒN[ƒ‹ƒ_ƒEƒ“’†iƒOƒŒ[j
+			// ã‚¯ãƒ¼ãƒ«ãƒ€ã‚¦ãƒ³ä¸­ï¼ˆã‚°ãƒ¬ãƒ¼ï¼‰
 			swprintf_s(skillBuffer, L"COOLDOWN: %.1fs", m_skillCooldown);
 			skillColor = (alphaInt << 24) | 0x00AAAAAA; // ABGR (Gray)
 		}
 		else {
-			// g—p‰Â”\i—Î/ƒVƒAƒ“j
+			// ä½¿ç”¨å¯èƒ½ï¼ˆç·‘/ã‚·ã‚¢ãƒ³ï¼‰
 			swprintf_s(skillBuffer, L"DASH READY");
 			skillColor = (alphaInt << 24) | 0x00FFFF00; // ABGR (Cyan)
 		}
 
 		float skillTextX = iconPosition.x;
-		float skillTextY = iconPosition.y + 40.0f; // ƒAƒCƒRƒ“‚Ì‰º‚É•\¦
+		float skillTextY = iconPosition.y + 40.0f; // ã‚¢ã‚¤ã‚³ãƒ³ã®ä¸‹ã«è¡¨ç¤º
 
 		m_fontWrapper->DrawString(
 			m_graphicsDevice->GetDeviceContext(),
@@ -141,4 +141,95 @@ void UI::SetMinimapZoom(float zoomLevel) {
 	if (m_minimap) {
 		m_minimap->SetZoom(zoomLevel);
 	}
+}
+
+void UI::RenderPauseMenu(int selectIndex, int screenWidth, int screenHeight) {
+	// 1. èƒŒæ™¯ã®æš—è»¢
+	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_graphicsDevice->GetAlphaBlendState());
+	RECT fullScreen = { 0, 0, screenWidth, screenHeight };
+	m_orbIcon->RenderFill(m_spriteBatch.get(), fullScreen, { 0.0f, 0.0f, 0.0f, 0.85f }); //
+
+	// 2. å¢ƒç•Œç·š (å·¦30%ã®ä½ç½®)
+	float dividerX = screenWidth * 0.3f;
+	RECT dividerLine = { static_cast<LONG>(dividerX), 0, static_cast<LONG>(dividerX + 2), screenHeight };
+	m_orbIcon->RenderFill(m_spriteBatch.get(), dividerLine, { 1.0f, 1.0f, 1.0f, 0.3f });
+
+	m_spriteBatch->End();
+
+	if (m_fontWrapper) {
+		// --- å·¦ä¸Š: MENU ã‚¿ã‚¤ãƒˆãƒ« ---
+		m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), L"MENU", 72.0f, screenWidth * 0.05f, screenHeight * 0.08f, 0xFFFFFFFF, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
+
+		// --- å·¦ä¸­å¤®: é¸æŠé …ç›® (0ã€œ4) ---
+		float menuTop = screenHeight * 0.28f;
+		float menuLeft = screenWidth * 0.05f;
+		const wchar_t* items[] = { L"SETTINGS", L"AUDIO", L"CONTROLS", L"HOW TO PLAY", L"SURVIVAL TIPS" };
+
+		for (int i = 0; i < 5; ++i) {
+			UINT32 color = (i == selectIndex) ? 0xFF00FFFF : 0xFFBBBBBB;
+			m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), items[i], 32.0f, menuLeft, menuTop + (i * 60.0f), color, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
+		}
+
+		// --- å·¦ä¸‹: RETURN (index 5) ---
+		UINT32 retColor = (selectIndex == 5) ? 0xFF00FFFF : 0xFFFFFFFF;
+		m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), L"RETURN TO GAME", 32.0f, menuLeft, screenHeight * 0.88f, retColor, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
+
+		// --- å³ä¸‹: EXIT (index 6) ---
+		UINT32 exitColor = (selectIndex == 6) ? 0xFF00FFFF : 0xFFFFFFFF;
+		m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), L"BACK TO TITLE", 32.0f, screenWidth * 0.72f, screenHeight * 0.88f, exitColor, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
+
+		// --- å³å´: ã‚³ãƒ³ãƒ†ãƒ³ãƒ„è¡¨ç¤º ---
+		float dividerX = screenWidth * 0.3f;
+		DrawMenuContent(selectIndex, dividerX + (screenWidth * 0.05f), screenHeight * 0.25f);
+	}
+}
+
+void UI::DrawMenuContent(int selectIndex, float x, float y) {
+	const wchar_t* title = L"";
+	const wchar_t* body = L"";
+
+	switch (selectIndex) {
+	case 0: // SETTINGS
+		title = L"VIDEO SETTINGS";
+		body = L"â€¢ BRIGHTNESS: Adjust the game visibility.\n"
+			L"â€¢ MOTION BLUR: Toggle blur effect during movement.\n"
+			L"â€¢ FOV INTENSITY: Adjust the field of view effect.";
+		break;
+	case 1: // AUDIO
+		title = L"AUDIO SETTINGS";
+		body = L"â€¢ MASTER VOLUME: Adjust overall game sound.\n"
+			L"â€¢ CURRENT: 80% (Configurable in Setting Scene)";
+		break;
+	case 2: // CONTROLS
+		title = L"CONTROLS";
+		body = L"â€¢ WASD: Move Player\n"
+			L"â€¢ MOUSE: Look Around\n"
+			L"â€¢ SHIFT: Dash (Uses Stamina)\n"
+			L"â€¢ ESC: Open/Close Menu";
+		break;
+	case 3: // HOW TO PLAY
+		title = L"HOW TO PLAY";
+		body = L"1. Collect all Orbs scattered in the maze.\n"
+			L"2. Find the glowing Gate to escape.\n"
+			L"3. Avoid the 'Watchers' - if they see you, run!";
+		break;
+	case 4: // TIPS (æ–°è¨­)
+		title = L"SURVIVAL TIPS";
+		body = L"â€¢ Listen carefully to footstep sounds.\n"
+			L"â€¢ Dashing is fast but very loud.\n"
+			L"â€¢ Use the minimap to keep track of your path.";
+		break;
+	case 5: // RETURN (å·¦ä¸‹é¸æŠæ™‚)
+		title = L"RESUME";
+		body = L"Close this menu and continue your escape.";
+		break;
+	case 6: // EXIT (å³ä¸‹é¸æŠæ™‚)
+		title = L"QUIT TO TITLE";
+		body = L"Return to the main menu.\nYour current progress will be lost.";
+		break;
+	}
+
+	// æç”»å‡¦ç†
+	m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), title, 48.0f, x, y, 0xFFFFFFFF, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
+	m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), body, 24.0f, x, y + 80.0f, 0xFFAAAAAA, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
 }

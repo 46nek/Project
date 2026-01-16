@@ -24,7 +24,8 @@ public:
 	void Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs, const std::vector<std::unique_ptr<Orb>>& specialOrbs, float alpha = 1.0f);
 
 	Minimap* GetMinimap() const;
-	void SetMinimapZoom(float zoomLevel);
+	void SetMinimapZoom(float zoomLevel); 
+	void RenderPauseMenu(int selectIndex, int screenWidth, int screenHeight);
 
 private:
 	GraphicsDevice* m_graphicsDevice;
@@ -43,4 +44,6 @@ private:
 	bool m_isSkillActive;
 
 	bool m_showEnemiesOnMinimap;
+
+	void DrawMenuContent(int selectIndex, float leftMargin, float topMargin);
 };

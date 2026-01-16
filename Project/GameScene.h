@@ -33,6 +33,9 @@ public:
     void BeginOpening();
 
 private:
+    bool m_isPaused = false;
+    int m_pauseSelectIndex = 0;
+
     static constexpr float PLAYER_HEIGHT = 3.0f;
     static constexpr float UI_FADE_DURATION = 0.5f;
 
