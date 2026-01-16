@@ -6,6 +6,7 @@
 #include "FW1FontWrapper.h"
 #include "Sprite.h"
 #include "SpriteBatch.h"
+#include "GameSettings.h"
 
 class Camera;
 class Enemy;
@@ -21,10 +22,13 @@ public:
 
 	void Update(float deltaTime, int remainingOrbs, int totalOrbs, float skillDuration, float skillCooldown, bool isSkillActive, bool showEnemiesOnMinimap);
 
+	// マウス入力と設定更新用の関数を追加
+	void UpdatePauseMenu(int& selectIndex, float mx, float my, bool isClicked, bool isDown, int screenWidth, int screenHeight);
+
 	void Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs, const std::vector<std::unique_ptr<Orb>>& specialOrbs, float alpha = 1.0f);
 
 	Minimap* GetMinimap() const;
-	void SetMinimapZoom(float zoomLevel); 
+	void SetMinimapZoom(float zoomLevel);
 	void RenderPauseMenu(int selectIndex, int screenWidth, int screenHeight);
 
 private:
@@ -38,12 +42,16 @@ private:
 	int m_remainingOrbs;
 	int m_totalOrbs;
 
-	// スキル状態表示用
 	float m_skillDuration;
 	float m_skillCooldown;
 	bool m_isSkillActive;
 
 	bool m_showEnemiesOnMinimap;
 
-	void DrawMenuContent(int selectIndex, float leftMargin, float topMargin);
+	// 設定同期・ドラッグ状態用に追加
+	bool m_isDraggingVolume = false;
+	bool m_isDraggingBright = false; 
+	int m_hoverIndex = -1;
+
+	void DrawMenuContent(int selectIndex, float leftMargin, float topMargin, int screenWidth, int screenHeight);
 };

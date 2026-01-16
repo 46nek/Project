@@ -177,29 +177,54 @@ void GameScene::Update(float deltaTime) {
     // --- ESCキーでポーズの切り替え ---
     if (m_input->IsKeyPressed(VK_ESCAPE)) {
         m_isPaused = !m_isPaused;
-        m_input->SetCursorLock(!m_isPaused); // ポーズ中はカーソルを表示
+        m_input->SetCursorLock(!m_isPaused);
+        m_input->SetCursorVisible(m_isPaused); // ポーズ中なら表示、再開なら非表示にする
+
+        if (m_isPaused) {
+            m_pauseSelectIndex = 0; // 開いた時はSETTINGSを選択
+        }
     }
 
     // --- ポーズ中のロジック ---
     if (m_isPaused) {
-        // 上下での移動 (0~6)
+        // 1. マウス座標の変換 (1280x720の論理座標へ)
+        int rawMx, rawMy;
+        m_input->GetMousePosition(rawMx, rawMy);
+        HWND hwnd = g_game->GetWindow()->GetHwnd();
+        RECT clientRect;
+        GetClientRect(hwnd, &clientRect);
+        float actualWidth = static_cast<float>(clientRect.right - clientRect.left);
+        float actualHeight = static_cast<float>(clientRect.bottom - clientRect.top);
+        if (actualWidth <= 0) actualWidth = 1.0f;
+        if (actualHeight <= 0) actualHeight = 1.0f;
+        float mx = rawMx * (static_cast<float>(Game::SCREEN_WIDTH) / actualWidth);
+        float my = rawMy * (static_cast<float>(Game::SCREEN_HEIGHT) / actualHeight);
+
+        // 2. UIの更新 (AUDIO削除後の新インデックス体系で呼び出し)
+        m_ui->UpdatePauseMenu(m_pauseSelectIndex, mx, my, m_input->IsKeyPressed(VK_LBUTTON), m_input->IsKeyDown(VK_LBUTTON), Game::SCREEN_WIDTH, Game::SCREEN_HEIGHT);
+
+        // 3. キーボード操作 (最大値を 5 に変更)
         if (m_input->IsKeyPressed(VK_UP)) {
-            m_pauseSelectIndex = (m_pauseSelectIndex > 0) ? m_pauseSelectIndex - 1 : 6;
+            m_pauseSelectIndex = (m_pauseSelectIndex > 0) ? m_pauseSelectIndex - 1 : 5;
         }
         if (m_input->IsKeyPressed(VK_DOWN)) {
-            m_pauseSelectIndex = (m_pauseSelectIndex < 6) ? m_pauseSelectIndex + 1 : 0;
+            m_pauseSelectIndex = (m_pauseSelectIndex < 5) ? m_pauseSelectIndex + 1 : 0;
         }
 
-        if (m_input->IsKeyPressed(VK_RETURN)) {
-            if (m_pauseSelectIndex == 5) { // RETURN TO GAME
+        // 4. 決定操作 (RETURN: 4, EXIT: 5)
+        bool isDecisionMade = m_input->IsKeyPressed(VK_RETURN) || (m_input->IsKeyPressed(VK_LBUTTON) && (m_pauseSelectIndex == 4 || m_pauseSelectIndex == 5));
+
+        if (isDecisionMade) {
+            if (m_pauseSelectIndex == 4) { // RETURN TO GAME
                 m_isPaused = false;
                 m_input->SetCursorLock(true);
+                m_input->SetCursorVisible(false); // カーソルを隠す
             }
-            else if (m_pauseSelectIndex == 6) { // BACK TO TITLE
+            else if (m_pauseSelectIndex == 5) { // BACK TO TITLE
                 m_nextScene = SceneState::Title;
             }
         }
-        return; // ゲーム停止
+        return;
     }
 
     if (!m_gameObjectManager) { return; }

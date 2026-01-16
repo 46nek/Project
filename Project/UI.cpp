@@ -5,7 +5,10 @@
 #include "Game.h"
 #include "AssetPaths.h"
 #include <string>
-#include <cstdio> // swprintf_s用
+#include <cstdio>
+#include <algorithm>
+
+extern Game* g_game;
 
 UI::UI()
 	: m_graphicsDevice(nullptr),
@@ -63,6 +66,79 @@ void UI::Update(float deltaTime, int remainingOrbs, int totalOrbs, float skillDu
 	m_skillCooldown = skillCooldown;
 	m_isSkillActive = isSkillActive;
 	m_showEnemiesOnMinimap = showEnemiesOnMinimap;
+}
+
+void UI::UpdatePauseMenu(int& selectIndex, float mx, float my, bool isClicked, bool isDown, int screenWidth, int screenHeight) {
+	float menuTop = screenHeight * 0.28f;
+	float menuLeft = screenWidth * 0.05f;
+	float itemWidth = screenWidth * 0.2f;
+	float itemHeight = 40.0f;
+
+	m_hoverIndex = -1; // 毎フレームリセット
+
+	// 1. 左側メインメニュー (0～3) の判定
+	for (int i = 0; i < 4; ++i) {
+		float y = menuTop + (i * 60.0f);
+		if (mx >= menuLeft && mx <= menuLeft + itemWidth && my >= y && my <= y + itemHeight) {
+			m_hoverIndex = i; // マウスが乗っている項目をハイライト用に保持
+			if (isClicked) {
+				selectIndex = i; // クリックされた時だけ選択を切り替える
+			}
+		}
+	}
+
+	// 2. 下部ボタン (4:RETURN, 5:EXIT) の判定
+	// RETURN
+	if (mx >= menuLeft && mx <= menuLeft + 300.0f && my >= screenHeight * 0.88f && my <= screenHeight * 0.88f + 40.0f) {
+		m_hoverIndex = 4;
+		if (isClicked) selectIndex = 4;
+	}
+	// EXIT
+	if (mx >= screenWidth * 0.72f && mx <= screenWidth * 0.72f + 300.0f && my >= screenHeight * 0.88f && my <= screenHeight * 0.88f + 40.0f) {
+		m_hoverIndex = 5;
+		if (isClicked) selectIndex = 5;
+	}
+
+	// 3. SETTINGS内の操作 (selectIndex 0)
+	if (selectIndex == 0) {
+		GameSettings& settings = g_game->GetSettings();
+		float dividerX = screenWidth * 0.3f;
+		float contentX = dividerX + (screenWidth * 0.05f);
+		float contentY = screenHeight * 0.25f;
+
+		float sliderW = 200.0f;
+		float sliderY = contentY + 120.0f;
+		float volX = contentX;
+		float brightX = contentX + 300.0f;
+
+		if (isClicked && mx >= volX && mx <= volX + sliderW && my >= sliderY - 15 && my <= sliderY + 35) m_isDraggingVolume = true;
+		if (!isDown) m_isDraggingVolume = false;
+		if (m_isDraggingVolume) {
+			float norm = std::clamp((mx - volX) / sliderW, 0.0f, 1.0f);
+			settings.volume = std::round(norm * 10.0f) / 10.0f;
+			if (g_game->GetAudioEngine()) g_game->GetAudioEngine()->SetMasterVolume(settings.volume);
+		}
+
+		if (isClicked && mx >= brightX && mx <= brightX + sliderW && my >= sliderY - 15 && my <= sliderY + 35) m_isDraggingBright = true;
+		if (!isDown) m_isDraggingBright = false;
+		if (m_isDraggingBright) {
+			float norm = std::clamp((mx - brightX) / sliderW, 0.0f, 1.0f);
+			settings.brightness = 0.5f + (std::round(norm * 10.0f) / 10.0f);
+		}
+
+		if (isClicked) {
+			float arrowY = contentY + 240.0f;
+			float leftArrowX = contentX + 220.0f;
+			float rightArrowX = contentX + 380.0f;
+			if (my >= arrowY && my <= arrowY + 40) {
+				if (mx >= leftArrowX - 10 && mx <= rightArrowX + 40) settings.motionBlur = !settings.motionBlur;
+			}
+			if (my >= arrowY + 80.0f && my <= arrowY + 120.0f) {
+				if (mx >= leftArrowX - 10 && mx <= leftArrowX + 40) settings.fovIntensity = (settings.fovIntensity + 2) % 3;
+				if (mx >= rightArrowX - 10 && mx <= rightArrowX + 40) settings.fovIntensity = (settings.fovIntensity + 1) % 3;
+			}
+		}
+	}
 }
 
 void UI::Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs, const std::vector<std::unique_ptr<Orb>>& specialOrbs, float alpha) {
@@ -144,92 +220,93 @@ void UI::SetMinimapZoom(float zoomLevel) {
 }
 
 void UI::RenderPauseMenu(int selectIndex, int screenWidth, int screenHeight) {
-	// 1. 背景の暗転
 	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_graphicsDevice->GetAlphaBlendState());
 	RECT fullScreen = { 0, 0, screenWidth, screenHeight };
-	m_orbIcon->RenderFill(m_spriteBatch.get(), fullScreen, { 0.0f, 0.0f, 0.0f, 0.85f }); //
+	m_orbIcon->RenderFill(m_spriteBatch.get(), fullScreen, { 0.0f, 0.0f, 0.0f, 0.85f });
 
-	// 2. 境界線 (左30%の位置)
 	float dividerX = screenWidth * 0.3f;
 	RECT dividerLine = { static_cast<LONG>(dividerX), 0, static_cast<LONG>(dividerX + 2), screenHeight };
 	m_orbIcon->RenderFill(m_spriteBatch.get(), dividerLine, { 1.0f, 1.0f, 1.0f, 0.3f });
-
 	m_spriteBatch->End();
 
 	if (m_fontWrapper) {
-		// --- 左上: MENU タイトル ---
 		m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), L"MENU", 72.0f, screenWidth * 0.05f, screenHeight * 0.08f, 0xFFFFFFFF, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
 
-		// --- 左中央: 選択項目 (0〜4) ---
 		float menuTop = screenHeight * 0.28f;
 		float menuLeft = screenWidth * 0.05f;
-		const wchar_t* items[] = { L"SETTINGS", L"AUDIO", L"CONTROLS", L"HOW TO PLAY", L"SURVIVAL TIPS" };
+		const wchar_t* items[] = { L"SETTINGS", L"CONTROLS", L"HOW TO PLAY", L"SURVIVAL TIPS" };
 
-		for (int i = 0; i < 5; ++i) {
-			UINT32 color = (i == selectIndex) ? 0xFF00FFFF : 0xFFBBBBBB;
+		for (int i = 0; i < 4; ++i) {
+			UINT32 color = (i == m_hoverIndex || i == selectIndex) ? 0xFF00FFFF : 0xFFBBBBBB;
 			m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), items[i], 32.0f, menuLeft, menuTop + (i * 60.0f), color, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
 		}
 
-		// --- 左下: RETURN (index 5) ---
-		UINT32 retColor = (selectIndex == 5) ? 0xFF00FFFF : 0xFFFFFFFF;
+		// インデックスを 4 と 5 に修正
+		UINT32 retColor = (m_hoverIndex == 4 || selectIndex == 4) ? 0xFF00FFFF : 0xFFFFFFFF;
 		m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), L"RETURN TO GAME", 32.0f, menuLeft, screenHeight * 0.88f, retColor, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
 
-		// --- 右下: EXIT (index 6) ---
-		UINT32 exitColor = (selectIndex == 6) ? 0xFF00FFFF : 0xFFFFFFFF;
+		UINT32 exitColor = (m_hoverIndex == 5 || selectIndex == 5) ? 0xFF00FFFF : 0xFFFFFFFF;
 		m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), L"BACK TO TITLE", 32.0f, screenWidth * 0.72f, screenHeight * 0.88f, exitColor, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
 
-		// --- 右側: コンテンツ表示 ---
-		float dividerX = screenWidth * 0.3f;
-		DrawMenuContent(selectIndex, dividerX + (screenWidth * 0.05f), screenHeight * 0.25f);
+		DrawMenuContent(selectIndex, dividerX + (screenWidth * 0.05f), screenHeight * 0.25f, screenWidth, screenHeight);
 	}
 }
 
-void UI::DrawMenuContent(int selectIndex, float x, float y) {
+void UI::DrawMenuContent(int selectIndex, float x, float y, int screenWidth, int screenHeight) {
+	if (selectIndex == 0) {
+		GameSettings& s = g_game->GetSettings();
+		m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), L"VIDEO & AUDIO", 48.0f, x, y, 0xFFFFFFFF, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
+
+		float sliderY = y + 120.0f;
+		auto DrawSlider = [&](const std::wstring& label, float sx, float value, float minV, float maxV) {
+			m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), label.c_str(), 24.0f, sx, sliderY - 35.0f, 0xFFFFFFFF, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
+			m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), L"----------------------", 32.0f, sx, sliderY, 0xFF444444, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
+			float norm = (value - minV) / (maxV - minV);
+			m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), L"I", 32.0f, sx + (200.0f * norm), sliderY, 0xFF00FFFF, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
+			};
+
+		DrawSlider(L"VOLUME", x, s.volume, 0.0f, 1.0f);
+		DrawSlider(L"BRIGHTNESS", x + 300.0f, s.brightness, 0.5f, 1.5f);
+
+		float arrowY = y + 240.0f;
+		auto DrawArrowItem = [&](const std::wstring& label, const std::wstring& val, float ay) {
+			m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), label.c_str(), 32.0f, x, ay, 0xFFFFFFFF, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
+			m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), L"◀", 32.0f, x + 220.0f, ay, 0xFF00FFFF, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
+			m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), val.c_str(), 32.0f, x + 275.0f, ay, 0xFFFFFFFF, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
+			m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), L"▶", 32.0f, x + 380.0f, ay, 0xFF00FFFF, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
+			};
+
+		DrawArrowItem(L"MOTION BLUR", s.motionBlur ? L"ON" : L"OFF", arrowY);
+		DrawArrowItem(L"FOV", (s.fovIntensity == 0 ? L"NONE" : s.fovIntensity == 1 ? L"WEAK" : L"NORMAL"), arrowY + 80.0f);
+		return; 
+	}
+
 	const wchar_t* title = L"";
 	const wchar_t* body = L"";
 
 	switch (selectIndex) {
-	case 0: // SETTINGS
-		title = L"VIDEO SETTINGS";
-		body = L"• BRIGHTNESS: Adjust the game visibility.\n"
-			L"• MOTION BLUR: Toggle blur effect during movement.\n"
-			L"• FOV INTENSITY: Adjust the field of view effect.";
-		break;
-	case 1: // AUDIO
-		title = L"AUDIO SETTINGS";
-		body = L"• MASTER VOLUME: Adjust overall game sound.\n"
-			L"• CURRENT: 80% (Configurable in Setting Scene)";
-		break;
-	case 2: // CONTROLS
+	case 1:
 		title = L"CONTROLS";
-		body = L"• WASD: Move Player\n"
-			L"• MOUSE: Look Around\n"
-			L"• SHIFT: Dash (Uses Stamina)\n"
-			L"• ESC: Open/Close Menu";
+		body = L"• WASD: Move Player\n• MOUSE: Look Around\n• SHIFT: Dash\n• ESC: Open/Close Menu";
 		break;
-	case 3: // HOW TO PLAY
+	case 2:
 		title = L"HOW TO PLAY";
-		body = L"1. Collect all Orbs scattered in the maze.\n"
-			L"2. Find the glowing Gate to escape.\n"
-			L"3. Avoid the 'Watchers' - if they see you, run!";
+		body = L"1. Collect all Orbs scattered in the maze.\n2. Find the glowing Gate to escape.\n3. Avoid the 'Watchers'!";
 		break;
-	case 4: // TIPS (新設)
-		title = L"SURVIVAL TIPS";
-		body = L"• Listen carefully to footstep sounds.\n"
-			L"• Dashing is fast but very loud.\n"
-			L"• Use the minimap to keep track of your path.";
+	case 3:
+		title = L"TIPS";
+		body = L"• Listen carefully to footstep sounds.\n• Dashing is fast but very loud.\n• Use the minimap to keep track of your path.";
 		break;
-	case 5: // RETURN (左下選択時)
+	case 4:
 		title = L"RESUME";
 		body = L"Close this menu and continue your escape.";
 		break;
-	case 6: // EXIT (右下選択時)
+	case 5:
 		title = L"QUIT TO TITLE";
 		body = L"Return to the main menu.\nYour current progress will be lost.";
 		break;
 	}
 
-	// 描画処理
 	m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), title, 48.0f, x, y, 0xFFFFFFFF, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
 	m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), body, 24.0f, x, y + 80.0f, 0xFFAAAAAA, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
 }

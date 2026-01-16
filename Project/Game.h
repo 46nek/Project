@@ -53,6 +53,7 @@ public:
 
 	Window* GetWindow() const { return m_window.get(); }
 	GameSettings& GetSettings() { return m_settings; }
+	DirectX::AudioEngine* GetAudioEngine() const { return m_audioEngine.get(); }
 private:
 	/**
 	 * @brief フレームごとの更新処理
