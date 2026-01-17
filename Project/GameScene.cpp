@@ -175,14 +175,12 @@ void GameScene::Update(float deltaTime) {
     }
 
     // --- ESCキーでポーズの切り替え ---
-    if (m_input->IsKeyPressed(VK_ESCAPE)) {
-        m_isPaused = !m_isPaused;
-        m_input->SetCursorLock(!m_isPaused);
-        m_input->SetCursorVisible(m_isPaused); // ポーズ中なら表示、再開なら非表示にする
+    if (!m_isPaused && m_input->IsKeyPressed(VK_ESCAPE)) {
+        m_isPaused = true;
+        m_input->SetCursorLock(false); 
+        m_input->SetCursorVisible(true); 
 
-        if (m_isPaused) {
-            m_pauseSelectIndex = 0; // 開いた時はSETTINGSを選択
-        }
+        m_pauseSelectIndex = 0; 
     }
 
     // --- ポーズ中のロジック ---
@@ -229,10 +227,7 @@ void GameScene::Update(float deltaTime) {
 
     if (!m_gameObjectManager) { return; }
 
-    if (m_input->IsKeyPressed(VK_ESCAPE)) {
-        m_input->SetCursorLock(false);
-    }
-    else if (m_input->IsKeyPressed(VK_LBUTTON) || (GetAsyncKeyState(VK_LBUTTON) & 0x8000)) {
+    if (m_input->IsKeyPressed(VK_LBUTTON) || (GetAsyncKeyState(VK_LBUTTON) & 0x8000)) {
         m_input->SetCursorLock(true);
     }
 

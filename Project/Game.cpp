@@ -13,9 +13,6 @@ void Game::SetPaused(bool isPaused) {
 	m_isPaused = isPaused;
 
 	if (m_isPaused) {
-		// ポーズ中: カーソルを表示する
-		// (ロックフラグ自体は変更せず、一時的に表示だけ許可するイメージでも良いが、
-		//  ここではシンプルに「ロックを一時解除」ではなく「表示」だけ制御します)
 		m_input->SetCursorVisible(true);
 
 		// オーディオを一時停止
@@ -25,7 +22,6 @@ void Game::SetPaused(bool isPaused) {
 	}
 	else {
 		// ポーズ解除
-		// 元々ロック状態（ゲーム中）だったなら、カーソルを再度非表示にする
 		if (m_input->IsCursorLocked()) {
 			m_input->SetCursorVisible(false);
 		}
@@ -117,14 +113,6 @@ bool Game::Update() {
 
 	if (m_audioEngine && !m_audioEngine->Update()) {
 		if (m_audioEngine->IsCriticalError()) {
-		}
-	}
-
-	// ESCキーでポーズ切り替え
-	// カーソルロックが有効（＝ゲームプレイ中）の場合のみポーズ可能にする
-	if (m_input->IsKeyPressed(VK_ESCAPE)) {
-		if (m_input->IsCursorLocked()) {
-			SetPaused(!m_isPaused);
 		}
 	}
 
