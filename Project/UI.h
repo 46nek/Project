@@ -51,6 +51,7 @@ private:
 	// 設定同期・ドラッグ状態用に追加
 	bool m_isDraggingVolume = false;
 	bool m_isDraggingBright = false; 
+	bool m_isDraggingSens = false;
 	int m_hoverIndex = -1;
 
 	void DrawMenuContent(int selectIndex, float leftMargin, float topMargin, int screenWidth, int screenHeight);

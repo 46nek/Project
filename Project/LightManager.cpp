@@ -2,11 +2,11 @@
 #include <vector>
 #include <tuple>
 #include <cmath>
-#include <algorithm> // min/max—p
+#include <algorithm> 
 
 LightManager::LightManager()
 	: m_flashlightIndex(-1),
-	m_playerLightIndex(-1), // ’Ç‰Á
+	m_playerLightIndex(-1), 
 	m_flashlightBaseIntensity(0.0f),
 	m_flickerTimer(0.0f),
 	m_nextFlickerTime(0.0f),

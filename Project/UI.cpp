@@ -74,68 +74,67 @@ void UI::UpdatePauseMenu(int& selectIndex, float mx, float my, bool isClicked, b
 	float itemWidth = screenWidth * 0.2f;
 	float itemHeight = 40.0f;
 
-	m_hoverIndex = -1; // 毎フレームリセット
+	m_hoverIndex = -1;
 
-	// 1. 左側メインメニュー (0～3) の判定
+	// 1. 左側メインメニューの判定
 	for (int i = 0; i < 4; ++i) {
 		float y = menuTop + (i * 60.0f);
 		if (mx >= menuLeft && mx <= menuLeft + itemWidth && my >= y && my <= y + itemHeight) {
-			m_hoverIndex = i; // マウスが乗っている項目をハイライト用に保持
-			if (isClicked) {
-				selectIndex = i; // クリックされた時だけ選択を切り替える
-			}
+			m_hoverIndex = i;
+			if (isClicked) selectIndex = i;
 		}
 	}
 
-	// 2. 下部ボタン (4:RETURN, 5:EXIT) の判定
-	// RETURN
+	// 2. 下部ボタンの判定
 	if (mx >= menuLeft && mx <= menuLeft + 300.0f && my >= screenHeight * 0.88f && my <= screenHeight * 0.88f + 40.0f) {
 		m_hoverIndex = 4;
 		if (isClicked) selectIndex = 4;
 	}
-	// EXIT
 	if (mx >= screenWidth * 0.72f && mx <= screenWidth * 0.72f + 300.0f && my >= screenHeight * 0.88f && my <= screenHeight * 0.88f + 40.0f) {
 		m_hoverIndex = 5;
 		if (isClicked) selectIndex = 5;
 	}
 
-	// 3. SETTINGS内の操作 (selectIndex 0)
+	// 3. SETTINGS内の操作
 	if (selectIndex == 0) {
-		GameSettings& settings = g_game->GetSettings();
+		GameSettings& s = g_game->GetSettings();
 		float dividerX = screenWidth * 0.3f;
 		float contentX = dividerX + (screenWidth * 0.05f);
 		float contentY = screenHeight * 0.25f;
 
 		float sliderW = 200.0f;
-		float sliderY = contentY + 120.0f;
-		float volX = contentX;
-		float brightX = contentX + 300.0f;
+		float volY = contentY + 100.0f;
+		float brightY = volY + 80.0f;
+		float sensY = brightY + 80.0f;
 
-		if (isClicked && mx >= volX && mx <= volX + sliderW && my >= sliderY - 15 && my <= sliderY + 35) m_isDraggingVolume = true;
-		if (!isDown) m_isDraggingVolume = false;
-		if (m_isDraggingVolume) {
-			float norm = std::clamp((mx - volX) / sliderW, 0.0f, 1.0f);
-			settings.volume = std::round(norm * 10.0f) / 10.0f;
-			if (g_game->GetAudioEngine()) g_game->GetAudioEngine()->SetMasterVolume(settings.volume);
-		}
+		auto HandleSlider = [&](float x, float y, float& val, float minV, float maxV, bool& dragging) {
+			// 当たり判定の範囲を広めに設定 (+-15, +-35)
+			if (isClicked && mx >= x && mx <= x + sliderW && my >= y - 15 && my <= y + 35) dragging = true;
+			if (!isDown) dragging = false;
+			if (dragging) {
+				float norm = std::clamp((mx - x) / sliderW, 0.0f, 1.0f);
+				int displayVal = static_cast<int>(std::round(norm * 100.0f)); // 1刻みの整数
+				val = minV + (displayVal / 100.0f) * (maxV - minV); // 内部数値に変換
+			}
+			};
 
-		if (isClicked && mx >= brightX && mx <= brightX + sliderW && my >= sliderY - 15 && my <= sliderY + 35) m_isDraggingBright = true;
-		if (!isDown) m_isDraggingBright = false;
-		if (m_isDraggingBright) {
-			float norm = std::clamp((mx - brightX) / sliderW, 0.0f, 1.0f);
-			settings.brightness = 0.5f + (std::round(norm * 10.0f) / 10.0f);
-		}
+		HandleSlider(contentX, volY, s.volume, 0.0f, 1.0f, m_isDraggingVolume);
+		if (m_isDraggingVolume && g_game->GetAudioEngine()) g_game->GetAudioEngine()->SetMasterVolume(s.volume);
+
+		HandleSlider(contentX, brightY, s.brightness, 0.5f, 1.5f, m_isDraggingBright);
+		HandleSlider(contentX, sensY, s.mouseSensitivity, 0.5f, 2.0f, m_isDraggingSens);
 
 		if (isClicked) {
-			float arrowY = contentY + 240.0f;
+			float arrowY = contentY + 340.0f;
 			float leftArrowX = contentX + 220.0f;
 			float rightArrowX = contentX + 380.0f;
+
 			if (my >= arrowY && my <= arrowY + 40) {
-				if (mx >= leftArrowX - 10 && mx <= rightArrowX + 40) settings.motionBlur = !settings.motionBlur;
+				if (mx >= leftArrowX - 10 && mx <= rightArrowX + 40) s.motionBlur = !s.motionBlur;
 			}
 			if (my >= arrowY + 80.0f && my <= arrowY + 120.0f) {
-				if (mx >= leftArrowX - 10 && mx <= leftArrowX + 40) settings.fovIntensity = (settings.fovIntensity + 2) % 3;
-				if (mx >= rightArrowX - 10 && mx <= rightArrowX + 40) settings.fovIntensity = (settings.fovIntensity + 1) % 3;
+				if (mx >= leftArrowX - 10 && mx <= leftArrowX + 40) s.fovIntensity = (s.fovIntensity + 2) % 3;
+				if (mx >= rightArrowX - 10 && mx <= rightArrowX + 40) s.fovIntensity = (s.fovIntensity + 1) % 3;
 			}
 		}
 	}
@@ -257,18 +256,26 @@ void UI::DrawMenuContent(int selectIndex, float x, float y, int screenWidth, int
 		GameSettings& s = g_game->GetSettings();
 		m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), L"VIDEO & AUDIO", 48.0f, x, y, 0xFFFFFFFF, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
 
-		float sliderY = y + 120.0f;
-		auto DrawSlider = [&](const std::wstring& label, float sx, float value, float minV, float maxV) {
-			m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), label.c_str(), 24.0f, sx, sliderY - 35.0f, 0xFFFFFFFF, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
-			m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), L"----------------------", 32.0f, sx, sliderY, 0xFF444444, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
+		float sliderW = 200.0f;
+		float startY = y + 100.0f;
+
+		auto DrawSlider = [&](const std::wstring& label, float sy, float value, float minV, float maxV) {
+			m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), label.c_str(), 24.0f, x, sy - 35.0f, 0xFFFFFFFF, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
+			m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), L"----------------------", 32.0f, x, sy, 0xFF444444, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
+
 			float norm = (value - minV) / (maxV - minV);
-			m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), L"I", 32.0f, sx + (200.0f * norm), sliderY, 0xFF00FFFF, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
+			int displayVal = static_cast<int>(std::round(norm * 100.0f));
+
+			m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), L"I", 32.0f, x + (sliderW * norm), sy, 0xFF00FFFF, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
+			// 数値を表示
+			m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), std::to_wstring(displayVal).c_str(), 24.0f, x + sliderW + 20.0f, sy, 0xFFFFFFFF, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
 			};
 
-		DrawSlider(L"VOLUME", x, s.volume, 0.0f, 1.0f);
-		DrawSlider(L"BRIGHTNESS", x + 300.0f, s.brightness, 0.5f, 1.5f);
+		DrawSlider(L"VOLUME", startY, s.volume, 0.0f, 1.0f);
+		DrawSlider(L"BRIGHTNESS", startY + 80.0f, s.brightness, 0.5f, 1.5f);
+		DrawSlider(L"MOUSE SENSITIVITY", startY + 160.0f, s.mouseSensitivity, 0.5f, 2.0f);
 
-		float arrowY = y + 240.0f;
+		float arrowY = startY + 240.0f; // y + 340.0f
 		auto DrawArrowItem = [&](const std::wstring& label, const std::wstring& val, float ay) {
 			m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), label.c_str(), 32.0f, x, ay, 0xFFFFFFFF, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
 			m_fontWrapper->DrawString(m_graphicsDevice->GetDeviceContext(), L"◀", 32.0f, x + 220.0f, ay, 0xFF00FFFF, FW1_LEFT | FW1_TOP | FW1_RESTORESTATE);
@@ -278,7 +285,7 @@ void UI::DrawMenuContent(int selectIndex, float x, float y, int screenWidth, int
 
 		DrawArrowItem(L"MOTION BLUR", s.motionBlur ? L"ON" : L"OFF", arrowY);
 		DrawArrowItem(L"FOV", (s.fovIntensity == 0 ? L"NONE" : s.fovIntensity == 1 ? L"WEAK" : L"NORMAL"), arrowY + 80.0f);
-		return; 
+		return;
 	}
 
 	const wchar_t* title = L"";

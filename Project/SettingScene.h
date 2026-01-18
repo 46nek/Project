@@ -25,6 +25,7 @@ private:
     // シークバー操作用
     bool m_isDraggingVolume;
     bool m_isDraggingBright; 
+    bool m_isDraggingSens; 
 
     void UpdateValue(int direction);
     std::wstring GetFovText();
@@ -37,4 +38,6 @@ private:
     const float ARROW_Y_START = 350.0f;
     const float BACK_X = 100.0f;
     const float BACK_Y = 600.0f;
+    const float SENS_X = 425.0f; 
+    const float SENS_Y = 300.0f; 
 };

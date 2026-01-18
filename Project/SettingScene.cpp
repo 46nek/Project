@@ -6,7 +6,7 @@ extern Game* g_game;
 
 SettingScene::SettingScene()
     : m_fontFactory(nullptr), m_font(nullptr), m_selectedItem(0),
-    m_isDraggingVolume(false), m_isDraggingBright(false) {
+    m_isDraggingVolume(false), m_isDraggingBright(false), m_isDraggingSens(false) { // 追加
 }
 
 SettingScene::~SettingScene() {}
@@ -33,7 +33,7 @@ void SettingScene::Shutdown() {
 
 void SettingScene::UpdateValue(int dir) {
     if (m_selectedItem == 1) m_settings.motionBlur = !m_settings.motionBlur;
-    if (m_selectedItem == 2) m_settings.brightness = std::clamp(m_settings.brightness + dir * 0.1f, 0.5f, 1.5f);
+    if (m_selectedItem == 2) m_settings.brightness = std::clamp(m_settings.brightness + dir * 0.5f, 0.5f, 1.5f);
     if (m_selectedItem == 3) m_settings.fovIntensity = (m_settings.fovIntensity + dir + 3) % 3;
 
     g_game->GetSettings() = m_settings;
@@ -58,35 +58,34 @@ void SettingScene::Update(float deltaTime) {
 
     const float centerX = Game::SCREEN_WIDTH / 2.0f;
     const float sliderW = 200.0f;
-    const float sliderY = 215.0f;
-    const float volX = centerX - sliderW - 30.0f;
-    const float brightX = centerX + 30.0f;
-    const float arrowItemY = 380.0f;
+    const float sliderX = centerX - 100.0f; // 縦に並べるためX座標を統一
+    const float volY = 200.0f;
+    const float brightY = 280.0f;
+    const float sensY = 360.0f;
+
+    auto UpdateSliderLogic = [&](float x, float y, float& value, float minVal, float maxVal, bool& dragging) {
+        if (isLeftClicked && mx >= x && mx <= x + sliderW && my >= y - 15 && my <= y + 35) dragging = true;
+        if (!isLeftDown) dragging = false;
+        if (dragging) {
+            float norm = std::clamp((mx - x) / sliderW, 0.0f, 1.0f);
+            int displayVal = static_cast<int>(std::round(norm * 100.0f)); // 0～100の1刻み
+            value = minVal + (displayVal / 100.0f) * (maxVal - minVal);
+            return true;
+        }
+        return false;
+        };
+
+    if (UpdateSliderLogic(sliderX, volY, m_settings.volume, 0.0f, 1.0f, m_isDraggingVolume)) {
+        if (m_audioEngine) m_audioEngine->SetMasterVolume(m_settings.volume);
+    }
+    UpdateSliderLogic(sliderX, brightY, m_settings.brightness, 0.5f, 1.5f, m_isDraggingBright);
+    UpdateSliderLogic(sliderX, sensY, m_settings.mouseSensitivity, 0.5f, 2.0f, m_isDraggingSens);
+
+    g_game->GetSettings() = m_settings;
+
+    const float arrowItemY = 480.0f;
     const float leftArrowX = centerX + 20.0f;
     const float rightArrowX = centerX + 180.0f;
-
-    // 音量操作
-    if (isLeftClicked && mx >= volX && mx <= volX + sliderW && my >= sliderY - 15 && my <= sliderY + 35) {
-        m_isDraggingVolume = true;
-    }
-    if (!isLeftDown) m_isDraggingVolume = false;
-    if (m_isDraggingVolume) {
-        float norm = std::clamp((mx - volX) / sliderW, 0.0f, 1.0f);
-        m_settings.volume = std::round(norm * 10.0f) / 10.0f;
-        if (m_audioEngine) m_audioEngine->SetMasterVolume(m_settings.volume);
-        g_game->GetSettings().volume = m_settings.volume; // 反映
-    }
-
-    // 明るさ操作
-    if (isLeftClicked && mx >= brightX && mx <= brightX + sliderW && my >= sliderY - 15 && my <= sliderY + 35) {
-        m_isDraggingBright = true;
-    }
-    if (!isLeftDown) m_isDraggingBright = false;
-    if (m_isDraggingBright) {
-        float norm = std::clamp((mx - brightX) / sliderW, 0.0f, 1.0f);
-        m_settings.brightness = 0.5f + (std::round(norm * 10.0f) / 10.0f);
-        g_game->GetSettings().brightness = m_settings.brightness; // 反映
-    }
 
     // ボタン判定
     if (isLeftClicked) {
@@ -108,26 +107,29 @@ void SettingScene::Update(float deltaTime) {
 void SettingScene::Render() {
     m_graphicsDevice->BeginScene(0.05f, 0.05f, 0.05f, 1.0f);
     if (m_font) {
-        // SETTINGS タイトル (左上)
         m_font->DrawString(m_graphicsDevice->GetDeviceContext(), L"SETTINGS", 60.0f, 80.0f, 80.0f, 0xFFFFFFFF, FW1_RESTORESTATE);
 
         const float centerX = Game::SCREEN_WIDTH / 2.0f;
+        const float sliderX = centerX - 100.0f;
         const float sliderW = 200.0f;
-        const float sliderY = 215.0f;
-        const float volX = centerX - sliderW - 30.0f;
-        const float brightX = centerX + 30.0f;
 
         auto DrawSlider = [&](const std::wstring& label, float x, float y, float value, float minVal, float maxVal) {
             m_font->DrawString(m_graphicsDevice->GetDeviceContext(), label.c_str(), 24.0f, x, y - 35.0f, 0xFFFFFFFF, FW1_RESTORESTATE);
             m_font->DrawString(m_graphicsDevice->GetDeviceContext(), L"----------------------", 32.0f, x, y, 0xFF444444, FW1_RESTORESTATE);
+
             float norm = (value - minVal) / (maxVal - minVal);
+            int displayVal = static_cast<int>(std::round(norm * 100.0f));
+
             m_font->DrawString(m_graphicsDevice->GetDeviceContext(), L"I", 32.0f, x + (sliderW * norm), y, 0xFF00FFFF, FW1_RESTORESTATE);
+            // 数値表示
+            m_font->DrawString(m_graphicsDevice->GetDeviceContext(), std::to_wstring(displayVal).c_str(), 24.0f, x + sliderW + 20.0f, y, 0xFFFFFFFF, FW1_RESTORESTATE);
             };
 
-        DrawSlider(L"VOLUME", volX, sliderY, m_settings.volume, 0.0f, 1.0f);
-        DrawSlider(L"BRIGHTNESS", brightX, sliderY, m_settings.brightness, 0.5f, 1.5f);
+        DrawSlider(L"VOLUME", sliderX, 200.0f, m_settings.volume, 0.0f, 1.0f);
+        DrawSlider(L"BRIGHTNESS", sliderX, 280.0f, m_settings.brightness, 0.5f, 1.5f);
+        DrawSlider(L"MOUSE SENSITIVITY", sliderX, 360.0f, m_settings.mouseSensitivity, 0.5f, 2.0f);
 
-        const float arrowItemY = 380.0f;
+        const float arrowItemY = 480.0f;
         const float labelX = centerX - 250.0f; // ラベルの開始位置
         const float leftArrowX = centerX + 20.0f;
         const float valueX = centerX + 75.0f;

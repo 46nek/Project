@@ -1,8 +1,11 @@
 #include "Player.h"
 #include "Audio.h"
+#include "Game.h"
 #include <cmath>
 #include <algorithm>
 #include <random> 
+
+extern Game* g_game;
 
 namespace {
 	// ’è”’è‹`
@@ -156,8 +159,11 @@ void Player::UpdateAudio(float deltaTime) {
 }
 
 void Player::Turn(int mouseX, int mouseY, float deltaTime) {
-	m_rotation.y += (float)mouseX * m_rotationSpeed;
-	m_rotation.x += (float)mouseY * m_rotationSpeed;
+	float sens = g_game->GetSettings().mouseSensitivity;
+
+	m_rotation.y += (float)mouseX * m_rotationSpeed * sens;
+	m_rotation.x += (float)mouseY * m_rotationSpeed * sens;
+
 	if (m_rotation.x > 90.0f) m_rotation.x = 90.0f;
 	if (m_rotation.x < -90.0f) m_rotation.x = -90.0f;
 }
