@@ -29,6 +29,7 @@ public:
 
 	void SetRotation(const DirectX::XMFLOAT3& rotation);
 	void SetFootstepSounds(DirectX::SoundEffect* walkSound, DirectX::SoundEffect* runSound);
+	void SetHeldOrbCount(int count) { m_heldOrbCount = count; }
 
 	DirectX::XMFLOAT3 GetPosition() const { return m_position; }
 	DirectX::XMFLOAT3 GetRotation() const { return m_rotation; }
@@ -38,6 +39,7 @@ public:
 	bool IsSkillActive() const { return m_isRunning; }
 	float GetSkillDurationTimer() const { return m_skillDurationTimer; }
 	float GetSkillCooldownTimer() const { return m_skillCoolDownTimer; }
+	int GetHeldOrbCount() const { return m_heldOrbCount; }
 
 private:
 	static constexpr float COLLISION_RADIUS = 0.45f;
@@ -69,4 +71,6 @@ private:
 	float m_stepTimer;
 	float m_walkInterval;
 	float m_runInterval;
+
+	int m_heldOrbCount = 0;
 };

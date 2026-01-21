@@ -222,15 +222,6 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 		enemy->Update(deltaTime, player, stage->GetMazeData(), stage->GetPathWidth());
 	}
 
-	// オーブの更新と収集判定
-	for (auto& orb : m_orbs) {
-		if (orb && !orb->IsCollected()) {
-			if (orb->Update(deltaTime, player, lightManager, collectSound)) {
-				m_remainingOrbs--;
-			}
-		}
-	}
-
 	// 特殊オーブの更新
 	for (auto it = m_specialOrbs.begin(); it != m_specialOrbs.end(); ) {
 		(*it)->Update(deltaTime, player, lightManager, collectSound);
@@ -257,12 +248,50 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 		m_enemyRadarTimer -= deltaTime;
 	}
 
-	// ゴール出現判定
+	int heldCount = 0;
+	auto it = m_orbs.begin();
+	while (it != m_orbs.end()) {
+		auto& orb = *it;
+
+		if (!orb->IsCollected()) {
+			// 拾っていない場合は当たり判定
+			if (orb->Update(deltaTime, player, lightManager, collectSound)) {
+				// 拾った瞬間。ここではまだ m_remainingOrbs は減らさない
+			}
+			++it;
+		}
+		else {
+			// 拾っている場合は追従
+			orb->FollowPlayer(deltaTime, player->GetPosition(), heldCount);
+			heldCount++;
+
+			// 中央（納品場所）への距離判定
+			auto startGrid = stage->GetStartPosition();
+			float centerX = (static_cast<float>(startGrid.first) + 0.5f) * stage->GetPathWidth();
+			float centerZ = (static_cast<float>(startGrid.second) + 0.5f) * stage->GetPathWidth();
+
+			float dx = orb->GetPosition().x - centerX;
+			float dz = orb->GetPosition().z - centerZ;
+			float distSq = dx * dx + dz * dz;
+
+			if (distSq < 1.0f) { // 納品成功
+				m_remainingOrbs--; // ここで初めてカウントを減らす
+				orb->Shutdown();
+				it = m_orbs.erase(it); // リストから消して物理的に消滅させる
+			}
+			else {
+				++it;
+			}
+		}
+	}
+	player->SetHeldOrbCount(heldCount);
+
+	// 4. ゴール出現判定
 	if (m_remainingOrbs <= 0 && !m_goalSpawned) {
 		SpawnGoal(stage, lightManager);
 	}
 
-	// ゴール判定
+	// 5. ゴール判定（既存のまま）
 	if (m_goalSpawned && m_goalOrb && !m_goalOrb->IsCollected()) {
 		if (m_goalOrb->Update(deltaTime, player, lightManager, collectSound)) {
 			stage->OpenExit();

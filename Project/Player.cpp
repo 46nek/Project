@@ -82,14 +82,13 @@ void Player::UpdateSkill(float deltaTime, Input* input) {
 }
 
 void Player::UpdateMovement(float deltaTime, Input* input, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth) {
-	float currentSpeed;
-
-	if (m_isRunning) {
-		currentSpeed = m_runSpeed;
+	
+	float penalty = 1.0f;
+	if (m_heldOrbCount > 5) {
+		float calculatedPenalty = 1.0f - (static_cast<float>(m_heldOrbCount) - 5.0f) * 0.1f;
+		penalty = (std::max)(0.5f, calculatedPenalty);
 	}
-	else {
-		currentSpeed = m_moveSpeed;
-	}
+	float currentSpeed = (m_isRunning ? m_runSpeed : m_moveSpeed) * penalty;
 
 	float moveAmount = currentSpeed * deltaTime;
 	DirectX::XMFLOAT3 desiredMove = { 0, 0, 0 };

@@ -20,9 +20,12 @@ public:
 	bool Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& position, int lightIndex, OrbType type = OrbType::Normal);
 	void Shutdown();
 	bool Update(float deltaTime, Player* player, LightManager* lightManager, DirectX::SoundEffect* collectSound);
-
+	void FollowPlayer(float deltaTime, const DirectX::XMFLOAT3& targetPos, int index);
 	Model* GetModel();
+	
 	bool IsCollected() const;
+	bool IsDelivered() const { return m_isDelivered; }
+
 	DirectX::XMFLOAT3 GetPosition() const;
 	OrbType GetType() const; // オーブの種類を取得する関数
 
@@ -31,6 +34,7 @@ private:
 	DirectX::XMFLOAT3 m_position;
 
 	bool m_isCollected;
+	bool m_isDelivered = false;
 	int m_lightIndex;
 	float m_animationTimer;
 	OrbType m_type; // オーブの種類を保持するメンバ変数

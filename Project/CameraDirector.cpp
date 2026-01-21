@@ -164,4 +164,12 @@ void CameraDirector::UpdateGameplay(float deltaTime, Player* player) {
     m_camera->UpdateBobbing(deltaTime, player->IsMoving());
 
     m_camera->Update(deltaTime);
+    m_vignetteIntensity = player->IsSkillActive() ? VIGNETTE_DASH : VIGNETTE_NORMAL;
+
+    // オーブ所持数による視界悪化
+    int heldOrbs = player->GetHeldOrbCount();
+    if (heldOrbs > 5) {
+        // 5個を超えると少しずつビネットを強くする
+        m_vignetteIntensity += (heldOrbs - 5) * 0.2f;
+    }
 }
