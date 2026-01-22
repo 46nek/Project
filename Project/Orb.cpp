@@ -84,16 +84,13 @@ bool Orb::Update(float deltaTime, Player* player, LightManager* lightManager, Di
 void Orb::FollowPlayer(float deltaTime, const DirectX::XMFLOAT3& targetPos, int index) {
 	if (m_isDelivered) return;
 
-	float angle = m_animationTimer * 1.5f + static_cast<float>(index);
-	DirectX::XMFLOAT3 followOffset = {
-		sinf(angle) * 0.7f,
-		0.5f + sinf(m_animationTimer * 2.0f) * 0.1f, // ‚ä‚ç‚ä‚ç
-		cosf(angle) * 0.7f
-	};
+	float verticalOffset = (index == 0) ? -1.5f : 0.0f;
 
-	m_position.x += (targetPos.x + followOffset.x - m_position.x) * deltaTime * 3.0f;
-	m_position.y += (targetPos.y + followOffset.y - m_position.y) * deltaTime * 3.0f;
-	m_position.z += (targetPos.z + followOffset.z - m_position.z) * deltaTime * 3.0f;
+	float sway = sinf(m_animationTimer * 2.5f) * 0.2f;
+
+	m_position.x += (targetPos.x - m_position.x) * deltaTime * 3.0f;
+	m_position.y += (targetPos.y + verticalOffset + sway - m_position.y) * deltaTime * 3.0f;
+	m_position.z += (targetPos.z - m_position.z) * deltaTime * 3.0f;
 
 	m_model->SetPosition(m_position.x, m_position.y, m_position.z);
 	m_animationTimer += deltaTime;

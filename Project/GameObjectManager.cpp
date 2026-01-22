@@ -248,6 +248,8 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 		m_enemyRadarTimer -= deltaTime;
 	}
 
+	DirectX::XMFLOAT3 currentTargetPos = player->GetPosition();
+
 	int heldCount = 0;
 	auto it = m_orbs.begin();
 	while (it != m_orbs.end()) {
@@ -261,9 +263,9 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 			++it;
 		}
 		else {
-			// E‚Á‚Ä‚¢‚éê‡‚Í’Ç]
-			orb->FollowPlayer(deltaTime, player->GetPosition(), heldCount);
-			heldCount++;
+			orb->FollowPlayer(deltaTime, currentTargetPos, heldCount);
+
+			currentTargetPos = orb->GetPosition(); heldCount++;
 
 			// ’†‰›i”[•iêŠj‚Ö‚Ì‹——£”»’è
 			auto startGrid = stage->GetStartPosition();
