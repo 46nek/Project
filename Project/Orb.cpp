@@ -97,9 +97,14 @@ void Orb::FollowPlayer(float deltaTime, const DirectX::XMFLOAT3& targetPos, int 
 }
 
 Model* Orb::GetModel() {
-	return m_isDelivered ? nullptr : m_model.get();
-}
+	if (m_isDelivered) return nullptr;
 
+	if (m_type != OrbType::Normal && m_isCollected) {
+		return nullptr;
+	}
+
+	return m_model.get();
+}
 bool Orb::IsCollected() const {
 	return m_isCollected;
 }

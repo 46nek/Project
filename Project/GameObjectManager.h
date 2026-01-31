@@ -25,7 +25,6 @@ public:
     void CollectRenderModels(std::vector<Model*>& models);
     bool CheckAndResetZoomRequest();
 
-    // ▼▼▼ 追加: 敵のパーティクルを描画する関数 ▼▼▼
     void RenderEnemies(GraphicsDevice* graphicsDevice, Camera* camera, LightManager* lightManager);
 
     // ゲッター
@@ -46,7 +45,7 @@ private:
     void SpawnGoal(Stage* stage, LightManager* lightManager);
 
     static constexpr int NUM_ENEMIES = 2;
-    static constexpr int NUM_ORBS = 20;
+    static constexpr int NUM_ORBS = 1;
 
     std::vector<std::unique_ptr<Enemy>> m_enemies;
     std::vector<std::unique_ptr<Orb>> m_orbs;
