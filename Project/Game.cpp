@@ -46,7 +46,7 @@ bool Game::Initialize(HINSTANCE hInstance) {
 	m_input = std::make_unique<Input>();
 	m_input->Initialize();
 
-	m_window = std::make_unique<Window>(L"The Unseen", SCREEN_WIDTH, SCREEN_HEIGHT);
+	m_window = std::make_unique<Window>(L"OBSCURA", SCREEN_WIDTH, SCREEN_HEIGHT);
 	if (!m_window->Initialize(hInstance, m_input.get())) {
 		return false;
 	}

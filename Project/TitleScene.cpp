@@ -57,7 +57,7 @@ bool TitleScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, Direct
 	}
 	if (m_fonts.empty()) { return false; }
 
-	m_titleText = L"THE UNSEEN";
+	m_titleText = L"OBSCURA";
 	m_charStates.resize(m_titleText.length());
 	for (auto& state : m_charStates) { state.fontIndex = 0; }
 

@@ -1,14 +1,16 @@
 #pragma once
 
 /**
- * @brief アセットのファイルパスを管理する名前空間
+ * @brief アセットのファイルパスを管理
  */
 namespace AssetPaths {
-	// === モデル (Assimp用: char*) ===
+	// === モデル ===
+	// (Assimp用: char*) 
 	// 敵、オーブなどで使用
 	const char* const MODEL_CUBE_OBJ = "Assets/cube.obj";
 
-	// === テクスチャ (WIC/DirectX用: wchar_t*) ===
+	// === テクスチャ ===
+	// (WIC/DirectX用: wchar_t*)
 	// UI関連
 	const wchar_t* const TEX_BUTTON = L"Assets/button.png";
 	const wchar_t* const TEX_BACKGROUND = L"Assets/background.png";

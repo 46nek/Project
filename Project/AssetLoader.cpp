@@ -7,7 +7,6 @@
 
 std::unique_ptr<Model> AssetLoader::LoadModelFromFile(ID3D11Device* device, const std::string& filename, float uvScale) {
 	Assimp::Importer importer;
-	// aiProcess_CalcTangentSpace ƒtƒ‰ƒO‚ð’Ç‰Á
 	const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
