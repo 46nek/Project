@@ -217,9 +217,42 @@ void GameObjectManager::SpawnGoal(Stage* stage, LightManager* lightManager) {
 }
 
 void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, LightManager* lightManager, DirectX::SoundEffect* collectSound) {
-	// 敵の更新
+	//デコイの生成
+	if (player->IsDecoyRequested()) {
+		auto it_consume = std::find_if(m_orbs.begin(), m_orbs.end(), [](const std::unique_ptr<Orb>& o) {
+			return o->IsCollected();
+			});
+
+		if (it_consume != m_orbs.end()) {
+			auto decoy = std::make_unique<Decoy>((*it_consume)->GetPosition());
+			if (decoy->Initialize(m_graphicsDevice->GetDevice())) {
+				m_decoys.push_back(std::move(decoy));
+
+				m_remainingOrbs--;
+
+				(*it_consume)->Shutdown();
+				m_orbs.erase(it_consume);
+			}
+		}
+		player->ResetDecoyRequest();
+	}
+
+	//デコイの更新と有効なデコイのリスト作成
+	std::vector<Decoy*> activeDecoyPtrs;
+	for (auto it = m_decoys.begin(); it != m_decoys.end(); ) {
+		(*it)->Update(deltaTime);
+		if (!(*it)->IsActive()) {
+			it = m_decoys.erase(it);
+		}
+		else {
+			activeDecoyPtrs.push_back(it->get());
+			++it;
+		}
+	}
+
+	//敵の更新（第5引数にデコイリストを渡す）
 	for (auto& enemy : m_enemies) {
-		enemy->Update(deltaTime, player, stage->GetMazeData(), stage->GetPathWidth());
+		enemy->Update(deltaTime, player, stage->GetMazeData(), stage->GetPathWidth(), activeDecoyPtrs);
 	}
 
 	// 特殊オーブの更新
@@ -306,6 +339,14 @@ void GameObjectManager::CollectRenderModels(std::vector<Model*>& models) {
 	for (const auto& orb : m_orbs) { if (Model* m = orb->GetModel()) { models.push_back(m); } }
 	for (const auto& orb : m_specialOrbs) { if (Model* m = orb->GetModel()) { models.push_back(m); } }
 	if (m_goalOrb) { if (Model* m = m_goalOrb->GetModel()) { models.push_back(m); } }
+
+	for (const auto& decoy : m_decoys) {
+		if (decoy->IsActive()) {
+			if (Model* m = decoy->GetModel()) {
+				models.push_back(m);
+			}
+		}
+	}
 }
 
 bool GameObjectManager::CheckAndResetZoomRequest() {

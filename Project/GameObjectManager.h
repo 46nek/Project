@@ -9,6 +9,7 @@
 #include "LightManager.h"
 #include "Player.h"
 #include "GraphicsDevice.h"
+#include "Decoy.h"
 
 class Camera;
 
@@ -50,6 +51,7 @@ private:
     std::vector<std::unique_ptr<Orb>> m_orbs;
     std::vector<std::unique_ptr<Orb>> m_specialOrbs;
     std::unique_ptr<Orb> m_goalOrb;
+    std::vector<std::unique_ptr<Decoy>> m_decoys;
 
     int m_remainingOrbs;
     int m_totalOrbs;

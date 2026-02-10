@@ -39,7 +39,8 @@ public:
 	float GetSkillDurationTimer() const { return m_skillDurationTimer; }
 	float GetSkillCooldownTimer() const { return m_skillCoolDownTimer; }
 	int GetHeldOrbCount() const { return m_heldOrbCount; }
-
+	bool IsDecoyRequested() const { return m_isDecoyRequested; }
+	void ResetDecoyRequest() { m_isDecoyRequested = false; }
 private:
 	static constexpr float COLLISION_RADIUS = 0.45f;
 
@@ -72,4 +73,5 @@ private:
 	float m_runInterval;
 
 	int m_heldOrbCount = 0;
+	bool m_isDecoyRequested = false;
 };

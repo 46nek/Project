@@ -1,5 +1,6 @@
 #include "Enemy.h"
 #include "GraphicsDevice.h"
+#include "Decoy.h"
 #include <random>
 #include <cmath>
 
@@ -30,25 +31,35 @@ void Enemy::Shutdown() {
 	if (m_particleSystem) { m_particleSystem->Shutdown(); }
 }
 
-void Enemy::Update(float deltaTime, const Player* player, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth) {
-	if (!player || !m_particleSystem) { return; }
+void Enemy::Update(float deltaTime, const Player* player, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth, const std::vector<Decoy*>& decoys) {
+	if (!player) return;
 
-	DirectX::XMFLOAT3 playerPos = player->GetPosition();
+	DirectX::XMFLOAT3 targetPos = player->GetPosition();
+	float minDistanceSq = 15.0f * 15.0f; // 反応範囲（225.0f）
+
+	// 近くにデコイがあれば、プレイヤーより優先する
+	for (auto decoy : decoys) {
+		float dx = decoy->GetPosition().x - m_position.x;
+		float dz = decoy->GetPosition().z - m_position.z;
+		float distSq = dx * dx + dz * dz;
+
+		if (distSq < minDistanceSq) {
+			targetPos = decoy->GetPosition();
+			minDistanceSq = distSq; // より近いデコイを優先
+		}
+	}
+
 	m_pathCooldown -= deltaTime;
-
 	if (m_pathCooldown <= 0.0f) {
+		m_pathCooldown = 0.4f; 
+
 		int startX = static_cast<int>(m_position.x / pathWidth);
 		int startY = static_cast<int>(m_position.z / pathWidth);
-		int goalX = static_cast<int>(playerPos.x / pathWidth);
-		int goalY = static_cast<int>(playerPos.z / pathWidth);
+		int goalX = static_cast<int>(targetPos.x / pathWidth);
+		int goalY = static_cast<int>(targetPos.z / pathWidth);
 
-		m_pathCooldown = PATH_COOLDOWN_TIME;
-		std::vector<DirectX::XMFLOAT2> newPath = m_astar->FindPath(startX, startY, goalX, goalY);
-
-		if (!newPath.empty()) {
-			m_path = newPath;
-			m_pathIndex = (m_path.size() > 1) ? 1 : -1;
-		}
+		m_path = m_astar->FindPath(startX, startY, goalX, goalY);
+		m_pathIndex = (m_path.size() > 1) ? 1 : -1;
 	}
 
 	if (m_pathIndex != -1 && m_pathIndex < static_cast<int>(m_path.size())) {

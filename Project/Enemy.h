@@ -8,6 +8,7 @@
 #include <d3d11.h>
 
 class GraphicsDevice; 
+class Decoy;
 
 class Enemy {
 public:
@@ -16,8 +17,8 @@ public:
 
 	bool Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& startPosition, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData);
 	void Shutdown();
-	void Update(float deltaTime, const Player* player, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth);
-
+	void Update(float deltaTime, const Player* player, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth, const std::vector<Decoy*>& decoys);
+	
 	void Render(GraphicsDevice* graphicsDevice,
 		const DirectX::XMMATRIX& viewMatrix,
 		const DirectX::XMMATRIX& projectionMatrix,

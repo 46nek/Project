@@ -52,6 +52,11 @@ void Player::Initialize(const DirectX::XMFLOAT3& startPosition) {
 void Player::Update(float deltaTime, Input* input, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth) {
 	m_isMoving = false;
 
+	if (input->IsKeyPressed('E') && m_heldOrbCount > 0) {
+		m_heldOrbCount--; // Š”‚ğŒ¸‚ç‚·
+		m_isDecoyRequested = true; // GameObjectManager‚É’Ê’m‚·‚é‚½‚ß‚Ìƒtƒ‰ƒO
+	}
+
 	UpdateSkill(deltaTime, input);
 	UpdateMovement(deltaTime, input, mazeData, pathWidth);
 	UpdateAudio(deltaTime);

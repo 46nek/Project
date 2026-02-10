@@ -166,6 +166,7 @@
     <ClInclude Include="AStar.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CameraDirector.h" />
+    <ClInclude Include="Decoy.h" />
     <ClInclude Include="Easing.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="framework.h" />
