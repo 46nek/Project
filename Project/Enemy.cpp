@@ -4,7 +4,7 @@
 #include <cmath>
 
 namespace {
-	constexpr float PATH_COOLDOWN_TIME = 2.0f;
+	constexpr float PATH_COOLDOWN_TIME = 0.4f;
 }
 
 Enemy::Enemy()

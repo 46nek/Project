@@ -1,6 +1,5 @@
 #include "MeshGenerator.h"
 
-// 指定された情報に基づいて、一つの四角い面（2つの三角形）を生成し、頂点とインデックスのリストに追加するヘルパー関数
 static void AddFace(
 	FaceDirection direction,
 	const DirectX::XMFLOAT3& position,

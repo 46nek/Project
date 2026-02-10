@@ -139,7 +139,6 @@ void Player::UpdateAudio(float deltaTime) {
 					m_runInstance->SetPitch(randomPitch);
 					m_runInstance->Play();
 				}
-				m_stepTimer = m_runInterval;
 			}
 			else {
 				if (m_walkInstance) {
@@ -148,12 +147,9 @@ void Player::UpdateAudio(float deltaTime) {
 					m_walkInstance->SetPitch(randomPitch);
 					m_walkInstance->Play();
 				}
-				m_stepTimer = m_walkInterval;
 			}
+			m_stepTimer = m_isRunning ? m_runInterval : m_walkInterval;
 		}
-	}
-	else {
-		m_stepTimer = 0.3f;
 	}
 }
 

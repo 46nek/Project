@@ -4,7 +4,7 @@
 
 Input::Input() :
 	m_mouseX(0), m_mouseY(0), m_absMouseX(0), m_absMouseY(0),
-	m_isCursorLocked(false), m_isCursorVisible(true) // ‰Šú‰»
+	m_isCursorLocked(false), m_isCursorVisible(true) 
 {
 }
 

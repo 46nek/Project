@@ -20,7 +20,6 @@ public:
 	void Initialize(const DirectX::XMFLOAT3& startPosition);
 	void Update(float deltaTime, Input* input, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth);
 
-	// –¼‘O‚ğ UpdateSkill ‚É•ÏX
 	void UpdateSkill(float deltaTime, Input* input);
 
 	void UpdateMovement(float deltaTime, Input* input, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth);

@@ -6,7 +6,6 @@ GameEnvironment::GameEnvironment() {}
 GameEnvironment::~GameEnvironment() {}
 
 bool GameEnvironment::Initialize(GraphicsDevice* graphicsDevice) {
-    // 追加: デバイスを保持しておく
     m_graphicsDevice = graphicsDevice;
 
     // ステージ生成

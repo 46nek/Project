@@ -10,7 +10,6 @@
 #include "Player.h"
 #include "GraphicsDevice.h"
 
-// ‘O•ûéŒ¾ (d—v)
 class Camera;
 
 class GameObjectManager {
@@ -45,7 +44,7 @@ private:
     void SpawnGoal(Stage* stage, LightManager* lightManager);
 
     static constexpr int NUM_ENEMIES = 2;
-    static constexpr int NUM_ORBS = 1;
+    static constexpr int NUM_ORBS = 20;
 
     std::vector<std::unique_ptr<Enemy>> m_enemies;
     std::vector<std::unique_ptr<Orb>> m_orbs;

@@ -9,8 +9,8 @@ std::unique_ptr<GameScene> GameScene::s_transferInstance = nullptr;
 
 namespace {
     constexpr float MINIMAP_ZOOM_OUT_LEVEL = 2.0f;
-    constexpr float CELL_CENTER_OFFSET = 0.5f;     // マスの中心へのオフセット
-    constexpr float INITIAL_ROTATION_Y = 180.0f;   // カメラとプレイヤーの初期回転(Y軸)
+    constexpr float CELL_CENTER_OFFSET = 0.5f;     
+    constexpr float INITIAL_ROTATION_Y = 180.0f;   
 }
 
 GameScene::GameScene()
