@@ -15,9 +15,10 @@ void MazeGenerator::Generate(int width, int height) {
 	m_height = (height % 2 == 0) ? height + 1 : height;
 
 	m_maze.assign(m_height, std::vector<CellType>(m_width, Wall));
+	m_rooms.clear();
 	std::vector<std::vector<bool>> protectedCells(m_height, std::vector<bool>(m_width, false));
 
-	// 1. ŒÅ’è‚Ì•”‰®‚Ìü•Ó‚ğ•ÛŒì—Ìˆæ‚Éİ’è
+	// 1. å›ºå®šã®éƒ¨å±‹ã®å‘¨è¾ºã‚’ä¿è­·é ˜åŸŸã«è¨­å®š
 	const int roomSize = 3;
 	const int cornerOffset = 1;
 	using Rect = std::tuple<int, int, int, int>;
@@ -39,18 +40,22 @@ void MazeGenerator::Generate(int width, int height) {
 		}
 	}
 
-	// 2. ƒx[ƒX‚Æ‚È‚éƒ‰ƒ“ƒ_ƒ€‚È–À˜H‚ğ¶¬
+	// 2. ãƒ™ãƒ¼ã‚¹ã¨ãªã‚‹ãƒ©ãƒ³ãƒ€ãƒ ãªè¿·è·¯ã‚’ç”Ÿæˆ
 	GenerateBaseMaze(protectedCells);
 
-	// 3. –À˜H‚ğ’²®is‚«~‚Ü‚è‚ğŒ¸‚ç‚µA’Ê˜H‚ğ×‚­‚·‚éj
+	// 3. è¿·è·¯ã‚’èª¿æ•´ï¼ˆè¡Œãæ­¢ã¾ã‚Šã‚’æ¸›ã‚‰ã—ã€é€šè·¯ã‚’ç´°ãã™ã‚‹ï¼‰
 	RefineMaze(protectedCells);
 
-	// 4. ŒÅ’è‚Ì•”‰®‚â’Ê˜H‚ğã‘‚«‚µ‚Ä”z’u
+	// 4. å›ºå®šã®éƒ¨å±‹ã‚„é€šè·¯ã‚’ä¸Šæ›¸ãã—ã¦é…ç½®
 	AddFeatures();
 
-	// 5. ƒXƒ^[ƒg’n“_‚ğİ’è
+	// 5. ã‚¹ã‚¿ãƒ¼ãƒˆåœ°ç‚¹ã‚’è¨­å®š
 	m_startX = (m_width - 1) / 2;
 	m_startY = (m_height - 1) / 2;
+}
+
+const std::vector<MazeGenerator::Room>& MazeGenerator::GetRooms() const {
+	return m_rooms;
 }
 
 void MazeGenerator::GenerateBaseMaze(const std::vector<std::vector<bool>>& protectedCells) {
@@ -65,26 +70,26 @@ void MazeGenerator::AddFeatures() {
 	const int roomSize = 3;
 	const int offset = 1;
 
-	// •”‰®
-	CreateRoom(offset, offset, roomSize, roomSize); // ¶ã
-	CreateRoom(m_width - offset - roomSize, offset, roomSize, roomSize); // ‰Eã
-	CreateRoom(offset, m_height - offset - roomSize, roomSize, roomSize); // ¶‰º
-	CreateRoom(m_width - offset - roomSize, m_height - offset - roomSize, roomSize, roomSize); // ‰E‰º
-	CreateRoom((m_width - roomSize) / 2, (m_height - roomSize) / 2, roomSize, roomSize); // ’†‰›
+	// éƒ¨å±‹
+	CreateRoom(offset, offset, roomSize, roomSize); // å·¦ä¸Š
+	CreateRoom(m_width - offset - roomSize, offset, roomSize, roomSize); // å³ä¸Š
+	CreateRoom(offset, m_height - offset - roomSize, roomSize, roomSize); // å·¦ä¸‹
+	CreateRoom(m_width - offset - roomSize, m_height - offset - roomSize, roomSize, roomSize); // å³ä¸‹
+	CreateRoom((m_width - roomSize) / 2, (m_height - roomSize) / 2, roomSize, roomSize); // ä¸­å¤®
 
-	// ŠOü’Ê˜H
-	CreateRoom(offset, offset, m_width - offset * 2, 1); // ã
-	CreateRoom(offset, m_height - offset - 1, m_width - offset * 2, 1); // ‰º
-	CreateRoom(offset, offset, 1, m_height - offset * 2); // ¶
-	CreateRoom(m_width - offset - 1, offset, 1, m_height - offset * 2); // ‰E
+	// å¤–å‘¨é€šè·¯
+	CreateRoom(offset, offset, m_width - offset * 2, 1); // ä¸Š
+	CreateRoom(offset, m_height - offset - 1, m_width - offset * 2, 1); // ä¸‹
+	CreateRoom(offset, offset, 1, m_height - offset * 2); // å·¦
+	CreateRoom(m_width - offset - 1, offset, 1, m_height - offset * 2); // å³
 
-	// ’†‰›‚©‚ç‚ÌÚ‘±’Ê˜H
+	// ä¸­å¤®ã‹ã‚‰ã®æ¥ç¶šé€šè·¯
 	int centerX = m_width / 2;
 	int centerY = m_height / 2;
-	CreateRoom(centerX, offset, 1, centerY - offset); // ’†‰›‚©‚çã‚Ö
-	CreateRoom(centerX, centerY + 1, 1, (m_height - offset - 1) - centerY); // ’†‰›‚©‚ç‰º‚Ö
-	CreateRoom(offset, centerY, centerX - offset, 1); // ’†‰›‚©‚ç¶‚Ö
-	CreateRoom(centerX + 1, centerY, (m_width - offset - 1) - centerX, 1); // ’†‰›‚©‚ç‰E‚Ö
+	CreateRoom(centerX, offset, 1, centerY - offset); // ä¸­å¤®ã‹ã‚‰ä¸Šã¸
+	CreateRoom(centerX, centerY + 1, 1, (m_height - offset - 1) - centerY); // ä¸­å¤®ã‹ã‚‰ä¸‹ã¸
+	CreateRoom(offset, centerY, centerX - offset, 1); // ä¸­å¤®ã‹ã‚‰å·¦ã¸
+	CreateRoom(centerX + 1, centerY, (m_width - offset - 1) - centerX, 1); // ä¸­å¤®ã‹ã‚‰å³ã¸
 }
 
 void MazeGenerator::RefineMaze(const std::vector<std::vector<bool>>& protectedCells) {
@@ -94,6 +99,17 @@ void MazeGenerator::RefineMaze(const std::vector<std::vector<bool>>& protectedCe
 
 void MazeGenerator::CreateRoom(int startX, int startY, int width, int height) {
 	if (startX < 0 || startY < 0 || startX + width > m_width || startY + height > m_height) { return; }
+
+	// éƒ¨å±‹æƒ…å ±ã‚’ä¿å­˜
+	Room room;
+	room.x = startX;
+	room.y = startY;
+	room.width = width;
+	room.height = height;
+	// ä¸­å¿ƒåº§æ¨™ã‚’è¨ˆç®—ï¼ˆã‚°ãƒªãƒƒãƒ‰åº§æ¨™ãƒ™ãƒ¼ã‚¹ï¼‰
+	room.center = DirectX::XMFLOAT3(startX + width / 2.0f, 0.0f, startY + height / 2.0f);
+	m_rooms.push_back(room);
+
 	for (int y = startY; y < startY + height; ++y) {
 		for (int x = startX; x < startX + width; ++x) {
 			m_maze[y][x] = Path;

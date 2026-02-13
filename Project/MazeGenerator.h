@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <random>
+#include <DirectXMath.h>
 
 class MazeGenerator {
 public:
@@ -9,23 +10,29 @@ public:
 		Wall
 	};
 
+	struct Room {
+		int x, y, width, height;
+		DirectX::XMFLOAT3 center; // ã‚°ãƒªãƒƒãƒ‰åº§æ¨™ãƒ™ãƒ¼ã‚¹ã®ä¸­å¿ƒ
+	};
+
 	MazeGenerator();
 	~MazeGenerator();
 
 	void Generate(int width, int height);
 	const std::vector<std::vector<CellType>>& GetMazeData() const;
 	std::pair<int, int> GetStartPosition() const;
+	const std::vector<Room>& GetRooms() const;
 
 	void SetCell(int x, int y, CellType type);
 
 private:
-	// Šù‘¶‚Ìƒwƒ‹ƒp[ŠÖ”
+	// æ—¢å­˜ã®ãƒ˜ãƒ«ãƒ‘ãƒ¼é–¢æ•°
 	void CarvePath(int x, int y, const std::vector<std::vector<bool>>& protectedCells);
 	void CreateRoom(int x, int y, int width, int height);
 	void RemoveDeadEnds(const std::vector<std::vector<bool>>& protectedCells);
 	void ThinPaths(const std::vector<std::vector<bool>>& protectedCells);
 
-	// GenerateŠÖ”‚©‚ç•ªŠ„‚³‚ê‚½V‚µ‚¢ƒwƒ‹ƒp[ŠÖ”
+	// Generateé–¢æ•°ã‹ã‚‰åˆ†å‰²ã•ã‚ŒãŸæ–°ã—ã„ãƒ˜ãƒ«ãƒ‘ãƒ¼é–¢æ•°
 	void GenerateBaseMaze(const std::vector<std::vector<bool>>& protectedCells);
 	void AddFeatures();
 	void RefineMaze(const std::vector<std::vector<bool>>& protectedCells);
@@ -35,5 +42,6 @@ private:
 	int m_width;
 	int m_height;
 	std::vector<std::vector<CellType>> m_maze;
+	std::vector<Room> m_rooms;
 	std::mt19937 m_rng;
 };

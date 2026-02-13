@@ -8,7 +8,7 @@
 
 /**
  * @class Stage
- * @brief ƒQ[ƒ€‚ÌƒXƒe[ƒWi–À˜HA’nŒ`ƒ‚ƒfƒ‹‚È‚Çj‚Ì\’z‚ÆŠÇ—‚ğs‚¤ƒNƒ‰ƒX
+ * @brief ã‚²ãƒ¼ãƒ ã®ã‚¹ãƒ†ãƒ¼ã‚¸ï¼ˆè¿·è·¯ã€åœ°å½¢ãƒ¢ãƒ‡ãƒ«ãªã©ï¼‰ã®æ§‹ç¯‰ã¨ç®¡ç†ã‚’è¡Œã†ã‚¯ãƒ©ã‚¹
  */
 class Stage {
 public:
@@ -22,11 +22,12 @@ public:
 	Model* GetGateModel() const;
 
 	const std::vector<std::vector<MazeGenerator::CellType>>& GetMazeData() const;
+	const std::vector<MazeGenerator::Room>& GetRooms() const;
 	std::pair<int, int> GetStartPosition() const;
 	float GetPathWidth() const;
 	void OpenExit();
 
-	// ’è”
+	// å®šæ•°
 	static constexpr int MAZE_WIDTH = 31;
 	static constexpr int MAZE_HEIGHT = 31;
 	static constexpr float PATH_WIDTH = 4.0f;

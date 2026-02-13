@@ -26,20 +26,20 @@ bool Orb::Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& position, in
 	m_model->SetScale(0.3f, 0.3f, 0.3f);
 	m_model->SetPosition(m_position.x, m_position.y, m_position.z);
 
-	// ƒI[ƒu‚Ìí—Ş‚É‰‚¶‚ÄF‚ğ•Ï‚¦‚é
+	// ã‚ªãƒ¼ãƒ–ã®ç¨®é¡ã«å¿œã˜ã¦è‰²ã‚’å¤‰ãˆã‚‹
 	switch (m_type) {
 	case OrbType::MinimapZoomOut:
-		m_model->SetEmissiveColor({ 0.2f, 1.0f, 0.2f, 1.0f }); // —Î
+		m_model->SetEmissiveColor({ 0.2f, 1.0f, 0.2f, 1.0f }); // ç·‘
 		break;
 	case OrbType::EnemyRadar:
-		m_model->SetEmissiveColor({ 1.0f, 0.2f, 0.2f, 1.0f }); // Ô
+		m_model->SetEmissiveColor({ 1.0f, 0.2f, 0.2f, 1.0f }); // èµ¤
 		break;
 	case OrbType::Goal:
 		m_model->SetEmissiveColor({ 1.0f, 0.8f, 0.0f, 1.0f });
 		break;
 	case OrbType::Normal:
 	default:
-		m_model->SetEmissiveColor({ 0.6f, 0.8f, 1.0f, 1.0f }); // Â
+		m_model->SetEmissiveColor({ 0.6f, 0.8f, 1.0f, 1.0f }); // é’
 		break;
 	}
 
@@ -58,7 +58,7 @@ void Orb::Shutdown() {
 
 bool Orb::Update(float deltaTime, Player* player, LightManager* lightManager, DirectX::SoundEffect* collectSound) {
 	if (m_isCollected) {
-		return false; // ‚·‚Å‚ÉûWÏ‚İ‚È‚ç false ‚ğ•Ô‚·
+		return false; // ã™ã§ã«åé›†æ¸ˆã¿ãªã‚‰ false ã‚’è¿”ã™
 	}
 
 	float floatingY = m_position.y + sin(m_animationTimer * 2.0f) * 0.25f;
@@ -74,11 +74,14 @@ bool Orb::Update(float deltaTime, Player* player, LightManager* lightManager, Di
 	float collisionRadiusSq = collisionRadius * collisionRadius;
 
 	if (distanceSq < collisionRadiusSq) {
+		if (collectSound) {
+			collectSound->Play();
+		}
 		m_isCollected = true;
 		return true;
 	}
 
-	return false; // ûW‚³‚ê‚È‚©‚Á‚½ê‡‚Í false ‚ğ•Ô‚·
+	return false; // åé›†ã•ã‚Œãªã‹ã£ãŸå ´åˆã¯ false ã‚’è¿”ã™
 }
 
 void Orb::FollowPlayer(float deltaTime, const DirectX::XMFLOAT3& targetPos, int index) {

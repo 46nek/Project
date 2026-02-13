@@ -197,27 +197,27 @@ bool GameObjectManager::InitializeSpecialOrbs(GraphicsDevice* graphicsDevice, St
 }
 
 void GameObjectManager::SpawnGoal(Stage* stage, LightManager* lightManager) {
-	// ƒXƒe[ƒW‚ÌŠJnˆÊ’uiƒS[ƒ‹ˆÊ’uj‚ğæ“¾
+	// ã‚¹ãƒ†ãƒ¼ã‚¸ã®é–‹å§‹ä½ç½®ï¼ˆã‚´ãƒ¼ãƒ«ä½ç½®ï¼‰ã‚’å–å¾—
 	std::pair<int, int> startPos = stage->GetStartPosition();
 	float pathWidth = stage->GetPathWidth();
 
-	// À•WŒvZ
+	// åº§æ¨™è¨ˆç®—
 	float goalX = (static_cast<float>(startPos.first) + 0.5f) * pathWidth;
 	float goalZ = (static_cast<float>(startPos.second) + 0.5f) * pathWidth;
 
-	// ƒS[ƒ‹‚ÌŒõ‚ğ’Ç‰ÁiCOLOR_GOAL_ORB‚È‚Ç‚Í–³–¼–¼‘O‹óŠÔ‚É‚ ‚é‘O’ñj
+	// ã‚´ãƒ¼ãƒ«ã®å…‰ã‚’è¿½åŠ ï¼ˆCOLOR_GOAL_ORBãªã©ã¯ç„¡ååå‰ç©ºé–“ã«ã‚ã‚‹å‰æï¼‰
 	int lightIndex = lightManager->AddPointLight({ goalX, 2.0f, goalZ }, COLOR_GOAL_ORB, GOAL_LIGHT_RANGE, GOAL_LIGHT_INTENSITY);
 
-	// ƒS[ƒ‹ƒI[ƒu¶¬
+	// ã‚´ãƒ¼ãƒ«ã‚ªãƒ¼ãƒ–ç”Ÿæˆ
 	m_goalOrb = std::make_unique<Orb>();
-	// •Û‘¶‚µ‚Ä‚¨‚¢‚½ m_graphicsDevice ‚ğg—p
+	// ä¿å­˜ã—ã¦ãŠã„ãŸ m_graphicsDevice ã‚’ä½¿ç”¨
 	m_goalOrb->Initialize(m_graphicsDevice->GetDevice(), { goalX, 2.0f, goalZ }, lightIndex, OrbType::Goal);
 
 	m_goalSpawned = true;
 }
 
 void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, LightManager* lightManager, DirectX::SoundEffect* collectSound) {
-	//ƒfƒRƒC‚Ì¶¬
+	//ãƒ‡ã‚³ã‚¤ã®ç”Ÿæˆ
 	if (player->IsDecoyRequested()) {
 		auto it_consume = std::find_if(m_orbs.begin(), m_orbs.end(), [](const std::unique_ptr<Orb>& o) {
 			return o->IsCollected();
@@ -237,7 +237,7 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 		player->ResetDecoyRequest();
 	}
 
-	//ƒfƒRƒC‚ÌXV‚Æ—LŒø‚ÈƒfƒRƒC‚ÌƒŠƒXƒgì¬
+	//ãƒ‡ã‚³ã‚¤ã®æ›´æ–°ã¨æœ‰åŠ¹ãªãƒ‡ã‚³ã‚¤ã®ãƒªã‚¹ãƒˆä½œæˆ
 	std::vector<Decoy*> activeDecoyPtrs;
 	for (auto it = m_decoys.begin(); it != m_decoys.end(); ) {
 		(*it)->Update(deltaTime);
@@ -250,12 +250,12 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 		}
 	}
 
-	//“G‚ÌXVi‘æ5ˆø”‚ÉƒfƒRƒCƒŠƒXƒg‚ğ“n‚·j
+	//æ•µã®æ›´æ–°ï¼ˆç¬¬5å¼•æ•°ã«ãƒ‡ã‚³ã‚¤ãƒªã‚¹ãƒˆã‚’æ¸¡ã™ï¼‰
 	for (auto& enemy : m_enemies) {
-		enemy->Update(deltaTime, player, stage->GetMazeData(), stage->GetPathWidth(), activeDecoyPtrs);
+		enemy->Update(deltaTime, player, stage, activeDecoyPtrs, m_enemies);
 	}
 
-	// “ÁêƒI[ƒu‚ÌXV
+	// ç‰¹æ®Šã‚ªãƒ¼ãƒ–ã®æ›´æ–°
 	for (auto it = m_specialOrbs.begin(); it != m_specialOrbs.end(); ) {
 		(*it)->Update(deltaTime, player, lightManager, collectSound);
 		if ((*it)->IsCollected()) {
@@ -268,7 +268,7 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 				m_enemyRadarTimer = RADAR_DURATION;
 				break;
 			}
-			// íœ‚¹‚¸ACollectedó‘Ô‚É‚·‚é‚¾‚¯‚É—¯‚ß‚é‚Ì‚ªˆê”Ê“I‚Å‚·‚ªAŒ³‚ÌƒƒWƒbƒN‚É]‚¢íœ“™‚Ìˆ—‚ğ“ü‚ê‚Ü‚·
+			// å‰Šé™¤ã›ãšã€CollectedçŠ¶æ…‹ã«ã™ã‚‹ã ã‘ã«ç•™ã‚ã‚‹ã®ãŒä¸€èˆ¬çš„ã§ã™ãŒã€å…ƒã®ãƒ­ã‚¸ãƒƒã‚¯ã«å¾“ã„å‰Šé™¤ç­‰ã®å‡¦ç†ã‚’å…¥ã‚Œã¾ã™
 			it = m_specialOrbs.erase(it);
 		}
 		else {
@@ -276,7 +276,7 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 		}
 	}
 
-	// ƒŒ[ƒ_[ƒ^ƒCƒ}[
+	// ãƒ¬ãƒ¼ãƒ€ãƒ¼ã‚¿ã‚¤ãƒãƒ¼
 	if (m_enemyRadarTimer > 0.0f) {
 		m_enemyRadarTimer -= deltaTime;
 	}
@@ -289,9 +289,9 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 		auto& orb = *it;
 
 		if (!orb->IsCollected()) {
-			// E‚Á‚Ä‚¢‚È‚¢ê‡‚Í“–‚½‚è”»’è
+			// æ‹¾ã£ã¦ã„ãªã„å ´åˆã¯å½“ãŸã‚Šåˆ¤å®š
 			if (orb->Update(deltaTime, player, lightManager, collectSound)) {
-				// E‚Á‚½uŠÔB‚±‚±‚Å‚Í‚Ü‚¾ m_remainingOrbs ‚ÍŒ¸‚ç‚³‚È‚¢
+				// æ‹¾ã£ãŸç¬é–“ã€‚ã“ã“ã§ã¯ã¾ã  m_remainingOrbs ã¯æ¸›ã‚‰ã•ãªã„
 			}
 			++it;
 		}
@@ -300,7 +300,7 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 
 			currentTargetPos = orb->GetPosition(); heldCount++;
 
-			// ’†‰›i”[•iêŠj‚Ö‚Ì‹——£”»’è
+			// ä¸­å¤®ï¼ˆç´å“å ´æ‰€ï¼‰ã¸ã®è·é›¢åˆ¤å®š
 			auto startGrid = stage->GetStartPosition();
 			float centerX = (static_cast<float>(startGrid.first) + 0.5f) * stage->GetPathWidth();
 			float centerZ = (static_cast<float>(startGrid.second) + 0.5f) * stage->GetPathWidth();
@@ -309,10 +309,10 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 			float dz = orb->GetPosition().z - centerZ;
 			float distSq = dx * dx + dz * dz;
 
-			if (distSq < 1.0f) { // ”[•i¬Œ÷
-				m_remainingOrbs--; // ‚±‚±‚Å‰‚ß‚ÄƒJƒEƒ“ƒg‚ğŒ¸‚ç‚·
+			if (distSq < 1.0f) { // ç´å“æˆåŠŸ
+				m_remainingOrbs--; // ã“ã“ã§åˆã‚ã¦ã‚«ã‚¦ãƒ³ãƒˆã‚’æ¸›ã‚‰ã™
 				orb->Shutdown();
-				it = m_orbs.erase(it); // ƒŠƒXƒg‚©‚çÁ‚µ‚Ä•¨—“I‚ÉÁ–Å‚³‚¹‚é
+				it = m_orbs.erase(it); // ãƒªã‚¹ãƒˆã‹ã‚‰æ¶ˆã—ã¦ç‰©ç†çš„ã«æ¶ˆæ»…ã•ã›ã‚‹
 			}
 			else {
 				++it;
@@ -321,12 +321,12 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 	}
 	player->SetHeldOrbCount(heldCount);
 
-	// 4. ƒS[ƒ‹oŒ»”»’è
+	// 4. ã‚´ãƒ¼ãƒ«å‡ºç¾åˆ¤å®š
 	if (m_remainingOrbs <= 0 && !m_goalSpawned) {
 		SpawnGoal(stage, lightManager);
 	}
 
-	// 5. ƒS[ƒ‹”»’èiŠù‘¶‚Ì‚Ü‚Üj
+	// 5. ã‚´ãƒ¼ãƒ«åˆ¤å®šï¼ˆæ—¢å­˜ã®ã¾ã¾ï¼‰
 	if (m_goalSpawned && m_goalOrb && !m_goalOrb->IsCollected()) {
 		if (m_goalOrb->Update(deltaTime, player, lightManager, collectSound)) {
 			stage->OpenExit();
@@ -360,7 +360,7 @@ bool GameObjectManager::CheckAndResetZoomRequest() {
 void GameObjectManager::RenderEnemies(GraphicsDevice* graphicsDevice, Camera* camera, LightManager* lightManager) {
 	if (!graphicsDevice || !camera || !lightManager) return;
 
-	// ƒvƒƒWƒFƒNƒVƒ‡ƒ“s—ñ‚ğì¬
+	// ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³è¡Œåˆ—ã‚’ä½œæˆ
 	DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(
 		camera->GetFOV(),
 		(float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT,
@@ -368,7 +368,7 @@ void GameObjectManager::RenderEnemies(GraphicsDevice* graphicsDevice, Camera* ca
 		1000.0f
 	);
 
-	// ‘S‚Ä‚Ì“G‚ÌRender‚ğŒÄ‚Ño‚·
+	// å…¨ã¦ã®æ•µã®Renderã‚’å‘¼ã³å‡ºã™
 	for (const auto& enemy : m_enemies) {
 		if (enemy) {
 			enemy->Render(

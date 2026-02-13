@@ -9,11 +9,12 @@ Minimap::Minimap()
 	m_position({ 20.0f, 20.0f }),
 	m_viewSize({ 200.0f, 200.0f }),
 	m_cellSize(8.0f),
-	m_zoomFactor(3.0f),
+	m_zoomFactor(0.5f),
 	m_pathSpriteScale(1.0f),
 	m_playerSpriteScale(0.0f),
 	m_orbSpriteScale(0.0f),
-	m_orbArrowSpriteScale(0.0f) {
+	m_orbArrowSpriteScale(0.0f),
+	m_enemySpriteScale(0.0f) {
 }
 
 Minimap::~Minimap() {
@@ -21,7 +22,7 @@ Minimap::~Minimap() {
 }
 
 bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth) {
-	// ïœçXÇ»Çµ
+	// Â§âÊõ¥„Å™„Åó
 	m_graphicsDevice = graphicsDevice;
 	m_mazeData = &mazeData;
 	m_pathWidth = pathWidth;
@@ -69,7 +70,7 @@ bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::
 }
 
 void Minimap::Shutdown() {
-	// ïœçXÇ»Çµ
+	// Â§âÊõ¥„Å™„Åó
 	if (m_pathSprite) { m_pathSprite->Shutdown(); }
 	if (m_playerSprite) { m_playerSprite->Shutdown(); }
 	if (m_enemySprite) { m_enemySprite->Shutdown(); }
@@ -87,7 +88,7 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 
 	ID3D11DeviceContext* deviceContext = m_graphicsDevice->GetDeviceContext();
 
-	// --- ç¿ïWåvéZ ---
+	// --- Â∫ßÊ®ôË®àÁÆó ---
 	DirectX::XMFLOAT3 playerWorldPos = camera->GetPosition();
 	float playerRotation = camera->GetRotation().y * (DirectX::XM_PI / 180.0f);
 
@@ -103,7 +104,7 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 		(mapHeightInCells - (playerWorldPos.z / m_pathWidth)) * m_cellSize
 	};
 
-	// --- ñKñ‚èÛãµÇÃçXêV ---
+	// --- Ë®™ÂïèÁä∂Ê≥Å„ÅÆÊõ¥Êñ∞ ---
 	int playerGridX = static_cast<int>(playerWorldPos.x / m_pathWidth);
 	int playerGridZ = static_cast<int>(playerWorldPos.z / m_pathWidth);
 
@@ -123,7 +124,7 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 		DirectX::XMMatrixRotationZ(-playerRotation) *
 		DirectX::XMMatrixTranslation(minimapCenter.x, minimapCenter.y, 0.0f);
 
-	// --- ï`âÊé¿çs ---
+	// --- ÊèèÁîªÂÆüË°å ---
 	m_graphicsDevice->GetSwapChain()->TurnZBufferOff(deviceContext);
 
 	D3D11_RECT scissorRect = {
@@ -131,12 +132,12 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 		(LONG)(m_position.x + m_viewSize.x), (LONG)(m_position.y + m_viewSize.y)
 	};
 
-	// --- 1. ÉtÉåÅ[ÉÄ(îwåi) ---
+	// --- 1. „Éï„É¨„Éº„É†(ËÉåÊôØ) ---
 	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_graphicsDevice->GetAlphaBlendState());
 	m_frameSprite->RenderFill(m_spriteBatch.get(), scissorRect, { 1.0f, 1.0f, 1.0f, alpha });
 	m_spriteBatch->End();
 
-	// --- 2. É}ÉbÉvóvëf (ÉNÉäÉbÉsÉìÉOóLå¯) ---
+	// --- 2. „Éû„ÉÉ„ÉóË¶ÅÁ¥† („ÇØ„É™„ÉÉ„Éî„É≥„Ç∞ÊúâÂäπ) ---
 	deviceContext->RSSetScissorRects(1, &scissorRect);
 
 	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_graphicsDevice->GetAlphaBlendState(), nullptr, nullptr, m_scissorRasterizerState.Get(), nullptr, transform);
@@ -185,7 +186,7 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 
 	m_spriteBatch->End();
 
-	// --- ç≈Ç‡ãﬂÇ¢ÉIÅ[ÉuÇÃíTçı ---
+	// --- ÊúÄ„ÇÇËøë„ÅÑ„Ç™„Éº„Éñ„ÅÆÊé¢Á¥¢ ---
 	float minDistanceSq = FLT_MAX;
 	DirectX::XMFLOAT3 targetPos = {};
 	bool foundTarget = false;
@@ -208,7 +209,7 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 
 	CheckClosestOrb(orbs);
 
-	// --- ñÓàÛÇÃï`âÊ ---
+	// --- Áü¢Âç∞„ÅÆÊèèÁîª ---
 	if (foundTarget) {
 		float dx = targetPos.x - playerWorldPos.x;
 		float dz = targetPos.z - playerWorldPos.z;
@@ -233,12 +234,12 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 		}
 	}
 
-	// ÉvÉåÉCÉÑÅ[ÇÃï`âÊ (èÌÇ…íÜâõ)
+	// „Éó„É¨„Ç§„É§„Éº„ÅÆÊèèÁîª (Â∏∏„Å´‰∏≠Â§Æ)
 	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_graphicsDevice->GetAlphaBlendState(), nullptr, nullptr, m_scissorRasterizerState.Get());
 	m_playerSprite->Render(m_spriteBatch.get(), minimapCenter, m_playerSpriteScale * m_zoomFactor * 0.3f, 0.0f, { 1.0f, 1.0f, 1.0f, alpha });
 	m_spriteBatch->End();
 
-	// --- å„èàóù ---
+	// --- ÂæåÂá¶ÁêÜ ---
 	D3D11_VIEWPORT viewport;
 	UINT numViewports = 1;
 	deviceContext->RSGetViewports(&numViewports, &viewport);

@@ -4,13 +4,13 @@
 #include <windows.h>
 
 namespace {
-	// === ƒQ[ƒg’²®—pƒpƒ‰ƒ[ƒ^ ===
-	constexpr float GATE_MODEL_SCALE_BASE = 6.0f; // FBXƒ[ƒh‚ÌŠî€ƒXƒP[ƒ‹
-	constexpr float GATE_POS_Z_OFFSET = 0.1f;     // ”z’u‚Ì”÷’²®
-	constexpr float GATE_SCALE_MARGIN = 1.1f;     // “¹•‚æ‚è‚Ç‚ê‚­‚ç‚¢¬‚³‚­‚·‚é‚©
+	// === ã‚²ãƒ¼ãƒˆèª¿æ•´ç”¨ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ ===
+	constexpr float GATE_MODEL_SCALE_BASE = 6.0f; // FBXãƒ­ãƒ¼ãƒ‰æ™‚ã®åŸºæº–ã‚¹ã‚±ãƒ¼ãƒ«
+	constexpr float GATE_POS_Z_OFFSET = 0.1f;     // é…ç½®æ™‚ã®å¾®èª¿æ•´
+	constexpr float GATE_SCALE_MARGIN = 1.1f;     // é“å¹…ã‚ˆã‚Šã©ã‚Œãã‚‰ã„å°ã•ãã™ã‚‹ã‹
 }
 
-Stage::Stage() : m_exitX(0), m_exitY(0) {} // ƒƒ“ƒo[‰Šú‰»qƒŠƒXƒg‚ğg—p
+Stage::Stage() : m_exitX(0), m_exitY(0) {} // ãƒ¡ãƒ³ãƒãƒ¼åˆæœŸåŒ–å­ãƒªã‚¹ãƒˆã‚’ä½¿ç”¨
 Stage::~Stage() {}
 
 bool Stage::Initialize(GraphicsDevice* graphicsDevice) {
@@ -22,7 +22,7 @@ bool Stage::Initialize(GraphicsDevice* graphicsDevice) {
 
 	m_mazeGenerator->SetCell(m_exitX, m_exitY, MazeGenerator::Path);
 
-	// ’è”‰»‚µ‚½ƒpƒX‚ğg—p
+	// å®šæ•°åŒ–ã—ãŸãƒ‘ã‚¹ã‚’ä½¿ç”¨
 	std::shared_ptr<Texture> wallTexture = AssetLoader::LoadTexture(graphicsDevice->GetDevice(), AssetPaths::TEX_WALL);
 	if (!wallTexture) { MessageBox(nullptr, L"Failed to load wall texture", L"Error", MB_OK); return false; }
 
@@ -35,14 +35,14 @@ bool Stage::Initialize(GraphicsDevice* graphicsDevice) {
 	std::shared_ptr<Texture> gateNormalMap = AssetLoader::LoadTexture(graphicsDevice->GetDevice(), AssetPaths::TEX_GATE_NORMAL);
 	if (!gateNormalMap) { MessageBox(nullptr, L"Failed to load gate normal map", L"Error", MB_OK); return false; }
 
-	// •Çƒ‚ƒfƒ‹ (1’i–Ú)
+	// å£ãƒ¢ãƒ‡ãƒ« (1æ®µç›®)
 	auto wallModel1 = AssetLoader::CreateMazeModel(graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT / 2.0f, MeshGenerator::MeshType::Wall);
 	if (!wallModel1) { return false; }
 	wallModel1->SetTexture(wallTexture);
 	wallModel1->SetNormalMap(wallNormalMap);
 	m_models.push_back(std::move(wallModel1));
 
-	// •Çƒ‚ƒfƒ‹ (2’i–Ú)
+	// å£ãƒ¢ãƒ‡ãƒ« (2æ®µç›®)
 	auto wallModel2 = AssetLoader::CreateMazeModel(graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT / 2.0f, MeshGenerator::MeshType::Wall);
 	if (!wallModel2) { return false; }
 	wallModel2->SetTexture(wallTexture);
@@ -50,21 +50,21 @@ bool Stage::Initialize(GraphicsDevice* graphicsDevice) {
 	wallModel2->SetPosition(0.0f, WALL_HEIGHT / 2.0f, 0.0f);
 	m_models.push_back(std::move(wallModel2));
 
-	// “Vˆä
+	// å¤©äº•
 	auto ceilingModel = AssetLoader::CreateMazeModel(graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT, MeshGenerator::MeshType::Ceiling);
 	if (!ceilingModel) { return false; }
 	ceilingModel->SetTexture(wallTexture);
 	ceilingModel->SetNormalMap(wallNormalMap);
 	m_models.push_back(std::move(ceilingModel));
 
-	// °
+	// åºŠ
 	auto floorModel = AssetLoader::CreateMazeModel(graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT, MeshGenerator::MeshType::Floor);
 	if (!floorModel) { return false; }
 	floorModel->SetTexture(wallTexture);
 	floorModel->SetNormalMap(wallNormalMap);
 	m_models.push_back(std::move(floorModel));
 
-	// ƒQ[ƒgƒ‚ƒfƒ‹
+	// ã‚²ãƒ¼ãƒˆãƒ¢ãƒ‡ãƒ«
 	m_gateModel = AssetLoader::LoadModelFromFile(graphicsDevice->GetDevice(), AssetPaths::MODEL_CUBE_OBJ, GATE_MODEL_SCALE_BASE);
 
 	if (m_gateModel) {
@@ -83,10 +83,10 @@ bool Stage::Initialize(GraphicsDevice* graphicsDevice) {
 }
 
 void Stage::OpenExit() {
-	// –À˜Hƒf[ƒ^ã‚ÅoŒû‚ğu“¹v‚É‚·‚éiƒvƒŒƒCƒ„[‚ª’Ê‚ê‚é‚æ‚¤‚É‚È‚éj
+	// è¿·è·¯ãƒ‡ãƒ¼ã‚¿ä¸Šã§å‡ºå£ã‚’ã€Œé“ã€ã«ã™ã‚‹ï¼ˆãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒé€šã‚Œã‚‹ã‚ˆã†ã«ãªã‚‹ï¼‰
 	m_mazeGenerator->SetCell(m_exitX, m_exitY, MazeGenerator::Path);
 
-	// ƒQ[ƒgƒ‚ƒfƒ‹‚ğÁ‚·inullptr‚É‚µ‚Ä•`‰æEXV‚µ‚È‚¢‚æ‚¤‚É‚·‚éj
+	// ã‚²ãƒ¼ãƒˆãƒ¢ãƒ‡ãƒ«ã‚’æ¶ˆã™ï¼ˆnullptrã«ã—ã¦æç”»ãƒ»æ›´æ–°ã—ãªã„ã‚ˆã†ã«ã™ã‚‹ï¼‰
 	if (m_gateModel) {
 		m_gateModel->Shutdown();
 		m_gateModel.reset();
@@ -106,6 +106,7 @@ void Stage::Shutdown() {
 }
 
 const std::vector<std::unique_ptr<Model>>& Stage::GetModels() const { return m_models; }
+const std::vector<MazeGenerator::Room>& Stage::GetRooms() const { return m_mazeGenerator->GetRooms(); }
 const std::vector<std::vector<MazeGenerator::CellType>>& Stage::GetMazeData() const { return m_mazeGenerator->GetMazeData(); }
 std::pair<int, int> Stage::GetStartPosition() const { return m_mazeGenerator->GetStartPosition(); }
 float Stage::GetPathWidth() const { return PATH_WIDTH; }
