@@ -2,6 +2,7 @@
 #include "AStar.h"
 #include "Player.h"
 #include "ParticleSystem.h"
+#include "MazeGenerator.h" 
 #include <DirectXMath.h>
 #include <d3d11.h>
 #include <vector>
