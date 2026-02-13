@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Window.h"
 #include "GraphicsDevice.h"
 #include "Input.h"
@@ -11,11 +11,11 @@
 class SceneManager;
 
 /**
- * @brief 繧ｲ繝ｼ繝蜈ｨ菴薙・邂｡逅・ｒ陦後≧繝｡繧､繝ｳ繧ｯ繝ｩ繧ｹ
+ * @brief ゲーム全体の管理を行うメインクラス
  */
 class Game {
 public:
-	// 螳壽焚
+	// 定数
 	static constexpr int SCREEN_WIDTH = 1280;
 	static constexpr int SCREEN_HEIGHT = 720;
 
@@ -23,31 +23,31 @@ public:
 	~Game();
 
 	/**
-	 * @brief 繧ｲ繝ｼ繝縺ｮ蛻晄悄蛹門・逅・
-	 * @param hInstance 繧｢繝励Μ繧ｱ繝ｼ繧ｷ繝ｧ繝ｳ縺ｮ繧､繝ｳ繧ｹ繧ｿ繝ｳ繧ｹ繝上Φ繝峨Ν
-	 * @return 蛻晄悄蛹悶′謌仙粥縺励◆蝣ｴ蜷医・ true
+	 * @brief ゲームの初期化処理
+	 * @param hInstance アプリケーションのインスタンスハンドル
+	 * @return 初期化が成功した場合は true
 	 */
 	bool Initialize(HINSTANCE hInstance);
 
 	/**
-	 * @brief 繧ｲ繝ｼ繝縺ｮ繝｡繧､繝ｳ繝ｫ繝ｼ繝励ｒ螳溯｡・
+	 * @brief ゲームのメインループを実行
 	 */
 	void Run();
 
 	/**
-	 * @brief 繧ｲ繝ｼ繝縺ｮ邨ゆｺ・・逅・
+	 * @brief ゲームの終了処理
 	 */
 	void Shutdown();
 
 	/**
-	 * @brief 繧ｲ繝ｼ繝縺ｮ繝昴・繧ｺ迥ｶ諷九ｒ險ｭ螳・
-	 * @param isPaused 繝昴・繧ｺ迥ｶ諷九↓縺吶ｋ蝣ｴ蜷医・ true
+	 * @brief ゲームのポーズ状態を設定
+	 * @param isPaused ポーズ状態にする場合は true
 	 */
 	void SetPaused(bool isPaused);
 
 	/**
-	 * @brief 迴ｾ蝨ｨ縺ｮ繝昴・繧ｺ迥ｶ諷九ｒ蜿門ｾ・
-	 * @return 繝昴・繧ｺ荳ｭ縺ｮ蝣ｴ蜷医・ true
+	 * @brief 現在のポーズ状態を取得
+	 * @return ポーズ中の場合は true
 	 */
 	bool IsPaused() const;
 
@@ -56,17 +56,17 @@ public:
 	DirectX::AudioEngine* GetAudioEngine() const { return m_audioEngine.get(); }
 private:
 	/**
-	 * @brief 繝輔Ξ繝ｼ繝縺斐→縺ｮ譖ｴ譁ｰ蜃ｦ逅・
-	 * @return 繧ｲ繝ｼ繝縺ｮ螳溯｡後ｒ邯壹￠繧句ｴ蜷医・ true
+	 * @brief フレームごとの更新処理
+	 * @return ゲームの実行を続ける場合は true
 	 */
 	bool Update();
 
 	/**
-	 * @brief 繝輔Ξ繝ｼ繝縺斐→縺ｮ謠冗判蜃ｦ逅・
+	 * @brief フレームごとの描画処理
 	 */
 	void Render();
 
-	// 繝｡繝ｳ繝舌・螟画焚
+	// メンバ変数
 	std::unique_ptr<Window> m_window;
 	std::unique_ptr<Input> m_input;
 	std::unique_ptr<GraphicsDevice> m_graphicsDevice;

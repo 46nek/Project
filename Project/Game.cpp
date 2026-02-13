@@ -1,4 +1,4 @@
-﻿#include "Game.h"
+#include "Game.h"
 #include <comdef.h>
 
 Game::Game() : m_isPaused(false) {
@@ -13,18 +13,18 @@ void Game::SetPaused(bool isPaused) {
 	if (m_isPaused) {
 		m_input->SetCursorVisible(true);
 
-		// 繧ｪ繝ｼ繝・ぅ繧ｪ繧剃ｸ譎ょ●豁｢
+		// オーディオを一時停止
 		if (m_audioEngine) {
 			m_audioEngine->Suspend();
 		}
 	}
 	else {
-		// 繝昴・繧ｺ隗｣髯､
+		// ポーズ解除
 		if (m_input->IsCursorLocked()) {
 			m_input->SetCursorVisible(false);
 		}
 
-		// 繧ｪ繝ｼ繝・ぅ繧ｪ繧貞・髢・
+		// オーディオを再開
 		if (m_audioEngine) {
 			m_audioEngine->Resume();
 		}
@@ -71,7 +71,7 @@ bool Game::Initialize(HINSTANCE hInstance) {
 		return false;
 	}
 
-	// 蛻晄悄險ｭ螳壹ｒ蜿肴丐
+	// 初期化設定を反映
 	SetPaused(m_isPaused);
 
 	return true;
@@ -115,15 +115,15 @@ bool Game::Update() {
 	}
 
 	if (!m_isPaused) {
-		// Input縺ｮ譖ｴ譁ｰ・医％縺薙〒繧ｫ繝ｼ繧ｽ繝ｫ荳ｭ螟ｮ蝗ｺ螳壹′螳溯｡後＆繧後∪縺呻ｼ・
-		// 繧ｦ繧｣繝ｳ繝峨え繝上Φ繝峨Ν繧呈ｸ｡縺励※縲∽ｸｭ蠢・ｺｧ讓吶ｒ險育ｮ励＆縺帙∪縺・
+		// Inputの更新（ここでカーソル中央固定が実行されます）
+		// ウィンドウハンドルを渡して、中心座標を計算させます
 		m_input->Update(m_window->GetHwnd());
 
 		m_sceneManager->Update(m_timer->GetDeltaTime());
 	}
 	else {
-		// 繝昴・繧ｺ荳ｭ縺ｯ繧ｫ繝ｼ繧ｽ繝ｫ繝ｭ繝・け蜃ｦ逅・ｼ・nput::Update・峨ｒ蜻ｼ縺ｰ縺ｪ縺・％縺ｨ縺ｧ縲・
-		// 繝槭え繧ｹ繧ｫ繝ｼ繧ｽ繝ｫ繧定・逕ｱ縺ｫ蜍輔°縺帙ｋ繧医≧縺ｫ縺励∪縺吶・
+		// ポーズ中はカーソルロック処理（Input::Update）を呼ばないことで、
+		// マウスカーソルを自由に動かせるようにします。
 	}
 
 	m_input->EndFrame();

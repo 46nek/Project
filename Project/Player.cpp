@@ -8,7 +8,7 @@
 extern Game* g_game;
 
 namespace {
-	// 螳壽焚螳夂ｾｩ
+	// 定数定義
 	constexpr int KEY_SHIFT = 0x10;
 	constexpr int KEY_MOVE_FORWARD = 'W';
 	constexpr int KEY_MOVE_BACKWARD = 'S';
@@ -53,8 +53,8 @@ void Player::Update(float deltaTime, Input* input, const std::vector<std::vector
 	m_isMoving = false;
 
 	if (input->IsKeyPressed('E') && m_heldOrbCount > 0) {
-		m_heldOrbCount--; // 謇謖∵焚繧呈ｸ帙ｉ縺・
-		m_isDecoyRequested = true; // GameObjectManager縺ｫ騾夂衍縺吶ｋ縺溘ａ縺ｮ繝輔Λ繧ｰ
+		m_heldOrbCount--; // 所持数を減らす
+		m_isDecoyRequested = true; // GameObjectManagerに通知するためのフラグ
 	}
 
 	UpdateSkill(deltaTime, input);
@@ -63,13 +63,13 @@ void Player::Update(float deltaTime, Input* input, const std::vector<std::vector
 }
 
 void Player::UpdateSkill(float deltaTime, Input* input) {
-	// 繧ｯ繝ｼ繝ｫ繝繧ｦ繝ｳ邨碁℃
+	// クールダウン経過
 	if (m_skillCoolDownTimer > 0.0f) {
 		m_skillCoolDownTimer -= deltaTime;
 		if (m_skillCoolDownTimer < 0.0f) m_skillCoolDownTimer = 0.0f;
 	}
 
-	// 蜉ｹ譫懈凾髢鍋ｵ碁℃
+	// 効果時間経過
 	if (m_isRunning) {
 		m_skillDurationTimer -= deltaTime;
 		if (m_skillDurationTimer <= 0.0f) {
@@ -78,11 +78,11 @@ void Player::UpdateSkill(float deltaTime, Input* input) {
 		}
 	}
 
-	// 逋ｺ蜍募愛螳・(繧ｯ繝ｼ繝ｫ繝繧ｦ繝ｳ0 縺九▽ Shift繧ｭ繝ｼ繧呈款縺励◆迸ｬ髢・
+	// 発動判定 (クールダウン0 かつ Shiftキーを押した瞬間)
 	if (m_skillCoolDownTimer <= 0.0f && input->IsKeyPressed(KEY_SHIFT)) {
 		m_isRunning = true;
 		m_skillDurationTimer = RUN_SKILL_DURATION;
-		m_skillCoolDownTimer = RUN_SKILL_COOLDOWN; // 逋ｺ蜍輔＠縺溽椪髢薙↓繧ｯ繝ｼ繝ｫ繝繧ｦ繝ｳ髢句ｧ具ｼ・0遘抵ｼ・
+		m_skillCoolDownTimer = RUN_SKILL_COOLDOWN; // 発動した瞬間にクールダウン開始（10秒）
 	}
 }
 

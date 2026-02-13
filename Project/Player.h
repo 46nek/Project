@@ -6,14 +6,14 @@
 #include <algorithm>
 #include <memory>
 
-// 蜑肴婿螳｣險
+// 前方宣言
 namespace DirectX {
     class SoundEffect;
     class SoundEffectInstance;
 }
 
 /**
- * @brief 繝励Ξ繧､繝､繝ｼ繧ｯ繝ｩ繧ｹ
+ * @brief プレイヤークラス
  */
 class Player {
 public:
@@ -37,7 +37,7 @@ public:
     DirectX::XMFLOAT3 GetRotation() const { return m_rotation; }
     bool IsMoving() const { return m_isMoving; }
 
-    // 繧ｹ繧ｭ繝ｫ迥ｶ諷九・蜿門ｾ・
+    // スキル状態の取得
     bool IsSkillActive() const { return m_isRunning; }
     float GetSkillDurationTimer() const { return m_skillDurationTimer; }
     float GetSkillCooldownTimer() const { return m_skillCoolDownTimer; }
@@ -48,9 +48,9 @@ public:
 private:
     static constexpr float COLLISION_RADIUS = 0.45f;
 
-    // 繧ｹ繧ｭ繝ｫ螳壽焚
-    static constexpr float RUN_SKILL_DURATION = 3.0f;  // 3遘帝俣襍ｰ繧後ｋ
-    static constexpr float RUN_SKILL_COOLDOWN = 10.0f; // 蜀堺ｽｿ逕ｨ縺ｾ縺ｧ10遘・
+    // スキル定数
+    static constexpr float RUN_SKILL_DURATION = 3.0f;  // 3秒間走れる
+    static constexpr float RUN_SKILL_COOLDOWN = 10.0f; // 再使用まで10秒
 
     bool IsCollidingWithWall(const DirectX::XMFLOAT3& position, float radius, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth);
 
@@ -63,9 +63,9 @@ private:
     bool m_isMoving;
     bool m_isRunning;
 
-    // 繧ｹ繧ｭ繝ｫ逕ｨ繧ｿ繧､繝槭・
-    float m_skillDurationTimer; // 襍ｰ繧後ｋ谿九ｊ譎る俣
-    float m_skillCoolDownTimer; // 蜀堺ｽｿ逕ｨ縺ｾ縺ｧ縺ｮ譎る俣
+    // スキル用タイマー
+    float m_skillDurationTimer; // 走れる残り時間
+    float m_skillCoolDownTimer; // 再使用までの時間
 
     DirectX::SoundEffect* m_walkSound;
     DirectX::SoundEffect* m_runSound;

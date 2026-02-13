@@ -13,7 +13,7 @@ class Decoy;
 class Stage;
 
 /**
- * @brief 謨ｵ繧ｭ繝｣繝ｩ繧ｯ繧ｿ繝ｼ繧ｯ繝ｩ繧ｹ
+ * @brief 敵キャラクタークラス
  */
 class Enemy {
 public:
@@ -54,7 +54,7 @@ private:
     float m_ambushTimer;
     DirectX::XMFLOAT3 m_ambushTarget;
     
-    // 繧ｹ繧ｿ繝・け讀懃衍逕ｨ
+    // スタック検知用
     DirectX::XMFLOAT3 m_prevPosition;
     float m_stuckTimer;
 
