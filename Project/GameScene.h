@@ -1,21 +1,31 @@
-#pragma once
+﻿#pragma once
 #include "Scene.h"
-#include <memory>
-#include <vector>
 #include "Camera.h"
 #include "Player.h"
 #include "UI.h"
 #include "GameObjectManager.h"
 #include "CameraDirector.h"
 #include "GameEnvironment.h"
+#include <memory>
+#include <vector>
 
 class GameScene : public Scene {
 public:
+    /**
+     * @brief 繧ｲ繝ｼ繝繧ｷ繝ｼ繝ｳ縺ｮ繧ｳ繝ｳ繧ｹ繝医Λ繧ｯ繧ｿ
+     */
     GameScene();
+
+    /**
+     * @brief 繧ｲ繝ｼ繝繧ｷ繝ｼ繝ｳ縺ｮ繝・せ繝医Λ繧ｯ繧ｿ
+     */
     ~GameScene();
 
     static std::unique_ptr<GameScene> s_transferInstance;
 
+    /**
+     * @brief 繧ｷ繝ｼ繝ｳ縺ｮ蛻晄悄蛹・
+     */
     bool Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine) override;
 
     bool InitializeEnvironment(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine);
@@ -23,8 +33,20 @@ public:
     bool InitializeGameObjects();
     bool InitializeAudio();
 
+    /**
+     * @brief 繧ｷ繝ｼ繝ｳ縺ｮ邨ゆｺ・・逅・
+     */
     void Shutdown() override;
+
+    /**
+     * @brief 繧ｷ繝ｼ繝ｳ縺ｮ譖ｴ譁ｰ蜃ｦ逅・
+     * @param deltaTime 蜑阪ヵ繝ｬ繝ｼ繝縺九ｉ縺ｮ邨碁℃譎る俣
+     */
     void Update(float deltaTime) override;
+
+    /**
+     * @brief 繧ｷ繝ｼ繝ｳ縺ｮ謠冗判蜃ｦ逅・
+     */
     void Render() override;
 
     void UpdateTitleLoop(float deltaTime);

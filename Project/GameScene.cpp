@@ -179,7 +179,6 @@ void GameScene::Update(float deltaTime) {
         m_isPaused = true;
         m_input->SetCursorLock(false); 
         m_input->SetCursorVisible(true); 
-
         m_pauseSelectIndex = 0; 
     }
 
@@ -198,10 +197,10 @@ void GameScene::Update(float deltaTime) {
         float mx = rawMx * (static_cast<float>(Game::SCREEN_WIDTH) / actualWidth);
         float my = rawMy * (static_cast<float>(Game::SCREEN_HEIGHT) / actualHeight);
 
-        // 2. UIの更新 (AUDIO削除後の新インデックス体系で呼び出し)
+        // 2. UIの更新
         m_ui->UpdatePauseMenu(m_pauseSelectIndex, mx, my, m_input->IsKeyPressed(VK_LBUTTON), m_input->IsKeyDown(VK_LBUTTON), Game::SCREEN_WIDTH, Game::SCREEN_HEIGHT);
 
-        // 3. キーボード操作 (最大値を 5 に変更)
+        // 3. キーボード操作
         if (m_input->IsKeyPressed(VK_UP)) {
             m_pauseSelectIndex = (m_pauseSelectIndex > 0) ? m_pauseSelectIndex - 1 : 5;
         }
@@ -227,7 +226,7 @@ void GameScene::Update(float deltaTime) {
 
     if (!m_gameObjectManager) { return; }
 
-    if (m_input->IsKeyPressed(VK_LBUTTON) || (GetAsyncKeyState(VK_LBUTTON) & 0x8000)) {
+    if (m_input->IsKeyPressed(VK_LBUTTON) || m_input->IsKeyDown(VK_LBUTTON)) {
         m_input->SetCursorLock(true);
     }
 

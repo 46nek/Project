@@ -1,15 +1,15 @@
-#include "AStar.h"
+ï»¿#include "AStar.h"
 #include <algorithm>
 #include <cmath>
 #include <queue>
 #include <vector>
 
-// À•W‚ğ•Û‚·‚é‚½‚ß‚ÌƒVƒ“ƒvƒ‹‚È\‘¢‘Ì
+// è ï½§è®“å¶ï½’è«æ™„æˆŸç¸ºå¶ï½‹ç¸ºæº˜ï½ç¸ºï½®ç¹§ï½·ç¹ï½³ç¹åŠ±Îç¸ºï½ªè®’çŸ©Â€ï£°è´ãƒ»
 struct Coord {
 	int x, y;
 };
 
-// —Dæ“x•t‚«ƒLƒ…[‚ÅFƒRƒXƒg‚ªÅ¬‚Ìƒm[ƒh‚ğ”äŠr‚·‚é‚½‚ß‚ÌƒJƒXƒ^ƒ€ƒRƒ“ƒpƒŒ[ƒ^
+// èœ†ï½ªèœˆäº¥ï½ºï½¦è‰å€¥â€³ç¹§ï½­ç¹ï½¥ç¹ï½¼ç¸ºï½§Fç¹§ï½³ç¹§ï½¹ç¹åŒ»â€²è­›Â€èŸ†ä¸Šãƒ»ç¹å¼±ãƒ»ç¹å³¨ï½’è±ˆç¢‘ï½¼ãƒ»â˜†ç¹§ä¹â—†ç¹§âˆšãƒ»ç¹§ï½«ç¹§ï½¹ç¹§ï½¿ç¹ï£°ç¹§ï½³ç¹ï½³ç¹ä»£Îç¹ï½¼ç¹§ï½¿
 struct CompareNode {
 	const std::vector<std::vector<AStar::NodeInfo>>& nodes;
 	CompareNode(const std::vector<std::vector<AStar::NodeInfo>>& nodes) : nodes(nodes) {}
@@ -49,22 +49,22 @@ int Heuristic(int x1, int y1, int x2, int y2) {
 	return abs(x1 - x2) + abs(y1 - y2);
 }
 
-// A*’TõƒAƒ‹ƒSƒŠƒYƒ€‚ÅÅ’ZŒo˜H‚ğŒ©‚Â‚¯‚é (Å“K‰»EˆÀ‘S«Œüã”Å)
+// A*è¬—ï½¢é‚ï½¢ç¹§ï½¢ç¹ï½«ç¹§ï½´ç¹ï½ªç¹§ï½ºç¹ï£°ç¸ºï½§è­›Â€éï½­é‚¨ç‘šï½·ï½¯ç¹§å®šï½¦ä¹â–½ç¸ºä»£ï½‹ (è­›Â€é©•ï½©è›¹æ‚¶ãƒ»è³ç‰™ãƒ»è«¤ï½§èœ·å°ï½¸é¡”æ²¿)
 std::vector<DirectX::XMFLOAT2> AStar::FindPath(int startX, int startY, int goalX, int goalY) {
-	// --- C³1: ƒXƒ^[ƒg’n“_‚ÌŒµ–§ƒ`ƒFƒbƒN ---
+	// --- è«ï½®è±ï½£1: ç¹§ï½¹ç¹§ï½¿ç¹ï½¼ç¹äº¥æ…è½¤ï½¹ç¸ºï½®èœ´ï½³èŸ‡ãƒ»ãƒ¡ç¹§ï½§ç¹ãƒ»ã‘ ---
 	if (!IsWalkable(startX, startY)) {
-		// ƒXƒ^[ƒg’n“_©‘Ì‚ª•Ç–„‚Ü‚è‚µ‚Ä‚¢‚éê‡‚Í‚Ç‚¤‚µ‚æ‚¤‚à‚È‚¢‚Ì‚Å‹ó‚ğ•Ô‚·
+		// ç¹§ï½¹ç¹§ï½¿ç¹ï½¼ç¹äº¥æ…è½¤ï½¹é–¾ï½ªè´è–™â€²è¢âˆæ²‚ç¸ºï½¾ç¹§ç¿«ï¼ ç¸ºï½¦ç¸ºãƒ»ï½‹è£ï½´èœ·åŒ»ãƒ»ç¸ºï½©ç¸ºãƒ»ï¼ ç¹§åŒ»â‰§ç¹§ã‚…â†‘ç¸ºãƒ»ãƒ»ç¸ºï½§é¨ï½ºç¹§å®šï½¿æ–â˜†
 		return {};
 	}
 
-	// --- C³2: ƒS[ƒ‹’n“_‚ª•Ç‚¾‚Á‚½ê‡‚Ì‹~Ï‘[’u ---
-	// ƒvƒŒƒCƒ„[‚ª•ÇÛ‚É‚¢‚é‚ÆAŒvZãu•Ç‚Ì’†v”»’è‚É‚È‚èAˆÚ“®‚µ‚Ä‚±‚È‚­‚È‚é‚Ì‚ğ–h‚®
+	// --- è«ï½®è±ï½£2: ç¹§ï½´ç¹ï½¼ç¹ï½«è¨ï½°è½¤ï½¹ç¸ºæ‚Ÿï½£âˆšâ–¡ç¸ºï½£ç¸ºæº·ï£°ï½´èœ·åŒ»ãƒ»è¬¨ç¬¬ï½¸åŸŸè’”é„‚ï½® ---
+	// ç¹åŠ±Îç¹§ï½¤ç¹ï½¤ç¹ï½¼ç¸ºæ‚Ÿï½£ãƒ»åœ€ç¸ºï½«ç¸ºãƒ»ï½‹ç¸ºï½¨ç¸²âˆ¬ï½¨è‚²ï½®å¶ºï½¸ç¿«Â€æ‚Ÿï½£âˆšãƒ»è³ï½­ç¸²æ¦Šæ„›è³å£¹â†“ç¸ºï½ªç¹§ç¿«Â€âˆ«ï½§ï½»èœè¼”ï¼ ç¸ºï½¦ç¸ºè–™â†‘ç¸ºä¸Šâ†‘ç¹§ä¹ãƒ»ç¹§å¸äºŸç¸ºãƒ»
 	if (!IsWalkable(goalX, goalY)) {
 		bool foundNewGoal = false;
 		int dx[] = { 0, 0, 1, -1 };
 		int dy[] = { 1, -1, 0, 0 };
 
-		// ã‰º¶‰E‚ğŒ©‚ÄA•à‚¯‚éêŠ‚ª‚ ‚ê‚Î‚»‚±‚ğ‰¼ƒS[ƒ‹‚É‚·‚é
+		// è³è´‹ï½¸å¥ï½·ï½¦èœ¿ï½³ç¹§å®šï½¦ä¹â€»ç¸²âˆµï½­ï½©ç¸ºä»£ï½‹è£ï½´è¬‡Â€ç¸ºå¾Œâ‰ ç¹§å¾Œãƒ»ç¸ºæ˜´ï¼…ç¹§å‰ƒï½»ï½®ç¹§ï½´ç¹ï½¼ç¹ï½«ç¸ºï½«ç¸ºå¶ï½‹
 		for (int i = 0; i < 4; ++i) {
 			int nx = goalX + dx[i];
 			int ny = goalY + dy[i];
@@ -75,7 +75,7 @@ std::vector<DirectX::XMFLOAT2> AStar::FindPath(int startX, int startY, int goalX
 				break;
 			}
 		}
-		// ‹~Ï‚µ‚Ä‚àƒ_ƒ‚È‚ç’ú‚ß‚é
+		// è¬¨ç¬¬ï½¸åŒ»ï¼ ç¸ºï½¦ç¹§ã‚…ãƒ ç¹ï½¡ç¸ºï½ªç¹§èŠ½ï½«ï½¦ç¹§âˆšï½‹
 		if (!foundNewGoal) { return {}; }
 	}
 
@@ -84,7 +84,7 @@ std::vector<DirectX::XMFLOAT2> AStar::FindPath(int startX, int startY, int goalX
 
 	std::priority_queue<Coord, std::vector<Coord>, CompareNode> openList{ CompareNode(m_nodes) };
 
-	// ƒXƒ^[ƒgƒm[ƒh‚Ìİ’è
+	// ç¹§ï½¹ç¹§ï½¿ç¹ï½¼ç¹åŒ»ãƒ®ç¹ï½¼ç¹å³¨ãƒ»éšªï½­è³ãƒ»
 	NodeInfo& startNode = m_nodes[startY][startX];
 
 	startNode.ResetValue();
@@ -93,36 +93,36 @@ std::vector<DirectX::XMFLOAT2> AStar::FindPath(int startX, int startY, int goalX
 	startNode.h = Heuristic(startX, startY, goalX, goalY);
 	startNode.inOpenList = true;
 
-	// --- C³3: eƒm[ƒh‚ğŠmÀ‚Éu–³‚µ(-1, -1)v‚Éİ’è ---
-	// ResetValue‚ÌÀ‘•˜R‚ê‘Îô‚Æ‚µ‚ÄA‚±‚±‚Å–¾¦“I‚É‘ã“ü‚µ‚Ü‚·B
+	// --- è«ï½®è±ï½£3: éš•ï½ªç¹å¼±ãƒ»ç¹å³¨ï½’é’ï½ºè³æº˜â†“ç¸²æªâ”Œç¸ºãƒ»-1, -1)ç¸²é˜ªâ†“éšªï½­è³ãƒ»---
+	// ResetValueç¸ºï½®è³æº¯ï½£ãƒ»ï½¼ä¸Šï½ŒèŸ‡ï½¾é²æ‚¶â†’ç¸ºåŠ±â€»ç¸²âˆšï¼…ç¸ºè–™ã€’è­å®ˆï½¤ï½ºé€§ãƒ»â†“è‰ï½£èœˆï½¥ç¸ºåŠ±âˆªç¸ºå¶Â€ãƒ»
 	startNode.parent = { -1.0f, -1.0f };
 
 	openList.push({ startX, startY });
 
-	// ’Tõƒ‹[ƒv
+	// è¬—ï½¢é‚ï½¢ç¹ï½«ç¹ï½¼ç¹ãƒ»
 	while (!openList.empty()) {
 		Coord current = openList.top();
 		openList.pop();
 
-		// ƒS[ƒ‹‚É“’B‚µ‚½ê‡
+		// ç¹§ï½´ç¹ï½¼ç¹ï½«ç¸ºï½«è›»ï½°é©•æ–ï¼ ç¸ºæº·ï£°ï½´èœ·ãƒ»
 		if (current.x == goalX && current.y == goalY) {
 			std::vector<DirectX::XMFLOAT2> path;
 			Coord temp = current;
 
-			// ƒXƒ^[ƒg’n“_‚Ü‚Åe‚ğ‚½‚Ç‚é
+			// ç¹§ï½¹ç¹§ï½¿ç¹ï½¼ç¹äº¥æ…è½¤ï½¹ç¸ºï½¾ç¸ºï½§éš•ï½ªç¹§åµâ—†ç¸ºï½©ç¹§ãƒ»
 			while (temp.x != -1 && temp.y != -1) {
 				path.push_back({ (float)temp.x, (float)temp.y });
 
-				// ˆÀ‘S‘Îô: ”z—ñŠOQÆƒ`ƒFƒbƒN
+				// è³ç‰™ãƒ»èŸ‡ï½¾é²ãƒ» é©Ÿæ¦Šãƒ»èŸé–€ç›¾è¾£ï½§ç¹âˆšã‰ç¹ãƒ»ã‘
 				if (temp.y < 0 || temp.y >= m_height || temp.x < 0 || temp.x >= m_width) { break; }
 
 				const auto& parentCoord = m_nodes[temp.y][temp.x].parent;
 
-				// eî•ñ‚ğæ“¾
+				// éš•ï½ªè« ãƒ»ï£°ï½±ç¹§è²å™è •ãƒ»
 				int px = static_cast<int>(parentCoord.x);
 				int py = static_cast<int>(parentCoord.y);
 
-				// –³ŒÀƒ‹[ƒv‘Îô: e‚ª©•ª©g‚¾‚Á‚½‚çI—¹
+				// è¾Ÿï½¡é«¯èˆŒÎç¹ï½¼ç¹æ€œï½¯ï½¾é²ãƒ» éš•ï½ªç¸ºç‘šãƒ»è›»ãƒ»ãƒ»éœ„ï½«ç¸ºï£°ç¸ºï½£ç¸ºæº˜ï½‰é‚¨ã‚†ï½ºãƒ»
 				if (px == temp.x && py == temp.y) { break; }
 
 				temp = { px, py };
@@ -145,11 +145,11 @@ std::vector<DirectX::XMFLOAT2> AStar::FindPath(int startX, int startY, int goalX
 
 			NodeInfo& neighbor = m_nodes[nextY][nextX];
 
-			// ID‚ªŒÃ‚¢ê‡‚ÍƒŠƒZƒbƒg
+			// IDç¸ºæ‚Ÿå•†ç¸ºãƒ»ï£°ï½´èœ·åŒ»ãƒ»ç¹ï½ªç¹§ï½»ç¹ãƒ»ãƒ¨
 			if (neighbor.searchId != m_currentSearchId) {
 				neighbor.ResetValue();
 				neighbor.searchId = m_currentSearchId;
-				// ƒŠƒZƒbƒg’¼Œã‚Ì‚½‚ßAClosedList‚È‚Ç‚Ìƒtƒ‰ƒO‚àfalse‚É‚È‚Á‚Ä‚¢‚é‚Í‚¸
+				// ç¹ï½ªç¹§ï½»ç¹ãƒ»ãƒ¨é€¶ï½´è •å¾Œãƒ»ç¸ºæº˜ï½ç¸²ï¼ŒlosedListç¸ºï½ªç¸ºï½©ç¸ºï½®ç¹è¼”Î›ç¹§ï½°ç¹§ï¼§alseç¸ºï½«ç¸ºï½ªç¸ºï½£ç¸ºï½¦ç¸ºãƒ»ï½‹ç¸ºï½¯ç¸ºãƒ»
 			}
 
 			if (neighbor.inClosedList) { continue; }
@@ -159,7 +159,7 @@ std::vector<DirectX::XMFLOAT2> AStar::FindPath(int startX, int startY, int goalX
 			if (!neighbor.inOpenList || newG < neighbor.g) {
 				neighbor.g = newG;
 				neighbor.h = Heuristic(nextX, nextY, goalX, goalY);
-				neighbor.parent = { (float)current.x, (float)current.y }; // e‚ğƒZƒbƒg
+				neighbor.parent = { (float)current.x, (float)current.y }; // éš•ï½ªç¹§åµãç¹ãƒ»ãƒ¨
 
 				if (!neighbor.inOpenList) {
 					neighbor.inOpenList = true;

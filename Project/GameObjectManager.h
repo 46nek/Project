@@ -1,8 +1,4 @@
-#pragma once
-#include <vector>
-#include <memory>
-#include <d3d11.h>
-#include <SimpleMath.h>
+﻿#pragma once
 #include "Enemy.h"
 #include "Orb.h"
 #include "Stage.h"
@@ -10,6 +6,11 @@
 #include "Player.h"
 #include "GraphicsDevice.h"
 #include "Decoy.h"
+
+#include <d3d11.h>
+#include <SimpleMath.h>
+#include <vector>
+#include <memory>
 
 class Camera;
 
@@ -27,7 +28,7 @@ public:
 
     void RenderEnemies(GraphicsDevice* graphicsDevice, Camera* camera, LightManager* lightManager);
 
-    // �Q�b�^�[
+    // 繧ｲ繝・ち繝ｼ
     int GetRemainingOrbs() const { return m_remainingOrbs; }
     int GetTotalOrbs() const { return m_totalOrbs; }
     bool IsGoalSpawned() const { return m_goalSpawned; }
@@ -60,3 +61,4 @@ private:
     bool m_requestZoomOut;
     float m_enemyRadarTimer;
 };
+

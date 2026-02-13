@@ -1,7 +1,11 @@
-#include "Easing.h"
+﻿#include "Easing.h"
+#include <algorithm>
+#include <cmath>
+
+static const float PI = 3.1415926535f;
 
 float Easing::GetValue(EasingType type, float t) {
-    // t�͈̔͂�0.0�`1.0�ɃN�����v
+    // t縺ｮ遽・峇繧・.0・・.0縺ｫ繧ｯ繝ｩ繝ｳ繝・
     t = std::max(0.0f, std::min(t, 1.0f));
 
     switch (type) {
@@ -139,3 +143,4 @@ float Easing::EaseInBounce(float t) { return 1 - EaseOutBounce(1 - t); }
 float Easing::EaseInOutBounce(float t) {
     return t < 0.5f ? (1 - EaseOutBounce(1 - 2 * t)) / 2 : (1 + EaseOutBounce(2 * t - 1)) / 2;
 }
+

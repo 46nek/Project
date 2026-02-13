@@ -1,8 +1,8 @@
-#pragma once
-#include <Windows.h> // HWND‚ğg—p‚·‚é‚½‚ß‚É’Ç‰Á
+ï»¿#pragma once
+#include <Windows.h> // HWNDã‚’ä½¿ç”¨ã™ã‚‹ãŸã‚ã«è¿½åŠ 
 
 /**
- * @brief ƒL[ƒ{[ƒh‚Æƒ}ƒEƒX‚Ì“ü—Í‚ğŠÇ—‚·‚éƒNƒ‰ƒX
+ * @brief ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰ã¨ãƒã‚¦ã‚¹ã®å…¥åŠ›ã‚’ç®¡ç†ã™ã‚‹ã‚¯ãƒ©ã‚¹
  */
 class Input {
 public:
@@ -13,12 +13,12 @@ public:
 
 	void Initialize();
 	/**
-	 * @brief ƒtƒŒ[ƒ€‚ÌI‚í‚è‚ÉƒL[ó‘Ô‚ğXV
+	 * @brief ãƒ•ãƒ¬ãƒ¼ãƒ ã®çµ‚ã‚ã‚Šã«ã‚­ãƒ¼çŠ¶æ…‹ã‚’æ›´æ–°
 	 */
 	void EndFrame();
 	/**
-	 * @brief –ˆƒtƒŒ[ƒ€‚ÌXVˆ—iƒJ[ƒ\ƒ‹ŒÅ’è‚È‚Ç‚ğs‚¤j
-	 * @param hwnd ƒEƒBƒ“ƒhƒEƒnƒ“ƒhƒ‹iƒJ[ƒ\ƒ‹ŒÅ’è‚ÌŠî€ˆÊ’uŒvZ—pj
+	 * @brief æ¯ãƒ•ãƒ¬ãƒ¼ãƒ ã®æ›´æ–°å‡¦ç†ï¼ˆã‚«ãƒ¼ã‚½ãƒ«å›ºå®šãªã©ã‚’è¡Œã†ï¼‰
+	 * @param hwnd ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãƒãƒ³ãƒ‰ãƒ«ï¼ˆã‚«ãƒ¼ã‚½ãƒ«å›ºå®šã®åŸºæº–ä½ç½®è¨ˆç®—ç”¨ï¼‰
 	 */
 	void Update(HWND hwnd);
 
@@ -27,40 +27,40 @@ public:
 	void MouseMove(int x, int y);
 
 	/**
-	 * @brief ƒ}ƒEƒX‚Ìâ‘ÎÀ•W‚ğİ’è
+	 * @brief ãƒã‚¦ã‚¹ã®çµ¶å¯¾åº§æ¨™ã‚’è¨­å®š
 	*/
 	void SetMousePosition(int x, int y);
 
 	/**
-	 * @brief ƒ}ƒEƒX‚Ìâ‘ÎÀ•W‚ğæ“¾
+	 * @brief ãƒã‚¦ã‚¹ã®çµ¶å¯¾åº§æ¨™ã‚’å–å¾—
 	 */
 	void GetMousePosition(int& x, int& y);
 
 	/**
-	 * @brief w’èƒL[‚ªŒ»İ‰Ÿ‚³‚ê‚Ä‚¢‚é‚©
+	 * @brief æŒ‡å®šã‚­ãƒ¼ãŒç¾åœ¨æŠ¼ã•ã‚Œã¦ã„ã‚‹ã‹
 	 */
 	bool IsKeyDown(unsigned int key);
 	/**
-	 * @brief w’èƒL[‚ª‚±‚ÌƒtƒŒ[ƒ€‚Å‰Ÿ‚³‚ê‚½uŠÔ‚©
+	 * @brief æŒ‡å®šã‚­ãƒ¼ãŒã“ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã§æŠ¼ã•ã‚ŒãŸç¬é–“ã‹
 	 */
 	bool IsKeyPressed(unsigned int key);
 	/**
-	 * @brief ‘OƒtƒŒ[ƒ€‚©‚ç‚Ìƒ}ƒEƒX‚ÌˆÚ“®—Ê‚ğæ“¾
+	 * @brief å‰ãƒ•ãƒ¬ãƒ¼ãƒ ã‹ã‚‰ã®ãƒã‚¦ã‚¹ã®ç§»å‹•é‡ã‚’å–å¾—
 	 */
 	void GetMouseDelta(int& x, int& y);
 
 	/**
-	 * @brief ƒJ[ƒ\ƒ‹‚Ì•\¦/”ñ•\¦‚ğİ’è
+	 * @brief ã‚«ãƒ¼ã‚½ãƒ«ã®è¡¨ç¤º/éè¡¨ç¤ºã‚’è¨­å®š
 	 */
 	void SetCursorVisible(bool visible);
 
 	/**
-	 * @brief ƒJ[ƒ\ƒ‹‚ÌƒƒbƒNi’†‰›ŒÅ’èjó‘Ô‚ğİ’è
+	 * @brief ã‚«ãƒ¼ã‚½ãƒ«ã®ãƒ­ãƒƒã‚¯ï¼ˆä¸­å¤®å›ºå®šï¼‰çŠ¶æ…‹ã‚’è¨­å®š
 	 */
 	void SetCursorLock(bool lock);
 
 	/**
-	 * @brief ƒJ[ƒ\ƒ‹‚ªƒƒbƒN‚³‚ê‚Ä‚¢‚é‚©‚ğæ“¾
+	 * @brief ã‚«ãƒ¼ã‚½ãƒ«ãŒãƒ­ãƒƒã‚¯ã•ã‚Œã¦ã„ã‚‹ã‹ã‚’å–å¾—
 	 */
 	bool IsCursorLocked() const;
 
@@ -70,7 +70,7 @@ private:
 	int m_mouseX, m_mouseY;
 	int m_absMouseX, m_absMouseY;
 
-	// ƒJ[ƒ\ƒ‹§Œä—p
-	bool m_isCursorLocked;   // ƒJ[ƒ\ƒ‹‚ğŒÅ’è‚·‚é‚©‚Ç‚¤‚©
-	bool m_isCursorVisible;  // Œ»İ‚ÌƒJ[ƒ\ƒ‹•\¦ó‘ÔŠÇ—iShowCursor‚Ìd•¡ŒÄ‚Ño‚µ–h~—pj
+	// ã‚«ãƒ¼ã‚½ãƒ«åˆ¶å¾¡ç”¨
+	bool m_isCursorLocked;   // ã‚«ãƒ¼ã‚½ãƒ«ã‚’å›ºå®šã™ã‚‹ã‹ã©ã†ã‹
+	bool m_isCursorVisible;  // ç¾åœ¨ã®ã‚«ãƒ¼ã‚½ãƒ«è¡¨ç¤ºçŠ¶æ…‹ç®¡ç†ï¼ˆShowCursorã®é‡è¤‡å‘¼ã³å‡ºã—é˜²æ­¢ç”¨ï¼‰
 };

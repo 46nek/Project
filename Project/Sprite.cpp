@@ -1,4 +1,4 @@
-#include "Sprite.h"
+ï»¿#include "Sprite.h"
 #include "WICTextureLoader.h"
 #include "SpriteBatch.h"
 
@@ -27,7 +27,7 @@ bool Sprite::Initialize(ID3D11Device* device, const wchar_t* textureFilename) {
 	return true;
 }
 
-// ƒƒSEƒ{ƒ^ƒ“—p‚ÌRenderŠÖ”‚ÌŽÀ‘•
+// ç¹ï½­ç¹§ï½´ç¹ï½»ç¹æ‡Šã¡ç¹ï½³é€•ï½¨ç¸ºï½®Renderé«¢ï½¢è¬¨ï½°ç¸ºï½®èž³æº¯ï½£ãƒ»
 void Sprite::Render(DirectX::SpriteBatch* spriteBatch, const DirectX::XMFLOAT2& position, float scale, float rotation, const DirectX::XMFLOAT4& color) {
 	if (spriteBatch && m_textureView) {
 		DirectX::XMFLOAT2 origin(m_textureWidth / 2.0f, m_textureHeight / 2.0f);
@@ -35,7 +35,7 @@ void Sprite::Render(DirectX::SpriteBatch* spriteBatch, const DirectX::XMFLOAT2& 
 	}
 }
 
-// ”wŒi—p‚ÌRenderŠÖ”‚ÌŽÀ‘•
+// é–­æ¢§å‹¹é€•ï½¨ç¸ºï½®Renderé«¢ï½¢è¬¨ï½°ç¸ºï½®èž³æº¯ï½£ãƒ»
 void Sprite::RenderFill(DirectX::SpriteBatch* spriteBatch, const RECT& destinationRectangle) {
 	if (spriteBatch && m_textureView) {
 		spriteBatch->Draw(m_textureView.Get(), destinationRectangle);
@@ -47,9 +47,9 @@ void Sprite::Shutdown() {
 }
 
 void Sprite::RenderFill(DirectX::SpriteBatch* spriteBatch, const RECT& destinationRect, const DirectX::XMFLOAT4& color) {
-	// m_texture ‚Å‚Í‚È‚­Am_textureView ‚ðŽg‚¢‚Ü‚·
+	// m_texture ç¸ºï½§ç¸ºï½¯ç¸ºï½ªç¸ºä¸ŠÂ€ï¼»_textureView ç¹§å‰ƒï½½ï½¿ç¸ºãƒ»âˆªç¸ºãƒ»
 	if (spriteBatch && m_textureView) {
-		// m_textureView.Get() ‚ÅƒVƒF[ƒ_[ƒŠƒ\[ƒXƒrƒ…[‚ðŽæ“¾‚µ‚Ü‚·
+		// m_textureView.Get() ç¸ºï½§ç¹§ï½·ç¹§ï½§ç¹ï½¼ç¹Â€ç¹ï½¼ç¹ï½ªç¹§ï½½ç¹ï½¼ç¹§ï½¹ç¹è–™Î—ç¹ï½¼ç¹§è²žå™è •åŠ±ï¼ ç¸ºï½¾ç¸ºãƒ»
 		spriteBatch->Draw(m_textureView.Get(), destinationRect, DirectX::XMLoadFloat4(&color));
 	}
 }

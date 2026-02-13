@@ -1,4 +1,4 @@
-#include "GraphicsDevice.h"
+﻿#include "GraphicsDevice.h"
 #include "LightManager.h"
 
 GraphicsDevice::GraphicsDevice()
@@ -154,13 +154,15 @@ void GraphicsDevice::EndScene() {
 bool GraphicsDevice::UpdateMatrixBuffer(const DirectX::XMMATRIX& world, const DirectX::XMMATRIX& view, const DirectX::XMMATRIX& projection, const DirectX::XMMATRIX& lightView, const DirectX::XMMATRIX& lightProjection) {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	if (FAILED(m_immediateContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) { return false; }
-	MatrixBufferType* dataPtr = (MatrixBufferType*)mappedResource.pData;
+	
+	auto* dataPtr = static_cast<MatrixBufferType*>(mappedResource.pData);
 	dataPtr->world = DirectX::XMMatrixTranspose(world);
 	dataPtr->view = DirectX::XMMatrixTranspose(view);
 	dataPtr->projection = DirectX::XMMatrixTranspose(projection);
 	dataPtr->worldInverseTranspose = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, world));
 	dataPtr->lightView = DirectX::XMMatrixTranspose(lightView);
 	dataPtr->lightProjection = DirectX::XMMatrixTranspose(lightProjection);
+	
 	m_immediateContext->Unmap(m_matrixBuffer, 0);
 	m_immediateContext->VSSetConstantBuffers(0, 1, &m_matrixBuffer);
 	return true;
@@ -169,8 +171,10 @@ bool GraphicsDevice::UpdateMatrixBuffer(const DirectX::XMMATRIX& world, const Di
 bool GraphicsDevice::UpdateLightBuffer(const LightBufferType& lightBuffer) {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	if (FAILED(m_immediateContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) { return false; }
-	LightBufferType* dataPtr = (LightBufferType*)mappedResource.pData;
+	
+	auto* dataPtr = static_cast<LightBufferType*>(mappedResource.pData);
 	*dataPtr = lightBuffer;
+	
 	m_immediateContext->Unmap(m_lightBuffer, 0);
 	m_immediateContext->PSSetConstantBuffers(1, 1, &m_lightBuffer);
 	return true;
@@ -179,10 +183,12 @@ bool GraphicsDevice::UpdateLightBuffer(const LightBufferType& lightBuffer) {
 bool GraphicsDevice::UpdateMotionBlurBuffer(const DirectX::XMMATRIX& prevViewProj, const DirectX::XMMATRIX& currentViewProjInv, float blurAmount) {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	if (FAILED(m_immediateContext->Map(m_motionBlurBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) { return false; }
-	MotionBlurBufferType* dataPtr = (MotionBlurBufferType*)mappedResource.pData;
+	
+	auto* dataPtr = static_cast<MotionBlurBufferType*>(mappedResource.pData);
 	dataPtr->previousViewProjection = DirectX::XMMatrixTranspose(prevViewProj);
 	dataPtr->currentViewProjectionInverse = DirectX::XMMatrixTranspose(currentViewProjInv);
 	dataPtr->blurAmount = blurAmount;
+	
 	m_immediateContext->Unmap(m_motionBlurBuffer, 0);
 	m_immediateContext->PSSetConstantBuffers(0, 1, &m_motionBlurBuffer);
 	return true;
@@ -191,8 +197,10 @@ bool GraphicsDevice::UpdateMotionBlurBuffer(const DirectX::XMMATRIX& prevViewPro
 bool GraphicsDevice::UpdateMaterialBuffer(const MaterialBufferType& materialBuffer) {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	if (FAILED(m_immediateContext->Map(m_materialBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) { return false; }
-	MaterialBufferType* dataPtr = (MaterialBufferType*)mappedResource.pData;
+	
+	auto* dataPtr = static_cast<MaterialBufferType*>(mappedResource.pData);
 	*dataPtr = materialBuffer;
+	
 	m_immediateContext->Unmap(m_materialBuffer, 0);
 	m_immediateContext->PSSetConstantBuffers(2, 1, &m_materialBuffer);
 	return true;
@@ -201,8 +209,10 @@ bool GraphicsDevice::UpdateMaterialBuffer(const MaterialBufferType& materialBuff
 bool GraphicsDevice::UpdatePostProcessBuffer(const PostProcessBufferType& postProcessBuffer) {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	if (FAILED(m_immediateContext->Map(m_postProcessBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource))) { return false; }
-	PostProcessBufferType* dataPtr = (PostProcessBufferType*)mappedResource.pData;
+	
+	auto* dataPtr = static_cast<PostProcessBufferType*>(mappedResource.pData);
 	*dataPtr = postProcessBuffer;
+	
 	m_immediateContext->Unmap(m_postProcessBuffer, 0);
 	m_immediateContext->PSSetConstantBuffers(3, 1, &m_postProcessBuffer);
 	return true;

@@ -1,33 +1,33 @@
-#pragma once
+ï»¿#pragma once
+#include "Model.h"
+#include "MazeGenerator.h"
+#include "MeshGenerator.h"
 #include <d3d11.h>
 #include <string>
 #include <vector>
 #include <memory>
-#include "Model.h"
-#include "MazeGenerator.h"
-#include "MeshGenerator.h"
 
 /**
  * @class AssetLoader
- * @brief 3Dƒ‚ƒfƒ‹‚âƒeƒNƒXƒ`ƒƒ‚È‚Ç‚ÌƒAƒZƒbƒg‚ğƒtƒ@ƒCƒ‹‚©‚ç“Ç‚İ‚ŞÃ“IƒNƒ‰ƒX
+ * @brief 3Dç¹ï½¢ç¹ãƒ»Îç¹§ãƒ»ãƒ¦ç¹§ï½¯ç¹§ï½¹ç¹âˆšÎ•ç¸ºï½ªç¸ºï½©ç¸ºï½®ç¹§ï½¢ç¹§ï½»ç¹ãƒ»ãƒ¨ç¹§åµãƒµç¹§ï½¡ç¹§ï½¤ç¹ï½«ç¸ºä¹ï½‰éš±ï½­ç¸ºï½¿éœï½¼ç¹§Â€é«±å’å™ªç¹§ï½¯ç¹ï½©ç¹§ï½¹
  */
 class AssetLoader {
 public:
 	/**
-	 * @brief Assimpƒ‰ƒCƒuƒ‰ƒŠ‚ğg—p‚µ‚Äƒ‚ƒfƒ‹ƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Ş
-	 * @return “Ç‚İ‚İ‚É¬Œ÷‚µ‚½ê‡‚ÍModel‚Ìƒ†ƒj[ƒNƒ|ƒCƒ“ƒ^
+	 * @brief Assimpç¹ï½©ç¹§ï½¤ç¹æ‚¶Î›ç¹ï½ªç¹§å‰ƒï½½ï½¿é€•ï½¨ç¸ºåŠ±â€»ç¹ï½¢ç¹ãƒ»Îç¹è¼”ãƒç¹§ï½¤ç¹ï½«ç¹§å®šï½ªï½­ç¸ºï½¿éœï½¼ç¹§Â€
+	 * @return éš±ï½­ç¸ºï½¿éœï½¼ç¸ºï½¿ç¸ºï½«è¬Œä»™ç²¥ç¸ºåŠ±â—†è£ï½´èœ·åŒ»ãƒ»Modelç¸ºï½®ç¹ï½¦ç¹ä¹ãƒ»ç¹§ï½¯ç¹æ˜´ã†ç¹ï½³ç¹§ï½¿
 	 */
 	static std::unique_ptr<Model> LoadModelFromFile(ID3D11Device* device, const std::string& filename, float uvScale = 1.0f);
 
 	/**
-	 * @brief –À˜Hƒf[ƒ^‚©‚ç3Dƒ‚ƒfƒ‹‚ğ¶¬‚·‚é
-	 * @return ¶¬‚É¬Œ÷‚µ‚½ê‡‚ÍModel‚Ìƒ†ƒj[ƒNƒ|ƒCƒ“ƒ^
+	 * @brief éœ‘ï½·éœï½¯ç¹ãƒ»ãƒ»ç¹§ï½¿ç¸ºä¹ï½‰3Dç¹ï½¢ç¹ãƒ»Îç¹§å ¤å‡½è¬ŒèˆŒâ˜†ç¹§ãƒ»
+	 * @return é€•æ»“ãƒ»ç¸ºï½«è¬Œä»™ç²¥ç¸ºåŠ±â—†è£ï½´èœ·åŒ»ãƒ»Modelç¸ºï½®ç¹ï½¦ç¹ä¹ãƒ»ç¹§ï½¯ç¹æ˜´ã†ç¹ï½³ç¹§ï½¿
 	 */
 	static std::unique_ptr<Model> CreateMazeModel(ID3D11Device* device, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth, float wallHeight, MeshGenerator::MeshType type);
 
 	/**
-	 * @brief ƒeƒNƒXƒ`ƒƒƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Ş
-	 * @return “Ç‚İ‚İ‚É¬Œ÷‚µ‚½ê‡‚ÍTexture‚Ìƒ†ƒj[ƒNƒ|ƒCƒ“ƒ^
+	 * @brief ç¹ãƒ»ã‘ç¹§ï½¹ç¹âˆšÎ•ç¹è¼”ãƒç¹§ï½¤ç¹ï½«ç¹§å®šï½ªï½­ç¸ºï½¿éœï½¼ç¹§Â€
+	 * @return éš±ï½­ç¸ºï½¿éœï½¼ç¸ºï½¿ç¸ºï½«è¬Œä»™ç²¥ç¸ºåŠ±â—†è£ï½´èœ·åŒ»ãƒ»Textureç¸ºï½®ç¹ï½¦ç¹ä¹ãƒ»ç¹§ï½¯ç¹æ˜´ã†ç¹ï½³ç¹§ï½¿
 	 */
 	static std::unique_ptr<Texture> LoadTexture(ID3D11Device* device, const wchar_t* filename);
 };

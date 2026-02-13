@@ -1,8 +1,6 @@
-#include "Game.h"
+ï»¿#include "Game.h"
 #include <comdef.h>
 
-// Game‚ÌƒRƒ“ƒXƒgƒ‰ƒNƒ^
-// m_cursorLockEnabled ‚Í InputƒNƒ‰ƒX‘¤‚ÅŠÇ—‚·‚é‚½‚ßíœ
 Game::Game() : m_isPaused(false) {
 }
 
@@ -15,18 +13,18 @@ void Game::SetPaused(bool isPaused) {
 	if (m_isPaused) {
 		m_input->SetCursorVisible(true);
 
-		// ƒI[ƒfƒBƒI‚ðˆêŽž’âŽ~
+		// ç¹§ï½ªç¹ï½¼ç¹ãƒ»ã…ç¹§ï½ªç¹§å‰ƒï½¸Â€è­Žã‚‡â—è±ï½¢
 		if (m_audioEngine) {
 			m_audioEngine->Suspend();
 		}
 	}
 	else {
-		// ƒ|[ƒY‰ðœ
+		// ç¹æ˜´ãƒ»ç¹§ï½ºéš—ï½£é«¯ï½¤
 		if (m_input->IsCursorLocked()) {
 			m_input->SetCursorVisible(false);
 		}
 
-		// ƒI[ƒfƒBƒI‚ðÄŠJ
+		// ç¹§ï½ªç¹ï½¼ç¹ãƒ»ã…ç¹§ï½ªç¹§è²žãƒ»é«¢ãƒ»
 		if (m_audioEngine) {
 			m_audioEngine->Resume();
 		}
@@ -73,7 +71,7 @@ bool Game::Initialize(HINSTANCE hInstance) {
 		return false;
 	}
 
-	// ‰ŠúÝ’è‚ð”½‰f
+	// è›»æ™„æ‚„éšªï½­èž³å£¹ï½’èœ¿è‚´ä¸
 	SetPaused(m_isPaused);
 
 	return true;
@@ -95,7 +93,7 @@ void Game::Shutdown() {
 void Game::Run() {
 	MSG msg = {};
 	while (msg.message != WM_QUIT) {
-		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) { // NULL -> nullptr
+		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
@@ -117,15 +115,15 @@ bool Game::Update() {
 	}
 
 	if (!m_isPaused) {
-		// Input‚ÌXVi‚±‚±‚ÅƒJ[ƒ\ƒ‹’†‰›ŒÅ’è‚ªŽÀs‚³‚ê‚Ü‚·j
-		// ƒEƒBƒ“ƒhƒEƒnƒ“ƒhƒ‹‚ð“n‚µ‚ÄA’†SˆÊ’u‚ðŒvŽZ‚³‚¹‚Ü‚·
+		// Inputç¸ºï½®è­–ï½´è­ï½°ãƒ»åŒ»ï¼…ç¸ºè–™ã€’ç¹§ï½«ç¹ï½¼ç¹§ï½½ç¹ï½«è³ï½­èžŸï½®è—ï½ºèž³å£¹â€²èž³æº¯ï½¡å¾Œï¼†ç¹§å¾Œâˆªç¸ºå‘»ï½¼ãƒ»
+		// ç¹§ï½¦ç¹§ï½£ç¹ï½³ç¹å³¨ãˆç¹ä¸ŠÎ¦ç¹å³¨Îç¹§å‘ˆï½¸ï½¡ç¸ºåŠ±â€»ç¸²âˆ½ï½¸ï½­è ¢ãƒ»ï½ºï½§è®“å¶ï½’éšªè‚²ï½®åŠ±ï¼†ç¸ºå¸™âˆªç¸ºãƒ»
 		m_input->Update(m_window->GetHwnd());
 
 		m_sceneManager->Update(m_timer->GetDeltaTime());
 	}
 	else {
-		// ƒ|[ƒY’†‚ÍƒJ[ƒ\ƒ‹ƒƒbƒNˆ—iInput::Updatej‚ðŒÄ‚Î‚È‚¢‚±‚Æ‚ÅA
-		// ƒ}ƒEƒXƒJ[ƒ\ƒ‹‚ðŽ©—R‚É“®‚©‚¹‚é‚æ‚¤‚É‚µ‚Ü‚·B
+		// ç¹æ˜´ãƒ»ç¹§ï½ºè³ï½­ç¸ºï½¯ç¹§ï½«ç¹ï½¼ç¹§ï½½ç¹ï½«ç¹ï½­ç¹ãƒ»ã‘èœƒï½¦é€…ãƒ»ï½¼ãƒ»nput::Updateãƒ»å³¨ï½’èœ»ï½¼ç¸ºï½°ç¸ºï½ªç¸ºãƒ»ï¼…ç¸ºï½¨ç¸ºï½§ç¸²ãƒ»
+		// ç¹æ§­ãˆç¹§ï½¹ç¹§ï½«ç¹ï½¼ç¹§ï½½ç¹ï½«ç¹§å®šãƒ»é€•ï½±ç¸ºï½«èœè¼”Â°ç¸ºå¸™ï½‹ç¹§åŒ»â‰§ç¸ºï½«ç¸ºåŠ±âˆªç¸ºå¶Â€ãƒ»
 	}
 
 	m_input->EndFrame();

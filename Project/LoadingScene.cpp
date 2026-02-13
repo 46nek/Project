@@ -1,4 +1,4 @@
-#include "LoadingScene.h"
+ï»¿#include "LoadingScene.h"
 #include "Game.h"
 
 LoadingScene::LoadingScene()
@@ -15,16 +15,16 @@ bool LoadingScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, Dire
 
 	if (GameScene::s_transferInstance) {
 		m_gameScene = std::move(GameScene::s_transferInstance);
-		// ŠÂ‹«(Phase1‘Š“–)‚Í¶¬Ï‚İ‚È‚Ì‚ÅAŸ‚ÍUI(Phase2‘Š“–)‚©‚ç
+		// è¿ºï½°è …ãƒ»Phase1é€¶ï½¸è –ãƒ»ç¸ºï½¯é€•æ»“ãƒ»è²‚åŒ»âˆ©ç¸ºï½ªç¸ºï½®ç¸ºï½§ç¸²âˆµï½¬ï½¡ç¸ºï½¯UI(Phase2é€¶ï½¸è –ãƒ»ç¸ºä¹ï½‰
 		m_loadingPhase = 1;
 	}
 	else {
-		// ˆø‚«Œp‚¬‚ª‚È‚¢ê‡iƒfƒoƒbƒO‹N“®‚È‚Çj‚Í’Êí’Ê‚èì¬
+		// è ‘è¼”â€³é‚¯å¶â„ƒç¸ºå¾Œâ†‘ç¸ºãƒ»ï£°ï½´èœ·èŒ¨ï½¼åŒ»ãƒ§ç¹èˆŒãƒ£ç¹§ï½°è¥ï½·èœè¼”â†‘ç¸ºï½©ãƒ»å³¨ãƒ»é¨¾å£¼ï½¸ï½¸é¨¾å£¹ï½Šè´æ‡ˆãƒ»
 		m_gameScene = std::make_unique<GameScene>();
 		m_loadingPhase = 0;
 	}
 
-	// ƒtƒHƒ“ƒg‚Ì‰Šú‰»
+	// ç¹è¼”ã‹ç¹ï½³ç¹åŒ»ãƒ»è›»æ™„æ‚„è›¹ãƒ»
 	HRESULT hr = FW1CreateFactory(FW1_VERSION, &m_fontFactory);
 	if (FAILED(hr)) { return false; }
 
@@ -41,51 +41,51 @@ void LoadingScene::Shutdown() {
 	if (m_fontWrapper) { m_fontWrapper->Release(); }
 	if (m_fontFactory) { m_fontFactory->Release(); }
 
-	// ƒV[ƒ“I—¹‚ÉŸiGameScenej‚Ö“n‚·
+	// ç¹§ï½·ç¹ï½¼ç¹ï½³é‚¨ã‚†ï½ºãƒ»å‡¾ç¸ºï½«è°ºï½¡ãƒ»ãƒ»ameSceneãƒ»å³¨âˆˆè²‚ï½¡ç¸ºãƒ»
 	if (m_gameScene) {
 		GameScene::s_transferInstance = std::move(m_gameScene);
 	}
 }
 
 void LoadingScene::Update(float deltaTime) {
-	// ƒ[ƒh’†‚à”wŒi‚Ìƒ‰ƒCƒg‚â‰‰o‚ğ“®‚©‚·
+	// ç¹ï½­ç¹ï½¼ç¹æˆ‘ï½¸ï½­ç¹§ã‚Šãƒ¬è­ï½¯ç¸ºï½®ç¹ï½©ç¹§ï½¤ç¹åŒ»ï½„è²æ³Œãƒ»ç¹§è²è™šç¸ºä¹â˜†
 	if (m_gameScene) {
 		m_gameScene->UpdateTitleLoop(deltaTime);
 	}
 
-	// ƒtƒŒ[ƒ€‚²‚Æ‚ÉGameScene‚Ì‰Šú‰»ˆ—‚ğ‚P’iŠK‚¸‚Âi‚ß‚é
+	// ç¹è¼”Îç¹ï½¼ç¹ï£°ç¸ºæ–â†’ç¸ºï½«GameSceneç¸ºï½®è›»æ™„æ‚„è›¹é–€ãƒ»é€…ãƒ»ï½’ãƒ»ç¬¬ï½®ï½µé««å¼±â˜…ç¸ºï½¤é¨¾ï½²ç¹§âˆšï½‹
 	switch (m_loadingPhase) {
 	case 0:
-		// ‹Œ Phase1: ŠÂ‹«\’z
+		// Phase 1: Environment
 		if (!m_gameScene->InitializeEnvironment(m_graphicsDevice, m_input, m_audioEngine)) {
-			// ƒGƒ‰[ˆ—
+			// ç¹§ï½¨ç¹ï½©ç¹ï½¼èœƒï½¦é€…ãƒ»
 		}
 		break;
 	case 1:
-		// ‹Œ Phase2: UI\’z
+		// Phase 2: UI
 		if (!m_gameScene->InitializeUI()) {
-			// ƒGƒ‰[ˆ—
+			// ç¹§ï½¨ç¹ï½©ç¹ï½¼èœƒï½¦é€…ãƒ»
 		}
 		break;
 	case 2:
-		// ‹Œ Phase3: ƒQ[ƒ€ƒIƒuƒWƒFƒNƒg(“G‚È‚Ç)¶¬
+		// Phase 3: Game Objects
 		if (!m_gameScene->InitializeGameObjects()) {
-			// ƒGƒ‰[ˆ—
+			// ç¹§ï½¨ç¹ï½©ç¹ï½¼èœƒï½¦é€…ãƒ»
 		}
 		break;
 	case 3:
-		// ‹Œ Phase4(‹ó)‚Ííœ‚µA‹Œ Phase5(Audio)‚ğÀs
+		// Audio
 		if (!m_gameScene->InitializeAudio()) {
-			// ƒGƒ‰[ˆ—
+			// ç¹§ï½¨ç¹ï½©ç¹ï½¼èœƒï½¦é€…ãƒ»
 		}
 		break;
 	case 4:
-		// ‚·‚×‚ÄŠ®—¹
+		// ç¸ºå¶âˆ‹ç¸ºï½¦è³å¾¡ï½ºãƒ»
 		m_gameScene->BeginOpening();
 
-		// ‚·‚×‚Ä‚Ì‰Šú‰»‚ªŠ®—¹‚µ‚½‚Ì‚ÅASceneManager‚ÉGameScene‚ğ“n‚µ‚Ä‘JˆÚ‚·‚é
+		// ç¸ºå¶âˆ‹ç¸ºï½¦ç¸ºï½®è›»æ™„æ‚„è›¹æ‚¶â€²è³å¾¡ï½ºãƒ»ï¼ ç¸ºæº˜ãƒ»ç¸ºï½§ç¸²ãƒ¾ceneManagerç¸ºï½«GameSceneç¹§å‘ˆï½¸ï½¡ç¸ºåŠ±â€»é©•ï½·é˜ï½»ç¸ºå¶ï½‹
 		m_nextScene = SceneState::Game;
-		// move‚ÍShutdown‚Ås‚¤
+		// moveç¸ºï½¯Shutdownç¸ºï½§é™¦å¾Œâ‰§
 		break;
 	}
 	m_loadingPhase++;
@@ -95,10 +95,10 @@ void LoadingScene::Render() {
 	m_graphicsDevice->BeginScene(0.0f, 0.0f, 0.1f, 1.0f);
 
 	if (m_gameScene) {
-		// Zƒoƒbƒtƒ@‚ğON‚É‚µ‚Ä3D•`‰æ
+		// Zç¹èˆŒãƒ£ç¹è¼”ãƒç¹§ä¸¹Nç¸ºï½«ç¸ºåŠ±â€»3Dè¬ å†—åˆ¤
 		m_graphicsDevice->GetSwapChain()->TurnZBufferOn(m_graphicsDevice->GetDeviceContext());
-		m_gameScene->RenderStageOnly(); // ”wŒi‚Ì‚İ
-		// Zƒoƒbƒtƒ@‚ğOFF‚É–ß‚µ‚Ä2D(•¶š)•`‰æ‚Ö
+		m_gameScene->RenderStageOnly(); // é–­æ¢§å‹¹ç¸ºï½®ç¸ºï½¿
+		// Zç¹èˆŒãƒ£ç¹è¼”ãƒç¹§ä¸¹FFç¸ºï½«è¬Œï½»ç¸ºåŠ±â€»2D(è­ãƒ»ï½­ãƒ»è¬ å†—åˆ¤ç¸ºï½¸
 		m_graphicsDevice->GetSwapChain()->TurnZBufferOff(m_graphicsDevice->GetDeviceContext());
 	}
 

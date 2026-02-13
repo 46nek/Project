@@ -1,4 +1,4 @@
-#include "AssetLoader.h"
+﻿#include "AssetLoader.h"
 #include "Texture.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -28,7 +28,7 @@ std::unique_ptr<Model> AssetLoader::LoadModelFromFile(ID3D11Device* device, cons
 			if (mesh->HasTextureCoords(0)) {
 				vertex.tex = { mesh->mTextureCoords[0][i].x * uvScale, mesh->mTextureCoords[0][i].y * uvScale };
 			}
-			if (mesh->HasTangentsAndBitangents()) { // �ڐ��Ə]�@���̃f�[�^���擾
+			if (mesh->HasTangentsAndBitangents()) { // 謗･邱壹→蠕捺ｳ慕ｷ壹・繝・・繧ｿ繧貞叙蠕・
 				vertex.tangent = { mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z };
 				vertex.binormal = { mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z };
 			}

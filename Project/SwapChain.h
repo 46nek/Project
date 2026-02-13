@@ -1,10 +1,10 @@
-#pragma once
+ï»¿#pragma once
 #include <d3d11.h>
 #include <dxgi.h>
 
 /**
  * @class SwapChain
- * @brief ƒXƒƒbƒvƒ`ƒFƒCƒ“AƒŒƒ“ƒ_[ƒ^[ƒQƒbƒgƒrƒ…[A[“xƒXƒeƒ“ƒVƒ‹ƒrƒ…[‚ğŠÇ—
+ * @brief ã‚¹ãƒ¯ãƒƒãƒ—ãƒã‚§ã‚¤ãƒ³ã€ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆãƒ“ãƒ¥ãƒ¼ã€æ·±åº¦ã‚¹ãƒ†ãƒ³ã‚·ãƒ«ãƒ“ãƒ¥ãƒ¼ã‚’ç®¡ç†
  */
 class SwapChain {
 public:
@@ -20,7 +20,7 @@ public:
 	void TurnZBufferOn(ID3D11DeviceContext* deviceContext);
 	void TurnZBufferOff(ID3D11DeviceContext* deviceContext);
 
-	// ƒQƒbƒ^[
+	// ã‚²ãƒƒã‚¿ãƒ¼
 	ID3D11RenderTargetView* GetRenderTargetView() const { return m_renderTargetView; }
 	ID3D11DepthStencilView* GetDepthStencilView() const { return m_depthStencilView; }
 

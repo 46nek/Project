@@ -1,4 +1,4 @@
-#include "CameraDirector.h"
+﻿#include "CameraDirector.h"
 #include "Game.h"
 #include "Easing.h"
 #include "Stage.h" 
@@ -8,7 +8,7 @@ extern Game* g_game;
 
 namespace {
     constexpr float VIGNETTE_NORMAL = 1.1f;
-    constexpr float VIGNETTE_DASH = 1.5f; // �_�b�V�����̉��o�p
+    constexpr float VIGNETTE_DASH = 1.5f; // 繝繝・す繝･荳ｭ縺ｮ貍泌・逕ｨ
 
     struct BobbingParams {
         float speed, amount, swaySpeed, swayAmount, rollSpeed;
@@ -119,26 +119,26 @@ void CameraDirector::UpdateOpening(float deltaTime) {
     m_camera->SetRotation(rx, ry, rz);
     m_camera->Update(deltaTime);
 
-    // �I�[�v�j���O���̓r�l�b�g�Ȃ�����ʏ�֑J��
+    // 繧ｪ繝ｼ繝励ル繝ｳ繧ｰ荳ｭ縺ｯ繝薙ロ繝・ヨ縺ｪ縺励°繧蛾壼ｸｸ縺ｸ驕ｷ遘ｻ
     m_vignetteIntensity = t * VIGNETTE_NORMAL;
 }
 
 void CameraDirector::UpdateGameplay(float deltaTime, Player* player) {
     if (!player) { return; }
 
-    // �ݒ���擾
+    // 險ｭ螳壹ｒ蜿門ｾ・
     auto& settings = g_game->GetSettings();
 
-    // 1. ��{�ƂȂ鎋��p (90�x)
+    // 1. 蝓ｺ譛ｬ縺ｨ縺ｪ繧玖ｦ夜㍽隗・(90蠎ｦ)
     float targetFovDeg = 45.0f;
 
-    // 2. �X�L���g�p����FOV�u�[�X�g�v�Z
+    // 2. 繧ｹ繧ｭ繝ｫ菴ｿ逕ｨ荳ｭ縺ｮFOV繝悶・繧ｹ繝郁ｨ育ｮ・
     if (player->IsSkillActive()) {
         float boost = 0.0f;
-        // �ݒ�(fovIntensity)�ɉ����đ����Ă��鎞�̒ǉ�����p��ς���
-        if (settings.fovIntensity == 1)      boost = 20.0f; // ���
-        else if (settings.fovIntensity == 2) boost = 45.0f; // �ʏ�
-        // 0 (NONE) �̏ꍇ�� boost = 0.0f �̂܂�
+        // 險ｭ螳・fovIntensity)縺ｫ蠢懊§縺ｦ襍ｰ縺｣縺ｦ縺・ｋ譎ゅ・霑ｽ蜉隕夜㍽隗偵ｒ螟峨∴繧・
+        if (settings.fovIntensity == 1)      boost = 20.0f; // 蠑ｱ繧・
+        else if (settings.fovIntensity == 2) boost = 45.0f; // 騾壼ｸｸ
+        // 0 (NONE) 縺ｮ蝣ｴ蜷医・ boost = 0.0f 縺ｮ縺ｾ縺ｾ
 
         targetFovDeg += boost;
         m_vignetteIntensity = VIGNETTE_DASH;
@@ -147,18 +147,18 @@ void CameraDirector::UpdateGameplay(float deltaTime, Player* player) {
         m_vignetteIntensity = VIGNETTE_NORMAL;
     }
 
-    // �J�����ɖڕWFOV��ݒ� (�x���@���烉�W�A���ɕϊ�)
+    // 繧ｫ繝｡繝ｩ縺ｫ逶ｮ讓僥OV繧定ｨｭ螳・(蠎ｦ謨ｰ豕輔°繧峨Λ繧ｸ繧｢繝ｳ縺ｫ螟画鋤)
     if (m_camera) {
         m_camera->SetTargetFOV(DirectX::XMConvertToRadians(targetFovDeg));
     }
 
-    // 3. �ʒu�E��]����
+    // 3. 菴咲ｽｮ繝ｻ蝗櫁ｻ｢蜷梧悄
     DirectX::XMFLOAT3 playerPos = player->GetPosition();
     DirectX::XMFLOAT3 playerRot = player->GetRotation();
     m_camera->SetPosition(playerPos.x, playerPos.y, playerPos.z);
     m_camera->SetRotation(playerRot.x, playerRot.y, playerRot.z);
 
-    // 4. �{�r���O�i�h��j
+    // 4. 繝懊ン繝ｳ繧ｰ・域昭繧鯉ｼ・
     const BobbingParams& bp = player->IsSkillActive() ? BOB_RUN : BOB_WALK;
     m_camera->SetBobbingParameters(bp.speed, bp.amount, bp.swaySpeed, bp.swayAmount, bp.rollSpeed);
     m_camera->UpdateBobbing(deltaTime, player->IsMoving());
@@ -166,10 +166,10 @@ void CameraDirector::UpdateGameplay(float deltaTime, Player* player) {
     m_camera->Update(deltaTime);
     m_vignetteIntensity = player->IsSkillActive() ? VIGNETTE_DASH : VIGNETTE_NORMAL;
 
-    // �I�[�u�������ɂ�鎋�E����
+    // 繧ｪ繝ｼ繝匁園謖∵焚縺ｫ繧医ｋ隕也阜謔ｪ蛹・
     int heldOrbs = player->GetHeldOrbCount();
     if (heldOrbs > 5) {
-        // 5�𒴂���Ə������r�l�b�g����������
+        // 5蛟九ｒ雜・∴繧九→蟆代＠縺壹▽繝薙ロ繝・ヨ繧貞ｼｷ縺上☆繧・
         m_vignetteIntensity += (heldOrbs - 5) * 0.2f;
     }
 }

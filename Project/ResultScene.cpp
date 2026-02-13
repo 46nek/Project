@@ -1,8 +1,9 @@
-#include "ResultScene.h"
+ï»¿#include "ResultScene.h"
 #include "framework.h"
 #include "Game.h"
 #include "AssetPaths.h"
 #include <ctime>
+#include <algorithm> // for std::max
 
 extern Game* g_game;
 
@@ -22,7 +23,7 @@ bool ResultScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, Direc
 	m_input = input;
 	m_audioEngine = audioEngine;
 
-	// ƒJ[ƒ\ƒ‹‚ð•\Ž¦
+	// ç¹§ï½«ç¹ï½¼ç¹§ï½½ç¹ï½«ç¹§å®šï½¡ï½¨é‰ï½º
 	m_input->SetCursorLock(false);
 	m_input->SetCursorVisible(true);
 
@@ -34,7 +35,7 @@ bool ResultScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, Direc
 	m_background = std::make_unique<Sprite>();
 	if (!m_background->Initialize(device, AssetPaths::TEX_BACKGROUND)) { return false; }
 
-	// ƒtƒHƒ“ƒg‰Šú‰»
+	// ç¹è¼”ã‹ç¹ï½³ç¹äº¥ãƒ»è­›æº·å–§
 	HRESULT hr = FW1CreateFactory(FW1_VERSION, &m_fontFactory);
 	if (FAILED(hr)) return false;
 
@@ -72,17 +73,17 @@ void ResultScene::Update(float deltaTime) {
 	HWND hwnd = g_game->GetWindow()->GetHwnd();
 	RECT clientRect;
 	GetClientRect(hwnd, &clientRect);
-	float actualWidth = max(1.0f, (float)(clientRect.right - clientRect.left));
-	float actualHeight = max(1.0f, (float)(clientRect.bottom - clientRect.top));
+	float actualWidth = (std::max)(1.0f, (float)(clientRect.right - clientRect.left));
+	float actualHeight = (std::max)(1.0f, (float)(clientRect.bottom - clientRect.top));
 
 	float mx = rawMx * (static_cast<float>(Game::SCREEN_WIDTH) / actualWidth);
 	float my = rawMy * (static_cast<float>(Game::SCREEN_HEIGHT) / actualHeight);
 
-	// --- ƒzƒo[”»’è ---
+	// --- ç¹å¸™ãƒ°ç¹ï½¼è›»ï½¤èž³ãƒ»---
 	float fontSize = 60.0f;
 	float padding = 10.0f;
 
-	// --- ƒzƒo[”»’è ---
+	// --- ç¹å¸™ãƒ°ç¹ï½¼è›»ï½¤èž³ãƒ»---
 	float titleY = 450.0f;
 	float titleW = CalculateTextWidth(m_toTitleText, fontSize);
 	float titleX = (Game::SCREEN_WIDTH - titleW) / 2.0f;
@@ -96,7 +97,7 @@ void ResultScene::Update(float deltaTime) {
 	m_isExitHovered = (mx >= exitX - padding && mx <= exitX + exitW + padding &&
 		my >= exitY - padding && my <= exitY + fontSize + padding);
 
-	// --- ƒOƒŠƒbƒ`XV (ƒzƒo[ƒtƒ‰ƒO‚Ì‚Ý‚ðŒ©‚é‚æ‚¤‚É®—) ---
+	// --- ç¹§ï½°ç¹ï½ªç¹ãƒ»ãƒ¡è­–ï½´è­ï½° (ç¹å¸™ãƒ°ç¹ï½¼ç¹è¼”Î›ç¹§ï½°ç¸ºï½®ç¸ºï½¿ç¹§å®šï½¦ä¹ï½‹ç¹§åŒ»â‰§ç¸ºï½«è¬¨ï½´é€…ãƒ» ---
 	m_glitchTimer += deltaTime;
 	if (m_glitchTimer > m_glitchUpdateInterval) {
 		m_glitchTimer = 0.0f;
@@ -106,11 +107,11 @@ void ResultScene::Update(float deltaTime) {
 			}
 			};
 		updateStates(m_escapeCharStates, true);
-		updateStates(m_toTitleCharStates, m_isTitleHovered); // m_selectIndex ‚Å‚Í‚È‚­ƒtƒ‰ƒO‚ðŽg—p
+		updateStates(m_toTitleCharStates, m_isTitleHovered); 
 		updateStates(m_exitCharStates, m_isExitHovered);
 	}
 
-	// Œˆ’èˆ—
+	// è±Žï½ºèž³å£¼ãƒ»é€…ãƒ»
 	if (m_input->IsKeyPressed(VK_LBUTTON)) {
 		if (m_isTitleHovered) m_nextScene = SceneState::Title;
 		else if (m_isExitHovered) PostQuitMessage(0);
@@ -160,10 +161,11 @@ void ResultScene::DrawGlitchText(const std::wstring& text, std::vector<CharState
 			str, fontSize, currentX, startY, color,
 			FW1_LEFT | FW1_TOP | FW1_RESTORESTATE
 		);
-		// •¶ŽšŠÔŠu‚ÌŠÈˆÕŒvŽZ
+		// è­ãƒ»ï½­éˆ´ä¿£é««æ–ãƒ»é‚ï½¡è­æ¥¢ï½¨è‚²ï½®ãƒ»
 		FW1_RECTF r = { 0, 0, 0, 0 };
 		m_fonts[states[i].fontIndex]->MeasureString(str, nullptr, fontSize, &r, 0);
 		float w = r.Right - r.Left;
 		currentX += (w <= 0.1f) ? fontSize * 0.5f : w + fontSize * 0.05f;
 	}
 }
+

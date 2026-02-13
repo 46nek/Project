@@ -1,35 +1,35 @@
-#pragma once
+ï»¿#pragma once
 
 /**
- * @brief ƒAƒZƒbƒg‚Ìƒtƒ@ƒCƒ‹ƒpƒX‚ğŠÇ—
+ * @brief ã‚¢ã‚»ãƒƒãƒˆã®ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹ã‚’ç®¡ç†
  */
 namespace AssetPaths {
-	// === ƒ‚ƒfƒ‹ ===
-	// (Assimp—p: char*) 
-	// “GAƒI[ƒu‚È‚Ç‚Åg—p
+	// === ãƒ¢ãƒ‡ãƒ« ===
+	// (Assimpç”¨: char*) 
+	// æ•µã€ã‚ªãƒ¼ãƒ–ãªã©ã§ä½¿ç”¨
 	const char* const MODEL_CUBE_OBJ = "Assets/cube.obj";
 
-	// === ƒeƒNƒXƒ`ƒƒ ===
-	// (WIC/DirectX—p: wchar_t*)
-	// UIŠÖ˜A
+	// === ãƒ†ã‚¯ã‚¹ãƒãƒ£ ===
+	// (WIC/DirectXç”¨: wchar_t*)
+	// UIé–¢é€£
 	const wchar_t* const TEX_BUTTON = L"Assets/button.png";
 	const wchar_t* const TEX_BACKGROUND = L"Assets/background.png";
 
-	// === ƒXƒe[ƒWŠÖ˜A ===
+	// === ã‚¹ãƒ†ãƒ¼ã‚¸é–¢é€£ ===
 	const wchar_t* const TEX_WALL = L"Assets/wall.png";
 	const wchar_t* const TEX_WALL_NORMAL = L"Assets/wall_normal.png";
 	const wchar_t* const TEX_GATE = L"Assets/gate.jpg";
 	const wchar_t* const TEX_GATE_NORMAL = L"Assets/gate_normal.png";
 
-	// === ƒ~ƒjƒ}ƒbƒvEHUDŠÖ˜A ===
+	// === ãƒŸãƒ‹ãƒãƒƒãƒ—ãƒ»HUDé–¢é€£ ===
 	const wchar_t* const TEX_MINIMAP_ORB = L"Assets/minimap_orb.png";
 	const wchar_t* const TEX_MINIMAP_FRAME = L"Assets/minimap_frame.png";
 	const wchar_t* const TEX_MINIMAP_PATH = L"Assets/minimap_path.png";
 
-	// === ƒTƒEƒ“ƒh ===
+	// === ã‚µã‚¦ãƒ³ãƒ‰ ===
 	const wchar_t* const SOUND_ORB_GET = L"Assets/orb_get.wav";
 	const wchar_t* const SOUND_WALK = L"Assets/walk.wav";
 
-	// === ƒp[ƒeƒBƒNƒ‹ ===
+	// === ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ« ===
 	const wchar_t* const ENEMY_PARTICLE = L"Assets/e_particle.png";
 }

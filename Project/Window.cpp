@@ -1,10 +1,10 @@
-#include "Window.h"
+﻿#include "Window.h"
 #include "Game.h"
 #include <windowsx.h>
 
 extern Game* g_game;
 
-// WndProc�Ŏg�����߂̐ÓI�|�C���^
+// WndProc縺ｧ菴ｿ縺・◆繧√・髱咏噪繝昴う繝ｳ繧ｿ
 static Window* g_windowHandle = nullptr;
 
 Window::Window(LPCWSTR applicationName, int screenWidth, int screenHeight)
@@ -107,8 +107,8 @@ LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPA
 		}
 		break;
 
-	case WM_LBUTTONDOWN: // �C���F�}�E�X���͂�Input�N���X�ɑ���
-		m_input->KeyDown(VK_LBUTTON); // �ǉ�
+	case WM_LBUTTONDOWN: // 繝槭え繧ｹ蜈･蜉帙ｒInput繧ｯ繝ｩ繧ｹ縺ｫ騾√ｋ
+		m_input->KeyDown(VK_LBUTTON);
 		if (g_game && g_game->IsPaused()) {
 			POINT p = { LOWORD(lparam), HIWORD(lparam) };
 			RECT clientRect;
@@ -119,11 +119,11 @@ LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPA
 		}
 		return 0;
 
-	case WM_LBUTTONUP: // �ǉ��F�{�^���𗣂������Ƃ��ʒm
+	case WM_LBUTTONUP: // 繝懊ち繝ｳ繧帝屬縺励◆縺薙→繧る夂衍
 		m_input->KeyUp(VK_LBUTTON);
 		return 0;
 
-	case WM_RBUTTONDOWN: // �K�v�ł���ΉE�N���b�N���ǉ�
+	case WM_RBUTTONDOWN: // 蜿ｳ繧ｯ繝ｪ繝・け
 		m_input->KeyDown(VK_RBUTTON);
 		return 0;
 
@@ -153,10 +153,10 @@ LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPA
 
 	case WM_SETCURSOR:
 		if (g_game && m_input && m_input->IsCursorLocked() && !g_game->IsPaused()) {
-			SetCursor(nullptr); // �J�[�\���摜���u�Ȃ��v�ɂ���i���`�悳��Ȃ��j
-			return true;     // ���������iOS�̃f�t�H���g�����������Ȃ��j
+			SetCursor(nullptr); // 繧ｫ繝ｼ繧ｽ繝ｫ謠冗判繧偵後↑縺励阪↓縺吶ｋ・域緒逕ｻ縺輔ｌ縺ｪ縺・ｼ・
+			return true;     // 蜃ｦ逅・ｮ御ｺ・ｼ・S縺ｮ繝・ヵ繧ｩ繝ｫ繝亥・逅・ｒ縺輔○縺ｪ縺・ｼ・
 		}
-		// �^�C�g����ʂ�|�[�Y����break���āAOS�̃f�t�H���g����(DefWindowProc)�ɔC���邱�ƂŖ��J�[�\�����`�悳���
+		// 繧ｿ繧､繝医Ν逕ｻ髱｢繧・・繝ｼ繧ｺ荳ｭ縺ｯbreak縺励※縲＾S縺ｮ繝・ヵ繧ｩ繝ｫ繝亥・逅・DefWindowProc)縺ｫ莉ｻ縺帙ｋ縺薙→縺ｧ遏｢蜊ｰ繧ｫ繝ｼ繧ｽ繝ｫ縺梧緒逕ｻ縺輔ｌ繧・
 		break;
 
 	case WM_MOUSEMOVE:

@@ -1,13 +1,13 @@
-#pragma once
+ï»¿#pragma once
 #include "Scene.h"
 #include "Sprite.h"
-#include <memory>
 #include "SpriteBatch.h"
 #include "GameScene.h"
 #include "FW1FontWrapper.h"
+#include <memory> 
 
 /**
- * @brief ƒ^ƒCƒgƒ‹‰æ–Ê‚ÌƒV[ƒ“‚ğŠÇ—‚·‚éƒNƒ‰ƒX
+ * @brief ç¹§ï½¿ç¹§ï½¤ç¹åŒ»Îé€•ï½»é«±ï½¢ç¸ºï½®ç¹§ï½·ç¹ï½¼ç¹ï½³ç¹§å ¤ï½®ï½¡é€…ãƒ»â˜†ç¹§ä¹ã‘ç¹ï½©ç¹§ï½¹
  */
 class TitleScene : public Scene {
 public:
@@ -24,26 +24,26 @@ private:
 
 	std::unique_ptr<GameScene> m_gameScene;
 
-	// --- ƒtƒHƒ“ƒgŠÖ˜A ---
+	// --- ç¹è¼”ã‹ç¹ï½³ç¹ç£¯æœªé¨¾ï½£ ---
 	IFW1Factory* m_fontFactory;
-	// 0”Ô–Ú‚ğƒƒCƒ“A‚»‚êˆÈ~‚ğƒOƒŠƒbƒ`—p‚Æ‚·‚é•¡”‚ÌƒtƒHƒ“ƒgƒ‰ƒbƒp[
+	// 0é€¡ï½ªé€¶ï½®ç¹§åµÎ“ç¹§ï½¤ç¹ï½³ç¸²âˆšâ—ç¹§å¾¡ï½»ï½¥é«¯é˜ªï½’ç¹§ï½°ç¹ï½ªç¹ãƒ»ãƒ¡é€•ï½¨ç¸ºï½¨ç¸ºå¶ï½‹éšãƒ»ç„šç¸ºï½®ç¹è¼”ã‹ç¹ï½³ç¹åŒ»Î›ç¹ãƒ»ãƒ±ç¹ï½¼
 	std::vector<IFW1FontWrapper*> m_fonts;
 
-	// Še•¶š‚Ìó‘Ô‚ğŠÇ—‚·‚é\‘¢‘Ì
+	// èœ·ãƒ»æšèŸ„åŠ±ãƒ»è¿¥ï½¶è«·ä¹ï½’é‚‚ï½¡é€…ãƒ»â˜†ç¹§åŒºï½§çŸ©Â€ï£°è´ãƒ»
 	struct CharState {
-		int fontIndex; // Œ»İ“K—p‚³‚ê‚Ä‚¢‚éƒtƒHƒ“ƒg‚ÌƒCƒ“ƒfƒbƒNƒX
+		int fontIndex; // è¿´ï½¾è¨ï½¨é©•ï½©é€•ï½¨ç¸ºè¼”ï½Œç¸ºï½¦ç¸ºãƒ»ï½‹ç¹è¼”ã‹ç¹ï½³ç¹åŒ»ãƒ»ç¹§ï½¤ç¹ï½³ç¹ãƒ»ãƒ£ç¹§ï½¯ç¹§ï½¹
 	};
 
-	// ƒ^ƒCƒgƒ‹ƒeƒLƒXƒg
+	// ç¹§ï½¿ç¹§ï½¤ç¹åŒ»Îç¹ãƒ»ãç¹§ï½¹ç¹ãƒ»
 	std::wstring m_titleText;
 	std::vector<CharState> m_charStates;
 
-	// PLAYƒ{ƒ^ƒ“ƒeƒLƒXƒg
+	// PLAYç¹æ‡Šã¡ç¹ï½³ç¹ãƒ»ãç¹§ï½¹ç¹ãƒ»
 	std::wstring m_playText;
 	std::vector<CharState> m_playCharStates;
-	bool m_isPlayHovered; // ƒJ[ƒ\ƒ‹‚ª‡‚Á‚Ä‚¢‚é‚©
+	bool m_isPlayHovered; // ç¹§ï½«ç¹ï½¼ç¹§ï½½ç¹ï½«ç¸ºæ‚Ÿç²‹ç¸ºï½£ç¸ºï½¦ç¸ºãƒ»ï½‹ç¸ºãƒ»
 
-	// ƒOƒŠƒbƒ`XV—pƒ^ƒCƒ}[
+	// ç¹§ï½°ç¹ï½ªç¹ãƒ»ãƒ¡è­–ï½´è­ï½°é€•ï½¨ç¹§ï½¿ç¹§ï½¤ç¹æ§­ãƒ»
 	float m_glitchTimer;
 	float m_glitchUpdateInterval;
 

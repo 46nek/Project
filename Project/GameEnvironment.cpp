@@ -1,4 +1,4 @@
-#include "GameEnvironment.h"
+ï»¿#include "GameEnvironment.h"
 #include "Game.h" 
 #include "GameObjectManager.h" 
 
@@ -8,20 +8,20 @@ GameEnvironment::~GameEnvironment() {}
 bool GameEnvironment::Initialize(GraphicsDevice* graphicsDevice) {
     m_graphicsDevice = graphicsDevice;
 
-    // ƒXƒe[ƒW¶¬
+    // ç¹§ï½¹ç¹ãƒ»ãƒ»ç¹§ï½¸é€•æ»“ãƒ»
     m_stage = std::make_unique<Stage>();
     if (!m_stage->Initialize(graphicsDevice)) { return false; }
 
-    // ƒ‰ƒCƒgŠÇ—
+    // ç¹ï½©ç¹§ï½¤ç¹è‚²ï½®ï½¡é€…ãƒ»
     m_lightManager = std::make_unique<LightManager>();
     m_lightManager->Initialize(m_stage->GetMazeData(), m_stage->GetPathWidth(), Stage::WALL_HEIGHT);
 
-    // ƒŒƒ“ƒ_ƒ‰[
+    // ç¹ï½¬ç¹ï½³ç¹Â€ç¹ï½©ç¹ï½¼
     m_renderer = std::make_unique<Renderer>(graphicsDevice);
 
-    // ƒXƒe[ƒWƒ‚ƒfƒ‹‚ÌƒLƒƒƒbƒVƒ…
+    // ç¹§ï½¹ç¹ãƒ»ãƒ»ç¹§ï½¸ç¹ï½¢ç¹ãƒ»Îç¸ºï½®ç¹§ï½­ç¹ï½£ç¹ãƒ»ã™ç¹ï½¥
     m_cachedStageModels.clear();
-    // ‚±‚±‚Åƒ‚ƒfƒ‹‚Ö‚Ìƒ|ƒCƒ“ƒ^‚ğƒLƒƒƒbƒVƒ…
+    // ç¸ºè–™ï¼…ç¸ºï½§ç¹ï½¢ç¹ãƒ»Îç¸ºï½¸ç¸ºï½®ç¹æ˜´ã†ç¹ï½³ç¹§ï½¿ç¹§åµãç¹ï½£ç¹ãƒ»ã™ç¹ï½¥
     for (const auto& model : m_stage->GetModels()) {
         if (model) {
             m_cachedStageModels.push_back(model.get());
@@ -43,10 +43,10 @@ void GameEnvironment::Update(float deltaTime, const Camera* camera) {
     }
 }
 
-// ˆø”‚ğC³
+// è ‘å¢“ç„šç¹§å‰ƒï½¿ï½®è±ï½£
 void GameEnvironment::Render(const Camera* camera, const std::vector<Model*>& dynamicModels, float vignetteIntensity, GameObjectManager* gameObjectManager) {
     if (m_renderer && m_stage) {
-        // 1. ’Êíƒ‚ƒfƒ‹‚Ì•`‰æ
+        // 1. é¨¾å£¼ï½¸ï½¸ç¹ï½¢ç¹ãƒ»Îç¸ºï½®è¬ å†—åˆ¤
         m_renderer->RenderSceneToTexture(
             m_cachedStageModels,
             dynamicModels,
@@ -56,13 +56,13 @@ void GameEnvironment::Render(const Camera* camera, const std::vector<Model*>& dy
             m_stage->GetPathWidth()
         );
 
-        // 2. “Giƒp[ƒeƒBƒNƒ‹j‚Ì•`‰æ
-        // ƒV[ƒ“•`‰æ‚ÌŒãAƒ|ƒXƒgƒvƒƒZƒX‚Ì‘O‚ÉÀs‚·‚é
+        // 2. è¬¨ï½µãƒ»åŒ»ãƒ±ç¹ï½¼ç¹ãƒ»ã…ç¹§ï½¯ç¹ï½«ãƒ»å³¨ãƒ»è¬ å†—åˆ¤
+        // ç¹§ï½·ç¹ï½¼ç¹ï½³è¬ å†—åˆ¤ç¸ºï½®è •å¾ŒÂ€âˆšãƒ»ç¹§ï½¹ç¹åŒ»ãƒ»ç¹ï½­ç¹§ï½»ç¹§ï½¹ç¸ºï½®èœ‘é˜ªâ†“è³æº¯ï½¡å¾Œâ˜†ç¹§ãƒ»
         if (gameObjectManager && m_graphicsDevice && m_lightManager) {
             gameObjectManager->RenderEnemies(m_graphicsDevice, const_cast<Camera*>(camera), m_lightManager.get());
         }
 
-        // 3. dã‚°iƒ|ƒXƒgƒvƒƒZƒXj
+        // 3. è‰ç©‚ï½¸ç¿«ï¿¡ãƒ»åŒ»ãƒ»ç¹§ï½¹ç¹åŒ»ãƒ»ç¹ï½­ç¹§ï½»ç¹§ï½¹ãƒ»ãƒ»
         m_renderer->RenderFinalPass(camera, vignetteIntensity);
     }
 }

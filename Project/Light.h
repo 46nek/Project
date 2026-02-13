@@ -1,17 +1,17 @@
-#pragma once
+﻿#pragma once
 #include <DirectXMath.h>
 
-// ���C�g�̍ő吔���`
+// ライトの最大数を定義
 constexpr int MAX_LIGHTS = 64;
 
-// ���C�g�̎��
+// ライトの種類
 enum LightType {
 	DirectionalLight = 0,
 	PointLight = 1,
 	SpotLight = 2
 };
 
-// �V�F�[�_�[�̒萔�o�b�t�@�ƈ�v�����邽�߂̃��C�g�\����
+// シェーダーの定数バッファと一致させるためのライト構造体
 struct Light {
 	DirectX::XMFLOAT4   color;       
 	DirectX::XMFLOAT3   direction;   

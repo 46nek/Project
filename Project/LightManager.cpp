@@ -1,4 +1,4 @@
-#include "LightManager.h"
+ï»¿#include "LightManager.h"
 #include <vector>
 #include <tuple>
 #include <cmath>
@@ -30,7 +30,7 @@ void LightManager::Initialize(const std::vector<std::vector<MazeGenerator::CellT
 	const int maze_width = static_cast<int>(mazeData[0].size());
 	const int maze_height = static_cast<int>(mazeData.size());
 
-	// --- •”‰®‚Ìƒ|ƒCƒ“ƒgƒ‰ƒCƒg ---
+	// --- é©›ï½¨è»ä¹ãƒ»ç¹æ˜´ã†ç¹ï½³ç¹åŒ»Î›ç¹§ï½¤ç¹ãƒ»---
 	const int roomSize = 3;
 	const int cornerOffset = 1;
 	using Rect = std::tuple<int, int, int, int>;
@@ -56,7 +56,7 @@ void LightManager::Initialize(const std::vector<std::vector<MazeGenerator::CellT
 		m_lights.push_back(roomLight);
 	}
 
-	// --- ‰ù’†“d“”iƒXƒ|ƒbƒgƒ‰ƒCƒgj ---
+	// --- è«›è‰ï½¸ï½­é«®ï½»è½£ï½¯ãƒ»åŒ»ã›ç¹æ˜´ãƒ£ç¹åŒ»Î›ç¹§ï½¤ç¹èŒ¨ï½¼ãƒ»---
 	Light flashlight = {};
 	flashlight.enabled = true;
 	flashlight.type = SpotLight;
@@ -69,18 +69,18 @@ void LightManager::Initialize(const std::vector<std::vector<MazeGenerator::CellT
 	m_lights.push_back(flashlight);
 	m_flashlightIndex = static_cast<int>(m_lights.size()) - 1;
 
-	// ‘S•ûˆÊ‚ğã‚­Æ‚ç‚·‚±‚Æ‚ÅA^‚ÁˆÃˆÅ‚ğ‰ñ”ğ‚µ‚Â‚ÂAèŒ³‚Ì•Ç‚Ì¿Š´‚È‚Ç‚ğ‹­’²‚·‚é
+	// èœˆï½¨è­ï½¹è´é˜ªï½’è ‘ï½±ç¸ºå†—ãƒ»ç¹§å³¨â˜†ç¸ºè–™â†’ç¸ºï½§ç¸²âˆ«æ‚„ç¸ºï½£è­‰éˆ´è£¸ç¹§è²å±“é©•ï½¿ç¸ºåŠ±â–½ç¸ºï½¤ç¸²âˆµç„”èœˆãƒ»ãƒ»è¢âˆšãƒ»é›‰ï½ªè«¢æº˜â†‘ç¸ºï½©ç¹§è²ï½¼ï½·éš±ï½¿ç¸ºå¶ï½‹
 	Light playerLight = {};
 	playerLight.enabled = true;
 	playerLight.type = PointLight;
-	playerLight.color = { 0.8f, 0.8f, 1.0f, 1.0f }; // ­‚µÂ‚İ‚ª‚©‚Á‚½Œõ
+	playerLight.color = { 0.8f, 0.8f, 1.0f, 1.0f }; // èŸ†ä»£ï¼ é«±åµâˆ©ç¸ºå¾ŒÂ°ç¸ºï½£ç¸ºæº·ãƒ»
 	playerLight.intensity = 1.0f;
-	playerLight.range = 12.0f; // ‰ù’†“d“”‚æ‚è‹·‚¢”ÍˆÍ
-	playerLight.attenuation = { 0.4f, 0.4f, 0.2f }; // Œ¸Š‚ğ‹­‚ß‚É‚µ‚ÄA‰“‚­‚É‚Í“Í‚©‚È‚¢‚æ‚¤‚É‚·‚é
+	playerLight.range = 12.0f; // è«›è‰ï½¸ï½­é«®ï½»è½£ï½¯ç¹§åŒ»ï½Šè¿¢ï½­ç¸ºãƒ»ï½¯ãƒ»å³‡
+	playerLight.attenuation = { 0.4f, 0.4f, 0.2f }; // è²‚å¹„ï½¡ï½°ç¹§è²ï½¼ï½·ç¹§âˆšâ†“ç¸ºåŠ±â€»ç¸²ãƒ»â–¡ç¸ºä¸Šâ†“ç¸ºï½¯è»ç¿«Â°ç¸ºï½ªç¸ºãƒ»ï½ˆç¸ºãƒ»â†“ç¸ºå¶ï½‹
 	m_lights.push_back(playerLight);
 	m_playerLightIndex = static_cast<int>(m_lights.size()) - 1;
 
-	// --- ÅIˆ— ---
+	// --- è­›Â€é‚¨ã‚‡ãƒ»é€…ãƒ»---
 	m_lightBuffer.numLights = static_cast<int>(m_lights.size());
 	if (m_lightBuffer.numLights > MAX_LIGHTS) {
 		m_lightBuffer.numLights = MAX_LIGHTS;
@@ -102,7 +102,7 @@ void LightManager::Update(float deltaTime, const DirectX::XMMATRIX& viewMatrix, 
 	m_lightBuffer.cameraPosition = cameraPosition;
 
 	UpdateFlashlight(deltaTime, cameraPosition, cameraRotation);
-	UpdatePlayerLight(cameraPosition); // ƒvƒŒƒCƒ„[ƒ‰ƒCƒg‚ÌXV
+	UpdatePlayerLight(cameraPosition); // ç¹åŠ±Îç¹§ï½¤ç¹ï½¤ç¹ï½¼ç¹ï½©ç¹§ï½¤ç¹åŒ»ãƒ»è­–ï½´è­ï½°
 
 	Frustum frustum;
 	frustum.ConstructFrustum(viewMatrix, projectionMatrix);
@@ -112,9 +112,9 @@ void LightManager::Update(float deltaTime, const DirectX::XMMATRIX& viewMatrix, 
 	for (const auto& light : m_lights) {
 		if (!light.enabled) { continue; }
 
-		// 1. ƒtƒ‰ƒXƒ^ƒ€i‰æ–Ê“àjƒ`ƒFƒbƒN
+		// 1. ç¹è¼”Î›ç¹§ï½¹ç¹§ï½¿ç¹ï£°ãƒ»è‚²åˆ¤é«±ï½¢èœ€ãƒ»ï½¼å³¨ãƒ¡ç¹§ï½§ç¹ãƒ»ã‘
 		if (frustum.CheckSphere(light.position, light.range)) {
-			// 2. ƒIƒNƒ‹[ƒWƒ‡ƒ“iÕ•Ájƒ`ƒFƒbƒN
+			// 2. ç¹§ï½ªç¹§ï½¯ç¹ï½«ç¹ï½¼ç¹§ï½¸ç¹ï½§ç¹ï½³ãƒ»ç£¯ãƒ»é˜¡ï½½ãƒ»å³¨ãƒ¡ç¹§ï½§ç¹ãƒ»ã‘
 			if (CheckOcclusion(cameraPosition, light.position, light.range)) {
 				if (m_lightBuffer.numLights < MAX_LIGHTS) {
 					m_lightBuffer.lights[m_lightBuffer.numLights] = light;
@@ -125,10 +125,10 @@ void LightManager::Update(float deltaTime, const DirectX::XMMATRIX& viewMatrix, 
 	}
 }
 
-// ƒvƒŒƒCƒ„[ƒ‰ƒCƒg‚ÌˆÊ’uXV—pƒƒ\ƒbƒh
+// ç¹åŠ±Îç¹§ï½¤ç¹ï½¤ç¹ï½¼ç¹ï½©ç¹§ï½¤ç¹åŒ»ãƒ»è´å’²ï½½ï½®è­–ï½´è­ï½°é€•ï½¨ç¹ï½¡ç¹§ï½½ç¹ãƒ»ãƒ©
 void LightManager::UpdatePlayerLight(const DirectX::XMFLOAT3& position) {
 	if (m_playerLightIndex != -1 && m_playerLightIndex < m_lights.size()) {
-		// ƒvƒŒƒCƒ„[‚Ì­‚µã‚É”z’u
+		// ç¹åŠ±Îç¹§ï½¤ç¹ï½¤ç¹ï½¼ç¸ºï½®èŸ†ä»£ï¼ è³ç¿«â†“é©Ÿå’²ï½½ï½®
 		m_lights[m_playerLightIndex].position = { position.x, position.y + 0.5f, position.z };
 	}
 }

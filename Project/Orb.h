@@ -1,41 +1,50 @@
-#pragma once
+ï»¿#pragma once
 #include "Model.h"
 #include "Player.h"
 #include "LightManager.h"
 #include "Audio.h"
 
-// ƒI[ƒu‚Ìí—Ş‚ğ’è‹`
+#include <d3d11.h>
+#include <DirectXMath.h>
+#include <memory>
+
+/**
+ * @brief ç¹§ï½ªç¹ï½¼ç¹æ‚¶ãƒ»éï½®é¬˜æ§«ï½®å¤‚ï½¾ï½©
+ */
 enum class OrbType {
-	Normal,
-	MinimapZoomOut,
-	EnemyRadar,
-	Goal
+    Normal,
+    MinimapZoomOut,
+    EnemyRadar,
+    Goal
 };
 
+/**
+ * @brief ç¹§ï½²ç¹ï½¼ç¹ï£°èœ€ãƒ»ãƒ»èœ¿æœ±å¯”ç¹§ï½¢ç¹§ï½¤ç¹ãƒ»Î’ãƒ»åŒ»ãŒç¹ï½¼ç¹å„ï½¼å³¨ã‘ç¹ï½©ç¹§ï½¹
+ */
 class Orb {
 public:
-	Orb();
-	~Orb();
+    Orb();
+    ~Orb();
 
-	bool Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& position, int lightIndex, OrbType type = OrbType::Normal);
-	void Shutdown();
-	bool Update(float deltaTime, Player* player, LightManager* lightManager, DirectX::SoundEffect* collectSound);
-	void FollowPlayer(float deltaTime, const DirectX::XMFLOAT3& targetPos, int index);
-	Model* GetModel();
-	
-	bool IsCollected() const;
-	bool IsDelivered() const { return m_isDelivered; }
+    bool Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& position, int lightIndex, OrbType type = OrbType::Normal);
+    void Shutdown();
+    bool Update(float deltaTime, Player* player, LightManager* lightManager, DirectX::SoundEffect* collectSound);
+    void FollowPlayer(float deltaTime, const DirectX::XMFLOAT3& targetPos, int index);
+    Model* GetModel();
+    
+    bool IsCollected() const;
+    bool IsDelivered() const { return m_isDelivered; }
 
-	DirectX::XMFLOAT3 GetPosition() const;
-	OrbType GetType() const; // ƒI[ƒu‚Ìí—Ş‚ğæ“¾‚·‚éŠÖ”
+    DirectX::XMFLOAT3 GetPosition() const;
+    OrbType GetType() const; 
 
 private:
-	std::unique_ptr<Model> m_model;
-	DirectX::XMFLOAT3 m_position;
+    std::unique_ptr<Model> m_model;
+    DirectX::XMFLOAT3 m_position;
 
-	bool m_isCollected;
-	bool m_isDelivered = false;
-	int m_lightIndex;
-	float m_animationTimer;
-	OrbType m_type; // ƒI[ƒu‚Ìí—Ş‚ğ•Û‚·‚éƒƒ“ƒo•Ï”
+    bool m_isCollected;
+    bool m_isDelivered = false;
+    int m_lightIndex;
+    float m_animationTimer;
+    OrbType m_type;
 };

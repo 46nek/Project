@@ -1,4 +1,4 @@
-#include "MeshGenerator.h"
+ï»¿#include "MeshGenerator.h"
 
 static void AddFace(
 	FaceDirection direction,
@@ -16,7 +16,7 @@ static void AddFace(
 	float halfHeight = height / 2.0f;
 
 	switch (direction) {
-	case FaceDirection::Top: // Y+ (°)
+	case FaceDirection::Top: // Y+ (è ãƒ»
 		v[0].pos = { position.x - halfWidth, position.y, position.z + halfHeight };
 		v[1].pos = { position.x + halfWidth, position.y, position.z + halfHeight };
 		v[2].pos = { position.x + halfWidth, position.y, position.z - halfHeight };
@@ -25,7 +25,7 @@ static void AddFace(
 		tangent = { 1.0f, 0.0f, 0.0f };
 		binormal = { 0.0f, 0.0f, -1.0f };
 		break;
-	case FaceDirection::Bottom: // Y- (“Vˆä)
+	case FaceDirection::Bottom: // Y- (èŸï½©è ãƒ»
 		v[0].pos = { position.x - halfWidth, position.y, position.z - halfHeight };
 		v[1].pos = { position.x + halfWidth, position.y, position.z - halfHeight };
 		v[2].pos = { position.x + halfWidth, position.y, position.z + halfHeight };
@@ -109,27 +109,27 @@ bool MeshGenerator::CreateMazeMesh(
 	const int mazeWidth = static_cast<int>(mazeData[0].size());
 
 	if (type == MeshType::Ceiling || type == MeshType::Floor) {
-		// ¥¥¥ ‚±‚±‚©‚ç‚ªC³‰ÓŠ ¥¥¥
-		// Zƒtƒ@ƒCƒeƒBƒ“ƒO‚ğ–h‚®‚½‚ß‚ÉA°‚Æ“Vˆä‚ÌƒƒbƒVƒ…‚ğ‚í‚¸‚©‚É¬‚³‚­‚·‚é
+		// ç¬†ï½¼ç¬†ï½¼ç¬†ï½¼ ç¸ºè–™ï¼…ç¸ºä¹ï½‰ç¸ºå¾¡ï½¿ï½®è±ï½£é‚‚ãƒ»åœ’ ç¬†ï½¼ç¬†ï½¼ç¬†ï½¼
+		// Zç¹è¼”ãƒç¹§ï½¤ç¹ãƒ»ã…ç¹ï½³ç¹§ï½°ç¹§å¸äºŸç¸ºèˆŒâ—†ç¹§âˆšâ†“ç¸²âˆï½ºç¿«â†’èŸï½©è è¼”ãƒ»ç¹ï½¡ç¹ãƒ»ã™ç¹ï½¥ç¹§åµï½ç¸ºå£¹Â°ç¸ºï½«èŸ†ä¸Šï¼†ç¸ºä¸Šâ˜†ç¹§ãƒ»
 		const float inset = 0.001f;
 		const float faceSize = pathWidth - inset;
-		// £££ C³‰ÓŠ‚±‚±‚Ü‚Å £££
+		// ç¬†ï½²ç¬†ï½²ç¬†ï½² è«ï½®è±ï½£é‚‚ãƒ»åœ’ç¸ºè–™ï¼…ç¸ºï½¾ç¸ºï½§ ç¬†ï½²ç¬†ï½²ç¬†ï½²
 
 		for (int y = 0; y < mazeHeight; ++y) {
 			for (int x = 0; x < mazeWidth; ++x) {
-				// •ÇƒZƒ‹‚È‚çƒXƒLƒbƒv
+				// è¢âˆšãç¹ï½«ç¸ºï½ªç¹§å³¨ã›ç¹§ï½­ç¹ãƒ»ãƒ»
 				if (mazeData[y][x] == MazeGenerator::Wall) { continue; }
 
-				// ’Ê˜HƒZƒ‹‚Ì’†SˆÊ’u‚ğŒvZ
+				// é¨¾å¤Šï½·ï½¯ç¹§ï½»ç¹ï½«ç¸ºï½®è³ï½­è ¢ãƒ»ï½½å’²ï½½ï½®ç¹§å®šï½¨è‚²ï½®ãƒ»
 				DirectX::XMFLOAT3 centerPos = { (x + 0.5f) * pathWidth, 0.0f, (y + 0.5f) * pathWidth };
 
 				if (type == MeshType::Ceiling) {
 					centerPos.y = wallHeight;
-					// ¬‚³‚­‚µ‚½ƒTƒCƒY‚Å“Vˆä‚Ì–Ê‚ğ’Ç‰Á
+					// èŸ†ä¸Šï¼†ç¸ºä¸Šï¼ ç¸ºæº˜ã—ç¹§ï½¤ç¹§ï½ºç¸ºï½§èŸï½©è è¼”ãƒ»é«±ï½¢ç¹§å®šï½¿ï½½èœ‰ï£°
 					AddFace(FaceDirection::Bottom, centerPos, faceSize, faceSize, outVertices, outIndices);
 				}
 				else { // type == MeshType::Floor
-					// ¬‚³‚­‚µ‚½ƒTƒCƒY‚Å°‚Ì–Ê‚ğ’Ç‰Á
+					// èŸ†ä¸Šï¼†ç¸ºä¸Šï¼ ç¸ºæº˜ã—ç¹§ï½¤ç¹§ï½ºç¸ºï½§è ç¿«ãƒ»é«±ï½¢ç¹§å®šï½¿ï½½èœ‰ï£°
 					AddFace(FaceDirection::Top, centerPos, faceSize, faceSize, outVertices, outIndices);
 				}
 			}

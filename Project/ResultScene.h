@@ -1,14 +1,14 @@
-#pragma once
+ï»¿#pragma once
 #include "Scene.h"
 #include "Sprite.h"
+#include "SpriteBatch.h"
+#include "FW1FontWrapper.h"
 #include <memory>
 #include <vector>
 #include <string>
-#include "SpriteBatch.h"
-#include "FW1FontWrapper.h"
 
 /**
- * @brief ƒŠƒUƒ‹ƒg‰æ–Ê‚ÌƒV[ƒ“‚ğŠÇ—‚·‚éƒNƒ‰ƒX
+ * @brief ç¹ï½ªç¹§ï½¶ç¹ï½«ç¹è‚²åˆ¤é«±ï½¢ç¸ºï½®ç¹§ï½·ç¹ï½¼ç¹ï½³ç¹§å ¤ï½®ï½¡é€…ãƒ»â˜†ç¹§ä¹ã‘ç¹ï½©ç¹§ï½¹
  */
 class ResultScene : public Scene {
 public:
@@ -24,7 +24,7 @@ private:
 	std::unique_ptr<Sprite> m_background;
 	std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
 
-	// --- ƒtƒHƒ“ƒgEƒOƒŠƒbƒ`ŠÖ˜A ---
+	// --- ç¹è¼”ã‹ç¹ï½³ç¹åŒ»ãƒ»ç¹§ï½°ç¹ï½ªç¹ãƒ»ãƒ¡é«¢ï½¢é¨¾ï½£ ---
 	IFW1Factory* m_fontFactory;
 	std::vector<IFW1FontWrapper*> m_fonts;
 
@@ -41,14 +41,14 @@ private:
 	std::wstring m_exitText;
 	std::vector<CharState> m_exitCharStates;
 
-	// --- ƒ}ƒEƒX‘I‘ğŠÖ˜A ---
+	// --- ç¹æ§­ãˆç¹§ï½¹é©•ï½¸è¬šæ¨£æœªé¨¾ï½£ ---
 	bool m_isTitleHovered;
 	bool m_isExitHovered;
 
 	float m_glitchTimer;
 	float m_glitchUpdateInterval;
 
-	// •`‰æEŒvZ•â•ŠÖ”
+	// è¬ å†—åˆ¤ç¹ï½»éšªè‚²ï½®è‹“ï½£æ‡·å‹§é«¢ï½¢è¬¨ï½°
 	void DrawGlitchText(const std::wstring& text, std::vector<CharState>& states, float fontSize, float startY, bool isHovered);
 	float CalculateTextWidth(const std::wstring& text, float fontSize);
 };

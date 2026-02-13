@@ -1,9 +1,9 @@
-#pragma once
+ï»¿#pragma once
 #include <d3d11.h>
 
 /**
  * @class ShadowMapper
- * @brief ƒVƒƒƒhƒEƒ}ƒbƒsƒ“ƒO—p‚Ì[“xƒeƒNƒXƒ`ƒƒ‚ÆŠÖ˜AƒŠƒ\[ƒX‚ğŠÇ—
+ * @brief ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ”ãƒ³ã‚°ç”¨ã®æ·±åº¦ãƒ†ã‚¯ã‚¹ãƒãƒ£ã¨é–¢é€£ãƒªã‚½ãƒ¼ã‚¹ã‚’ç®¡ç†
  */
 class ShadowMapper {
 public:
@@ -17,11 +17,11 @@ public:
 	void Shutdown();
 
 	/**
-	 * @brief [“xƒeƒNƒXƒ`ƒƒ‚ğƒŒƒ“ƒ_[ƒ^[ƒQƒbƒg‚Æ‚µ‚Äİ’è
+	 * @brief æ·±åº¦ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã¨ã—ã¦è¨­å®š
 	 */
 	void SetRenderTarget(ID3D11DeviceContext* deviceContext);
 
-	// ƒQƒbƒ^[
+	// ã‚²ãƒƒã‚¿ãƒ¼
 	ID3D11ShaderResourceView* GetShadowMapSRV() const { return m_shadowMapSRV; }
 	ID3D11SamplerState* GetShadowSampleState() const { return m_shadowSampleState; }
 

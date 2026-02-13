@@ -1,11 +1,14 @@
-#pragma once
-#include <memory>
-#include <DirectXMath.h>
+ï»¿#pragma once
 #include "Camera.h"
 #include "Player.h"
+#include <DirectXMath.h>
+#include <memory>
 
 class Stage;
-// Ó–±: ƒV[ƒ“‚Ìó‘Ôiƒ^ƒCƒgƒ‹AƒI[ƒvƒjƒ“ƒOAƒvƒŒƒC’†j‚É‰‚¶‚½ƒJƒƒ‰‚Ì“®‚«‚ğŠÇ—‚·‚é
+
+/**
+ * @brief ç¹§ï½·ç¹ï½¼ç¹ï½³ç¸ºï½®è¿¥ï½¶è«·å…·ï½¼åŒ»ã¡ç¹§ï½¤ç¹åŒ»Îç¸²âˆšãŒç¹ï½¼ç¹åŠ±ãƒ«ç¹ï½³ç¹§ï½°ç¸²âˆšãƒ»ç¹ï½¬ç¹§ï½¤è³ï½­ãƒ»å³¨â†“è ¢æ‡ŠÂ§ç¸ºæº˜ãç¹ï½¡ç¹ï½©ç¸ºï½®èœè¼”â€³ç¹§å ¤ï½®ï½¡é€…ãƒ»â˜†ç¹§ä¹ã‘ç¹ï½©ç¹§ï½¹
+ */
 class CameraDirector {
 public:
     CameraDirector(std::shared_ptr<Camera> camera);

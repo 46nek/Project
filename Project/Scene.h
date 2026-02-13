@@ -1,9 +1,9 @@
-#pragma once
+ï»¿#pragma once
 #include "GraphicsDevice.h"
 #include "Input.h"
 #include "Audio.h"
 
-// ƒV[ƒ“‚Ìó‘Ô
+// ã‚·ãƒ¼ãƒ³ã®çŠ¶æ…‹
 enum class SceneState {
 	None,
 	Title,
@@ -14,7 +14,7 @@ enum class SceneState {
 };
 
 /**
- * @brief ŠeƒV[ƒ“‚ÌŠî’ê‚Æ‚È‚é’ŠÛƒNƒ‰ƒX
+ * @brief å„ã‚·ãƒ¼ãƒ³ã®åŸºåº•ã¨ãªã‚‹æŠ½è±¡ã‚¯ãƒ©ã‚¹
  */
 class Scene {
 public:

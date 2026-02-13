@@ -1,10 +1,10 @@
-#pragma once
+ï»¿#pragma once
+#include "Texture.h"
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <vector>
 #include <string>
 #include <memory>
-#include "Texture.h"
 
 struct SimpleVertex {
 	DirectX::XMFLOAT3 pos;      // Pos -> pos
@@ -46,7 +46,7 @@ public:
 	bool GetUseNormalMap() const;
 	bool HasNormalMap() const;
 
-	// --- ‹‘äƒJƒŠƒ“ƒO—p‚ÌŠÖ” ---
+	// --- éš•å¤œå€¹èœ¿ï½°ç¹§ï½«ç¹ï½ªç¹ï½³ç¹§ï½°é€•ï½¨ç¸ºï½®é«¢ï½¢è¬¨ï½° ---
 	DirectX::XMFLOAT3 GetBoundingSphereCenter() const;
 	float GetBoundingSphereRadius() const;
 
@@ -67,7 +67,7 @@ private:
 	bool m_useTexture;
 	bool m_useNormalMap;
 
-	// --- ‹‘äƒJƒŠƒ“ƒO—p‚Ì•Ï” ---
+	// --- éš•å¤œå€¹èœ¿ï½°ç¹§ï½«ç¹ï½ªç¹ï½³ç¹§ï½°é€•ï½¨ç¸ºï½®èŸç”»ç„š ---
 	DirectX::XMFLOAT3 m_boundingSphereCenter;
 	float m_boundingSphereRadius;
 };

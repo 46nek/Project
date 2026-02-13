@@ -1,4 +1,4 @@
-#include "Model.h"
+﻿#include "Model.h"
 #include "Texture.h"
 #include <cmath>
 
@@ -20,6 +20,7 @@ Model::~Model() {
 bool Model::Initialize(ID3D11Device* device, const std::vector<SimpleVertex>& vertices, const std::vector<unsigned long>& indices) {
 	if (vertices.empty() || indices.empty()) { return false; }
 
+	// 繝舌え繝ｳ繝・ぅ繝ｳ繧ｰ繧ｹ繝輔ぅ繧｢縺ｮ險育ｮ・
 	CalculateBoundingSphere(vertices);
 
 	Mesh newMesh = {};
@@ -27,6 +28,7 @@ bool Model::Initialize(ID3D11Device* device, const std::vector<SimpleVertex>& ve
 	D3D11_SUBRESOURCE_DATA vertexData = {}, indexData = {};
 	HRESULT result;
 
+	// 鬆らせ繝舌ャ繝輔ぃ縺ｮ菴懈・
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	vertexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(SimpleVertex) * vertices.size());
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -34,6 +36,7 @@ bool Model::Initialize(ID3D11Device* device, const std::vector<SimpleVertex>& ve
 	result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &newMesh.vertexBuffer);
 	if (FAILED(result)) { return false; }
 
+	// 繧､繝ｳ繝・ャ繧ｯ繧ｹ繝舌ャ繝輔ぃ縺ｮ菴懈・
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	indexBufferDesc.ByteWidth = static_cast<UINT>(sizeof(unsigned long) * indices.size());
 	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
@@ -72,9 +75,9 @@ void Model::CalculateBoundingSphere(const std::vector<SimpleVertex>& vertices) {
 	m_boundingSphereRadius = 0.0f;
 	for (const auto& vertex : vertices) {
 		float distance = sqrtf(
-			pow(vertex.pos.x - m_boundingSphereCenter.x, 2) +
-			pow(vertex.pos.y - m_boundingSphereCenter.y, 2) +
-			pow(vertex.pos.z - m_boundingSphereCenter.z, 2)
+			powf(vertex.pos.x - m_boundingSphereCenter.x, 2) +
+			powf(vertex.pos.y - m_boundingSphereCenter.y, 2) +
+			powf(vertex.pos.z - m_boundingSphereCenter.z, 2)
 		);
 		if (distance > m_boundingSphereRadius) {
 			m_boundingSphereRadius = distance;
@@ -181,3 +184,4 @@ bool Model::GetUseNormalMap() const {
 bool Model::HasNormalMap() const {
 	return m_normalMap != nullptr;
 }
+

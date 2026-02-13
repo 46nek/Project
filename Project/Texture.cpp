@@ -1,4 +1,4 @@
-#include "Texture.h"
+ï»¿#include "Texture.h"
 #include "WICTextureLoader.h"
 
 Texture::Texture() {
@@ -10,7 +10,7 @@ Texture::~Texture() {
 bool Texture::Initialize(ID3D11Device* device, const wchar_t* filename) {
 	HRESULT result;
 
-	// ƒeƒNƒXƒ`ƒƒƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Ş
+	// ç¹ãƒ»ã‘ç¹§ï½¹ç¹âˆšÎ•ç¹è¼”ãƒç¹§ï½¤ç¹ï½«ç¹§å®šï½ªï½­ç¸ºï½¿éœï½¼ç¹§Â€
 	result = DirectX::CreateWICTextureFromFile(device, filename, nullptr, m_textureView.GetAddressOf());
 	if (FAILED(result)) {
 		return false;

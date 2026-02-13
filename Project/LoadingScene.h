@@ -1,9 +1,9 @@
-#pragma once
+﻿#pragma once
 #include "Scene.h"
 #include "GameScene.h"
-#include <memory>
 #include "SpriteBatch.h"
 #include "FW1FontWrapper.h"
+#include <memory>
 
 class LoadingScene : public Scene {
 public:

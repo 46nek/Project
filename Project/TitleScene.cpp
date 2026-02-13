@@ -170,7 +170,6 @@ void TitleScene::Update(float deltaTime) {
 	if (!m_isPlayHovered) { for (auto& state : m_playCharStates) state.fontIndex = 0; }
 	if (!m_isSettingHovered) { for (auto& state : m_settingCharStates) state.fontIndex = 0; }
 
-	// Inputクラスに統合（GetAsyncKeyStateは削除）
 	if ((m_isPlayHovered && m_input->IsKeyPressed(VK_LBUTTON)) || m_input->IsKeyPressed(VK_RETURN)) {
 		m_nextScene = SceneState::Loading;
 		m_input->SetCursorVisible(false);

@@ -1,4 +1,4 @@
-#include "GameObjectManager.h"
+﻿#include "GameObjectManager.h"
 #include "AssetPaths.h"
 #include "Camera.h"
 #include "Game.h"
@@ -197,27 +197,27 @@ bool GameObjectManager::InitializeSpecialOrbs(GraphicsDevice* graphicsDevice, St
 }
 
 void GameObjectManager::SpawnGoal(Stage* stage, LightManager* lightManager) {
-	// ステージの開始位置（ゴール位置）を取得
+	// 繧ｹ繝・・繧ｸ縺ｮ髢句ｧ倶ｽ咲ｽｮ・医ざ繝ｼ繝ｫ菴咲ｽｮ・峨ｒ蜿門ｾ・
 	std::pair<int, int> startPos = stage->GetStartPosition();
 	float pathWidth = stage->GetPathWidth();
 
-	// 座標計算
+	// 蠎ｧ讓呵ｨ育ｮ・
 	float goalX = (static_cast<float>(startPos.first) + 0.5f) * pathWidth;
 	float goalZ = (static_cast<float>(startPos.second) + 0.5f) * pathWidth;
 
-	// ゴールの光を追加（COLOR_GOAL_ORBなどは無名名前空間にある前提）
+	// 繧ｴ繝ｼ繝ｫ縺ｮ蜈峨ｒ霑ｽ蜉・・OLOR_GOAL_ORB縺ｪ縺ｩ縺ｯ辟｡蜷榊錐蜑咲ｩｺ髢薙↓縺ゅｋ蜑肴署・・
 	int lightIndex = lightManager->AddPointLight({ goalX, 2.0f, goalZ }, COLOR_GOAL_ORB, GOAL_LIGHT_RANGE, GOAL_LIGHT_INTENSITY);
 
-	// ゴールオーブ生成
+	// 繧ｴ繝ｼ繝ｫ繧ｪ繝ｼ繝也函謌・
 	m_goalOrb = std::make_unique<Orb>();
-	// 保存しておいた m_graphicsDevice を使用
+	// 菫晏ｭ倥＠縺ｦ縺翫＞縺・m_graphicsDevice 繧剃ｽｿ逕ｨ
 	m_goalOrb->Initialize(m_graphicsDevice->GetDevice(), { goalX, 2.0f, goalZ }, lightIndex, OrbType::Goal);
 
 	m_goalSpawned = true;
 }
 
 void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, LightManager* lightManager, DirectX::SoundEffect* collectSound) {
-	//デコイの生成
+	// 繝・さ繧､縺ｮ逕滓・
 	if (player->IsDecoyRequested()) {
 		auto it_consume = std::find_if(m_orbs.begin(), m_orbs.end(), [](const std::unique_ptr<Orb>& o) {
 			return o->IsCollected();
@@ -237,7 +237,7 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 		player->ResetDecoyRequest();
 	}
 
-	//デコイの更新と有効なデコイのリスト作成
+	// 繝・さ繧､縺ｮ譖ｴ譁ｰ縺ｨ譛牙柑縺ｪ繝・さ繧､縺ｮ繝ｪ繧ｹ繝井ｽ懈・
 	std::vector<Decoy*> activeDecoyPtrs;
 	for (auto it = m_decoys.begin(); it != m_decoys.end(); ) {
 		(*it)->Update(deltaTime);
@@ -250,12 +250,12 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 		}
 	}
 
-	//敵の更新（第5引数にデコイリストを渡す）
+	// 謨ｵ縺ｮ譖ｴ譁ｰ・育ｬｬ5蠑墓焚縺ｫ繝・さ繧､繝ｪ繧ｹ繝医ｒ貂｡縺呻ｼ・
 	for (auto& enemy : m_enemies) {
 		enemy->Update(deltaTime, player, stage, activeDecoyPtrs, m_enemies);
 	}
 
-	// 特殊オーブの更新
+	// 迚ｹ谿翫が繝ｼ繝悶・譖ｴ譁ｰ
 	for (auto it = m_specialOrbs.begin(); it != m_specialOrbs.end(); ) {
 		(*it)->Update(deltaTime, player, lightManager, collectSound);
 		if ((*it)->IsCollected()) {
@@ -268,7 +268,7 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 				m_enemyRadarTimer = RADAR_DURATION;
 				break;
 			}
-			// 削除せず、Collected状態にするだけに留めるのが一般的ですが、元のロジックに従い削除等の処理を入れます
+			// 蜑企勁縺帙★縲，ollected迥ｶ諷九↓縺吶ｋ縺縺代↓縺ｨ縺ｩ繧√ｋ縺ｮ縺御ｸ闊ｬ逧・〒縺吶′縲∽ｻ悶・繝ｭ繧ｸ繝・け縺ｫ蠕薙＞蜑企勁遲峨・蜃ｦ逅・ｒ蜈･繧後∪縺・
 			it = m_specialOrbs.erase(it);
 		}
 		else {
@@ -276,7 +276,7 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 		}
 	}
 
-	// レーダータイマー
+	// 繝ｬ繝ｼ繝繝ｼ繧ｿ繧､繝槭・
 	if (m_enemyRadarTimer > 0.0f) {
 		m_enemyRadarTimer -= deltaTime;
 	}
@@ -289,9 +289,9 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 		auto& orb = *it;
 
 		if (!orb->IsCollected()) {
-			// 拾っていない場合は当たり判定
+			// 諡ｾ縺｣縺ｦ縺・↑縺・ｴ蜷医・蠖薙◆繧雁愛螳・
 			if (orb->Update(deltaTime, player, lightManager, collectSound)) {
-				// 拾った瞬間。ここではまだ m_remainingOrbs は減らさない
+				// 諡ｾ縺｣縺溽椪髢薙ゅ％縺薙〒縺ｯ縺ｾ縺 m_remainingOrbs 縺ｯ貂帙ｉ縺輔↑縺・
 			}
 			++it;
 		}
@@ -300,7 +300,7 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 
 			currentTargetPos = orb->GetPosition(); heldCount++;
 
-			// 中央（納品場所）への距離判定
+			// 荳ｭ螟ｮ・育ｴ榊刀蝣ｴ謇・峨∈縺ｮ霍晞屬蛻､螳・
 			auto startGrid = stage->GetStartPosition();
 			float centerX = (static_cast<float>(startGrid.first) + 0.5f) * stage->GetPathWidth();
 			float centerZ = (static_cast<float>(startGrid.second) + 0.5f) * stage->GetPathWidth();
@@ -309,10 +309,10 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 			float dz = orb->GetPosition().z - centerZ;
 			float distSq = dx * dx + dz * dz;
 
-			if (distSq < 1.0f) { // 納品成功
-				m_remainingOrbs--; // ここで初めてカウントを減らす
+			if (distSq < 1.0f) { // 邏榊刀謌仙粥
+				m_remainingOrbs--; // 縺薙％縺ｧ蛻昴ａ縺ｦ繧ｫ繧ｦ繝ｳ繝医ｒ貂帙ｉ縺・
 				orb->Shutdown();
-				it = m_orbs.erase(it); // リストから消して物理的に消滅させる
+				it = m_orbs.erase(it); // 繝ｪ繧ｹ繝医°繧画ｶ医＠縺ｦ迚ｩ逅・噪縺ｫ豸域ｻ・＆縺帙ｋ
 			}
 			else {
 				++it;
@@ -321,12 +321,12 @@ void GameObjectManager::Update(float deltaTime, Player* player, Stage* stage, Li
 	}
 	player->SetHeldOrbCount(heldCount);
 
-	// 4. ゴール出現判定
+	// 4. 繧ｴ繝ｼ繝ｫ蜃ｺ迴ｾ蛻､螳・
 	if (m_remainingOrbs <= 0 && !m_goalSpawned) {
 		SpawnGoal(stage, lightManager);
 	}
 
-	// 5. ゴール判定（既存のまま）
+	// 5. 繧ｴ繝ｼ繝ｫ蛻､螳夲ｼ域里蟄倥・縺ｾ縺ｾ・・
 	if (m_goalSpawned && m_goalOrb && !m_goalOrb->IsCollected()) {
 		if (m_goalOrb->Update(deltaTime, player, lightManager, collectSound)) {
 			stage->OpenExit();
@@ -360,7 +360,7 @@ bool GameObjectManager::CheckAndResetZoomRequest() {
 void GameObjectManager::RenderEnemies(GraphicsDevice* graphicsDevice, Camera* camera, LightManager* lightManager) {
 	if (!graphicsDevice || !camera || !lightManager) return;
 
-	// プロジェクション行列を作成
+	// 繝励Ο繧ｸ繧ｧ繧ｯ繧ｷ繝ｧ繝ｳ陦悟・繧剃ｽ懈・
 	DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(
 		camera->GetFOV(),
 		(float)Game::SCREEN_WIDTH / Game::SCREEN_HEIGHT,
@@ -368,7 +368,7 @@ void GameObjectManager::RenderEnemies(GraphicsDevice* graphicsDevice, Camera* ca
 		1000.0f
 	);
 
-	// 全ての敵のRenderを呼び出す
+	// 蜈ｨ縺ｦ縺ｮ謨ｵ縺ｮRender繧貞他縺ｳ蜃ｺ縺・
 	for (const auto& enemy : m_enemies) {
 		if (enemy) {
 			enemy->Render(

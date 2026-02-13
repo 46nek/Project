@@ -1,7 +1,7 @@
-#include "Timer.h"
+ï»¿#include "Timer.h"
 
 namespace {
-	// 1•b‚ ‚½‚è‚Ìƒ~ƒŠ•b”‚ğ•\‚·’è”
+	// 1é˜åµâ‰ ç¸ºæº˜ï½Šç¸ºï½®ç¹æº˜Îœé˜å‘ˆç„šç¹§å®šï½¡ï½¨ç¸ºåï½®å£½ç„š
 	constexpr float MILLISECONDS_PER_SECOND = 1000.0f;
 }
 
@@ -16,16 +16,16 @@ Timer::~Timer() {
 }
 
 bool Timer::Initialize() {
-	// CPU‚ÌƒNƒƒbƒNü”g”iƒeƒBƒbƒN/•bj‚ğæ“¾
+	// CPUç¸ºï½®ç¹§ï½¯ç¹ï½­ç¹ãƒ»ã‘èœ»ï½¨è±•ï½¢è¬¨ï½°ãƒ»åŒ»ãƒ¦ç¹§ï½£ç¹ãƒ»ã‘/é˜æŠµï½¼å³¨ï½’èœ¿é–€ï½¾ãƒ»
 	QueryPerformanceFrequency((LARGE_INTEGER*)&m_frequency);
 	if (m_frequency == 0) {
 		return false;
 	}
 
-	// 1ƒ~ƒŠ•b‚ ‚½‚è‚ÌƒeƒBƒbƒN”‚ğŒvZ
+	// 1ç¹æº˜Îœé˜åµâ‰ ç¸ºæº˜ï½Šç¸ºï½®ç¹ãƒ»ã…ç¹ãƒ»ã‘è¬¨ï½°ç¹§å®šï½¨è‚²ï½®ãƒ»
 	m_ticksPerMillisecond = static_cast<float>(m_frequency) / MILLISECONDS_PER_SECOND;
 
-	// ŠJnŠÔ‚ğ‹L˜^
+	// é«¢å¥ï½§åŒºå‡¾é«¢è–™ï½’éšªå€¬é¹¸
 	QueryPerformanceCounter((LARGE_INTEGER*)&m_startTime);
 
 	return true;
@@ -34,20 +34,20 @@ bool Timer::Initialize() {
 void Timer::Tick() {
 	INT64 currentTime;
 
-	// Œ»İ‚ÌŠÔ‚ğæ“¾
+	// è¿´ï½¾è¨ï½¨ç¸ºï½®è­ã‚‹ä¿£ç¹§è²å™è •ãƒ»
 	QueryPerformanceCounter((LARGE_INTEGER*)&currentTime);
 
-	// ‘O‰ñ‚ÌƒtƒŒ[ƒ€‚©‚ç‚ÌŒo‰ßƒeƒBƒbƒN”‚ğŒvZ
+	// èœ‘æ¦Šå±“ç¸ºï½®ç¹è¼”Îç¹ï½¼ç¹ï£°ç¸ºä¹ï½‰ç¸ºï½®é‚¨ç¢â„ƒç¹ãƒ»ã…ç¹ãƒ»ã‘è¬¨ï½°ç¹§å®šï½¨è‚²ï½®ãƒ»
 	float timeDifference = static_cast<float>(currentTime - m_startTime);
 
-	// ƒfƒ‹ƒ^ƒ^ƒCƒ€‚ğƒ~ƒŠ•b’PˆÊ‚ÅŒvZ
+	// ç¹ãƒ»Îç¹§ï½¿ç¹§ï½¿ç¹§ï½¤ç¹ï£°ç¹§åµÎ‘ç¹ï½ªé˜è²è…°è´é˜ªã€’éšªè‚²ï½®ãƒ»
 	m_deltaTime = timeDifference / m_ticksPerMillisecond;
 
-	// Ÿ‚ÌƒtƒŒ[ƒ€‚Ì‚½‚ß‚ÉŠJnŠÔ‚ğXV
+	// è°ºï½¡ç¸ºï½®ç¹è¼”Îç¹ï½¼ç¹ï£°ç¸ºï½®ç¸ºæº˜ï½ç¸ºï½«é«¢å¥ï½§åŒºå‡¾é«¢è–™ï½’è­–ï½´è­ï½°
 	m_startTime = currentTime;
 }
 
 float Timer::GetDeltaTime() const {
-	// ƒfƒ‹ƒ^ƒ^ƒCƒ€‚ğ•b’PˆÊ‚Å•Ô‚·
+	// ç¹ãƒ»Îç¹§ï½¿ç¹§ï½¿ç¹§ï½¤ç¹ï£°ç¹§å ¤ï½§è²è…°è´é˜ªã€’éœ‘æ–â˜†
 	return m_deltaTime / MILLISECONDS_PER_SECOND;
 }

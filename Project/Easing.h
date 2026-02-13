@@ -1,10 +1,10 @@
-#pragma once
+ï»¿#pragma once
 
 #include <cmath>
 #include <algorithm>
 
 /**
- * @brief ƒC[ƒWƒ“ƒO‚Ìí—Ş‚ğ’è‹`‚·‚é—ñ‹“Œ^
+ * @brief ã‚¤ãƒ¼ã‚¸ãƒ³ã‚°ã®ç¨®é¡ã‚’å®šç¾©ã™ã‚‹åˆ—æŒ™å‹
  */
 enum class EasingType {
     Linear,
@@ -21,23 +21,23 @@ enum class EasingType {
 };
 
 /**
- * @brief ƒC[ƒWƒ“ƒOŒvZ‚ğs‚¤Ã“IƒNƒ‰ƒX
+ * @brief ã‚¤ãƒ¼ã‚¸ãƒ³ã‚°è¨ˆç®—ã‚’è¡Œã†é™çš„ã‚¯ãƒ©ã‚¹
  */
 class Easing {
 public:
     /**
-     * @brief w’è‚³‚ê‚½ƒC[ƒWƒ“ƒOƒ^ƒCƒv‚ÉŠî‚Ã‚¢‚Ä•âŠÔ’l‚ğŒvZ‚µ‚Ü‚·B
-     * @param type ƒC[ƒWƒ“ƒO‚Ìí—Ş
-     * @param t is“x (0.0f ` 1.0f)
-     * @return ƒC[ƒWƒ“ƒO“K—pŒã‚Ì’l (ŠT‚Ë 0.0f ` 1.0f)
+     * @brief æŒ‡å®šã•ã‚ŒãŸã‚¤ãƒ¼ã‚¸ãƒ³ã‚°ã‚¿ã‚¤ãƒ—ã«åŸºã¥ã„ã¦è£œé–“å€¤ã‚’è¨ˆç®—ã—ã¾ã™ã€‚
+     * @param type ã‚¤ãƒ¼ã‚¸ãƒ³ã‚°ã®ç¨®é¡
+     * @param t é€²è¡Œåº¦ (0.0f ï½ 1.0f)
+     * @return ã‚¤ãƒ¼ã‚¸ãƒ³ã‚°é©ç”¨å¾Œã®å€¤ (æ¦‚ã­ 0.0f ï½ 1.0f)
      */
     static float GetValue(EasingType type, float t);
 
 private:
-    // ’è”
+    // å®šæ•°
     static constexpr float PI = 3.14159265359f;
 
-    // ŠeƒC[ƒWƒ“ƒOŠÖ”‚ÌÀ‘•
+    // å„ã‚¤ãƒ¼ã‚¸ãƒ³ã‚°é–¢æ•°ã®å®Ÿè£…
     static float EaseInQuad(float t);
     static float EaseOutQuad(float t);
     static float EaseInOutQuad(float t);

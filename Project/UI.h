@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "GraphicsDevice.h"
 #include "Minimap.h"
 #include <vector>
@@ -22,7 +22,7 @@ public:
 
 	void Update(float deltaTime, int remainingOrbs, int totalOrbs, float skillDuration, float skillCooldown, bool isSkillActive, bool showEnemiesOnMinimap);
 
-	// ƒ}ƒEƒX“ü—Í‚Æİ’èXV—p‚ÌŠÖ”‚ğ’Ç‰Á
+	// ãƒã‚¦ã‚¹å…¥åŠ›ã¨è¨­å®šæ›´æ–°ç”¨ã®é–¢æ•°ã‚’è¿½åŠ 
 	void UpdatePauseMenu(int& selectIndex, float mx, float my, bool isClicked, bool isDown, int screenWidth, int screenHeight);
 
 	void Render(const Camera* camera, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::vector<std::unique_ptr<Orb>>& orbs, const std::vector<std::unique_ptr<Orb>>& specialOrbs, float alpha = 1.0f);
@@ -48,7 +48,7 @@ private:
 
 	bool m_showEnemiesOnMinimap;
 
-	// İ’è“¯ŠúEƒhƒ‰ƒbƒOó‘Ô—p‚É’Ç‰Á
+	// è¨­å®šåŒæœŸãƒ»ãƒ‰ãƒ©ãƒƒã‚°çŠ¶æ…‹ç”¨ã«è¿½åŠ 
 	bool m_isDraggingVolume = false;
 	bool m_isDraggingBright = false; 
 	bool m_isDraggingSens = false;

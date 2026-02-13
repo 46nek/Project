@@ -1,12 +1,12 @@
-#pragma once
-#include <d3d11.h>
-#include <DirectXMath.h>
-#include <memory>
+ï»¿#pragma once
 #include "SwapChain.h"
 #include "ShaderManager.h"
 #include "ShadowMapper.h"
 #include "RenderTarget.h"
 #include "OrthoWindow.h"
+#include <d3d11.h>
+#include <DirectXMath.h>
+#include <memory>
 
 struct MatrixBufferType {
 	DirectX::XMMATRIX world;
@@ -26,7 +26,7 @@ struct MotionBlurBufferType {
 
 /**
  * @struct MaterialBufferType
- * @brief ƒ}ƒeƒŠƒAƒ‹î•ñ‚ğƒVƒF[ƒ_[‚É“n‚·‚½‚ß‚Ì\‘¢‘Ì
+ * @brief ç¹æ§­ãƒ¦ç¹ï½ªç¹§ï½¢ç¹ï½«è« ãƒ»ï£°ï½±ç¹§åµã™ç¹§ï½§ç¹ï½¼ç¹Â€ç¹ï½¼ç¸ºï½«è²‚ï½¡ç¸ºå¶â—†ç¹§âˆšãƒ»è®’çŸ©Â€ï£°è´ãƒ»
  */
 struct MaterialBufferType {
 	DirectX::XMFLOAT4 emissiveColor;
@@ -37,14 +37,14 @@ struct MaterialBufferType {
 
 /**
  * @struct PostProcessBufferType
- * @brief ƒ|ƒXƒgƒvƒƒZƒX‚¨‚æ‚ÑƒtƒHƒO“™‚ÌƒGƒtƒFƒNƒg—pƒpƒ‰ƒ[ƒ^
+ * @brief ç¹æ˜´ã›ç¹åŒ»ãƒ»ç¹ï½­ç¹§ï½»ç¹§ï½¹ç¸ºç¿«ï½ˆç¸ºï½³ç¹è¼”ã‹ç¹§ï½°é²å³¨ãƒ»ç¹§ï½¨ç¹è¼”ã‰ç¹§ï½¯ç¹è‚²ç•‘ç¹ä»£Î›ç¹ï½¡ç¹ï½¼ç¹§ï½¿
  */
 struct PostProcessBufferType {
 	float vignetteIntensity;
-	float fogStart;          // ƒtƒHƒO‚ÌŠJn‹——£
-	float fogEnd;            // ƒtƒHƒO‚ÌI—¹‹——£i‚±‚Ì‹——£‚ÅŠ®‘S‚ÉƒtƒHƒOF‚É‚È‚éj
-	float padding;           // ƒAƒ‰ƒCƒƒ“ƒg—pƒpƒfƒBƒ“ƒO
-	DirectX::XMFLOAT4 fogColor; // ƒtƒHƒO‚ÌF
+	float fogStart;          // ç¹è¼”ã‹ç¹§ï½°ç¸ºï½®é«¢å¥ï½§ç–ï½·æ™å±¬
+	float fogEnd;            // ç¹è¼”ã‹ç¹§ï½°ç¸ºï½®é‚¨ã‚†ï½ºãƒ»ï½·æ™å±¬ãƒ»åŒ»ï¼…ç¸ºï½®éœæ™å±¬ç¸ºï½§è³æ‚Ÿãƒ»ç¸ºï½«ç¹è¼”ã‹ç¹§ï½°æ¿¶ï½²ç¸ºï½«ç¸ºï½ªç¹§å…·ï½¼ãƒ»
+	float padding;           // ç¹§ï½¢ç¹ï½©ç¹§ï½¤ç¹ï½¡ç¹ï½³ç¹è‚²ç•‘ç¹ä»£ãƒ§ç¹§ï½£ç¹ï½³ç¹§ï½°
+	DirectX::XMFLOAT4 fogColor; // ç¹è¼”ã‹ç¹§ï½°ç¸ºï½®æ¿¶ï½²
 };
 
 struct LightBufferType;

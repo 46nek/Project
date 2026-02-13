@@ -1,4 +1,4 @@
-#include "Renderer.h"
+ï»¿#include "Renderer.h"
 #include "Game.h"
 #include "Stage.h"
 #include <algorithm>
@@ -24,7 +24,7 @@ void Renderer::RenderSceneToTexture(
 
 	RenderTarget* renderTarget = m_graphicsDevice->GetRenderTarget();
 	renderTarget->SetRenderTarget(m_graphicsDevice->GetDeviceContext());
-	renderTarget->ClearRenderTarget(m_graphicsDevice->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f); // ”wŒi‚ð•‚É•ÏXiƒtƒHƒO‚É‡‚í‚¹‚éj
+	renderTarget->ClearRenderTarget(m_graphicsDevice->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f); // é–­æ¢§å‹¹ç¹§å¸ï½»åµâ†“èžŸç”»å³©ãƒ»åŒ»ãƒµç¹§ï½©ç¹§ï½°ç¸ºï½«èœ·åŒ»ï½ç¸ºå¸™ï½‹ãƒ»ãƒ»
 
 	RenderDepthPass(stageModels, dynamicModels, lightManager);
 
@@ -36,11 +36,11 @@ void Renderer::RenderSceneToTexture(
 void Renderer::RenderFinalPass(const Camera* camera, float vignetteIntensity) {
 	ID3D11DeviceContext* deviceContext = m_graphicsDevice->GetDeviceContext();
 	ShaderManager* shaderManager = m_graphicsDevice->GetShaderManager();
-	auto& settings = g_game->GetSettings(); // Ý’è‚ðŽæ“¾
+	auto& settings = g_game->GetSettings(); // éšªï½­èž³å£¹ï½’èœ¿é–€ï½¾ãƒ»
 
-	// ƒ|ƒXƒgƒvƒƒZƒXƒoƒbƒtƒ@‚ÌXV
+	// ç¹æ˜´ã›ç¹åŒ»ãƒ»ç¹ï½­ç¹§ï½»ç¹§ï½¹ç¹èˆŒãƒ£ç¹è¼”ãƒç¸ºï½®è­–ï½´è­ï½°
 	PostProcessBufferType postProcessBuffer;
-	// –¾‚é‚³Ý’è‚ð”½‰f (–¾‚é‚¢‚Ù‚Çƒ”ƒBƒlƒbƒg‚ðŽã‚­‚·‚é)
+	// è­å¼±ï½‹ç¸ºæˆŠï½¨ï½­èž³å£¹ï½’èœ¿è‚´ä¸ (è­å¼±ï½‹ç¸ºãƒ»âŠ‡ç¸ºï½©ç¹ï½´ç¹§ï½£ç¹é˜ªãƒ£ç¹åŒ»ï½’è ‘ï½±ç¸ºä¸Šâ˜†ç¹§ãƒ»
 	postProcessBuffer.vignetteIntensity = vignetteIntensity * (2.0f - settings.brightness);
 	postProcessBuffer.fogStart = 0.0f;
 	postProcessBuffer.fogEnd = 0.0f;
@@ -54,16 +54,16 @@ void Renderer::RenderFinalPass(const Camera* camera, float vignetteIntensity) {
 	deviceContext->IASetInputLayout(shaderManager->GetInputLayout());
 	deviceContext->VSSetShader(shaderManager->GetPostProcessVertexShader(), nullptr, 0);
 
-	// ƒVƒF[ƒ_[‚Íí‚É MotionBlur —p‚ðŽg—p‚·‚é (ƒuƒ‰[—Ê 0 ‚È‚ç’P‚È‚éƒpƒXƒXƒ‹[‚É‚È‚é)
+	// ç¹§ï½·ç¹§ï½§ç¹ï½¼ç¹Â€ç¹ï½¼ç¸ºï½¯èŸ¶ï½¸ç¸ºï½« MotionBlur é€•ï½¨ç¹§å‰ƒï½½ï½¿é€•ï½¨ç¸ºå¶ï½‹ (ç¹æ‚¶Î›ç¹ï½¼é©¥ãƒ»0 ç¸ºï½ªç¹§ç‰™è…°ç¸ºï½ªç¹§ä¹ãƒ±ç¹§ï½¹ç¹§ï½¹ç¹ï½«ç¹ï½¼ç¸ºï½«ç¸ºï½ªç¹§ãƒ»
 	deviceContext->PSSetShader(shaderManager->GetMotionBlurPixelShader(), nullptr, 0);
 
 	DirectX::XMMATRIX currentView = camera->GetViewMatrix();
 	DirectX::XMMATRIX previousView = camera->GetPreviousViewMatrix();
 
-	// ƒ‚[ƒVƒ‡ƒ“ƒuƒ‰[Ý’è‚ªOFF‚È‚çƒuƒ‰[—Ê‚ð 0 ‚É‚·‚é
+	// ç¹ï½¢ç¹ï½¼ç¹§ï½·ç¹ï½§ç¹ï½³ç¹æ‚¶Î›ç¹ï½¼éšªï½­èž³å£¹â€²OFFç¸ºï½ªç¹§å³¨ãƒ¶ç¹ï½©ç¹ï½¼é©¥ä¸Šï½’ 0 ç¸ºï½«ç¸ºå¶ï½‹
 	float blurAmount = settings.motionBlur ? 1.0f : 0.0f;
 
-	// ƒJƒƒ‰‚ª“®‚¢‚Ä‚¢‚È‚¢ê‡‚àƒuƒ‰[‚ð 0 ‚É‚·‚é
+	// ç¹§ï½«ç¹ï½¡ç¹ï½©ç¸ºæ‚Ÿè™šç¸ºãƒ»â€»ç¸ºãƒ»â†‘ç¸ºãƒ»ï£°ï½´èœ·åŒ»ï½‚ç¹æ‚¶Î›ç¹ï½¼ç¹§ãƒ»0 ç¸ºï½«ç¸ºå¶ï½‹
 	if (memcmp(&currentView, &previousView, sizeof(DirectX::XMMATRIX)) == 0) {
 		blurAmount = 0.0f;
 	}
@@ -167,9 +167,9 @@ void Renderer::RenderMainPass(
 	auto& settings = g_game->GetSettings();
 
 	PostProcessBufferType fogParams;
-	fogParams.vignetteIntensity = 0.8f * (2.0f - settings.brightness); // –¾‚é‚¢‚Ù‚ÇŽü•ÓŒ¸Œõ‚ðŽã‚­
+	fogParams.vignetteIntensity = 0.8f * (2.0f - settings.brightness); // è­å¼±ï½‹ç¸ºãƒ»âŠ‡ç¸ºï½©èœ»ï½¨éœŽï½ºè²‚å¸›ãƒ»ç¹§è²žï½¼ï½±ç¸ºãƒ»
 	fogParams.fogStart = 15.0f;
-	fogParams.fogEnd = 60.0f * settings.brightness; // –¾‚é‚¢‚Ù‚Ç‰“‚­‚Ü‚ÅŒ©‚¦‚é‚æ‚¤‚É
+	fogParams.fogEnd = 60.0f * settings.brightness; // è­å¼±ï½‹ç¸ºãƒ»âŠ‡ç¸ºï½©é©•ï£°ç¸ºä¸Šâˆªç¸ºï½§éš•ä¹âˆ´ç¹§ä¹ï½ˆç¸ºãƒ»â†“
 	fogParams.fogColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	fogParams.padding = 0.0f;
 	m_graphicsDevice->UpdatePostProcessBuffer(fogParams);
@@ -183,10 +183,10 @@ void Renderer::RenderMainPass(
 	deviceContext->PSSetSamplers(1, 1, &shadowSampler);
 
 	struct CurrentMaterialState {
-		DirectX::XMFLOAT4 emissiveColor; // EmissiveColor -> emissiveColor
-		int useTexture;     // UseTexture -> useTexture
-		int useNormalMap;   // UseNormalMap -> useNormalMap
-		bool isValid = false; // IsValid -> isValid
+		DirectX::XMFLOAT4 emissiveColor;
+		int useTexture;
+		int useNormalMap; 
+		bool isValid = false;
 	} currentState;
 
 	auto renderModel = [&](Model* model) {
@@ -206,10 +206,10 @@ void Renderer::RenderMainPass(
 
 		if (needUpdate) {
 			MaterialBufferType materialBuffer;
-			materialBuffer.emissiveColor = model->GetEmissiveColor(); // C³
-			materialBuffer.useTexture = model->GetUseTexture();       // C³
-			materialBuffer.useNormalMap = model->HasNormalMap() && model->GetUseNormalMap(); // C³
-			materialBuffer.padding = DirectX::XMFLOAT2(0, 0); // ’Ç‰Á: ‰Šú‰»
+			materialBuffer.emissiveColor = model->GetEmissiveColor();
+			materialBuffer.useTexture = model->GetUseTexture();     
+			materialBuffer.useNormalMap = model->HasNormalMap() && model->GetUseNormalMap();
+			materialBuffer.padding = DirectX::XMFLOAT2(0, 0);
 			m_graphicsDevice->UpdateMaterialBuffer(materialBuffer);
 
 			currentState.emissiveColor = materialBuffer.emissiveColor;
@@ -228,7 +228,7 @@ void Renderer::RenderMainPass(
 		model->Render(deviceContext);
 		};
 
-	// 1. ƒXƒe[ƒWƒ‚ƒfƒ‹
+	// 1. ç¹§ï½¹ç¹ãƒ»ãƒ»ç¹§ï½¸ç¹ï½¢ç¹ãƒ»Î
 	for (Model* model : stageModels) {
 		if (!m_frustum->CheckSphere(model->GetBoundingSphereCenter(), model->GetBoundingSphereRadius())) {
 			continue;
@@ -236,7 +236,7 @@ void Renderer::RenderMainPass(
 		renderModel(model);
 	}
 
-	// 2. “®“Iƒ‚ƒfƒ‹
+	// 2. èœæ…•å™ªç¹ï½¢ç¹ãƒ»Î
 	for (Model* model : dynamicModels) {
 		DirectX::XMFLOAT3 modelPos = model->GetBoundingSphereCenter();
 		if (!m_frustum->CheckSphere(modelPos, model->GetBoundingSphereRadius())) {

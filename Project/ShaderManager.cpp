@@ -1,4 +1,4 @@
-#include "ShaderManager.h"
+ï»¿#include "ShaderManager.h"
 #include <d3dcompiler.h>
 #include <iostream>
 
@@ -13,14 +13,14 @@ ShaderManager::ShaderManager()
 ShaderManager::~ShaderManager() {
 }
 
-// ƒGƒ‰[ƒƒbƒZ[ƒW‚ğ•\¦‚·‚éƒwƒ‹ƒp[ŠÖ”
+// ç¹§ï½¨ç¹ï½©ç¹ï½¼ç¹ï½¡ç¹ãƒ»ãç¹ï½¼ç¹§ï½¸ç¹§å®šï½¡ï½¨é‰ï½ºç¸ºå¶ï½‹ç¹å€¥Îç¹ä»£ãƒ»é«¢ï½¢è¬¨ï½°
 void OutputShaderError(ID3DBlob* errorMessage, const char* shaderFilename) {
 	if (errorMessage) {
-		MessageBoxA(nullptr, (char*)errorMessage->GetBufferPointer(), shaderFilename, MB_OK); // NULL -> nullptr
+		MessageBoxA(nullptr, (char*)errorMessage->GetBufferPointer(), shaderFilename, MB_OK);
 		errorMessage->Release();
 	}
 	else {
-		MessageBoxA(nullptr, "Shader Compilation Failed (No Error Message)", shaderFilename, MB_OK); // NULL -> nullptr
+		MessageBoxA(nullptr, "Shader Compilation Failed (No Error Message)", shaderFilename, MB_OK);
 	}
 }
 
@@ -37,55 +37,55 @@ bool ShaderManager::Initialize(ID3D11Device* device) {
 
 	HRESULT hr;
 
-	// ’Êí‚Ì’¸“_ƒVƒF[ƒ_[
+	// é¨¾å£¼ï½¸ï½¸ç¸ºï½®é¬†ã‚‰ã›ç¹§ï½·ç¹§ï½§ç¹ï½¼ç¹Â€ç¹ï½¼
 	hr = D3DCompileFromFile(L"VertexShader.hlsl", nullptr, nullptr, "VS", "vs_5_0", 0, 0, &vsBlob, &errorBlob);
 	if (FAILED(hr)) { OutputShaderError(errorBlob, "VertexShader.hlsl"); return false; }
 	hr = device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &m_vertexShader);
 	if (FAILED(hr)) { vsBlob->Release(); return false; }
 
-	// ƒ|ƒXƒgƒvƒƒZƒX—p’¸“_ƒVƒF[ƒ_[
+	// ç¹æ˜´ã›ç¹åŒ»ãƒ»ç¹ï½­ç¹§ï½»ç¹§ï½¹é€•ï½¨é¬†ã‚‰ã›ç¹§ï½·ç¹§ï½§ç¹ï½¼ç¹Â€ç¹ï½¼
 	hr = D3DCompileFromFile(L"PostProcessVertexShader.hlsl", nullptr, nullptr, "VS", "vs_5_0", 0, 0, &postProcessVsBlob, &errorBlob);
 	if (FAILED(hr)) { OutputShaderError(errorBlob, "PostProcessVertexShader.hlsl"); return false; }
 	hr = device->CreateVertexShader(postProcessVsBlob->GetBufferPointer(), postProcessVsBlob->GetBufferSize(), nullptr, &m_postProcessVertexShader);
 	if (FAILED(hr)) { postProcessVsBlob->Release(); return false; }
 
-	// ’Êí‚ÌƒsƒNƒZƒ‹ƒVƒF[ƒ_[
+	// é¨¾å£¼ï½¸ï½¸ç¸ºï½®ç¹æ–ã‘ç¹§ï½»ç¹ï½«ç¹§ï½·ç¹§ï½§ç¹ï½¼ç¹Â€ç¹ï½¼
 	hr = D3DCompileFromFile(L"PixelShader.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &psBlob, &errorBlob);
 	if (FAILED(hr)) { OutputShaderError(errorBlob, "PixelShader.hlsl"); return false; }
 	hr = device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &m_pixelShader);
 	if (FAILED(hr)) { psBlob->Release(); return false; }
 
-	// ƒeƒNƒXƒ`ƒƒ—pƒsƒNƒZƒ‹ƒVƒF[ƒ_[
+	// ç¹ãƒ»ã‘ç¹§ï½¹ç¹âˆšÎ•é€•ï½¨ç¹æ–ã‘ç¹§ï½»ç¹ï½«ç¹§ï½·ç¹§ï½§ç¹ï½¼ç¹Â€ç¹ï½¼
 	hr = D3DCompileFromFile(L"TexturePixelShader.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &texturePsBlob, &errorBlob);
 	if (FAILED(hr)) { OutputShaderError(errorBlob, "TexturePixelShader.hlsl"); return false; }
 	hr = device->CreatePixelShader(texturePsBlob->GetBufferPointer(), texturePsBlob->GetBufferSize(), nullptr, &m_texturePixelShader);
 	if (FAILED(hr)) { texturePsBlob->Release(); return false; }
 
-	// ƒ‚[ƒVƒ‡ƒ“ƒuƒ‰[—pƒsƒNƒZƒ‹ƒVƒF[ƒ_[
+	// ç¹ï½¢ç¹ï½¼ç¹§ï½·ç¹ï½§ç¹ï½³ç¹æ‚¶Î›ç¹ï½¼é€•ï½¨ç¹æ–ã‘ç¹§ï½»ç¹ï½«ç¹§ï½·ç¹§ï½§ç¹ï½¼ç¹Â€ç¹ï½¼
 	hr = D3DCompileFromFile(L"MotionBlur.hlsl", nullptr, nullptr, "main", "ps_5_0", 0, 0, &motionBlurPsBlob, &errorBlob);
 	if (FAILED(hr)) { OutputShaderError(errorBlob, "MotionBlur.hlsl"); return false; }
 	hr = device->CreatePixelShader(motionBlurPsBlob->GetBufferPointer(), motionBlurPsBlob->GetBufferSize(), nullptr, &m_motionBlurPixelShader);
 	if (FAILED(hr)) { motionBlurPsBlob->Release(); return false; }
 
-	// [“x—p’¸“_ƒVƒF[ƒ_[
+	// è±ºï½±è ï½¦é€•ï½¨é¬†ã‚‰ã›ç¹§ï½·ç¹§ï½§ç¹ï½¼ç¹Â€ç¹ï½¼
 	hr = D3DCompileFromFile(L"DepthVertexShader.hlsl", nullptr, nullptr, "main", "vs_5_0", 0, 0, &depthVsBlob, &errorBlob);
 	if (FAILED(hr)) { OutputShaderError(errorBlob, "DepthVertexShader.hlsl"); return false; }
 	hr = device->CreateVertexShader(depthVsBlob->GetBufferPointer(), depthVsBlob->GetBufferSize(), nullptr, &m_depthVertexShader);
 	if (FAILED(hr)) { depthVsBlob->Release(); return false; }
 
-	// UI—p’¸“_ƒVƒF[ƒ_[
+	// UIé€•ï½¨é¬†ã‚‰ã›ç¹§ï½·ç¹§ï½§ç¹ï½¼ç¹Â€ç¹ï½¼
 	hr = D3DCompileFromFile(L"SimpleVertexShader.hlsl", nullptr, nullptr, "main", "vs_5_0", 0, 0, &simpleVsBlob, &errorBlob);
 	if (FAILED(hr)) { OutputShaderError(errorBlob, "SimpleVertexShader.hlsl"); return false; }
 	hr = device->CreateVertexShader(simpleVsBlob->GetBufferPointer(), simpleVsBlob->GetBufferSize(), nullptr, &m_simpleVertexShader);
 	if (FAILED(hr)) { simpleVsBlob->Release(); return false; }
 
-	// UI—pƒsƒNƒZƒ‹ƒVƒF[ƒ_[
+	// UIé€•ï½¨ç¹æ–ã‘ç¹§ï½»ç¹ï½«ç¹§ï½·ç¹§ï½§ç¹ï½¼ç¹Â€ç¹ï½¼
 	hr = D3DCompileFromFile(L"SimplePixelShader.hlsl", nullptr, nullptr, "main", "ps_5_0", 0, 0, &simplePsBlob, &errorBlob);
 	if (FAILED(hr)) { OutputShaderError(errorBlob, "SimplePixelShader.hlsl"); return false; }
 	hr = device->CreatePixelShader(simplePsBlob->GetBufferPointer(), simplePsBlob->GetBufferSize(), nullptr, &m_simplePixelShader);
 	if (FAILED(hr)) { simplePsBlob->Release(); return false; }
 
-	// ƒCƒ“ƒvƒbƒgƒŒƒCƒAƒEƒg
+	// ç¹§ï½¤ç¹ï½³ç¹åŠ±ãƒ£ç¹åŒ»Îç¹§ï½¤ç¹§ï½¢ç¹§ï½¦ç¹ãƒ»
 	D3D11_INPUT_ELEMENT_DESC layout[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },

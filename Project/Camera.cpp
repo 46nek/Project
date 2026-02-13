@@ -1,4 +1,4 @@
-#include "Camera.h"
+﻿#include "Camera.h"
 #include <cmath>
 
 template<typename T>
@@ -68,10 +68,10 @@ float Camera::GetFOV() const {
 }
 
 void Camera::Update(float deltaTime) {
-	// ���݂̃r���[�s���ۑ�
+	// 迴ｾ蝨ｨ縺ｮ繝薙Η繝ｼ陦悟・繧剃ｿ晏ｭ・
 	m_previousViewMatrix = m_viewMatrix;
 
-	// FOV�̊��炩�ȕ�ԏ���
+	// FOV縺ｮ貊代ｉ縺九↑陬憺俣蜃ｦ逅・
 	float fovSpeed = 5.0f * deltaTime;
 	m_fov = Lerp(m_fov, m_targetFov, fovSpeed);
 

@@ -1,9 +1,9 @@
 ﻿#pragma once
 #include "Scene.h"
+#include "GameSettings.h"
+#include "FW1FontWrapper.h"
 #include <vector>
 #include <string>
-#include "FW1FontWrapper.h"
-#include "GameSettings.h"
 
 class SettingScene : public Scene {
 public:
@@ -26,7 +26,7 @@ private:
     bool m_isDraggingVolume;
     bool m_isDraggingBright; 
     bool m_isDraggingSens; 
-
+    
     void UpdateValue(int direction);
     std::wstring GetFovText();
 

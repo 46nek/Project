@@ -1,5 +1,4 @@
-#pragma once
-#include <memory>
+ï»¿#pragma once
 #include "Window.h"
 #include "GraphicsDevice.h"
 #include "Input.h"
@@ -7,15 +6,16 @@
 #include "Timer.h"
 #include "Audio.h"
 #include "GameSettings.h"
+#include <memory>
 
 class SceneManager;
 
 /**
- * @brief ƒQ[ƒ€‘S‘Ì‚ÌŠÇ—‚ğs‚¤ƒƒCƒ“ƒNƒ‰ƒX
+ * @brief ç¹§ï½²ç¹ï½¼ç¹ï£°èœˆï½¨è´è–™ãƒ»é‚‚ï½¡é€…ãƒ»ï½’é™¦å¾Œâ‰§ç¹ï½¡ç¹§ï½¤ç¹ï½³ç¹§ï½¯ç¹ï½©ç¹§ï½¹
  */
 class Game {
 public:
-	// ’è”
+	// è³å£½ç„š
 	static constexpr int SCREEN_WIDTH = 1280;
 	static constexpr int SCREEN_HEIGHT = 720;
 
@@ -23,31 +23,31 @@ public:
 	~Game();
 
 	/**
-	 * @brief ƒQ[ƒ€‚Ì‰Šú‰»ˆ—
-	 * @param hInstance ƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ÌƒCƒ“ƒXƒ^ƒ“ƒXƒnƒ“ƒhƒ‹
-	 * @return ‰Šú‰»‚ª¬Œ÷‚µ‚½ê‡‚Í true
+	 * @brief ç¹§ï½²ç¹ï½¼ç¹ï£°ç¸ºï½®è›»æ™„æ‚„è›¹é–€ãƒ»é€…ãƒ»
+	 * @param hInstance ç¹§ï½¢ç¹åŠ±Îœç¹§ï½±ç¹ï½¼ç¹§ï½·ç¹ï½§ç¹ï½³ç¸ºï½®ç¹§ï½¤ç¹ï½³ç¹§ï½¹ç¹§ï½¿ç¹ï½³ç¹§ï½¹ç¹ä¸ŠÎ¦ç¹å³¨Î
+	 * @return è›»æ™„æ‚„è›¹æ‚¶â€²è¬Œä»™ç²¥ç¸ºåŠ±â—†è£ï½´èœ·åŒ»ãƒ» true
 	 */
 	bool Initialize(HINSTANCE hInstance);
 
 	/**
-	 * @brief ƒQ[ƒ€‚ÌƒƒCƒ“ƒ‹[ƒv‚ğÀs
+	 * @brief ç¹§ï½²ç¹ï½¼ç¹ï£°ç¸ºï½®ç¹ï½¡ç¹§ï½¤ç¹ï½³ç¹ï½«ç¹ï½¼ç¹åŠ±ï½’è³æº¯ï½¡ãƒ»
 	 */
 	void Run();
 
 	/**
-	 * @brief ƒQ[ƒ€‚ÌI—¹ˆ—
+	 * @brief ç¹§ï½²ç¹ï½¼ç¹ï£°ç¸ºï½®é‚¨ã‚†ï½ºãƒ»ãƒ»é€…ãƒ»
 	 */
 	void Shutdown();
 
 	/**
-	 * @brief ƒQ[ƒ€‚Ìƒ|[ƒYó‘Ô‚ğİ’è
-	 * @param isPaused ƒ|[ƒYó‘Ô‚É‚·‚éê‡‚Í true
+	 * @brief ç¹§ï½²ç¹ï½¼ç¹ï£°ç¸ºï½®ç¹æ˜´ãƒ»ç¹§ï½ºè¿¥ï½¶è«·ä¹ï½’éšªï½­è³ãƒ»
+	 * @param isPaused ç¹æ˜´ãƒ»ç¹§ï½ºè¿¥ï½¶è«·ä¹â†“ç¸ºå¶ï½‹è£ï½´èœ·åŒ»ãƒ» true
 	 */
 	void SetPaused(bool isPaused);
 
 	/**
-	 * @brief Œ»İ‚Ìƒ|[ƒYó‘Ô‚ğæ“¾
-	 * @return ƒ|[ƒY’†‚Ìê‡‚Í true
+	 * @brief è¿´ï½¾è¨ï½¨ç¸ºï½®ç¹æ˜´ãƒ»ç¹§ï½ºè¿¥ï½¶è«·ä¹ï½’èœ¿é–€ï½¾ãƒ»
+	 * @return ç¹æ˜´ãƒ»ç¹§ï½ºè³ï½­ç¸ºï½®è£ï½´èœ·åŒ»ãƒ» true
 	 */
 	bool IsPaused() const;
 
@@ -56,17 +56,17 @@ public:
 	DirectX::AudioEngine* GetAudioEngine() const { return m_audioEngine.get(); }
 private:
 	/**
-	 * @brief ƒtƒŒ[ƒ€‚²‚Æ‚ÌXVˆ—
-	 * @return ƒQ[ƒ€‚ÌÀs‚ğ‘±‚¯‚éê‡‚Í true
+	 * @brief ç¹è¼”Îç¹ï½¼ç¹ï£°ç¸ºæ–â†’ç¸ºï½®è­–ï½´è­ï½°èœƒï½¦é€…ãƒ»
+	 * @return ç¹§ï½²ç¹ï½¼ç¹ï£°ç¸ºï½®è³æº¯ï½¡å¾Œï½’é‚¯å£¹ï¿ ç¹§å¥ï£°ï½´èœ·åŒ»ãƒ» true
 	 */
 	bool Update();
 
 	/**
-	 * @brief ƒtƒŒ[ƒ€‚²‚Æ‚Ì•`‰æˆ—
+	 * @brief ç¹è¼”Îç¹ï½¼ç¹ï£°ç¸ºæ–â†’ç¸ºï½®è¬ å†—åˆ¤èœƒï½¦é€…ãƒ»
 	 */
 	void Render();
 
-	// ƒƒ“ƒo[•Ï”
+	// ç¹ï½¡ç¹ï½³ç¹èˆŒãƒ»èŸç”»ç„š
 	std::unique_ptr<Window> m_window;
 	std::unique_ptr<Input> m_input;
 	std::unique_ptr<GraphicsDevice> m_graphicsDevice;

@@ -1,10 +1,10 @@
-#pragma once
+ï»¿#pragma once
 #include <d3d11.h>
 #include <wrl/client.h>
 
 /**
  * @class Texture
- * @brief WIC (Windows Imaging Component) ‚ğg—p‚µ‚½ƒeƒNƒXƒ`ƒƒ‚Ì“Ç‚İ‚İ‚ÆŠÇ—
+ * @brief WIC (Windows Imaging Component) ã‚’ä½¿ç”¨ã—ãŸãƒ†ã‚¯ã‚¹ãƒãƒ£ã®èª­ã¿è¾¼ã¿ã¨ç®¡ç†
  */
 class Texture {
 public:

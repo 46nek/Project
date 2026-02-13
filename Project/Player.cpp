@@ -1,4 +1,4 @@
-#include "Player.h"
+ï»¿#include "Player.h"
 #include "Audio.h"
 #include "Game.h"
 #include <cmath>
@@ -8,7 +8,7 @@
 extern Game* g_game;
 
 namespace {
-	// ’è”’è‹`
+	// è³å£½ç„šè³å¤‚ï½¾ï½©
 	constexpr int KEY_SHIFT = 0x10;
 	constexpr int KEY_MOVE_FORWARD = 'W';
 	constexpr int KEY_MOVE_BACKWARD = 'S';
@@ -53,8 +53,8 @@ void Player::Update(float deltaTime, Input* input, const std::vector<std::vector
 	m_isMoving = false;
 
 	if (input->IsKeyPressed('E') && m_heldOrbCount > 0) {
-		m_heldOrbCount--; // Š”‚ğŒ¸‚ç‚·
-		m_isDecoyRequested = true; // GameObjectManager‚É’Ê’m‚·‚é‚½‚ß‚Ìƒtƒ‰ƒO
+		m_heldOrbCount--; // è¬‡Â€è¬–âˆµç„šç¹§å‘ˆï½¸å¸™ï½‰ç¸ºãƒ»
+		m_isDecoyRequested = true; // GameObjectManagerç¸ºï½«é¨¾å¤‚è¡ç¸ºå¶ï½‹ç¸ºæº˜ï½ç¸ºï½®ç¹è¼”Î›ç¹§ï½°
 	}
 
 	UpdateSkill(deltaTime, input);
@@ -63,13 +63,13 @@ void Player::Update(float deltaTime, Input* input, const std::vector<std::vector
 }
 
 void Player::UpdateSkill(float deltaTime, Input* input) {
-	// ƒN[ƒ‹ƒ_ƒEƒ“Œo‰ß
+	// ç¹§ï½¯ç¹ï½¼ç¹ï½«ç¹Â€ç¹§ï½¦ç¹ï½³é‚¨ç¢â„ƒ
 	if (m_skillCoolDownTimer > 0.0f) {
 		m_skillCoolDownTimer -= deltaTime;
 		if (m_skillCoolDownTimer < 0.0f) m_skillCoolDownTimer = 0.0f;
 	}
 
-	// Œø‰ÊŠÔŒo‰ß
+	// èœ‰ï½¹è­«æ‡ˆå‡¾é«¢é‹ï½µç¢â„ƒ
 	if (m_isRunning) {
 		m_skillDurationTimer -= deltaTime;
 		if (m_skillDurationTimer <= 0.0f) {
@@ -78,11 +78,11 @@ void Player::UpdateSkill(float deltaTime, Input* input) {
 		}
 	}
 
-	// ”­“®”»’è (ƒN[ƒ‹ƒ_ƒEƒ“0 ‚©‚Â ShiftƒL[‚ğ‰Ÿ‚µ‚½uŠÔ)
+	// é€‹ï½ºèœå‹Ÿæ„›è³ãƒ»(ç¹§ï½¯ç¹ï½¼ç¹ï½«ç¹Â€ç¹§ï½¦ç¹ï½³0 ç¸ºä¹â–½ Shiftç¹§ï½­ç¹ï½¼ç¹§å‘ˆæ¬¾ç¸ºåŠ±â—†è¿¸ï½¬é«¢ãƒ»
 	if (m_skillCoolDownTimer <= 0.0f && input->IsKeyPressed(KEY_SHIFT)) {
 		m_isRunning = true;
 		m_skillDurationTimer = RUN_SKILL_DURATION;
-		m_skillCoolDownTimer = RUN_SKILL_COOLDOWN; // ”­“®‚µ‚½uŠÔ‚ÉƒN[ƒ‹ƒ_ƒEƒ“ŠJni10•bj
+		m_skillCoolDownTimer = RUN_SKILL_COOLDOWN; // é€‹ï½ºèœè¼”ï¼ ç¸ºæº½æ¤ªé«¢è–™â†“ç¹§ï½¯ç¹ï½¼ç¹ï½«ç¹Â€ç¹§ï½¦ç¹ï½³é«¢å¥ï½§å…·ï½¼ãƒ»0é˜æŠµï½¼ãƒ»
 	}
 }
 

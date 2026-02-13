@@ -1,4 +1,4 @@
-#include "RenderTarget.h"
+﻿#include "RenderTarget.h"
 
 RenderTarget::RenderTarget() {
 }
@@ -6,7 +6,7 @@ RenderTarget::~RenderTarget() {
 }
 
 bool RenderTarget::Initialize(ID3D11Device* device, int textureWidth, int textureHeight, bool createDepthSrv) {
-	// --- �J���[�e�N�X�`���̍쐬 ---
+	// --- 繧ｫ繝ｩ繝ｼ繝・け繧ｹ繝√Ε縺ｮ菴懈・ ---
 	D3D11_TEXTURE2D_DESC textureDesc = {};
 	textureDesc.Width = textureWidth;
 	textureDesc.Height = textureHeight;
@@ -26,7 +26,7 @@ bool RenderTarget::Initialize(ID3D11Device* device, int textureWidth, int textur
 	hr = device->CreateShaderResourceView(m_renderTargetTexture.Get(), nullptr, &m_shaderResourceView);
 	if (FAILED(hr)) { return false; }
 
-	// --- �[�x�o�b�t�@�̍쐬 ---
+	// --- 豺ｱ蠎ｦ繝舌ャ繝輔ぃ縺ｮ菴懈・ ---
 	D3D11_TEXTURE2D_DESC depthBufferDesc = {};
 	depthBufferDesc.Width = textureWidth;
 	depthBufferDesc.Height = textureHeight;
@@ -46,7 +46,7 @@ bool RenderTarget::Initialize(ID3D11Device* device, int textureWidth, int textur
 	hr = device->CreateDepthStencilView(m_depthStencilBuffer.Get(), &dsvDesc, &m_depthStencilView);
 	if (FAILED(hr)) { return false; }
 
-	// ���[�V�����u���[�p�ɁA�[�x�e�N�X�`���̃V�F�[�_�[���\�[�X�r���[���쐬����ꍇ
+	// 繝｢繝ｼ繧ｷ繝ｧ繝ｳ繝悶Λ繝ｼ逕ｨ縺ｫ縲∵ｷｱ蠎ｦ繝・け繧ｹ繝√Ε縺ｮ繧ｷ繧ｧ繝ｼ繝繝ｼ繝ｪ繧ｽ繝ｼ繧ｹ繝薙Η繝ｼ繧ゆｽ懈・縺吶ｋ蝣ｴ蜷・
 	if (createDepthSrv) {
 		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 		srvDesc.Format = DXGI_FORMAT_R32_FLOAT;

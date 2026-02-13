@@ -1,22 +1,22 @@
-#pragma once
+ï»¿#pragma once
+#include "MazeGenerator.h"
+#include "Model.h"
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include <vector>
-#include "MazeGenerator.h"
-#include "Model.h"
 
-// ƒ|ƒŠƒSƒ“‚Ì–Ê‚ÌŒü‚«
+// ç¹æ˜´Îœç¹§ï½´ç¹ï½³ç¸ºï½®é«±ï½¢ç¸ºï½®èœ·ä»£â€³
 enum class FaceDirection {
 	Top, Bottom, Left, Right, Front, Back
 };
 
 /**
  * @class MeshGenerator
- * @brief –À˜Hƒf[ƒ^‚©‚ç•ÇA°A“Vˆä‚ÌƒƒbƒVƒ…‚ğ¶¬‚·‚éÃ“IƒNƒ‰ƒX
+ * @brief éœ‘ï½·éœï½¯ç¹ãƒ»ãƒ»ç¹§ï½¿ç¸ºä¹ï½‰è¢âˆšÂ€âˆï½ºç¿«Â€âˆï½¤ï½©è è¼”ãƒ»ç¹ï½¡ç¹ãƒ»ã™ç¹ï½¥ç¹§å ¤å‡½è¬ŒèˆŒâ˜†ç¹§çŸ©æ’•é€§ãƒ»ã‘ç¹ï½©ç¹§ï½¹
  */
 class MeshGenerator {
 public:
-	// ¶¬‚·‚éƒƒbƒVƒ…‚Ìí—Ş
+	// é€•æ»“ãƒ»ç¸ºå¶ï½‹ç¹ï½¡ç¹ãƒ»ã™ç¹ï½¥ç¸ºï½®éï½®é¬˜ãƒ»
 	enum class MeshType {
 		Wall, Ceiling, Floor
 	};

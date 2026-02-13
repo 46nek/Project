@@ -1,4 +1,4 @@
-#include "Input.h"
+ï»¿#include "Input.h"
 #include <algorithm> 
 #include <iterator>
 
@@ -15,7 +15,7 @@ void Input::Initialize() {
 	std::fill(std::begin(m_keys), std::end(m_keys), false);
 	std::fill(std::begin(m_previousKeys), std::end(m_previousKeys), false);
 
-	// ƒ}ƒEƒXˆÚ“®—Ê‚ğ0‚Å‰Šú‰»
+	// ç¹æ§­ãˆç¹§ï½¹é˜ï½»èœæš®ã¼ç¸ºï½ªç¸ºï½©ç¹§è²ãƒ»è­›æº·å–§
 	m_mouseX = 0;
 	m_mouseY = 0;
 	m_absMouseX = 0;
@@ -27,24 +27,24 @@ void Input::EndFrame() {
 		m_previousKeys[i] = m_keys[i];
 	}
 
-	// Ÿ‚ÌƒtƒŒ[ƒ€‚Ì‚½‚ß‚Éƒ}ƒEƒXˆÚ“®—Ê‚ğƒŠƒZƒbƒg
+	// è°ºï½¡ç¸ºï½®ç¹è¼”Îç¹ï½¼ç¹ï£°ç¸ºï½®ç¸ºæº˜ï½ç¸ºï½«ç¹æ§­ãˆç¹§ï½¹é˜ï½»èœæš®ã¼ç¹§åµÎœç¹§ï½»ç¹ãƒ»ãƒ¨
 	m_mouseX = 0;
 	m_mouseY = 0;
 }
 
 void Input::Update(HWND hwnd) {
-	// ƒJ[ƒ\ƒ‹ƒƒbƒN‚ª—LŒø‚È‚çAƒJ[ƒ\ƒ‹‚ğ‰æ–Ê’†‰›‚É–ß‚·
+	// ç¹§ï½«ç¹ï½¼ç¹§ï½½ç¹ï½«ç¹ï½­ç¹ãƒ»ã‘ç¸ºæ¢§æ€èœ‰ï½¹ç¸ºï½ªç¹§å³¨Â€âˆšãç¹ï½¼ç¹§ï½½ç¹ï½«ç¹§å ¤åˆ¤é«±ï½¢è³ï½­èŸï½®ç¸ºï½«è¬Œï½»ç¸ºãƒ»
 	if (m_isCursorLocked && hwnd) {
-		// ƒEƒBƒ“ƒhƒE‚ªƒAƒNƒeƒBƒu‚Èê‡‚Ì‚İÀsi”ñƒAƒNƒeƒBƒu‚Éƒ}ƒEƒX‚ğ’D‚í‚È‚¢‚æ‚¤‚Éj
+		// ç¹§ï½¦ç¹§ï½£ç¹ï½³ç¹å³¨ãˆç¸ºå¾Œã„ç¹§ï½¯ç¹ãƒ»ã…ç¹æ‚¶â†‘è£ï½´èœ·åŒ»ãƒ»ç¸ºï½¿è³æº¯ï½¡é¯‰ï½¼ç£¯æ’¼ç¹§ï½¢ç¹§ï½¯ç¹ãƒ»ã…ç¹åŒå‡¾ç¸ºï½«ç¹æ§­ãˆç¹§ï½¹ç¹§è²ï½¥ï½ªç¹§ä¸Šâ†‘ç¸ºãƒ»ï½ˆç¸ºãƒ»â†“ãƒ»ãƒ»
 		if (GetForegroundWindow() == hwnd) {
-			// ƒEƒBƒ“ƒhƒE‚Ì’†‰›À•W‚ğŒvZ
+			// ç¹§ï½¦ç¹§ï½£ç¹ï½³ç¹å³¨ãˆç¸ºï½®è³ï½­èŸï½®è ï½§è®“å¶ï½’éšªè‚²ï½®ãƒ»
 			RECT rect;
 			GetClientRect(hwnd, &rect);
 			POINT center;
 			center.x = (rect.right - rect.left) / 2;
 			center.y = (rect.bottom - rect.top) / 2;
 
-			// ƒXƒNƒŠ[ƒ“À•W‚É•ÏŠ·‚µ‚ÄƒZƒbƒg
+			// ç¹§ï½¹ç¹§ï½¯ç¹ï½ªç¹ï½¼ç¹ï½³è ï½§è®“å¶â†“èŸç”»é‹¤ç¸ºåŠ±â€»ç¹§ï½»ç¹ãƒ»ãƒ¨
 			ClientToScreen(hwnd, &center);
 			SetCursorPos(center.x, center.y);
 		}
@@ -52,17 +52,17 @@ void Input::Update(HWND hwnd) {
 }
 
 void Input::KeyDown(unsigned int input) {
-	// ƒL[‚ª‰Ÿ‚³‚ê‚½‚±‚Æ‚ğ‹L˜^
+	// ç¹§ï½­ç¹ï½¼ç¸ºæ¢§æ¬¾ç¸ºè¼”ï½Œç¸ºæº˜ï¼…ç¸ºï½¨ç¹§å®šï½¨å€¬é¹¸
 	m_keys[input] = true;
 }
 
 void Input::KeyUp(unsigned int input) {
-	// ƒL[‚ª—£‚³‚ê‚½‚±‚Æ‚ğ‹L˜^
+	// ç¹§ï½­ç¹ï½¼ç¸ºç¢å±¬ç¸ºè¼”ï½Œç¸ºæº˜ï¼…ç¸ºï½¨ç¹§å®šï½¨å€¬é¹¸
 	m_keys[input] = false;
 }
 
 void Input::MouseMove(int x, int y) {
-	// ‘O‚ÌƒtƒŒ[ƒ€‚©‚ç‚ÌˆÚ“®—Ê‚ğ‰ÁZ
+	// èœ‘é˜ªãƒ»ç¹è¼”Îç¹ï½¼ç¹ï£°ç¸ºä¹ï½‰ç¸ºï½®é˜ï½»èœæš®ã¼ç¹§è²åˆˆé‚‚ãƒ»
 	m_mouseX += x;
 	m_mouseY += y;
 }
@@ -78,12 +78,12 @@ void Input::GetMousePosition(int& x, int& y) {
 }
 
 bool Input::IsKeyDown(unsigned int key) {
-	// w’è‚³‚ê‚½ƒL[‚ª‰Ÿ‚³‚ê‚Ä‚¢‚é‚©‚Ç‚¤‚©‚Ìó‘Ô‚ğ•Ô‚·
+	// è¬–ãƒ»ï½®å£¹ï¼†ç¹§å¾Œâ—†ç¹§ï½­ç¹ï½¼ç¸ºæ¢§æ¬¾ç¸ºè¼”ï½Œç¸ºï½¦ç¸ºãƒ»ï½‹ç¸ºä¹â†ç¸ºãƒ»Â°ç¸ºï½®è¿¥ï½¶è«·ä¹ï½’éœ‘æ–â˜†
 	return m_keys[key];
 }
 
 bool Input::IsKeyPressed(unsigned int key) {
-	// Œ»İ‚Í‰Ÿ‚³‚ê‚Ä‚¢‚ÄA‘O‚ÌƒtƒŒ[ƒ€‚Å‚Í‰Ÿ‚³‚ê‚Ä‚¢‚È‚©‚Á‚½ê‡‚Étrue‚ğ•Ô‚·
+	// è¿´ï½¾è¨ï½¨ç¸ºï½¯è¬šï½¼ç¸ºè¼”ï½Œç¸ºï½¦ç¸ºãƒ»â€»ç¸²âˆç‡•ç¸ºï½®ç¹è¼”Îç¹ï½¼ç¹ï£°ç¸ºï½§ç¸ºï½¯è¬šï½¼ç¸ºè¼”ï½Œç¸ºï½¦ç¸ºãƒ»â†‘ç¸ºä¹â–²ç¸ºæº·ï£°ï½´èœ·åŒ»â†“trueç¹§å®šï½¿æ–â˜†
 	return m_keys[key] && !m_previousKeys[key];
 }
 
@@ -93,7 +93,7 @@ void Input::GetMouseDelta(int& x, int& y) {
 }
 
 void Input::SetCursorVisible(bool visible) {
-	// ó‘Ô‚ª•Ï‚í‚éê‡‚Ì‚İAPI‚ğŒÄ‚ÔiShowCursor‚Í“à•”ƒJƒEƒ“ƒ^‚ğ‚Â‚½‚ßj
+	// è¿¥ï½¶è«·ä¹â€²èŸå³¨ï½ç¹§å¥ï£°ï½´èœ·åŒ»ãƒ»ç¸ºï½¿APIç¹§è²ä»–ç¸ºï½¶ãƒ»ãƒ»howCursorç¸ºï½¯èœ€ãƒ»Îšç¹§ï½«ç¹§ï½¦ç¹ï½³ç¹§ï½¿ç¹§å‘ˆæˆŸç¸ºï½¤ç¸ºæº˜ï½ãƒ»ãƒ»
 	if (m_isCursorVisible != visible) {
 		::ShowCursor(visible ? TRUE : FALSE);
 		m_isCursorVisible = visible;
@@ -103,7 +103,7 @@ void Input::SetCursorVisible(bool visible) {
 void Input::SetCursorLock(bool lock) {
 	m_isCursorLocked = lock;
 
-	// ƒƒbƒN‚·‚é‚Æ‚«‚ÍƒJ[ƒ\ƒ‹‚ğÁ‚·‚Ì‚ªˆê”Ê“I
+	// ç¹ï½­ç¹ãƒ»ã‘ç¸ºå¶ï½‹ç¸ºï½¨ç¸ºé˜ªãƒ»ç¹§ï½«ç¹ï½¼ç¹§ï½½ç¹ï½«ç¹§å‘ˆï½¶åŒ»â˜†ç¸ºï½®ç¸ºå¾¡ï½¸Â€é—Šï½¬é€§ãƒ»
 	if (lock) {
 		SetCursorVisible(false);
 	}

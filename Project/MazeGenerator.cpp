@@ -1,4 +1,4 @@
-#include "MazeGenerator.h"
+﻿#include "MazeGenerator.h"
 #include <vector>
 #include <algorithm>
 #include <stack>
@@ -18,7 +18,7 @@ void MazeGenerator::Generate(int width, int height) {
 	m_rooms.clear();
 	std::vector<std::vector<bool>> protectedCells(m_height, std::vector<bool>(m_width, false));
 
-	// 1. 固定の部屋の周辺を保護領域に設定
+	// 1. 蝗ｺ螳壹・驛ｨ螻九・蜻ｨ霎ｺ繧剃ｿ晁ｭｷ鬆伜沺縺ｫ險ｭ螳・
 	const int roomSize = 3;
 	const int cornerOffset = 1;
 	using Rect = std::tuple<int, int, int, int>;
@@ -40,16 +40,16 @@ void MazeGenerator::Generate(int width, int height) {
 		}
 	}
 
-	// 2. ベースとなるランダムな迷路を生成
+	// 2. 繝吶・繧ｹ縺ｨ縺ｪ繧九Λ繝ｳ繝繝縺ｪ霑ｷ霍ｯ繧堤函謌・
 	GenerateBaseMaze(protectedCells);
 
-	// 3. 迷路を調整（行き止まりを減らし、通路を細くする）
+	// 3. 霑ｷ霍ｯ繧定ｪｿ謨ｴ・郁｡後″豁｢縺ｾ繧翫ｒ貂帙ｉ縺励※縲・夊ｷｯ繧堤ｴｰ縺上☆繧具ｼ・
 	RefineMaze(protectedCells);
 
-	// 4. 固定の部屋や通路を上書きして配置
+	// 4. 蝗ｺ螳壹・驛ｨ螻九ｄ騾夊ｷｯ繧剃ｸ頑嶌縺阪＠縺ｦ驟咲ｽｮ
 	AddFeatures();
 
-	// 5. スタート地点を設定
+	// 5. 繧ｹ繧ｿ繝ｼ繝亥慍轤ｹ繧定ｨｭ螳・
 	m_startX = (m_width - 1) / 2;
 	m_startY = (m_height - 1) / 2;
 }
@@ -70,26 +70,26 @@ void MazeGenerator::AddFeatures() {
 	const int roomSize = 3;
 	const int offset = 1;
 
-	// 部屋
-	CreateRoom(offset, offset, roomSize, roomSize); // 左上
-	CreateRoom(m_width - offset - roomSize, offset, roomSize, roomSize); // 右上
-	CreateRoom(offset, m_height - offset - roomSize, roomSize, roomSize); // 左下
-	CreateRoom(m_width - offset - roomSize, m_height - offset - roomSize, roomSize, roomSize); // 右下
-	CreateRoom((m_width - roomSize) / 2, (m_height - roomSize) / 2, roomSize, roomSize); // 中央
+	// 驛ｨ螻・
+	CreateRoom(offset, offset, roomSize, roomSize); // 蟾ｦ荳・
+	CreateRoom(m_width - offset - roomSize, offset, roomSize, roomSize); // 蜿ｳ荳・
+	CreateRoom(offset, m_height - offset - roomSize, roomSize, roomSize); // 蟾ｦ荳・
+	CreateRoom(m_width - offset - roomSize, m_height - offset - roomSize, roomSize, roomSize); // 蜿ｳ荳・
+	CreateRoom((m_width - roomSize) / 2, (m_height - roomSize) / 2, roomSize, roomSize); // 荳ｭ螟ｮ
 
-	// 外周通路
-	CreateRoom(offset, offset, m_width - offset * 2, 1); // 上
-	CreateRoom(offset, m_height - offset - 1, m_width - offset * 2, 1); // 下
-	CreateRoom(offset, offset, 1, m_height - offset * 2); // 左
-	CreateRoom(m_width - offset - 1, offset, 1, m_height - offset * 2); // 右
+	// 螟門捉騾夊ｷｯ
+	CreateRoom(offset, offset, m_width - offset * 2, 1); // 荳・
+	CreateRoom(offset, m_height - offset - 1, m_width - offset * 2, 1); // 荳・
+	CreateRoom(offset, offset, 1, m_height - offset * 2); // 蟾ｦ
+	CreateRoom(m_width - offset - 1, offset, 1, m_height - offset * 2); // 蜿ｳ
 
-	// 中央からの接続通路
+	// 荳ｭ螟ｮ縺九ｉ縺ｮ謗･邯夐夊ｷｯ
 	int centerX = m_width / 2;
 	int centerY = m_height / 2;
-	CreateRoom(centerX, offset, 1, centerY - offset); // 中央から上へ
-	CreateRoom(centerX, centerY + 1, 1, (m_height - offset - 1) - centerY); // 中央から下へ
-	CreateRoom(offset, centerY, centerX - offset, 1); // 中央から左へ
-	CreateRoom(centerX + 1, centerY, (m_width - offset - 1) - centerX, 1); // 中央から右へ
+	CreateRoom(centerX, offset, 1, centerY - offset); // 荳ｭ螟ｮ縺九ｉ荳翫∈
+	CreateRoom(centerX, centerY + 1, 1, (m_height - offset - 1) - centerY); // 荳ｭ螟ｮ縺九ｉ荳九∈
+	CreateRoom(offset, centerY, centerX - offset, 1); // 荳ｭ螟ｮ縺九ｉ蟾ｦ縺ｸ
+	CreateRoom(centerX + 1, centerY, (m_width - offset - 1) - centerX, 1); // 荳ｭ螟ｮ縺九ｉ蜿ｳ縺ｸ
 }
 
 void MazeGenerator::RefineMaze(const std::vector<std::vector<bool>>& protectedCells) {
@@ -100,13 +100,13 @@ void MazeGenerator::RefineMaze(const std::vector<std::vector<bool>>& protectedCe
 void MazeGenerator::CreateRoom(int startX, int startY, int width, int height) {
 	if (startX < 0 || startY < 0 || startX + width > m_width || startY + height > m_height) { return; }
 
-	// 部屋情報を保存
+	// 驛ｨ螻区ュ蝣ｱ繧剃ｿ晏ｭ・
 	Room room;
 	room.x = startX;
 	room.y = startY;
 	room.width = width;
 	room.height = height;
-	// 中心座標を計算（グリッド座標ベース）
+	// 荳ｭ蠢・ｺｧ讓吶ｒ險育ｮ暦ｼ医げ繝ｪ繝・ラ蠎ｧ讓吶・繝ｼ繧ｹ・・
 	room.center = DirectX::XMFLOAT3(startX + width / 2.0f, 0.0f, startY + height / 2.0f);
 	m_rooms.push_back(room);
 

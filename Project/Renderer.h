@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <vector>
 #include <memory>
 #include "GraphicsDevice.h"
@@ -9,15 +9,15 @@
 #include "MazeGenerator.h"
 
 /**
- * @brief 3DƒV[ƒ“‚Ì•`‰æˆ—‚ğ“Š‡‚·‚éƒNƒ‰ƒX
+ * @brief 3Dã‚·ãƒ¼ãƒ³ã®æç”»å‡¦ç†ã‚’çµ±æ‹¬ã™ã‚‹ã‚¯ãƒ©ã‚¹
  */
 class Renderer {
 public:
 	Renderer(GraphicsDevice* graphicsDevice);
 	~Renderer();
 
-	// --- V‚µ‚¢•`‰æƒtƒ[ ---
-	// 1. ƒV[ƒ“‚ğƒeƒNƒXƒ`ƒƒ‚ÉƒŒƒ“ƒ_ƒŠƒ“ƒO‚·‚é
+	// --- æ–°ã—ã„æç”»ãƒ•ãƒ­ãƒ¼ ---
+	// 1. ã‚·ãƒ¼ãƒ³ã‚’ãƒ†ã‚¯ã‚¹ãƒãƒ£ã«ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°ã™ã‚‹
 	void RenderSceneToTexture(
 		const std::vector<Model*>& stageModels,
 		const std::vector<Model*>& dynamicModels,
@@ -26,16 +26,16 @@ public:
 		const std::vector<std::vector<MazeGenerator::CellType>>& mazeData,
 		float pathWidth
 	);
-	// 2. ƒŒƒ“ƒ_ƒŠƒ“ƒO‚³‚ê‚½ƒeƒNƒXƒ`ƒƒ‚Éƒ|ƒXƒgƒvƒƒZƒX‚ğ“K—p‚µA‰æ–Ê‚É•`‰æ‚·‚é
+	// 2. ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°ã•ã‚ŒãŸãƒ†ã‚¯ã‚¹ãƒãƒ£ã«ãƒã‚¹ãƒˆãƒ—ãƒ­ã‚»ã‚¹ã‚’é©ç”¨ã—ã€ç”»é¢ã«æç”»ã™ã‚‹
 	void RenderFinalPass(const Camera* camera, float vignetteIntensity);
 private:
-	// ƒVƒƒƒhƒEƒ}ƒbƒv¶¬ƒpƒX
+	// ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—ç”Ÿæˆãƒ‘ã‚¹
 	void RenderDepthPass(
 		const std::vector<Model*>& stageModels,
 		const std::vector<Model*>& dynamicModels,
 		LightManager* lightManager
 	);
-	// ’Êí‚Ì•`‰æƒpƒX
+	// é€šå¸¸ã®æç”»ãƒ‘ã‚¹
 	void RenderMainPass(
 		const std::vector<Model*>& stageModels,
 		const std::vector<Model*>& dynamicModels,

@@ -1,10 +1,10 @@
 ﻿#pragma once
-#include <DirectXMath.h>
-#include <vector>
-#include <random>
 #include "Light.h"
 #include "MazeGenerator.h"
 #include "Frustum.h"
+#include <DirectXMath.h>
+#include <vector>
+#include <random>
 
 struct LightBufferType {
 	Light               lights[MAX_LIGHTS]; // Lights -> lights

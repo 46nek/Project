@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <memory>
 #include <vector>
 #include <d3d11.h>
@@ -8,25 +8,25 @@
 #include "Renderer.h"
 #include "Camera.h"
 
-// ‘O•ûéŒ¾ (d—v)
+// å‰æ–¹å®£è¨€ (é‡è¦)
 class GameObjectManager;
 
-// ƒXƒe[ƒWAŒõŒ¹AƒŒƒ“ƒ_ƒ‰[‚È‚ÇuƒQ[ƒ€‚Ì¢ŠEŠÂ‹«v‚ğˆêŠ‡ŠÇ—‚·‚éƒNƒ‰ƒX
+// ã‚¹ãƒ†ãƒ¼ã‚¸ã€å…‰æºã€ãƒ¬ãƒ³ãƒ€ãƒ©ãƒ¼ãªã©ã€Œã‚²ãƒ¼ãƒ ã®ä¸–ç•Œç’°å¢ƒã€ã‚’ä¸€æ‹¬ç®¡ç†ã™ã‚‹ã‚¯ãƒ©ã‚¹
 class GameEnvironment {
 public:
     GameEnvironment();
     ~GameEnvironment();
 
-    // ‰Šú‰»
+    // åˆæœŸåŒ–
     bool Initialize(GraphicsDevice* graphicsDevice);
 
-    // XViŒõŒ¹‚ÌŒvZ‚È‚Çj
+    // æ›´æ–°ï¼ˆå…‰æºã®è¨ˆç®—ãªã©ï¼‰
     void Update(float deltaTime, const Camera* camera);
 
-    // •`‰æ (ˆø”‚É GameObjectManager* ‚ğ’Ç‰Á)
+    // æç”» (å¼•æ•°ã« GameObjectManager* ã‚’è¿½åŠ )
     void Render(const Camera* camera, const std::vector<Model*>& dynamicModels, float vignetteIntensity, GameObjectManager* gameObjectManager);
 
-    // ƒQƒbƒ^[
+    // ã‚²ãƒƒã‚¿ãƒ¼
     Stage* GetStage() const { return m_stage.get(); }
     LightManager* GetLightManager() const { return m_lightManager.get(); }
     Renderer* GetRenderer() const { return m_renderer.get(); }

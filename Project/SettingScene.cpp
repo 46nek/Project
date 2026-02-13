@@ -6,7 +6,7 @@ extern Game* g_game;
 
 SettingScene::SettingScene()
     : m_fontFactory(nullptr), m_font(nullptr), m_selectedItem(0),
-    m_isDraggingVolume(false), m_isDraggingBright(false), m_isDraggingSens(false) { // 追加
+    m_isDraggingVolume(false), m_isDraggingBright(false), m_isDraggingSens(false) {
 }
 
 SettingScene::~SettingScene() {}
@@ -73,7 +73,7 @@ void SettingScene::Update(float deltaTime) {
             return true;
         }
         return false;
-        };
+    };
 
     if (UpdateSliderLogic(sliderX, volY, m_settings.volume, 0.0f, 1.0f, m_isDraggingVolume)) {
         if (m_audioEngine) m_audioEngine->SetMasterVolume(m_settings.volume);
@@ -123,7 +123,7 @@ void SettingScene::Render() {
             m_font->DrawString(m_graphicsDevice->GetDeviceContext(), L"I", 32.0f, x + (sliderW * norm), y, 0xFF00FFFF, FW1_RESTORESTATE);
             // 数値表示
             m_font->DrawString(m_graphicsDevice->GetDeviceContext(), std::to_wstring(displayVal).c_str(), 24.0f, x + sliderW + 20.0f, y, 0xFFFFFFFF, FW1_RESTORESTATE);
-            };
+        };
 
         DrawSlider(L"VOLUME", sliderX, 200.0f, m_settings.volume, 0.0f, 1.0f);
         DrawSlider(L"BRIGHTNESS", sliderX, 280.0f, m_settings.brightness, 0.5f, 1.5f);
@@ -140,7 +140,7 @@ void SettingScene::Render() {
             m_font->DrawString(m_graphicsDevice->GetDeviceContext(), L"◀", 32.0f, leftArrowX, y, 0xFF00FFFF, FW1_RESTORESTATE);
             m_font->DrawString(m_graphicsDevice->GetDeviceContext(), val.c_str(), 32.0f, valueX, y, 0xFFFFFFFF, FW1_RESTORESTATE);
             m_font->DrawString(m_graphicsDevice->GetDeviceContext(), L"▶", 32.0f, rightArrowX, y, 0xFF00FFFF, FW1_RESTORESTATE);
-            };
+        };
 
         DrawArrowItem(L"MOTION BLUR", m_settings.motionBlur ? L"ON" : L"OFF", arrowItemY);
         DrawArrowItem(L"FOV INTENSITY", (m_settings.fovIntensity == 0 ? L"NONE" : m_settings.fovIntensity == 1 ? L"WEAK" : L"NORMAL"), arrowItemY + 80.0f);

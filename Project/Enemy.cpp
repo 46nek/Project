@@ -1,4 +1,4 @@
-#include "Enemy.h"
+﻿#include "Enemy.h"
 #include "GraphicsDevice.h"
 #include "Decoy.h"
 #include "Stage.h"
@@ -6,12 +6,12 @@
 #include <cmath>
 
 namespace {
-	constexpr float PATH_COOLDOWN_TIME = 0.5f; // パス計算の間隔
-	constexpr float SEARCH_DURATION = 3.0f;    // 探索時間
-	constexpr float AMBUSH_DURATION = 5.0f;    // 待ち伏せ最大時間
-	constexpr float SIGHT_RANGE = 20.0f;       // 視認距離
-	constexpr float HEAR_RANGE_NORMAL = 5.0f;  // 通常聴覚範囲
-	constexpr float HEAR_RANGE_RUN = 30.0f;    // ダッシュ時の聴覚範囲
+	constexpr float PATH_COOLDOWN_TIME = 0.5f; // 繝代せ險育ｮ励・髢馴囈
+	constexpr float SEARCH_DURATION = 3.0f;    // 謗｢邏｢譎る俣
+	constexpr float AMBUSH_DURATION = 5.0f;    // 蠕・■莨上○譛螟ｧ譎る俣
+	constexpr float SIGHT_RANGE = 20.0f;       // 隕冶ｪ崎ｷ晞屬
+	constexpr float HEAR_RANGE_NORMAL = 5.0f;  // 騾壼ｸｸ閨ｴ隕夂ｯ・峇
+	constexpr float HEAR_RANGE_RUN = 30.0f;    // 繝繝・す繝･譎ゅ・閨ｴ隕夂ｯ・峇
 }
 
 Enemy::Enemy()
@@ -50,11 +50,11 @@ void Enemy::Update(float deltaTime, const Player* player, const Stage* stage, co
 	float distToPlayerSq = (playerPos.x - m_position.x) * (playerPos.x - m_position.x) + (playerPos.z - m_position.z) * (playerPos.z - m_position.z);
 	float distToPlayer = std::sqrt(distToPlayerSq);
 
-	// --- 感覚処理 ---
+	// --- 諢溯ｦ壼・逅・---
 	bool canSee = CanSeePlayer(playerPos, mazeData, pathWidth);
 	bool canHear = (player->IsSkillActive() && distToPlayer < HEAR_RANGE_RUN) || (distToPlayer < HEAR_RANGE_NORMAL);
 
-	// デコイ優先処理
+	// 繝・さ繧､蜆ｪ蜈亥・逅・
 	DirectX::XMFLOAT3 targetPos = playerPos;
 	bool chasingDecoy = false;
 	float minDecoyDistSq = FLT_MAX;
@@ -62,7 +62,7 @@ void Enemy::Update(float deltaTime, const Player* player, const Stage* stage, co
 		float dx = decoy->GetPosition().x - m_position.x;
 		float dz = decoy->GetPosition().z - m_position.z;
 		float dSq = dx * dx + dz * dz;
-		if (dSq < 225.0f) { // デコイ反応範囲
+		if (dSq < 225.0f) { // 繝・さ繧､蜿榊ｿ懃ｯ・峇
 			if (dSq < minDecoyDistSq) {
 				minDecoyDistSq = dSq;
 				targetPos = decoy->GetPosition();
@@ -72,17 +72,17 @@ void Enemy::Update(float deltaTime, const Player* player, const Stage* stage, co
 	}
 
 	if (chasingDecoy) {
-		m_currentState = CHASE; // デコイを追う時は無条件で追跡
+		m_currentState = CHASE; // 繝・さ繧､繧定ｿｽ縺・凾縺ｯ辟｡譚｡莉ｶ縺ｧ霑ｽ霍｡
 	}
 	else {
-		// --- ステート遷移 ---
+		// --- 繧ｹ繝・・繝磯・遘ｻ ---
 		switch (m_currentState) {
 		case PATROL:
 			if (canSee || canHear) {
 				m_currentState = CHASE;
 			}
 			else {
-				// 目的地（m_ambushTargetを流用）がない、または到着したら次の目的地を設定
+				// 逶ｮ逧・慍・・_ambushTarget繧呈ｵ∫畑・峨′縺ｪ縺・√∪縺溘・蛻ｰ逹縺励◆繧画ｬ｡縺ｮ逶ｮ逧・慍繧定ｨｭ螳・
 				float dx = m_ambushTarget.x - m_position.x;
 				float dz = m_ambushTarget.z - m_position.z;
 				if (dx * dx + dz * dz < 1.0f || m_path.empty()) {
@@ -103,10 +103,10 @@ void Enemy::Update(float deltaTime, const Player* player, const Stage* stage, co
 				m_lastKnownPlayerPos = playerPos;
 			}
 			else {
-				// 見失った -> 探索へ
+				// 隕句､ｱ縺｣縺・-> 謗｢邏｢縺ｸ
 				m_currentState = SEARCH;
 				m_searchTimer = SEARCH_DURATION;
-				targetPos = m_lastKnownPlayerPos; // 最後に見た場所へ行く
+				targetPos = m_lastKnownPlayerPos; // 譛蠕後↓隕句､ｱ縺｣縺溷ｴ謇縺ｸ陦後￥
 			}
 			break;
 
@@ -117,8 +117,8 @@ void Enemy::Update(float deltaTime, const Player* player, const Stage* stage, co
 			else {
 				m_searchTimer -= deltaTime;
 				if (m_searchTimer <= 0.0f) {
-					// 探索終了 -> 待ち伏せ または 巡回
-					// ここではランダムに部屋を選んで待ち伏せする
+					// 謗｢邏｢邨ゆｺ・-> 蠕・■莨上○ 縺ｾ縺溘・ 蟾｡蝗・
+					// 縺薙％縺ｧ縺ｯ繝ｩ繝ｳ繝繝縺ｫ驛ｨ螻九ｒ驕ｸ繧薙〒蠕・■莨上○縺吶ｋ
 					m_currentState = AMBUSH;
 					m_ambushTimer = AMBUSH_DURATION;
 					
@@ -129,10 +129,10 @@ void Enemy::Update(float deltaTime, const Player* player, const Stage* stage, co
 						m_ambushTarget.x = m_ambushTarget.x * pathWidth;
 						m_ambushTarget.z = m_ambushTarget.z * pathWidth;
 					} else {
-						m_currentState = PATROL; // 部屋がなければPATROL
+						m_currentState = PATROL; // 驛ｨ螻九′縺ｪ縺代ｌ縺ｰPATROL
 					}
 				}
-				targetPos = m_lastKnownPlayerPos; // 探索中は最後の位置へ向かう(着いたらウロウロさせたいが今回は位置維持)
+				targetPos = m_lastKnownPlayerPos; // 謗｢邏｢荳ｭ縺ｯ譛蠕後・菴咲ｽｮ縺ｸ蜷代°縺・ら捩縺・◆繧峨え繝ｭ繧ｦ繝ｭ縺輔○縺溘＞縺御ｻ雁屓縺ｯ菴咲ｽｮ邯ｭ謖・
 			}
 			break;
 
@@ -152,9 +152,9 @@ void Enemy::Update(float deltaTime, const Player* player, const Stage* stage, co
 	}
 
 	// MOVE LOGIC (A*)
-	// ターゲットが変わらない限り、パス再計算はクールダウンごとに行う
+	// 繧ｿ繝ｼ繧ｲ繝・ヨ縺悟､峨ｏ繧峨↑縺・剞繧翫√ヱ繧ｹ蜀崎ｨ育ｮ励・繧ｯ繝ｼ繝ｫ繝繧ｦ繝ｳ縺斐→縺ｫ陦後≧
 	m_pathCooldown -= deltaTime;
-	if (true) { // 常に移動判定を行う (PATROL, SEARCH, AMBUSH, CHASE 全てで移動可能性があるため)
+	if (true) { // 蟶ｸ縺ｫ遘ｻ蜍募愛螳壹ｒ陦後≧ (PATROL, SEARCH, AMBUSH, CHASE 蜈ｨ縺ｦ縺ｧ遘ｻ蜍募庄閭ｽ諤ｧ縺後≠繧九◆繧・
 		if (m_pathCooldown <= 0.0f) {
 			m_pathCooldown = PATH_COOLDOWN_TIME;
 
@@ -163,7 +163,7 @@ void Enemy::Update(float deltaTime, const Player* player, const Stage* stage, co
 			int goalX = static_cast<int>(targetPos.x / pathWidth);
 			int goalY = static_cast<int>(targetPos.z / pathWidth);
 
-			// マップ範囲外チェック
+			// 繝槭ャ繝礼ｯ・峇螟悶メ繧ｧ繝・け
 			int w = mazeData[0].size();
 			int h = mazeData.size();
 			if (goalX >= 0 && goalX < w && goalY >= 0 && goalY < h) {
@@ -188,12 +188,12 @@ void Enemy::Update(float deltaTime, const Player* player, const Stage* stage, co
 			}
 			else {
 				float speed = m_speed;
-				if (m_currentState == AMBUSH) speed *= 1.5f; // 先回り時は速く移動
-				if (m_currentState == CHASE && canSee) speed *= 1.2f; // 視認中は加速
+				if (m_currentState == AMBUSH) speed *= 1.5f; // 蜈亥屓繧頑凾縺ｯ騾溘￥遘ｻ蜍・
+				if (m_currentState == CHASE && canSee) speed *= 1.2f; // 隕冶ｪ堺ｸｭ縺ｯ蜉騾・
 
 				DirectX::XMVECTOR moveVec = DirectX::XMVector3Normalize(vecToTarget);
 				
-				// --- 分離（Separation）挙動 ---
+				// --- 蛻・屬・・eparation・画嫌蜍・---
 				DirectX::XMVECTOR separationVec = DirectX::XMVectorZero();
 				int neighborCount = 0;
 				for (const auto& otherEnemy : enemies) {
@@ -204,22 +204,22 @@ void Enemy::Update(float deltaTime, const Player* player, const Stage* stage, co
 					DirectX::XMVECTOR toNeighbor = DirectX::XMVectorSubtract(otherPos, DirectX::XMLoadFloat3(&m_position));
 					float distToNeighbor = DirectX::XMVectorGetX(DirectX::XMVector3Length(toNeighbor));
 
-					if (distToNeighbor < 2.0f && distToNeighbor > 0.001f) { // 2.0f以内の敵から離れる
+					if (distToNeighbor < 2.0f && distToNeighbor > 0.001f) { // 2.0f莉･蜀・・謨ｵ縺九ｉ髮｢繧後ｋ
 						DirectX::XMVECTOR flee = DirectX::XMVectorScale(DirectX::XMVector3Normalize(toNeighbor), -1.0f);
-						flee = DirectX::XMVectorScale(flee, 1.0f / distToNeighbor); // 近いほど強く離れる
+						flee = DirectX::XMVectorScale(flee, 1.0f / distToNeighbor); // 霑代＞縺ｻ縺ｩ蠑ｷ縺城屬繧後ｋ
 						separationVec = DirectX::XMVectorAdd(separationVec, flee);
 						neighborCount++;
 					}
 				}
 
 				if (neighborCount > 0) {
-					separationVec = DirectX::XMVectorScale(separationVec, 1.5f); // 分離の重み
+					separationVec = DirectX::XMVectorScale(separationVec, 1.5f); // 蛻・屬縺ｮ驥阪∩
 					moveVec = DirectX::XMVectorAdd(moveVec, separationVec);
-					moveVec = DirectX::XMVector3Normalize(moveVec); // 正規化しなおす
+					moveVec = DirectX::XMVector3Normalize(moveVec); // 豁｣隕丞喧縺励↑縺翫☆
 
-					// 同じ場所に留まり続けるのを防ぐため、混雑時は確率でターゲット変更（巡回時に限る）
-					if (m_currentState == PATROL && (rand() % 100) < 2) { // 2%の確率で変更
-				 		m_path.clear(); // 強制的にパスリセット
+					// 蜷後§蝣ｴ謇縺ｫ逡吶∪繧顔ｶ壹￠繧九・繧帝亟縺舌◆繧√∵ｷｷ髮第凾縺ｯ遒ｺ邇・〒繧ｿ繝ｼ繧ｲ繝・ヨ螟画峩・亥ｷ｡蝗樊凾縺ｫ髯舌ｋ・・
+					if (m_currentState == PATROL && (rand() % 100) < 2) { // 2%縺ｮ遒ｺ邇・〒螟画峩
+				 		m_path.clear(); // 蠑ｷ蛻ｶ逧・↓繝代せ繝ｪ繧ｻ繝・ヨ
 						m_pathIndex = -1;
 					}
 				}
@@ -227,34 +227,34 @@ void Enemy::Update(float deltaTime, const Player* player, const Stage* stage, co
 				moveVec = DirectX::XMVectorScale(moveVec, speed * deltaTime);
 				DirectX::XMStoreFloat3(&m_position, DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&m_position), moveVec));
 
-				// --- スタック検知 ---
+				// --- 繧ｹ繧ｿ繝・け讀懃衍 ---
 				float movedDistSq = 
 					(m_position.x - m_prevPosition.x) * (m_position.x - m_prevPosition.x) +
 					(m_position.z - m_prevPosition.z) * (m_position.z - m_prevPosition.z);
 				
-				if (movedDistSq < 0.0001f) { // ほとんど動いていない
+				if (movedDistSq < 0.0001f) { // 縺ｻ縺ｨ繧薙←蜍輔＞縺ｦ縺・↑縺・
 					m_stuckTimer += deltaTime;
-					if (m_stuckTimer > 2.0f) { // 2秒以上スタック
-						// スタック脱出：ランダムな方向へ少し動かすか、ターゲットを強制変更
+					if (m_stuckTimer > 2.0f) { // 2遘剃ｻ･荳翫せ繧ｿ繝・け
+						// 繧ｹ繧ｿ繝・け閼ｱ蜃ｺ・壹Λ繝ｳ繝繝縺ｪ譁ｹ蜷代∈蟆代＠蜍輔°縺吶°縲√ち繝ｼ繧ｲ繝・ヨ繧貞ｼｷ蛻ｶ螟画峩
 						m_path.clear();
 						m_pathIndex = -1;
-						m_ambushTarget = m_position; // 一旦ターゲットを自分にしてリセット
-						m_currentState = PATROL; // 巡回に戻す
+						m_ambushTarget = m_position; // 荳譌ｦ繧ｿ繝ｼ繧ｲ繝・ヨ繧定・蛻・↓縺励※繝ｪ繧ｻ繝・ヨ
+						m_currentState = PATROL; // 蟾｡蝗槭↓謌ｻ繧・
 						m_stuckTimer = 0.0f;
 					}
 				} else {
-					m_stuckTimer = 0.0f; // 動いたらリセット
+					m_stuckTimer = 0.0f; // 蜍輔＞縺溘ｉ繝ｪ繧ｻ繝・ヨ
 				}
 				m_prevPosition = m_position;
 			}
 		}
 	}
 
-	// --- パーティクルの更新 ---
+	// --- 繝代・繝・ぅ繧ｯ繝ｫ縺ｮ譖ｴ譁ｰ ---
 	m_particleSystem->Update(deltaTime, m_position);
 }
 
-// 描画: パーティクルシステムに委譲
+// 謠冗判: 繝代・繝・ぅ繧ｯ繝ｫ繧ｷ繧ｹ繝・Β縺ｫ蟋碑ｭｲ
 void Enemy::Render(GraphicsDevice* graphicsDevice,
 	const DirectX::XMMATRIX& viewMatrix,
 	const DirectX::XMMATRIX& projectionMatrix,
@@ -278,7 +278,7 @@ bool Enemy::CanSeePlayer(const DirectX::XMFLOAT3& playerPos, const std::vector<s
 
 	if (dist > SIGHT_RANGE) return false;
 
-	// レイキャスト (簡易版: ステップサイズごとに壁判定)
+	// 繝ｬ繧､繧ｭ繝｣繧ｹ繝・(邁｡譏鍋沿: 繧ｹ繝・ャ繝励し繧､繧ｺ縺斐→縺ｫ螢∝愛螳・
 	vDir = DirectX::XMVector3Normalize(vDir);
 	float step = pathWidth * 0.5f;
 	int steps = static_cast<int>(dist / step);
@@ -295,7 +295,7 @@ bool Enemy::CanSeePlayer(const DirectX::XMFLOAT3& playerPos, const std::vector<s
 
 		if (x >= 0 && x < mazeData[0].size() && y >= 0 && y < mazeData.size()) {
 			if (mazeData[y][x] == MazeGenerator::Wall) {
-				return false; // 壁に遮られた
+				return false; // 螢√↓驕ｮ繧峨ｌ縺・
 			}
 		}
 	}

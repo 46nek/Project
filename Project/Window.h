@@ -1,10 +1,10 @@
-#pragma once
+ï»¿#pragma once
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include "Input.h"
 
 /**
- * @brief ƒEƒBƒ“ƒhƒE‚Ì¶¬‚ÆŠÇ—‚ğs‚¤ƒNƒ‰ƒX
+ * @brief ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®ç”Ÿæˆã¨ç®¡ç†ã‚’è¡Œã†ã‚¯ãƒ©ã‚¹
  */
 class Window {
 public:
@@ -12,32 +12,32 @@ public:
 	~Window();
 
 	/**
-	 * @brief ƒEƒBƒ“ƒhƒE‚ğ‰Šú‰»
-	 * @param hInstance ƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ÌƒCƒ“ƒXƒ^ƒ“ƒXƒnƒ“ƒhƒ‹
-	 * @param input “ü—ÍŠÇ—ƒNƒ‰ƒX‚ÌƒCƒ“ƒXƒ^ƒ“ƒX
-	 * @return ‰Šú‰»‚ª¬Œ÷‚µ‚½ê‡‚Í true
+	 * @brief ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’åˆæœŸåŒ–
+	 * @param hInstance ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ãƒãƒ³ãƒ‰ãƒ«
+	 * @param input å…¥åŠ›ç®¡ç†ã‚¯ãƒ©ã‚¹ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹
+	 * @return åˆæœŸåŒ–ãŒæˆåŠŸã—ãŸå ´åˆã¯ true
 	 */
 	bool Initialize(HINSTANCE hInstance, Input* input);
 
 	/**
-	 * @brief ƒEƒBƒ“ƒhƒE‚ğ”jŠü
+	 * @brief ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’ç ´æ£„
 	 */
 	void Shutdown();
 
 	/**
-	 * @brief ƒEƒBƒ“ƒhƒEƒnƒ“ƒhƒ‹‚ğæ“¾
-	 * @return HWND ƒEƒBƒ“ƒhƒEƒnƒ“ƒhƒ‹
+	 * @brief ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãƒãƒ³ãƒ‰ãƒ«ã‚’å–å¾—
+	 * @return HWND ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãƒãƒ³ãƒ‰ãƒ«
 	 */
 	HWND GetHwnd() const;
 
 private:
 	/**
-	 * @brief ƒEƒBƒ“ƒhƒEƒvƒƒV[ƒWƒƒ
+	 * @brief ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãƒ—ãƒ­ã‚·ãƒ¼ã‚¸ãƒ£
 	 */
 	static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 	/**
-	 * @brief ƒƒbƒZ[ƒWƒnƒ“ƒhƒ‰
+	 * @brief ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒãƒ³ãƒ‰ãƒ©
 	 */
 	LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
 

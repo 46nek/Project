@@ -1,4 +1,4 @@
-#include "OrthoWindow.h"
+ï»¿#include "OrthoWindow.h"
 
 OrthoWindow::OrthoWindow() {
 }
@@ -7,7 +7,7 @@ OrthoWindow::~OrthoWindow() {
 }
 
 bool OrthoWindow::Initialize(ID3D11Device* device, int windowWidth, int windowHeight) {
-	// SimpleVertex‚Ìƒƒ“ƒo‡˜: pos, color, tex, normal, tangent, binormal
+	// SimpleVertexç¸ºï½®ç¹ï½¡ç¹ï½³ç¹å®£ï£°ãƒ»ï½ºãƒ» pos, color, tex, normal, tangent, binormal
 	std::vector<SimpleVertex> vertices = {
 		{ { -1.0f,  1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, -1.0f, 0.0f } },
 		{ {  1.0f,  1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, -1.0f, 0.0f } },
@@ -30,3 +30,4 @@ void OrthoWindow::Shutdown() {
 void OrthoWindow::Render(ID3D11DeviceContext* deviceContext) {
 	m_quad->Render(deviceContext);
 }
+

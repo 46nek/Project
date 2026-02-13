@@ -1,9 +1,9 @@
-#include "SwapChain.h"
+ï»¿#include "SwapChain.h"
 
 SwapChain::SwapChain()
 	: m_swapChain(nullptr), m_renderTargetView(nullptr), m_depthStencilBuffer(nullptr),
 	m_depthStencilState(nullptr), m_depthDisabledStencilState(nullptr), m_depthStencilView(nullptr),
-	// ƒƒ“ƒo•Ï”‚ğ‰Šú‰»
+	// ç¹ï½¡ç¹ï½³ç¹ä»™ï½¤ç”»ç„šç¹§è²ãƒ»è­›æº·å–§
 	m_screenWidth(0), m_screenHeight(0) {
 }
 
@@ -11,11 +11,11 @@ SwapChain::~SwapChain() {
 }
 
 bool SwapChain::Initialize(ID3D11Device* device, HWND hWnd, int screenWidth, int screenHeight) {
-	// ‰æ–ÊƒTƒCƒY‚ğƒƒ“ƒo•Ï”‚É•Û‘¶
+	// é€•ï½»é«±ï½¢ç¹§ï½µç¹§ï½¤ç¹§ï½ºç¹§åµÎ“ç¹ï½³ç¹ä»™ï½¤ç”»ç„šç¸ºï½«è«æ™ï½­ãƒ»
 	m_screenWidth = screenWidth;
 	m_screenHeight = screenHeight;
 
-	// ƒXƒƒbƒvƒ`ƒFƒCƒ“‚Ìì¬
+	// ç¹§ï½¹ç¹ï½¯ç¹ãƒ»ãƒ»ç¹âˆšã‰ç¹§ï½¤ç¹ï½³ç¸ºï½®è´æ‡ˆãƒ»
 	DXGI_SWAP_CHAIN_DESC sd = {};
 	sd.BufferCount = 1;
 	sd.BufferDesc.Width = screenWidth;
@@ -43,7 +43,7 @@ bool SwapChain::Initialize(ID3D11Device* device, HWND hWnd, int screenWidth, int
 
 	if (FAILED(hr)) { return false; }
 
-	// ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒgƒrƒ…[‚Ìì¬
+	// ç¹ï½¬ç¹ï½³ç¹Â€ç¹ï½¼ç¹§ï½¿ç¹ï½¼ç¹§ï½²ç¹ãƒ»ãƒ¨ç¹è–™Î—ç¹ï½¼ç¸ºï½®è´æ‡ˆãƒ»
 	ID3D11Texture2D* pBackBuffer = nullptr;
 	hr = m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 	if (FAILED(hr)) { return false; }
@@ -51,7 +51,7 @@ bool SwapChain::Initialize(ID3D11Device* device, HWND hWnd, int screenWidth, int
 	pBackBuffer->Release();
 	if (FAILED(hr)) { return false; }
 
-	// ƒfƒvƒXƒXƒeƒ“ƒVƒ‹ƒoƒbƒtƒ@‚Æƒrƒ…[‚Ìì¬
+	// ç¹ãƒ»ãƒ»ç¹§ï½¹ç¹§ï½¹ç¹ãƒ»Î¦ç¹§ï½·ç¹ï½«ç¹èˆŒãƒ£ç¹è¼”ãƒç¸ºï½¨ç¹è–™Î—ç¹ï½¼ç¸ºï½®è´æ‡ˆãƒ»
 	D3D11_TEXTURE2D_DESC depthBufferDesc = {};
 	depthBufferDesc.Width = screenWidth;
 	depthBufferDesc.Height = screenHeight;
@@ -61,7 +61,7 @@ bool SwapChain::Initialize(ID3D11Device* device, HWND hWnd, int screenWidth, int
 	depthBufferDesc.SampleDesc.Count = 1;
 	depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	hr = device->CreateTexture2D(&depthBufferDesc, nullptr, &m_depthStencilBuffer); // NULL -> nullptr
+	hr = device->CreateTexture2D(&depthBufferDesc, nullptr, &m_depthStencilBuffer);
 	if (FAILED(hr)) { return false; }
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
@@ -70,7 +70,7 @@ bool SwapChain::Initialize(ID3D11Device* device, HWND hWnd, int screenWidth, int
 	hr = device->CreateDepthStencilView(m_depthStencilBuffer, &dsvDesc, &m_depthStencilView);
 	if (FAILED(hr)) { return false; }
 
-	// ƒfƒvƒXƒXƒeƒ“ƒVƒ‹ƒXƒe[ƒg‚Ìì¬ (Zƒoƒbƒtƒ@—LŒø/–³Œø)
+	// ç¹ãƒ»ãƒ»ç¹§ï½¹ç¹§ï½¹ç¹ãƒ»Î¦ç¹§ï½·ç¹ï½«ç¹§ï½¹ç¹ãƒ»ãƒ»ç¹åŒ»ãƒ»è´æ‡ˆãƒ» (Zç¹èˆŒãƒ£ç¹è¼”ãƒè­›ç‰™æŸ‘/è¾Ÿï½¡èœ‰ï½¹)
 	D3D11_DEPTH_STENCIL_DESC dsDesc = {};
 	dsDesc.DepthEnable = true;
 	dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
@@ -85,7 +85,7 @@ bool SwapChain::Initialize(ID3D11Device* device, HWND hWnd, int screenWidth, int
 }
 
 void SwapChain::Shutdown() {
-	if (m_swapChain) { m_swapChain->SetFullscreenState(false, nullptr); } // NULL -> nullptr
+	if (m_swapChain) { m_swapChain->SetFullscreenState(false, nullptr); }
 	if (m_depthDisabledStencilState) { m_depthDisabledStencilState->Release(); }
 	if (m_depthStencilState) { m_depthStencilState->Release(); }
 	if (m_depthStencilView) { m_depthStencilView->Release(); }
@@ -95,7 +95,7 @@ void SwapChain::Shutdown() {
 }
 
 void SwapChain::BeginScene(ID3D11DeviceContext* deviceContext, float r, float g, float b, float a) {
-	// ƒrƒ…[ƒ|[ƒg‚ğİ’è‚·‚éˆ—‚ğ’Ç‰Á
+	// ç¹è–™Î—ç¹ï½¼ç¹æ˜´ãƒ»ç¹åŒ»ï½’éšªï½­è³å£¹â˜†ç¹§å¥ãƒ»é€…ãƒ»ï½’éœ‘ï½½èœ‰ï£°
 	D3D11_VIEWPORT viewport = {};
 	viewport.Width = (FLOAT)m_screenWidth;
 	viewport.Height = (FLOAT)m_screenHeight;

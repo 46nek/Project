@@ -1,4 +1,4 @@
-#include "Frustum.h"
+Ôªø#include "Frustum.h"
 
 Frustum::Frustum() {
 }
@@ -9,46 +9,46 @@ Frustum::~Frustum() {
 void Frustum::ConstructFrustum(const DirectX::XMMATRIX& viewMatrix, const DirectX::XMMATRIX& projectionMatrix) {
 	DirectX::XMMATRIX viewProjMatrix = DirectX::XMMatrixMultiply(viewMatrix, projectionMatrix);
 
-	// ç∂ïΩñ 
+	// ËüæÔΩ¶Ëü∑ÔΩ≥È´±ÔΩ¢
 	m_planes[0].normal.x = viewProjMatrix.r[0].m128_f32[3] + viewProjMatrix.r[0].m128_f32[0];
 	m_planes[0].normal.y = viewProjMatrix.r[1].m128_f32[3] + viewProjMatrix.r[1].m128_f32[0];
 	m_planes[0].normal.z = viewProjMatrix.r[2].m128_f32[3] + viewProjMatrix.r[2].m128_f32[0];
 	m_planes[0].distance = viewProjMatrix.r[3].m128_f32[3] + viewProjMatrix.r[3].m128_f32[0];
 
-	// âEïΩñ 
+	// ËúøÔΩ≥Ëü∑ÔΩ≥È´±ÔΩ¢
 	m_planes[1].normal.x = viewProjMatrix.r[0].m128_f32[3] - viewProjMatrix.r[0].m128_f32[0];
 	m_planes[1].normal.y = viewProjMatrix.r[1].m128_f32[3] - viewProjMatrix.r[1].m128_f32[0];
 	m_planes[1].normal.z = viewProjMatrix.r[2].m128_f32[3] - viewProjMatrix.r[2].m128_f32[0];
 	m_planes[1].distance = viewProjMatrix.r[3].m128_f32[3] - viewProjMatrix.r[3].m128_f32[0];
 
-	// è„ïΩñ 
+	// Ëç≥ÈõÅÔΩπÔΩ≥È´±ÔΩ¢
 	m_planes[2].normal.x = viewProjMatrix.r[0].m128_f32[3] - viewProjMatrix.r[0].m128_f32[1];
 	m_planes[2].normal.y = viewProjMatrix.r[1].m128_f32[3] - viewProjMatrix.r[1].m128_f32[1];
 	m_planes[2].normal.z = viewProjMatrix.r[2].m128_f32[3] - viewProjMatrix.r[2].m128_f32[1];
 	m_planes[2].distance = viewProjMatrix.r[3].m128_f32[3] - viewProjMatrix.r[3].m128_f32[1];
 
-	// â∫ïΩñ 
+	// Ëç≥Âè•ÔΩπÔΩ≥È´±ÔΩ¢
 	m_planes[3].normal.x = viewProjMatrix.r[0].m128_f32[3] + viewProjMatrix.r[0].m128_f32[1];
 	m_planes[3].normal.y = viewProjMatrix.r[1].m128_f32[3] + viewProjMatrix.r[1].m128_f32[1];
 	m_planes[3].normal.z = viewProjMatrix.r[2].m128_f32[3] + viewProjMatrix.r[2].m128_f32[1];
 	m_planes[3].distance = viewProjMatrix.r[3].m128_f32[3] + viewProjMatrix.r[3].m128_f32[1];
 
-	// ãﬂïΩñ 
+	// ÈúëÂ§ßÔΩπÔΩ≥È´±ÔΩ¢
 	m_planes[4].normal.x = viewProjMatrix.r[0].m128_f32[2];
 	m_planes[4].normal.y = viewProjMatrix.r[1].m128_f32[2];
 	m_planes[4].normal.z = viewProjMatrix.r[2].m128_f32[2];
 	m_planes[4].distance = viewProjMatrix.r[3].m128_f32[2];
 
-	// âìïΩñ 
+	// È©ïÔ£∞Ëü∑ÔΩ≥È´±ÔΩ¢
 	m_planes[5].normal.x = viewProjMatrix.r[0].m128_f32[3] - viewProjMatrix.r[0].m128_f32[2];
 	m_planes[5].normal.y = viewProjMatrix.r[1].m128_f32[3] - viewProjMatrix.r[1].m128_f32[2];
 	m_planes[5].normal.z = viewProjMatrix.r[2].m128_f32[3] - viewProjMatrix.r[2].m128_f32[2];
 	m_planes[5].distance = viewProjMatrix.r[3].m128_f32[3] - viewProjMatrix.r[3].m128_f32[2];
 
-	// ïΩñ Çê≥ãKâª
+	// Ëü∑ÔΩ≥È´±ÔΩ¢ÁπßÂëàÔΩ≠ÔΩ£Èöï‰∏ûÂñß
 	for (int i = 0; i < 6; i++) {
 		float length = sqrtf((m_planes[i].normal.x * m_planes[i].normal.x) + (m_planes[i].normal.y * m_planes[i].normal.y) + (m_planes[i].normal.z * m_planes[i].normal.z));
-		if (length == 0.0f) { continue; } // É[ÉçèúéZÇñhé~
+		if (length == 0.0f) { continue; } // ÁπßÔΩºÁπùÔΩ≠È´ØÔΩ§ÈÇÇÂä±ÔΩíÈ´¶ÔΩ≤Ë±ÅÔΩ¢
 		m_planes[i].normal.x /= length;
 		m_planes[i].normal.y /= length;
 		m_planes[i].normal.z /= length;

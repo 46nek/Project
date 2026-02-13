@@ -1,4 +1,4 @@
-#include "SceneManager.h"
+ï»¿#include "SceneManager.h"
 #include "TitleScene.h"
 #include "SettingScene.h"
 #include "GameScene.h"
@@ -54,20 +54,20 @@ bool SceneManager::ChangeScene(SceneState nextState) {
 	if (nextState == SceneState::Game) {
 		LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(m_currentScene.get());
 		if (loadingScene) {
-			// ƒ[ƒfƒBƒ“ƒOÏ‚İ‚ÌGameScene‚ÌŠ—LŒ ‚ğæ“¾
+			// ç¹ï½­ç¹ï½¼ç¹ãƒ»ã…ç¹ï½³ç¹§ï½°è²‚åŒ»âˆ©ç¸ºï½®GameSceneç¸ºï½®è¬‡Â€è­›ç”»ï½¨ï½©ç¹§è²å™è •ãƒ»
 			std::unique_ptr<Scene> nextScene = loadingScene->GetGameScene();
 
-			// Œ»İ‚ÌƒV[ƒ“‚ğ”jŠü
+			// è¿´ï½¾è¨ï½¨ç¸ºï½®ç¹§ï½·ç¹ï½¼ç¹ï½³ç¹§å ¤ï£°ï½´è­½ãƒ»
 			m_currentScene->Shutdown();
 			m_currentScene = nullptr;
 
-			// GameScene‚ğƒZƒbƒg
+			// GameSceneç¹§åµãç¹ãƒ»ãƒ¨
 			m_currentScene = std::move(nextScene);
 			return true;
 		}
 	}
 
-	// ’Êí‚ÌƒV[ƒ“‘JˆÚ
+	// é¨¾å£¼ï½¸ï½¸ç¸ºï½®ç¹§ï½·ç¹ï½¼ç¹ï½³é©•ï½·é˜ï½»
 	if (m_currentScene) {
 		m_currentScene->Shutdown();
 		m_currentScene = nullptr;
