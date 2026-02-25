@@ -9,7 +9,7 @@ Minimap::Minimap()
 	m_position({ 20.0f, 20.0f }),
 	m_viewSize({ 200.0f, 200.0f }),
 	m_cellSize(8.0f),
-	m_zoomFactor(0.5f),
+	m_zoomFactor(3.0f),
 	m_pathSpriteScale(1.0f),
 	m_playerSpriteScale(0.0f),
 	m_orbSpriteScale(0.0f),
