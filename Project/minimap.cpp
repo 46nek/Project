@@ -22,7 +22,6 @@ Minimap::~Minimap() {
 }
 
 bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::vector<MazeGenerator::CellType>>& mazeData, float pathWidth) {
-	// 螟画峩縺ｪ縺・
 	m_graphicsDevice = graphicsDevice;
 	m_mazeData = &mazeData;
 	m_pathWidth = pathWidth;
@@ -70,7 +69,6 @@ bool Minimap::Initialize(GraphicsDevice* graphicsDevice, const std::vector<std::
 }
 
 void Minimap::Shutdown() {
-	// 螟画峩縺ｪ縺・
 	if (m_pathSprite) { m_pathSprite->Shutdown(); }
 	if (m_playerSprite) { m_playerSprite->Shutdown(); }
 	if (m_enemySprite) { m_enemySprite->Shutdown(); }
@@ -88,7 +86,6 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 
 	ID3D11DeviceContext* deviceContext = m_graphicsDevice->GetDeviceContext();
 
-	// --- 蠎ｧ讓呵ｨ育ｮ・---
 	DirectX::XMFLOAT3 playerWorldPos = camera->GetPosition();
 	float playerRotation = camera->GetRotation().y * (DirectX::XM_PI / 180.0f);
 
@@ -104,7 +101,6 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 		(mapHeightInCells - (playerWorldPos.z / m_pathWidth)) * m_cellSize
 	};
 
-	// --- 險ｪ蝠冗憾諷九・譖ｴ譁ｰ ---
 	int playerGridX = static_cast<int>(playerWorldPos.x / m_pathWidth);
 	int playerGridZ = static_cast<int>(playerWorldPos.z / m_pathWidth);
 
@@ -124,7 +120,6 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 		DirectX::XMMatrixRotationZ(-playerRotation) *
 		DirectX::XMMatrixTranslation(minimapCenter.x, minimapCenter.y, 0.0f);
 
-	// --- 謠冗判螳溯｡・---
 	m_graphicsDevice->GetSwapChain()->TurnZBufferOff(deviceContext);
 
 	D3D11_RECT scissorRect = {
@@ -132,12 +127,10 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 		(LONG)(m_position.x + m_viewSize.x), (LONG)(m_position.y + m_viewSize.y)
 	};
 
-	// --- 1. 繝輔Ξ繝ｼ繝(閭梧勹) ---
 	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_graphicsDevice->GetAlphaBlendState());
 	m_frameSprite->RenderFill(m_spriteBatch.get(), scissorRect, { 1.0f, 1.0f, 1.0f, alpha });
 	m_spriteBatch->End();
 
-	// --- 2. 繝槭ャ繝苓ｦ∫ｴ (繧ｯ繝ｪ繝・ヴ繝ｳ繧ｰ譛牙柑) ---
 	deviceContext->RSSetScissorRects(1, &scissorRect);
 
 	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_graphicsDevice->GetAlphaBlendState(), nullptr, nullptr, m_scissorRasterizerState.Get(), nullptr, transform);
@@ -186,7 +179,6 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 
 	m_spriteBatch->End();
 
-	// --- 譛繧りｿ代＞繧ｪ繝ｼ繝悶・謗｢邏｢ ---
 	float minDistanceSq = FLT_MAX;
 	DirectX::XMFLOAT3 targetPos = {};
 	bool foundTarget = false;
@@ -209,7 +201,6 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 
 	CheckClosestOrb(orbs);
 
-	// --- 遏｢蜊ｰ縺ｮ謠冗判 ---
 	if (foundTarget) {
 		float dx = targetPos.x - playerWorldPos.x;
 		float dz = targetPos.z - playerWorldPos.z;
@@ -234,12 +225,10 @@ void Minimap::Render(const Camera* camera, const std::vector<std::unique_ptr<Ene
 		}
 	}
 
-	// 繝励Ξ繧､繝､繝ｼ縺ｮ謠冗判 (蟶ｸ縺ｫ荳ｭ螟ｮ)
 	m_spriteBatch->Begin(DirectX::SpriteSortMode_Deferred, m_graphicsDevice->GetAlphaBlendState(), nullptr, nullptr, m_scissorRasterizerState.Get());
 	m_playerSprite->Render(m_spriteBatch.get(), minimapCenter, m_playerSpriteScale * m_zoomFactor * 0.3f, 0.0f, { 1.0f, 1.0f, 1.0f, alpha });
 	m_spriteBatch->End();
 
-	// --- 蠕悟・逅・---
 	D3D11_VIEWPORT viewport;
 	UINT numViewports = 1;
 	deviceContext->RSGetViewports(&numViewports, &viewport);
