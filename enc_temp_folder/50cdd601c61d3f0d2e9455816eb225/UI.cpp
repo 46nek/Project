@@ -294,23 +294,23 @@ void UI::DrawMenuContent(int selectIndex, float x, float y, int screenWidth, int
 	switch (selectIndex) {
 	case 1:
 		title = L"CONTROLS";
-		body = L"• WASD: 移動\n• MOUSE: 視点操作\n• SHIFT: ダッシュ\n• ESC: メニュー";
+		body = L"• WASD: Move Player\n• MOUSE: Look Around\n• SHIFT: Dash\n• ESC: Open/Close Menu";
 		break;
 	case 2:
 		title = L"HOW TO PLAY";
-		body = L"";
+		body = L"1. Collect all Orbs scattered in the maze.\n2. Find the glowing Gate to escape.\n3. Avoid the 'Watchers'!";
 		break;
 	case 3:
 		title = L"TIPS";
-		body = L"";
+		body = L"• Listen carefully to footstep sounds.\n• Dashing is fast but very loud.\n• Use the minimap to keep track of your path.";
 		break;
 	case 4:
 		title = L"RESUME";
-		body = L"";
+		body = L"Close this menu and continue your escape.";
 		break;
 	case 5:
 		title = L"QUIT TO TITLE";
-		body = L"";
+		body = L"Return to the main menu.\nYour current progress will be lost.";
 		break;
 	}
 
