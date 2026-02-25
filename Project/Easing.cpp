@@ -5,7 +5,7 @@
 static const float PI = 3.1415926535f;
 
 float Easing::GetValue(EasingType type, float t) {
-    // t縺ｮ遽・峇繧・.0・・.0縺ｫ繧ｯ繝ｩ繝ｳ繝・
+    
     t = std::max(0.0f, std::min(t, 1.0f));
 
     switch (type) {

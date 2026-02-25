@@ -29,7 +29,7 @@ public:
      * @brief 指定されたイージングタイプに基づいて補間値を計算します。
      * @param type イージングの種類
      * @param t 進行度 (0.0f ～ 1.0f)
-     * @return イージング適用後の値 (概ね 0.0f ～ 1.0f)
+     * @return イージング適用後の値 (0.0f ～ 1.0f)
      */
     static float GetValue(EasingType type, float t);
 

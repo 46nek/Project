@@ -7,7 +7,6 @@ OrthoWindow::~OrthoWindow() {
 }
 
 bool OrthoWindow::Initialize(ID3D11Device* device, int windowWidth, int windowHeight) {
-	// SimpleVertex縺ｮ繝｡繝ｳ繝宣・ｺ・ pos, color, tex, normal, tangent, binormal
 	std::vector<SimpleVertex> vertices = {
 		{ { -1.0f,  1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, -1.0f, 0.0f } },
 		{ {  1.0f,  1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, -1.0f, 0.0f } },
