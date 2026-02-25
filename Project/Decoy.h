@@ -5,9 +5,6 @@
 #include <DirectXMath.h>
 #include <memory> 
 
-/**
- * @brief 繝・さ繧､・亥岼・峨け繝ｩ繧ｹ
- */
 class Decoy {
 public:
     Decoy(const DirectX::XMFLOAT3& pos, float duration = 7.0f)
@@ -18,9 +15,9 @@ public:
         m_model = AssetLoader::LoadModelFromFile(device, AssetPaths::MODEL_CUBE_OBJ);
         if (!m_model) return false;
 
-        m_model->SetScale(0.4f, 0.4f, 0.4f); // 蟆代＠螟ｧ縺阪ａ縺ｫ縺励※逶ｮ遶九◆縺帙ｋ
+        m_model->SetScale(0.4f, 0.4f, 0.4f);
         m_model->SetPosition(m_position.x, m_position.y, m_position.z);
-        m_model->SetEmissiveColor({ 1.0f, 0.5f, 0.0f, 1.0f }); // 隴ｦ蜻願牡・医が繝ｬ繝ｳ繧ｸ・・
+        m_model->SetEmissiveColor({ 1.0f, 0.5f, 0.0f, 1.0f });
         m_model->SetUseTexture(false);
         return true;
     }
