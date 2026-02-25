@@ -1,9 +1,6 @@
 ﻿#pragma once
 #include <DirectXMath.h>
 
-/**
- * @brief 繧ｫ繝｡繝ｩ繧ｯ繝ｩ繧ｹ
- */
 class Camera {
 public:
 	Camera(float x = 0.0f, float y = 0.0f, float z = 0.0f);
@@ -16,8 +13,8 @@ public:
 
 	void Update(float deltaTime);
 
-	void SetTargetFOV(float fov); // 逶ｮ讓僥OV繧定ｨｭ螳・
-	float GetFOV() const;         // 迴ｾ蝨ｨ縺ｮFOV繧貞叙蠕・
+	void SetTargetFOV(float fov); 
+	float GetFOV() const;         
 
 	DirectX::XMMATRIX GetViewMatrix() const;
 	DirectX::XMMATRIX GetPreviousViewMatrix() const;
