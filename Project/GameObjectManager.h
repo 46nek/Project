@@ -28,7 +28,6 @@ public:
 
     void RenderEnemies(GraphicsDevice* graphicsDevice, Camera* camera, LightManager* lightManager);
 
-    // 繧ｲ繝・ち繝ｼ
     int GetRemainingOrbs() const { return m_remainingOrbs; }
     int GetTotalOrbs() const { return m_totalOrbs; }
     bool IsGoalSpawned() const { return m_goalSpawned; }

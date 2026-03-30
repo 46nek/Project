@@ -54,20 +54,20 @@ bool SceneManager::ChangeScene(SceneState nextState) {
 	if (nextState == SceneState::Game) {
 		LoadingScene* loadingScene = dynamic_cast<LoadingScene*>(m_currentScene.get());
 		if (loadingScene) {
-			// 繝ｭ繝ｼ繝・ぅ繝ｳ繧ｰ貂医∩縺ｮGameScene縺ｮ謇譛画ｨｩ繧貞叙蠕・
+			// ロード済みのGameSceneの所有権を取得
 			std::unique_ptr<Scene> nextScene = loadingScene->GetGameScene();
 
-			// 迴ｾ蝨ｨ縺ｮ繧ｷ繝ｼ繝ｳ繧堤ｴ譽・
+			// 現在のシーンを破棄
 			m_currentScene->Shutdown();
 			m_currentScene = nullptr;
 
-			// GameScene繧偵そ繝・ヨ
+			// GameSceneをセット
 			m_currentScene = std::move(nextScene);
 			return true;
 		}
 	}
 
-	// 騾壼ｸｸ縺ｮ繧ｷ繝ｼ繝ｳ驕ｷ遘ｻ
+	// 通常のシーン遷移
 	if (m_currentScene) {
 		m_currentScene->Shutdown();
 		m_currentScene = nullptr;

@@ -1,4 +1,5 @@
 ﻿#pragma once
+
 #include <DirectXMath.h>
 
 class Camera {
@@ -13,8 +14,8 @@ public:
 
 	void Update(float deltaTime);
 
-	void SetTargetFOV(float fov); 
-	float GetFOV() const;         
+	void SetTargetFOV(float fov);
+	float GetFOV() const;
 
 	DirectX::XMMATRIX GetViewMatrix() const;
 	DirectX::XMMATRIX GetPreviousViewMatrix() const;
@@ -38,8 +39,8 @@ private:
 	float m_moveSpeed;
 	float m_rotationSpeed;
 
-	float m_fov;            // 迴ｾ蝨ｨ縺ｮFOV
-	float m_targetFov;      // 逶ｮ讓吶・FOV
+	float m_fov;            // 現在のFOV
+	float m_targetFov;      // 目標のFOV
 
 	float m_bobbingTimer;
 	float m_bobbingAmount;
@@ -48,4 +49,4 @@ private:
 	float m_swaySpeed;
 	float m_rollAmount;
 	float m_rollSpeed;
-};
+}; 

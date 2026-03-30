@@ -7,7 +7,7 @@
 #include <memory> 
 
 /**
- * @brief 繧ｿ繧､繝医Ν逕ｻ髱｢縺ｮ繧ｷ繝ｼ繝ｳ繧堤ｮ｡逅・☆繧九け繝ｩ繧ｹ
+ * @brief タイトル画面のシーンを管理するクラス
  */
 class TitleScene : public Scene {
 public:
@@ -24,26 +24,25 @@ private:
 
 	std::unique_ptr<GameScene> m_gameScene;
 
-	// --- 繝輔か繝ｳ繝磯未騾｣ ---
+	//フォント関連
 	IFW1Factory* m_fontFactory;
-	// 0逡ｪ逶ｮ繧偵Γ繧､繝ｳ縲√◎繧御ｻ･髯阪ｒ繧ｰ繝ｪ繝・メ逕ｨ縺ｨ縺吶ｋ隍・焚縺ｮ繝輔か繝ｳ繝医Λ繝・ヱ繝ｼ
 	std::vector<IFW1FontWrapper*> m_fonts;
 
-	// 蜷・枚蟄励・迥ｶ諷九ｒ邂｡逅・☆繧区ｧ矩菴・
+	// 各文字の状態を管理する構造体
 	struct CharState {
-		int fontIndex; // 迴ｾ蝨ｨ驕ｩ逕ｨ縺輔ｌ縺ｦ縺・ｋ繝輔か繝ｳ繝医・繧､繝ｳ繝・ャ繧ｯ繧ｹ
+		int fontIndex; 
 	};
 
-	// 繧ｿ繧､繝医Ν繝・く繧ｹ繝・
+	// タイトルテキスト
 	std::wstring m_titleText;
 	std::vector<CharState> m_charStates;
 
-	// PLAY繝懊ち繝ｳ繝・く繧ｹ繝・
+	// PLAYボタンテキスト
 	std::wstring m_playText;
 	std::vector<CharState> m_playCharStates;
-	bool m_isPlayHovered; // 繧ｫ繝ｼ繧ｽ繝ｫ縺悟粋縺｣縺ｦ縺・ｋ縺・
+	bool m_isPlayHovered;
 
-	// 繧ｰ繝ｪ繝・メ譖ｴ譁ｰ逕ｨ繧ｿ繧､繝槭・
+	// グリッチ更新用タイマー
 	float m_glitchTimer;
 	float m_glitchUpdateInterval;
 

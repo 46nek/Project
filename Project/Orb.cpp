@@ -27,20 +27,20 @@ bool Orb::Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& position, in
 	m_model->SetScale(0.3f, 0.3f, 0.3f);
 	m_model->SetPosition(m_position.x, m_position.y, m_position.z);
 
-	// 繧ｪ繝ｼ繝悶・遞ｮ鬘槭↓蠢懊§縺ｦ濶ｲ繧貞､峨∴繧・
+	// オーブの種類に応じて色を変える
 	switch (m_type) {
 	case OrbType::MinimapZoomOut:
-		m_model->SetEmissiveColor({ 0.2f, 1.0f, 0.2f, 1.0f }); // 邱・
+		m_model->SetEmissiveColor({ 0.2f, 1.0f, 0.2f, 1.0f }); // 緑
 		break;
 	case OrbType::EnemyRadar:
-		m_model->SetEmissiveColor({ 1.0f, 0.2f, 0.2f, 1.0f }); // 襍､
+		m_model->SetEmissiveColor({ 1.0f, 0.2f, 0.2f, 1.0f }); // 赤
 		break;
 	case OrbType::Goal:
-		m_model->SetEmissiveColor({ 1.0f, 0.8f, 0.0f, 1.0f }); // 繧ｴ繝ｼ繝ｫ繝・
+		m_model->SetEmissiveColor({ 1.0f, 0.8f, 0.0f, 1.0f }); // ゴールド
 		break;
 	case OrbType::Normal:
 	default:
-		m_model->SetEmissiveColor({ 0.6f, 0.8f, 1.0f, 1.0f }); // 髱・
+		m_model->SetEmissiveColor({ 0.6f, 0.8f, 1.0f, 1.0f }); // 青
 		break;
 	}
 
@@ -62,7 +62,7 @@ void Orb::Shutdown() {
 
 bool Orb::Update(float deltaTime, Player* player, LightManager* lightManager, DirectX::SoundEffect* collectSound) {
 	if (m_isCollected) {
-		return false; // 縺吶〒縺ｫ蜿朱寔貂医∩縺ｪ繧・false 繧定ｿ斐☆
+		return false; 
 	}
 
 	float floatingY = m_position.y + std::sin(m_animationTimer * 2.0f) * 0.25f;
@@ -85,7 +85,7 @@ bool Orb::Update(float deltaTime, Player* player, LightManager* lightManager, Di
 		return true;
 	}
 
-	return false; // 蜿朱寔縺輔ｌ縺ｪ縺九▲縺溷ｴ蜷医・ false 繧定ｿ斐☆
+	return false; 
 }
 
 void Orb::FollowPlayer(float deltaTime, const DirectX::XMFLOAT3& targetPos, int index) {

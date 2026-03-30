@@ -12,19 +12,19 @@
 class GameScene : public Scene {
 public:
     /**
-     * @brief 繧ｲ繝ｼ繝繧ｷ繝ｼ繝ｳ縺ｮ繧ｳ繝ｳ繧ｹ繝医Λ繧ｯ繧ｿ
+     * @brief ゲームシーンのコンストラクタ
      */
     GameScene();
 
     /**
-     * @brief 繧ｲ繝ｼ繝繧ｷ繝ｼ繝ｳ縺ｮ繝・せ繝医Λ繧ｯ繧ｿ
+     * @brief ゲームシーンのデストラクタ
      */
     ~GameScene();
 
     static std::unique_ptr<GameScene> s_transferInstance;
 
     /**
-     * @brief 繧ｷ繝ｼ繝ｳ縺ｮ蛻晄悄蛹・
+     * @brief シーンの初期化
      */
     bool Initialize(GraphicsDevice* graphicsDevice, Input* input, DirectX::AudioEngine* audioEngine) override;
 
@@ -34,18 +34,18 @@ public:
     bool InitializeAudio();
 
     /**
-     * @brief 繧ｷ繝ｼ繝ｳ縺ｮ邨ゆｺ・・逅・
+     * @brief シーンの終了処理
      */
     void Shutdown() override;
 
     /**
-     * @brief 繧ｷ繝ｼ繝ｳ縺ｮ譖ｴ譁ｰ蜃ｦ逅・
-     * @param deltaTime 蜑阪ヵ繝ｬ繝ｼ繝縺九ｉ縺ｮ邨碁℃譎る俣
+     * @brief シーンの更新処理
+     * @param deltaTime 前フレームからの経過時間
      */
     void Update(float deltaTime) override;
 
     /**
-     * @brief 繧ｷ繝ｼ繝ｳ縺ｮ謠冗判蜃ｦ逅・
+     * @brief シーンの描画処理
      */
     void Render() override;
 

@@ -13,7 +13,7 @@ ShaderManager::ShaderManager()
 ShaderManager::~ShaderManager() {
 }
 
-// 繧ｨ繝ｩ繝ｼ繝｡繝・そ繝ｼ繧ｸ繧定｡ｨ遉ｺ縺吶ｋ繝倥Ν繝代・髢｢謨ｰ
+// エラーメッセージを表示するヘルパー関数
 void OutputShaderError(ID3DBlob* errorMessage, const char* shaderFilename) {
 	if (errorMessage) {
 		MessageBoxA(nullptr, (char*)errorMessage->GetBufferPointer(), shaderFilename, MB_OK);
@@ -37,55 +37,55 @@ bool ShaderManager::Initialize(ID3D11Device* device) {
 
 	HRESULT hr;
 
-	// 騾壼ｸｸ縺ｮ鬆らせ繧ｷ繧ｧ繝ｼ繝繝ｼ
+	// 通常の頂点シェーダー
 	hr = D3DCompileFromFile(L"VertexShader.hlsl", nullptr, nullptr, "VS", "vs_5_0", 0, 0, &vsBlob, &errorBlob);
 	if (FAILED(hr)) { OutputShaderError(errorBlob, "VertexShader.hlsl"); return false; }
 	hr = device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &m_vertexShader);
 	if (FAILED(hr)) { vsBlob->Release(); return false; }
 
-	// 繝昴せ繝医・繝ｭ繧ｻ繧ｹ逕ｨ鬆らせ繧ｷ繧ｧ繝ｼ繝繝ｼ
+	// ポストプロセス用頂点シェーダー
 	hr = D3DCompileFromFile(L"PostProcessVertexShader.hlsl", nullptr, nullptr, "VS", "vs_5_0", 0, 0, &postProcessVsBlob, &errorBlob);
 	if (FAILED(hr)) { OutputShaderError(errorBlob, "PostProcessVertexShader.hlsl"); return false; }
 	hr = device->CreateVertexShader(postProcessVsBlob->GetBufferPointer(), postProcessVsBlob->GetBufferSize(), nullptr, &m_postProcessVertexShader);
 	if (FAILED(hr)) { postProcessVsBlob->Release(); return false; }
 
-	// 騾壼ｸｸ縺ｮ繝斐け繧ｻ繝ｫ繧ｷ繧ｧ繝ｼ繝繝ｼ
+	// 通常のピクセルシェーダー
 	hr = D3DCompileFromFile(L"PixelShader.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &psBlob, &errorBlob);
 	if (FAILED(hr)) { OutputShaderError(errorBlob, "PixelShader.hlsl"); return false; }
 	hr = device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &m_pixelShader);
 	if (FAILED(hr)) { psBlob->Release(); return false; }
 
-	// 繝・け繧ｹ繝√Ε逕ｨ繝斐け繧ｻ繝ｫ繧ｷ繧ｧ繝ｼ繝繝ｼ
+	// テクスチャ用ピクセルシェーダー
 	hr = D3DCompileFromFile(L"TexturePixelShader.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &texturePsBlob, &errorBlob);
 	if (FAILED(hr)) { OutputShaderError(errorBlob, "TexturePixelShader.hlsl"); return false; }
 	hr = device->CreatePixelShader(texturePsBlob->GetBufferPointer(), texturePsBlob->GetBufferSize(), nullptr, &m_texturePixelShader);
 	if (FAILED(hr)) { texturePsBlob->Release(); return false; }
 
-	// 繝｢繝ｼ繧ｷ繝ｧ繝ｳ繝悶Λ繝ｼ逕ｨ繝斐け繧ｻ繝ｫ繧ｷ繧ｧ繝ｼ繝繝ｼ
+	// モーションブラー用ピクセルシェーダー
 	hr = D3DCompileFromFile(L"MotionBlur.hlsl", nullptr, nullptr, "main", "ps_5_0", 0, 0, &motionBlurPsBlob, &errorBlob);
 	if (FAILED(hr)) { OutputShaderError(errorBlob, "MotionBlur.hlsl"); return false; }
 	hr = device->CreatePixelShader(motionBlurPsBlob->GetBufferPointer(), motionBlurPsBlob->GetBufferSize(), nullptr, &m_motionBlurPixelShader);
 	if (FAILED(hr)) { motionBlurPsBlob->Release(); return false; }
 
-	// 豺ｱ蠎ｦ逕ｨ鬆らせ繧ｷ繧ｧ繝ｼ繝繝ｼ
+	// 深度用頂点シェーダー
 	hr = D3DCompileFromFile(L"DepthVertexShader.hlsl", nullptr, nullptr, "main", "vs_5_0", 0, 0, &depthVsBlob, &errorBlob);
 	if (FAILED(hr)) { OutputShaderError(errorBlob, "DepthVertexShader.hlsl"); return false; }
 	hr = device->CreateVertexShader(depthVsBlob->GetBufferPointer(), depthVsBlob->GetBufferSize(), nullptr, &m_depthVertexShader);
 	if (FAILED(hr)) { depthVsBlob->Release(); return false; }
 
-	// UI逕ｨ鬆らせ繧ｷ繧ｧ繝ｼ繝繝ｼ
+	// UI用頂点シェーダー
 	hr = D3DCompileFromFile(L"SimpleVertexShader.hlsl", nullptr, nullptr, "main", "vs_5_0", 0, 0, &simpleVsBlob, &errorBlob);
 	if (FAILED(hr)) { OutputShaderError(errorBlob, "SimpleVertexShader.hlsl"); return false; }
 	hr = device->CreateVertexShader(simpleVsBlob->GetBufferPointer(), simpleVsBlob->GetBufferSize(), nullptr, &m_simpleVertexShader);
 	if (FAILED(hr)) { simpleVsBlob->Release(); return false; }
 
-	// UI逕ｨ繝斐け繧ｻ繝ｫ繧ｷ繧ｧ繝ｼ繝繝ｼ
+	// UI用ピクセルシェーダー
 	hr = D3DCompileFromFile(L"SimplePixelShader.hlsl", nullptr, nullptr, "main", "ps_5_0", 0, 0, &simplePsBlob, &errorBlob);
 	if (FAILED(hr)) { OutputShaderError(errorBlob, "SimplePixelShader.hlsl"); return false; }
 	hr = device->CreatePixelShader(simplePsBlob->GetBufferPointer(), simplePsBlob->GetBufferSize(), nullptr, &m_simplePixelShader);
 	if (FAILED(hr)) { simplePsBlob->Release(); return false; }
 
-	// 繧､繝ｳ繝励ャ繝医Ξ繧､繧｢繧ｦ繝・
+	// インプットレイアウト
 	D3D11_INPUT_ELEMENT_DESC layout[] = {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },

@@ -24,7 +24,7 @@ void Renderer::RenderSceneToTexture(
 
 	RenderTarget* renderTarget = m_graphicsDevice->GetRenderTarget();
 	renderTarget->SetRenderTarget(m_graphicsDevice->GetDeviceContext());
-	renderTarget->ClearRenderTarget(m_graphicsDevice->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f); // 閭梧勹繧帝ｻ偵↓螟画峩・医ヵ繧ｩ繧ｰ縺ｫ蜷医ｏ縺帙ｋ・・
+	renderTarget->ClearRenderTarget(m_graphicsDevice->GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f); // 背景を黒に変更（フォグに合わせる）
 
 	RenderDepthPass(stageModels, dynamicModels, lightManager);
 
@@ -36,11 +36,11 @@ void Renderer::RenderSceneToTexture(
 void Renderer::RenderFinalPass(const Camera* camera, float vignetteIntensity) {
 	ID3D11DeviceContext* deviceContext = m_graphicsDevice->GetDeviceContext();
 	ShaderManager* shaderManager = m_graphicsDevice->GetShaderManager();
-	auto& settings = g_game->GetSettings(); // 險ｭ螳壹ｒ蜿門ｾ・
+	auto& settings = g_game->GetSettings();
 
-	// 繝昴せ繝医・繝ｭ繧ｻ繧ｹ繝舌ャ繝輔ぃ縺ｮ譖ｴ譁ｰ
+	// ポストプロセスバッファの更新
 	PostProcessBufferType postProcessBuffer;
-	// 譏弱ｋ縺戊ｨｭ螳壹ｒ蜿肴丐 (譏弱ｋ縺・⊇縺ｩ繝ｴ繧｣繝阪ャ繝医ｒ蠑ｱ縺上☆繧・
+	// 明るさ設定を反映 (明るいほどヴィネットを弱くする)
 	postProcessBuffer.vignetteIntensity = vignetteIntensity * (2.0f - settings.brightness);
 	postProcessBuffer.fogStart = 0.0f;
 	postProcessBuffer.fogEnd = 0.0f;
@@ -54,16 +54,16 @@ void Renderer::RenderFinalPass(const Camera* camera, float vignetteIntensity) {
 	deviceContext->IASetInputLayout(shaderManager->GetInputLayout());
 	deviceContext->VSSetShader(shaderManager->GetPostProcessVertexShader(), nullptr, 0);
 
-	// 繧ｷ繧ｧ繝ｼ繝繝ｼ縺ｯ蟶ｸ縺ｫ MotionBlur 逕ｨ繧剃ｽｿ逕ｨ縺吶ｋ (繝悶Λ繝ｼ驥・0 縺ｪ繧牙腰縺ｪ繧九ヱ繧ｹ繧ｹ繝ｫ繝ｼ縺ｫ縺ｪ繧・
+	// シェーダーは常に MotionBlur 用を使用する (ブラー量が 0 なら単なるパススルーになる)
 	deviceContext->PSSetShader(shaderManager->GetMotionBlurPixelShader(), nullptr, 0);
 
 	DirectX::XMMATRIX currentView = camera->GetViewMatrix();
 	DirectX::XMMATRIX previousView = camera->GetPreviousViewMatrix();
 
-	// 繝｢繝ｼ繧ｷ繝ｧ繝ｳ繝悶Λ繝ｼ險ｭ螳壹′OFF縺ｪ繧峨ヶ繝ｩ繝ｼ驥上ｒ 0 縺ｫ縺吶ｋ
+	// モーションブラー設定がOFFならブラー量を 0 にする
 	float blurAmount = settings.motionBlur ? 1.0f : 0.0f;
 
-	// 繧ｫ繝｡繝ｩ縺悟虚縺・※縺・↑縺・ｴ蜷医ｂ繝悶Λ繝ｼ繧・0 縺ｫ縺吶ｋ
+	// カメラが動いていない場合もブラー量を 0 にする
 	if (memcmp(&currentView, &previousView, sizeof(DirectX::XMMATRIX)) == 0) {
 		blurAmount = 0.0f;
 	}
@@ -167,9 +167,9 @@ void Renderer::RenderMainPass(
 	auto& settings = g_game->GetSettings();
 
 	PostProcessBufferType fogParams;
-	fogParams.vignetteIntensity = 0.8f * (2.0f - settings.brightness); // 譏弱ｋ縺・⊇縺ｩ蜻ｨ霎ｺ貂帛・繧貞ｼｱ縺・
+	fogParams.vignetteIntensity = 0.8f * (2.0f - settings.brightness); // 明るいほど周辺減光を弱く
 	fogParams.fogStart = 15.0f;
-	fogParams.fogEnd = 60.0f * settings.brightness; // 譏弱ｋ縺・⊇縺ｩ驕縺上∪縺ｧ隕九∴繧九ｈ縺・↓
+	fogParams.fogEnd = 60.0f * settings.brightness; // 明るいほど遠くまで見えるように
 	fogParams.fogColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	fogParams.padding = 0.0f;
 	m_graphicsDevice->UpdatePostProcessBuffer(fogParams);
@@ -185,7 +185,7 @@ void Renderer::RenderMainPass(
 	struct CurrentMaterialState {
 		DirectX::XMFLOAT4 emissiveColor;
 		int useTexture;
-		int useNormalMap; 
+		int useNormalMap;
 		bool isValid = false;
 	} currentState;
 
@@ -207,7 +207,7 @@ void Renderer::RenderMainPass(
 		if (needUpdate) {
 			MaterialBufferType materialBuffer;
 			materialBuffer.emissiveColor = model->GetEmissiveColor();
-			materialBuffer.useTexture = model->GetUseTexture();     
+			materialBuffer.useTexture = model->GetUseTexture();
 			materialBuffer.useNormalMap = model->HasNormalMap() && model->GetUseNormalMap();
 			materialBuffer.padding = DirectX::XMFLOAT2(0, 0);
 			m_graphicsDevice->UpdateMaterialBuffer(materialBuffer);
@@ -228,7 +228,7 @@ void Renderer::RenderMainPass(
 		model->Render(deviceContext);
 		};
 
-	// 1. 繧ｹ繝・・繧ｸ繝｢繝・Ν
+	// 1. ステージモデル
 	for (Model* model : stageModels) {
 		if (!m_frustum->CheckSphere(model->GetBoundingSphereCenter(), model->GetBoundingSphereRadius())) {
 			continue;
@@ -236,7 +236,7 @@ void Renderer::RenderMainPass(
 		renderModel(model);
 	}
 
-	// 2. 蜍慕噪繝｢繝・Ν
+	// 2. 動的モデル
 	for (Model* model : dynamicModels) {
 		DirectX::XMFLOAT3 modelPos = model->GetBoundingSphereCenter();
 		if (!m_frustum->CheckSphere(modelPos, model->GetBoundingSphereRadius())) {

@@ -26,7 +26,7 @@ struct MotionBlurBufferType {
 
 /**
  * @struct MaterialBufferType
- * @brief 繝槭ユ繝ｪ繧｢繝ｫ諠・ｱ繧偵す繧ｧ繝ｼ繝繝ｼ縺ｫ貂｡縺吶◆繧√・讒矩菴・
+ * @brief マテリアル情報をシェーダーに渡すための構造体
  */
 struct MaterialBufferType {
 	DirectX::XMFLOAT4 emissiveColor;
@@ -37,14 +37,14 @@ struct MaterialBufferType {
 
 /**
  * @struct PostProcessBufferType
- * @brief 繝昴せ繝医・繝ｭ繧ｻ繧ｹ縺翫ｈ縺ｳ繝輔か繧ｰ遲峨・繧ｨ繝輔ぉ繧ｯ繝育畑繝代Λ繝｡繝ｼ繧ｿ
+ * @brief ポストプロセスおよびフォグ等のエフェクト用パラメータ
  */
 struct PostProcessBufferType {
 	float vignetteIntensity;
-	float fogStart;          // 繝輔か繧ｰ縺ｮ髢句ｧ玖ｷ晞屬
-	float fogEnd;            // 繝輔か繧ｰ縺ｮ邨ゆｺ・ｷ晞屬・医％縺ｮ霍晞屬縺ｧ螳悟・縺ｫ繝輔か繧ｰ濶ｲ縺ｫ縺ｪ繧具ｼ・
-	float padding;           // 繧｢繝ｩ繧､繝｡繝ｳ繝育畑繝代ョ繧｣繝ｳ繧ｰ
-	DirectX::XMFLOAT4 fogColor; // 繝輔か繧ｰ縺ｮ濶ｲ
+	float fogStart;           // フォグの開始距離
+	float fogEnd;             // フォグの終了距離（この距離で完全にフォグ色になる）
+	float padding;            // アライメント用パディング
+	DirectX::XMFLOAT4 fogColor; // フォグの色
 };
 
 struct LightBufferType;

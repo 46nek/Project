@@ -113,7 +113,6 @@ void TitleScene::Update(float deltaTime) {
 
 	float padding = 10.0f;
 
-	// --- CalculateGlitchTextWidth は変更なし ---
 	auto CalculateGlitchTextWidth = [&](const std::wstring& text, float fontSize) {
 		float totalWidth = 0.0f;
 		for (size_t i = 0; i < text.length(); ++i) {
@@ -134,7 +133,7 @@ void TitleScene::Update(float deltaTime) {
 		return totalWidth;
 		};
 
-	// --- PLAYボタン (mx, my を変換後の float 版で使用) ---
+	// PLAYボタン
 	float playFontSize = 60.0f;
 	float playY = 500.0f;
 	float playWidth = CalculateGlitchTextWidth(m_playText, playFontSize);
@@ -143,7 +142,7 @@ void TitleScene::Update(float deltaTime) {
 	m_isPlayHovered = (mx >= playX - padding && mx <= playX + playWidth + padding &&
 		my >= playY - padding && my <= playY + playFontSize + padding);
 
-	// --- SETTINGSボタン (Renderと合わせ 60.0f を使用) ---
+	// SETTINGSボタン
 	float setFontSize = 60.0f;
 	float setY = 600.0f;
 	float setWidth = CalculateGlitchTextWidth(m_settingText, setFontSize);

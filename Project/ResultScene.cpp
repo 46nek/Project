@@ -23,7 +23,7 @@ bool ResultScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, Direc
 	m_input = input;
 	m_audioEngine = audioEngine;
 
-	// 繧ｫ繝ｼ繧ｽ繝ｫ繧定｡ｨ遉ｺ
+	// カーソルを表示
 	m_input->SetCursorLock(false);
 	m_input->SetCursorVisible(true);
 
@@ -35,7 +35,7 @@ bool ResultScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, Direc
 	m_background = std::make_unique<Sprite>();
 	if (!m_background->Initialize(device, AssetPaths::TEX_BACKGROUND)) { return false; }
 
-	// 繝輔か繝ｳ繝亥・譛溷喧
+	// フォント初期化
 	HRESULT hr = FW1CreateFactory(FW1_VERSION, &m_fontFactory);
 	if (FAILED(hr)) return false;
 
@@ -79,11 +79,11 @@ void ResultScene::Update(float deltaTime) {
 	float mx = rawMx * (static_cast<float>(Game::SCREEN_WIDTH) / actualWidth);
 	float my = rawMy * (static_cast<float>(Game::SCREEN_HEIGHT) / actualHeight);
 
-	// --- 繝帙ヰ繝ｼ蛻､螳・---
+	// --- ホバー判定用パラメータ ---
 	float fontSize = 60.0f;
 	float padding = 10.0f;
 
-	// --- 繝帙ヰ繝ｼ蛻､螳・---
+	// --- タイトルへ戻るボタンのホバー判定 ---
 	float titleY = 450.0f;
 	float titleW = CalculateTextWidth(m_toTitleText, fontSize);
 	float titleX = (Game::SCREEN_WIDTH - titleW) / 2.0f;
@@ -91,13 +91,14 @@ void ResultScene::Update(float deltaTime) {
 	m_isTitleHovered = (mx >= titleX - padding && mx <= titleX + titleW + padding &&
 		my >= titleY - padding && my <= titleY + fontSize + padding);
 
+	// --- ゲーム終了ボタンのホバー判定 ---
 	float exitY = 550.0f;
 	float exitW = CalculateTextWidth(m_exitText, fontSize);
 	float exitX = (Game::SCREEN_WIDTH - exitW) / 2.0f;
 	m_isExitHovered = (mx >= exitX - padding && mx <= exitX + exitW + padding &&
 		my >= exitY - padding && my <= exitY + fontSize + padding);
 
-	// --- 繧ｰ繝ｪ繝・メ譖ｴ譁ｰ (繝帙ヰ繝ｼ繝輔Λ繧ｰ縺ｮ縺ｿ繧定ｦ九ｋ繧医≧縺ｫ謨ｴ逅・ ---
+	// --- グリッチ更新 (ホバーフラグのみを見るように整理) ---
 	m_glitchTimer += deltaTime;
 	if (m_glitchTimer > m_glitchUpdateInterval) {
 		m_glitchTimer = 0.0f;
@@ -107,11 +108,11 @@ void ResultScene::Update(float deltaTime) {
 			}
 			};
 		updateStates(m_escapeCharStates, true);
-		updateStates(m_toTitleCharStates, m_isTitleHovered); 
+		updateStates(m_toTitleCharStates, m_isTitleHovered);
 		updateStates(m_exitCharStates, m_isExitHovered);
 	}
 
-	// 豎ｺ螳壼・逅・
+	// 決定処理
 	if (m_input->IsKeyPressed(VK_LBUTTON)) {
 		if (m_isTitleHovered) m_nextScene = SceneState::Title;
 		else if (m_isExitHovered) PostQuitMessage(0);
@@ -161,11 +162,10 @@ void ResultScene::DrawGlitchText(const std::wstring& text, std::vector<CharState
 			str, fontSize, currentX, startY, color,
 			FW1_LEFT | FW1_TOP | FW1_RESTORESTATE
 		);
-		// 譁・ｭ鈴俣髫斐・邁｡譏楢ｨ育ｮ・
+		// 文字間隔の簡易計算
 		FW1_RECTF r = { 0, 0, 0, 0 };
 		m_fonts[states[i].fontIndex]->MeasureString(str, nullptr, fontSize, &r, 0);
 		float w = r.Right - r.Left;
 		currentX += (w <= 0.1f) ? fontSize * 0.5f : w + fontSize * 0.05f;
 	}
 }
-

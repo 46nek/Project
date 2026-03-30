@@ -8,7 +8,7 @@ extern Game* g_game;
 
 namespace {
     constexpr float VIGNETTE_NORMAL = 1.1f;
-    constexpr float VIGNETTE_DASH = 1.5f; // 繝繝・す繝･荳ｭ縺ｮ貍泌・逕ｨ
+    constexpr float VIGNETTE_DASH = 1.5f; // ダッシュ中の演出用
 
     struct BobbingParams {
         float speed, amount, swaySpeed, swayAmount, rollSpeed;
@@ -119,26 +119,26 @@ void CameraDirector::UpdateOpening(float deltaTime) {
     m_camera->SetRotation(rx, ry, rz);
     m_camera->Update(deltaTime);
 
-    // 繧ｪ繝ｼ繝励ル繝ｳ繧ｰ荳ｭ縺ｯ繝薙ロ繝・ヨ縺ｪ縺励°繧蛾壼ｸｸ縺ｸ驕ｷ遘ｻ
+    // オープニング中はビネットなしから通常へ遷移
     m_vignetteIntensity = t * VIGNETTE_NORMAL;
 }
 
 void CameraDirector::UpdateGameplay(float deltaTime, Player* player) {
     if (!player) { return; }
 
-    // 險ｭ螳壹ｒ蜿門ｾ・
+    // 設定を取得
     auto& settings = g_game->GetSettings();
 
-    // 1. 蝓ｺ譛ｬ縺ｨ縺ｪ繧玖ｦ夜㍽隗・(90蠎ｦ)
+    // 1. 基本となる視野角
     float targetFovDeg = 45.0f;
 
-    // 2. 繧ｹ繧ｭ繝ｫ菴ｿ逕ｨ荳ｭ縺ｮFOV繝悶・繧ｹ繝郁ｨ育ｮ・
+    // 2. スキル使用中のFOVブースト計算
     if (player->IsSkillActive()) {
         float boost = 0.0f;
-        // 險ｭ螳・fovIntensity)縺ｫ蠢懊§縺ｦ襍ｰ縺｣縺ｦ縺・ｋ譎ゅ・霑ｽ蜉隕夜㍽隗偵ｒ螟峨∴繧・
-        if (settings.fovIntensity == 1)      boost = 20.0f; // 蠑ｱ繧・
-        else if (settings.fovIntensity == 2) boost = 45.0f; // 騾壼ｸｸ
-        // 0 (NONE) 縺ｮ蝣ｴ蜷医・ boost = 0.0f 縺ｮ縺ｾ縺ｾ
+        // 設定に応じて走っている時の追加視野角を変える
+        if (settings.fovIntensity == 1)      boost = 20.0f; // 弱い
+        else if (settings.fovIntensity == 2) boost = 45.0f; // 通常
+        // 0 (NONE) の場合は boost = 0.0f のまま
 
         targetFovDeg += boost;
         m_vignetteIntensity = VIGNETTE_DASH;
@@ -147,29 +147,30 @@ void CameraDirector::UpdateGameplay(float deltaTime, Player* player) {
         m_vignetteIntensity = VIGNETTE_NORMAL;
     }
 
-    // 繧ｫ繝｡繝ｩ縺ｫ逶ｮ讓僥OV繧定ｨｭ螳・(蠎ｦ謨ｰ豕輔°繧峨Λ繧ｸ繧｢繝ｳ縺ｫ螟画鋤)
+    // カメラに目標FOVを設定
     if (m_camera) {
         m_camera->SetTargetFOV(DirectX::XMConvertToRadians(targetFovDeg));
     }
 
-    // 3. 菴咲ｽｮ繝ｻ蝗櫁ｻ｢蜷梧悄
+    // 3. 位置・回転同期
     DirectX::XMFLOAT3 playerPos = player->GetPosition();
     DirectX::XMFLOAT3 playerRot = player->GetRotation();
     m_camera->SetPosition(playerPos.x, playerPos.y, playerPos.z);
     m_camera->SetRotation(playerRot.x, playerRot.y, playerRot.z);
 
-    // 4. 繝懊ン繝ｳ繧ｰ・域昭繧鯉ｼ・
+    // 4. ボビング
     const BobbingParams& bp = player->IsSkillActive() ? BOB_RUN : BOB_WALK;
     m_camera->SetBobbingParameters(bp.speed, bp.amount, bp.swaySpeed, bp.swayAmount, bp.rollSpeed);
     m_camera->UpdateBobbing(deltaTime, player->IsMoving());
 
     m_camera->Update(deltaTime);
+
     m_vignetteIntensity = player->IsSkillActive() ? VIGNETTE_DASH : VIGNETTE_NORMAL;
 
-    // 繧ｪ繝ｼ繝匁園謖∵焚縺ｫ繧医ｋ隕也阜謔ｪ蛹・
+    // オーブ所持数による視界悪化
     int heldOrbs = player->GetHeldOrbCount();
     if (heldOrbs > 5) {
-        // 5蛟九ｒ雜・∴繧九→蟆代＠縺壹▽繝薙ロ繝・ヨ繧貞ｼｷ縺上☆繧・
+        // 5個を超えると少しずつビネットを強くする
         m_vignetteIntensity += (heldOrbs - 5) * 0.2f;
     }
 }

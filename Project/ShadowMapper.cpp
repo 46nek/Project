@@ -36,9 +36,9 @@ bool ShadowMapper::Initialize(ID3D11Device* device) {
 	D3D11_RASTERIZER_DESC rasterDesc = {};
 	rasterDesc.FillMode = D3D11_FILL_SOLID;
 	rasterDesc.CullMode = D3D11_CULL_BACK;
-	rasterDesc.DepthBias = 5000; // 蛟､繧定ｪｿ謨ｴ
+	rasterDesc.DepthBias = 5000; 
 	rasterDesc.SlopeScaledDepthBias = 1.0f;
-	rasterDesc.DepthBiasClamp = 0.0f; // 繧ｯ繝ｩ繝ｳ繝励・0縺ｫ險ｭ螳・
+	rasterDesc.DepthBiasClamp = 0.0f; 
 	hr = device->CreateRasterizerState(&rasterDesc, &m_rasterState);
 	if (FAILED(hr)) { return false; }
 

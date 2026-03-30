@@ -16,7 +16,7 @@ static void AddFace(
 	float halfHeight = height / 2.0f;
 
 	switch (direction) {
-	case FaceDirection::Top: // Y+ (蠎・
+	case FaceDirection::Top: // Y+ (床面)
 		v[0].pos = { position.x - halfWidth, position.y, position.z + halfHeight };
 		v[1].pos = { position.x + halfWidth, position.y, position.z + halfHeight };
 		v[2].pos = { position.x + halfWidth, position.y, position.z - halfHeight };
@@ -25,7 +25,7 @@ static void AddFace(
 		tangent = { 1.0f, 0.0f, 0.0f };
 		binormal = { 0.0f, 0.0f, -1.0f };
 		break;
-	case FaceDirection::Bottom: // Y- (螟ｩ莠・
+	case FaceDirection::Bottom: // Y- (天井面)
 		v[0].pos = { position.x - halfWidth, position.y, position.z - halfHeight };
 		v[1].pos = { position.x + halfWidth, position.y, position.z - halfHeight };
 		v[2].pos = { position.x + halfWidth, position.y, position.z + halfHeight };
@@ -109,27 +109,27 @@ bool MeshGenerator::CreateMazeMesh(
 	const int mazeWidth = static_cast<int>(mazeData[0].size());
 
 	if (type == MeshType::Ceiling || type == MeshType::Floor) {
-		// 笆ｼ笆ｼ笆ｼ 縺薙％縺九ｉ縺御ｿｮ豁｣邂・園 笆ｼ笆ｼ笆ｼ
-		// Z繝輔ぃ繧､繝・ぅ繝ｳ繧ｰ繧帝亟縺舌◆繧√↓縲∝ｺ翫→螟ｩ莠輔・繝｡繝・す繝･繧偵ｏ縺壹°縺ｫ蟆上＆縺上☆繧・
+		// ▼▼▼ 修正箇所 ▼▼▼
+		// Zファイティングを防ぐために、床と天井のメッシュをわずかに小さくする
 		const float inset = 0.001f;
 		const float faceSize = pathWidth - inset;
-		// 笆ｲ笆ｲ笆ｲ 菫ｮ豁｣邂・園縺薙％縺ｾ縺ｧ 笆ｲ笆ｲ笆ｲ
+		// ▲▲▲ 修正箇所ここまで ▲▲▲
 
 		for (int y = 0; y < mazeHeight; ++y) {
 			for (int x = 0; x < mazeWidth; ++x) {
-				// 螢√そ繝ｫ縺ｪ繧峨せ繧ｭ繝・・
+				// 壁セルならスキップ
 				if (mazeData[y][x] == MazeGenerator::Wall) { continue; }
 
-				// 騾夊ｷｯ繧ｻ繝ｫ縺ｮ荳ｭ蠢・ｽ咲ｽｮ繧定ｨ育ｮ・
+				// 通路セルの中心位置を計算
 				DirectX::XMFLOAT3 centerPos = { (x + 0.5f) * pathWidth, 0.0f, (y + 0.5f) * pathWidth };
 
 				if (type == MeshType::Ceiling) {
 					centerPos.y = wallHeight;
-					// 蟆上＆縺上＠縺溘し繧､繧ｺ縺ｧ螟ｩ莠輔・髱｢繧定ｿｽ蜉
+					// 小さくしたサイズで天井の面を追加
 					AddFace(FaceDirection::Bottom, centerPos, faceSize, faceSize, outVertices, outIndices);
 				}
 				else { // type == MeshType::Floor
-					// 蟆上＆縺上＠縺溘し繧､繧ｺ縺ｧ蠎翫・髱｢繧定ｿｽ蜉
+					// 小さくしたサイズで床の面を追加
 					AddFace(FaceDirection::Top, centerPos, faceSize, faceSize, outVertices, outIndices);
 				}
 			}

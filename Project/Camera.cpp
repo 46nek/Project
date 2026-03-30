@@ -68,10 +68,10 @@ float Camera::GetFOV() const {
 }
 
 void Camera::Update(float deltaTime) {
-	// 迴ｾ蝨ｨ縺ｮ繝薙Η繝ｼ陦悟・繧剃ｿ晏ｭ・
+	// 現在のビュー行列を保存
 	m_previousViewMatrix = m_viewMatrix;
 
-	// FOV縺ｮ貊代ｉ縺九↑陬憺俣蜃ｦ逅・
+	// FOVの滑らかな補間処理
 	float fovSpeed = 5.0f * deltaTime;
 	m_fov = Lerp(m_fov, m_targetFov, fovSpeed);
 
@@ -162,6 +162,7 @@ void Camera::UpdateBobbing(float deltaTime, bool isMoving) {
 		float swayOffset = sinf(m_bobbingTimer * m_swaySpeed) * m_swayAmount;
 		DirectX::XMVECTOR localOffset = DirectX::XMVectorSet(swayOffset, bobOffset, 0.0f, 0.0f);
 		DirectX::XMVECTOR worldOffset = DirectX::XMVector3Transform(localOffset, rotationMatrix);
+
 		m_positionX = m_basePosition.x + DirectX::XMVectorGetX(worldOffset);
 		m_positionY = m_basePosition.y + DirectX::XMVectorGetY(worldOffset);
 		m_positionZ = m_basePosition.z + DirectX::XMVectorGetZ(worldOffset);

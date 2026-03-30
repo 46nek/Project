@@ -10,7 +10,7 @@ Texture::~Texture() {
 bool Texture::Initialize(ID3D11Device* device, const wchar_t* filename) {
 	HRESULT result;
 
-	// 繝・け繧ｹ繝√Ε繝輔ぃ繧､繝ｫ繧定ｪｭ縺ｿ霎ｼ繧
+	// テクスチャファイルを読み込む
 	result = DirectX::CreateWICTextureFromFile(device, filename, nullptr, m_textureView.GetAddressOf());
 	if (FAILED(result)) {
 		return false;

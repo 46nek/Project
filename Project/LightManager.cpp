@@ -6,7 +6,7 @@
 
 LightManager::LightManager()
 	: m_flashlightIndex(-1),
-	m_playerLightIndex(-1), 
+	m_playerLightIndex(-1),
 	m_flashlightBaseIntensity(0.0f),
 	m_flickerTimer(0.0f),
 	m_nextFlickerTime(0.0f),
@@ -30,7 +30,7 @@ void LightManager::Initialize(const std::vector<std::vector<MazeGenerator::CellT
 	const int maze_width = static_cast<int>(mazeData[0].size());
 	const int maze_height = static_cast<int>(mazeData.size());
 
-	// --- 驛ｨ螻九・繝昴う繝ｳ繝医Λ繧､繝・---
+	// --- 部屋のポイントライト ---
 	const int roomSize = 3;
 	const int cornerOffset = 1;
 	using Rect = std::tuple<int, int, int, int>;
@@ -56,7 +56,7 @@ void LightManager::Initialize(const std::vector<std::vector<MazeGenerator::CellT
 		m_lights.push_back(roomLight);
 	}
 
-	// --- 諛蝉ｸｭ髮ｻ轣ｯ・医せ繝昴ャ繝医Λ繧､繝茨ｼ・---
+	// --- 懐中電灯（スポットライト） ---
 	Light flashlight = {};
 	flashlight.enabled = true;
 	flashlight.type = SpotLight;
@@ -69,18 +69,18 @@ void LightManager::Initialize(const std::vector<std::vector<MazeGenerator::CellT
 	m_lights.push_back(flashlight);
 	m_flashlightIndex = static_cast<int>(m_lights.size()) - 1;
 
-	// 蜈ｨ譁ｹ菴阪ｒ蠑ｱ縺冗・繧峨☆縺薙→縺ｧ縲∫悄縺｣證鈴裸繧貞屓驕ｿ縺励▽縺､縲∵焔蜈・・螢√・雉ｪ諢溘↑縺ｩ繧貞ｼｷ隱ｿ縺吶ｋ
+	// 全方位を弱く照らすことで、真っ暗闇を回避しつつ、手元や壁の質感などを強調する
 	Light playerLight = {};
 	playerLight.enabled = true;
 	playerLight.type = PointLight;
-	playerLight.color = { 0.8f, 0.8f, 1.0f, 1.0f }; // 蟆代＠髱偵∩縺後°縺｣縺溷・
+	playerLight.color = { 0.8f, 0.8f, 1.0f, 1.0f }; // 少し青みがかった光
 	playerLight.intensity = 1.0f;
-	playerLight.range = 12.0f; // 諛蝉ｸｭ髮ｻ轣ｯ繧医ｊ迢ｭ縺・ｯ・峇
-	playerLight.attenuation = { 0.4f, 0.4f, 0.2f }; // 貂幄｡ｰ繧貞ｼｷ繧√↓縺励※縲・□縺上↓縺ｯ螻翫°縺ｪ縺・ｈ縺・↓縺吶ｋ
+	playerLight.range = 12.0f; // 懐中電灯より狭い範囲
+	playerLight.attenuation = { 0.4f, 0.4f, 0.2f }; // 減衰を強めにして、遠くには届かないようにする
 	m_lights.push_back(playerLight);
 	m_playerLightIndex = static_cast<int>(m_lights.size()) - 1;
 
-	// --- 譛邨ょ・逅・---
+	// --- 最終処理 ---
 	m_lightBuffer.numLights = static_cast<int>(m_lights.size());
 	if (m_lightBuffer.numLights > MAX_LIGHTS) {
 		m_lightBuffer.numLights = MAX_LIGHTS;
@@ -102,7 +102,7 @@ void LightManager::Update(float deltaTime, const DirectX::XMMATRIX& viewMatrix, 
 	m_lightBuffer.cameraPosition = cameraPosition;
 
 	UpdateFlashlight(deltaTime, cameraPosition, cameraRotation);
-	UpdatePlayerLight(cameraPosition); // 繝励Ξ繧､繝､繝ｼ繝ｩ繧､繝医・譖ｴ譁ｰ
+	UpdatePlayerLight(cameraPosition); // プレイヤーライトの更新
 
 	Frustum frustum;
 	frustum.ConstructFrustum(viewMatrix, projectionMatrix);
@@ -112,9 +112,9 @@ void LightManager::Update(float deltaTime, const DirectX::XMMATRIX& viewMatrix, 
 	for (const auto& light : m_lights) {
 		if (!light.enabled) { continue; }
 
-		// 1. 繝輔Λ繧ｹ繧ｿ繝・育判髱｢蜀・ｼ峨メ繧ｧ繝・け
+		// 1. フラスラム（画面内）チェック
 		if (frustum.CheckSphere(light.position, light.range)) {
-			// 2. 繧ｪ繧ｯ繝ｫ繝ｼ繧ｸ繝ｧ繝ｳ・磯・阡ｽ・峨メ繧ｧ繝・け
+			// 2. オクルージョン（遮蔽）チェック
 			if (CheckOcclusion(cameraPosition, light.position, light.range)) {
 				if (m_lightBuffer.numLights < MAX_LIGHTS) {
 					m_lightBuffer.lights[m_lightBuffer.numLights] = light;
@@ -125,10 +125,10 @@ void LightManager::Update(float deltaTime, const DirectX::XMMATRIX& viewMatrix, 
 	}
 }
 
-// 繝励Ξ繧､繝､繝ｼ繝ｩ繧､繝医・菴咲ｽｮ譖ｴ譁ｰ逕ｨ繝｡繧ｽ繝・ラ
+// プレイヤーライトの位置更新用メソッド
 void LightManager::UpdatePlayerLight(const DirectX::XMFLOAT3& position) {
 	if (m_playerLightIndex != -1 && m_playerLightIndex < m_lights.size()) {
-		// 繝励Ξ繧､繝､繝ｼ縺ｮ蟆代＠荳翫↓驟咲ｽｮ
+		// プレイヤーの少し上に配置
 		m_lights[m_playerLightIndex].position = { position.x, position.y + 0.5f, position.z };
 	}
 }

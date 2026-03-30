@@ -15,16 +15,16 @@ bool LoadingScene::Initialize(GraphicsDevice* graphicsDevice, Input* input, Dire
 
 	if (GameScene::s_transferInstance) {
 		m_gameScene = std::move(GameScene::s_transferInstance);
-		// 迺ｰ蠅・Phase1逶ｸ蠖・縺ｯ逕滓・貂医∩縺ｪ縺ｮ縺ｧ縲∵ｬ｡縺ｯUI(Phase2逶ｸ蠖・縺九ｉ
+		// 環境(Phase 1相当)は生成済みなので、次はUI(Phase 2相当)から
 		m_loadingPhase = 1;
 	}
 	else {
-		// 蠑輔″邯吶℃縺後↑縺・ｴ蜷茨ｼ医ョ繝舌ャ繧ｰ襍ｷ蜍輔↑縺ｩ・峨・騾壼ｸｸ騾壹ｊ菴懈・
+		// 引き継ぎがない場合（デバッグ起動など）は通常通り作成
 		m_gameScene = std::make_unique<GameScene>();
 		m_loadingPhase = 0;
 	}
 
-	// 繝輔か繝ｳ繝医・蛻晄悄蛹・
+	// フォントの初期化
 	HRESULT hr = FW1CreateFactory(FW1_VERSION, &m_fontFactory);
 	if (FAILED(hr)) { return false; }
 
@@ -41,51 +41,51 @@ void LoadingScene::Shutdown() {
 	if (m_fontWrapper) { m_fontWrapper->Release(); }
 	if (m_fontFactory) { m_fontFactory->Release(); }
 
-	// 繧ｷ繝ｼ繝ｳ邨ゆｺ・凾縺ｫ谺｡・・ameScene・峨∈貂｡縺・
+	// シーン終了時に次(GameScene)へ渡す
 	if (m_gameScene) {
 		GameScene::s_transferInstance = std::move(m_gameScene);
 	}
 }
 
 void LoadingScene::Update(float deltaTime) {
-	// 繝ｭ繝ｼ繝我ｸｭ繧りレ譎ｯ縺ｮ繝ｩ繧､繝医ｄ貍泌・繧貞虚縺九☆
+	// ロード中も背景のライトや演出を動かす
 	if (m_gameScene) {
 		m_gameScene->UpdateTitleLoop(deltaTime);
 	}
 
-	// 繝輔Ξ繝ｼ繝縺斐→縺ｫGameScene縺ｮ蛻晄悄蛹門・逅・ｒ・第ｮｵ髫弱★縺､騾ｲ繧√ｋ
+	// フレームごとにGameSceneの初期化処理を1段階ずつ進める
 	switch (m_loadingPhase) {
 	case 0:
 		// Phase 1: Environment
 		if (!m_gameScene->InitializeEnvironment(m_graphicsDevice, m_input, m_audioEngine)) {
-			// 繧ｨ繝ｩ繝ｼ蜃ｦ逅・
+			// エラー処理
 		}
 		break;
 	case 1:
 		// Phase 2: UI
 		if (!m_gameScene->InitializeUI()) {
-			// 繧ｨ繝ｩ繝ｼ蜃ｦ逅・
+			// エラー処理
 		}
 		break;
 	case 2:
 		// Phase 3: Game Objects
 		if (!m_gameScene->InitializeGameObjects()) {
-			// 繧ｨ繝ｩ繝ｼ蜃ｦ逅・
+			// エラー処理
 		}
 		break;
 	case 3:
 		// Audio
 		if (!m_gameScene->InitializeAudio()) {
-			// 繧ｨ繝ｩ繝ｼ蜃ｦ逅・
+			// エラー処理
 		}
 		break;
 	case 4:
-		// 縺吶∋縺ｦ螳御ｺ・
+		// すべて完了
 		m_gameScene->BeginOpening();
 
-		// 縺吶∋縺ｦ縺ｮ蛻晄悄蛹悶′螳御ｺ・＠縺溘・縺ｧ縲ヾceneManager縺ｫGameScene繧呈ｸ｡縺励※驕ｷ遘ｻ縺吶ｋ
+		// すべての初期化が完了したので、SceneManagerにGameSceneを渡して遷移する
 		m_nextScene = SceneState::Game;
-		// move縺ｯShutdown縺ｧ陦後≧
+		// moveはShutdownで行う
 		break;
 	}
 	m_loadingPhase++;
@@ -95,10 +95,10 @@ void LoadingScene::Render() {
 	m_graphicsDevice->BeginScene(0.0f, 0.0f, 0.1f, 1.0f);
 
 	if (m_gameScene) {
-		// Z繝舌ャ繝輔ぃ繧丹N縺ｫ縺励※3D謠冗判
+		// ZバッファをONにして3D描画
 		m_graphicsDevice->GetSwapChain()->TurnZBufferOn(m_graphicsDevice->GetDeviceContext());
-		m_gameScene->RenderStageOnly(); // 閭梧勹縺ｮ縺ｿ
-		// Z繝舌ャ繝輔ぃ繧丹FF縺ｫ謌ｻ縺励※2D(譁・ｭ・謠冗判縺ｸ
+		m_gameScene->RenderStageOnly(); // 背景のみ
+		// ZバッファをOFFに戻して2D(文字)描画へ
 		m_graphicsDevice->GetSwapChain()->TurnZBufferOff(m_graphicsDevice->GetDeviceContext());
 	}
 

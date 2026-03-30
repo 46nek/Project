@@ -2,7 +2,7 @@
 #include <windows.h>
 
 /**
- * @brief 譎る俣險域ｸｬ繧定｡後＞縲√ョ繝ｫ繧ｿ繧ｿ繧､繝繧堤ｮ｡逅・☆繧九け繝ｩ繧ｹ
+ * @brief 時間計測を行い、デルタタイムを管理するクラス
  */
 class Timer {
 public:
@@ -11,13 +11,13 @@ public:
 
 	bool Initialize();
 	/**
-	 * @brief 豈弱ヵ繝ｬ繝ｼ繝蜻ｼ縺ｳ蜃ｺ縺励√ョ繝ｫ繧ｿ繧ｿ繧､繝繧定ｨ育ｮ・
+	 * @brief 毎フレーム呼び出し、デルタタイムを計算
 	 */
 	void Tick();
 
 	/**
-	 * @brief 蜑阪ヵ繝ｬ繝ｼ繝縺九ｉ縺ｮ邨碁℃譎る俣繧堤ｧ貞腰菴阪〒蜿門ｾ・
-	 * @return float 繝・Ν繧ｿ繧ｿ繧､繝・育ｧ抵ｼ・
+	 * @brief 前フレームからの経過時間を秒単位で取得
+	 * @return float デルタタイム（秒）
 	 */
 	float GetDeltaTime() const;
 

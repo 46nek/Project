@@ -27,7 +27,6 @@ bool Sprite::Initialize(ID3D11Device* device, const wchar_t* textureFilename) {
 	return true;
 }
 
-// 繝ｭ繧ｴ繝ｻ繝懊ち繝ｳ逕ｨ縺ｮRender髢｢謨ｰ縺ｮ螳溯｣・
 void Sprite::Render(DirectX::SpriteBatch* spriteBatch, const DirectX::XMFLOAT2& position, float scale, float rotation, const DirectX::XMFLOAT4& color) {
 	if (spriteBatch && m_textureView) {
 		DirectX::XMFLOAT2 origin(m_textureWidth / 2.0f, m_textureHeight / 2.0f);
@@ -35,7 +34,6 @@ void Sprite::Render(DirectX::SpriteBatch* spriteBatch, const DirectX::XMFLOAT2& 
 	}
 }
 
-// 閭梧勹逕ｨ縺ｮRender髢｢謨ｰ縺ｮ螳溯｣・
 void Sprite::RenderFill(DirectX::SpriteBatch* spriteBatch, const RECT& destinationRectangle) {
 	if (spriteBatch && m_textureView) {
 		spriteBatch->Draw(m_textureView.Get(), destinationRectangle);
@@ -47,9 +45,7 @@ void Sprite::Shutdown() {
 }
 
 void Sprite::RenderFill(DirectX::SpriteBatch* spriteBatch, const RECT& destinationRect, const DirectX::XMFLOAT4& color) {
-	// m_texture 縺ｧ縺ｯ縺ｪ縺上［_textureView 繧剃ｽｿ縺・∪縺・
 	if (spriteBatch && m_textureView) {
-		// m_textureView.Get() 縺ｧ繧ｷ繧ｧ繝ｼ繝繝ｼ繝ｪ繧ｽ繝ｼ繧ｹ繝薙Η繝ｼ繧貞叙蠕励＠縺ｾ縺・
 		spriteBatch->Draw(m_textureView.Get(), destinationRect, DirectX::XMLoadFloat4(&color));
 	}
 }

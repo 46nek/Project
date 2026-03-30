@@ -7,12 +7,12 @@
 #include <memory>
 
 struct SimpleVertex {
-	DirectX::XMFLOAT3 pos;      // Pos -> pos
-	DirectX::XMFLOAT4 color;    // Color -> color
-	DirectX::XMFLOAT2 tex;      // Tex -> tex
-	DirectX::XMFLOAT3 normal;   // Normal -> normal
-	DirectX::XMFLOAT3 tangent;  // Tangent -> tangent
-	DirectX::XMFLOAT3 binormal; // Binormal -> binormal
+	DirectX::XMFLOAT3 pos;      
+	DirectX::XMFLOAT4 color;    
+	DirectX::XMFLOAT2 tex;      
+	DirectX::XMFLOAT3 normal;   
+	DirectX::XMFLOAT3 tangent;  
+	DirectX::XMFLOAT3 binormal; 
 };
 
 class Model {
@@ -46,7 +46,6 @@ public:
 	bool GetUseNormalMap() const;
 	bool HasNormalMap() const;
 
-	// --- 隕夜倹蜿ｰ繧ｫ繝ｪ繝ｳ繧ｰ逕ｨ縺ｮ髢｢謨ｰ ---
 	DirectX::XMFLOAT3 GetBoundingSphereCenter() const;
 	float GetBoundingSphereRadius() const;
 
@@ -67,7 +66,6 @@ private:
 	bool m_useTexture;
 	bool m_useNormalMap;
 
-	// --- 隕夜倹蜿ｰ繧ｫ繝ｪ繝ｳ繧ｰ逕ｨ縺ｮ螟画焚 ---
 	DirectX::XMFLOAT3 m_boundingSphereCenter;
 	float m_boundingSphereRadius;
 };

@@ -5,18 +5,18 @@
 #include <DirectXMath.h>
 #include <vector>
 
-// 繝昴Μ繧ｴ繝ｳ縺ｮ髱｢縺ｮ蜷代″
+// ポリゴンの面の向き
 enum class FaceDirection {
 	Top, Bottom, Left, Right, Front, Back
 };
 
 /**
  * @class MeshGenerator
- * @brief 霑ｷ霍ｯ繝・・繧ｿ縺九ｉ螢√∝ｺ翫∝､ｩ莠輔・繝｡繝・す繝･繧堤函謌舌☆繧矩撕逧・け繝ｩ繧ｹ
+ * @brief 迷路データから壁、床、天井のメッシュを生成する静的クラス
  */
 class MeshGenerator {
 public:
-	// 逕滓・縺吶ｋ繝｡繝・す繝･縺ｮ遞ｮ鬘・
+	// 生成するメッシュの種類
 	enum class MeshType {
 		Wall, Ceiling, Floor
 	};

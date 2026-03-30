@@ -9,7 +9,7 @@
 #include <memory>
 
 /**
- * @brief 繧ｪ繝ｼ繝悶・遞ｮ鬘槫ｮ夂ｾｩ
+ * @brief オーブの種類定義
  */
 enum class OrbType {
     Normal,
@@ -19,7 +19,7 @@ enum class OrbType {
 };
 
 /**
- * @brief 繧ｲ繝ｼ繝蜀・・蜿朱寔繧｢繧､繝・Β・医が繝ｼ繝厄ｼ峨け繝ｩ繧ｹ
+ * @brief ゲーム内の収集アイテム（オーブ）クラス
  */
 class Orb {
 public:
@@ -42,9 +42,9 @@ private:
     std::unique_ptr<Model> m_model;
     DirectX::XMFLOAT3 m_position;
 
-    bool m_isCollected;
+    bool m_isCollected = false; 
     bool m_isDelivered = false;
     int m_lightIndex;
-    float m_animationTimer;
+    float m_animationTimer = 0.0f;
     OrbType m_type;
 };

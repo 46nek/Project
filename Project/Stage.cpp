@@ -4,13 +4,13 @@
 #include <windows.h>
 
 namespace {
-	// === 繧ｲ繝ｼ繝隱ｿ謨ｴ逕ｨ繝代Λ繝｡繝ｼ繧ｿ ===
-	constexpr float GATE_MODEL_SCALE_BASE = 6.0f; // FBX繝ｭ繝ｼ繝画凾縺ｮ蝓ｺ貅悶せ繧ｱ繝ｼ繝ｫ
-	constexpr float GATE_POS_Z_OFFSET = 0.1f;     // 驟咲ｽｮ譎ゅ・蠕ｮ隱ｿ謨ｴ
-	constexpr float GATE_SCALE_MARGIN = 1.1f;     // 騾夊ｷｯ繧医ｊ縺ｩ繧後￥繧峨＞蟆上＆縺上☆繧九°
+	// === ゲーム調整用パラメータ ===
+	constexpr float GATE_MODEL_SCALE_BASE = 6.0f; 
+	constexpr float GATE_POS_Z_OFFSET = 0.1f;     
+	constexpr float GATE_SCALE_MARGIN = 1.1f;     
 }
 
-Stage::Stage() : m_exitX(0), m_exitY(0) {} // 繝｡繝ｳ繝仙・譛溷喧蟄舌Μ繧ｹ繝医ｒ菴ｿ逕ｨ
+Stage::Stage() : m_exitX(0), m_exitY(0) {} // メンバ初期化リストを使用
 Stage::~Stage() {}
 
 bool Stage::Initialize(GraphicsDevice* graphicsDevice) {
@@ -22,7 +22,7 @@ bool Stage::Initialize(GraphicsDevice* graphicsDevice) {
 
 	m_mazeGenerator->SetCell(m_exitX, m_exitY, MazeGenerator::Path);
 
-	// 螳壽焚蛹悶＠縺溘ヱ繧ｹ繧剃ｽｿ逕ｨ
+	// 定数化したパスを使用
 	std::shared_ptr<Texture> wallTexture = AssetLoader::LoadTexture(graphicsDevice->GetDevice(), AssetPaths::TEX_WALL);
 	if (!wallTexture) { MessageBox(nullptr, L"Failed to load wall texture", L"Error", MB_OK); return false; }
 
@@ -35,14 +35,14 @@ bool Stage::Initialize(GraphicsDevice* graphicsDevice) {
 	std::shared_ptr<Texture> gateNormalMap = AssetLoader::LoadTexture(graphicsDevice->GetDevice(), AssetPaths::TEX_GATE_NORMAL);
 	if (!gateNormalMap) { MessageBox(nullptr, L"Failed to load gate normal map", L"Error", MB_OK); return false; }
 
-	// 螢√Δ繝・Ν (1谿ｵ逶ｮ)
+	// 壁モデル (1段目)
 	auto wallModel1 = AssetLoader::CreateMazeModel(graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT / 2.0f, MeshGenerator::MeshType::Wall);
 	if (!wallModel1) { return false; }
 	wallModel1->SetTexture(wallTexture);
 	wallModel1->SetNormalMap(wallNormalMap);
 	m_models.push_back(std::move(wallModel1));
 
-	// 螢√Δ繝・Ν (2谿ｵ逶ｮ)
+	// 壁モデル (2段目)
 	auto wallModel2 = AssetLoader::CreateMazeModel(graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT / 2.0f, MeshGenerator::MeshType::Wall);
 	if (!wallModel2) { return false; }
 	wallModel2->SetTexture(wallTexture);
@@ -50,21 +50,21 @@ bool Stage::Initialize(GraphicsDevice* graphicsDevice) {
 	wallModel2->SetPosition(0.0f, WALL_HEIGHT / 2.0f, 0.0f);
 	m_models.push_back(std::move(wallModel2));
 
-	// 螟ｩ莠・
+	// 天井
 	auto ceilingModel = AssetLoader::CreateMazeModel(graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT, MeshGenerator::MeshType::Ceiling);
 	if (!ceilingModel) { return false; }
 	ceilingModel->SetTexture(wallTexture);
 	ceilingModel->SetNormalMap(wallNormalMap);
 	m_models.push_back(std::move(ceilingModel));
 
-	// 蠎・
+	// 床
 	auto floorModel = AssetLoader::CreateMazeModel(graphicsDevice->GetDevice(), m_mazeGenerator->GetMazeData(), PATH_WIDTH, WALL_HEIGHT, MeshGenerator::MeshType::Floor);
 	if (!floorModel) { return false; }
 	floorModel->SetTexture(wallTexture);
 	floorModel->SetNormalMap(wallNormalMap);
 	m_models.push_back(std::move(floorModel));
 
-	// 繧ｲ繝ｼ繝医Δ繝・Ν
+	// ゲートモデル
 	m_gateModel = AssetLoader::LoadModelFromFile(graphicsDevice->GetDevice(), AssetPaths::MODEL_CUBE_OBJ, GATE_MODEL_SCALE_BASE);
 
 	if (m_gateModel) {
@@ -83,10 +83,10 @@ bool Stage::Initialize(GraphicsDevice* graphicsDevice) {
 }
 
 void Stage::OpenExit() {
-	// 霑ｷ霍ｯ繝・・繧ｿ荳翫〒蜃ｺ蜿｣繧偵碁％縲阪↓縺吶ｋ・医・繝ｬ繧､繝､繝ｼ縺碁壹ｌ繧九ｈ縺・↓縺ｪ繧具ｼ・
+	// 迷路データ上で出口を「道」にする（プレイヤーが通れるようにする）
 	m_mazeGenerator->SetCell(m_exitX, m_exitY, MazeGenerator::Path);
 
-	// 繧ｲ繝ｼ繝医Δ繝・Ν繧呈ｶ医☆・・ullptr縺ｫ縺励※謠冗判繝ｻ譖ｴ譁ｰ縺励↑縺・ｈ縺・↓縺吶ｋ・・
+	// ゲートモデルを消す
 	if (m_gateModel) {
 		m_gateModel->Shutdown();
 		m_gateModel.reset();

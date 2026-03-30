@@ -9,46 +9,46 @@ Frustum::~Frustum() {
 void Frustum::ConstructFrustum(const DirectX::XMMATRIX& viewMatrix, const DirectX::XMMATRIX& projectionMatrix) {
 	DirectX::XMMATRIX viewProjMatrix = DirectX::XMMatrixMultiply(viewMatrix, projectionMatrix);
 
-	// 蟾ｦ蟷ｳ髱｢
+	// 左平面
 	m_planes[0].normal.x = viewProjMatrix.r[0].m128_f32[3] + viewProjMatrix.r[0].m128_f32[0];
 	m_planes[0].normal.y = viewProjMatrix.r[1].m128_f32[3] + viewProjMatrix.r[1].m128_f32[0];
 	m_planes[0].normal.z = viewProjMatrix.r[2].m128_f32[3] + viewProjMatrix.r[2].m128_f32[0];
 	m_planes[0].distance = viewProjMatrix.r[3].m128_f32[3] + viewProjMatrix.r[3].m128_f32[0];
 
-	// 蜿ｳ蟷ｳ髱｢
+	// 右平面
 	m_planes[1].normal.x = viewProjMatrix.r[0].m128_f32[3] - viewProjMatrix.r[0].m128_f32[0];
 	m_planes[1].normal.y = viewProjMatrix.r[1].m128_f32[3] - viewProjMatrix.r[1].m128_f32[0];
 	m_planes[1].normal.z = viewProjMatrix.r[2].m128_f32[3] - viewProjMatrix.r[2].m128_f32[0];
 	m_planes[1].distance = viewProjMatrix.r[3].m128_f32[3] - viewProjMatrix.r[3].m128_f32[0];
 
-	// 荳雁ｹｳ髱｢
+	// 上平面
 	m_planes[2].normal.x = viewProjMatrix.r[0].m128_f32[3] - viewProjMatrix.r[0].m128_f32[1];
 	m_planes[2].normal.y = viewProjMatrix.r[1].m128_f32[3] - viewProjMatrix.r[1].m128_f32[1];
 	m_planes[2].normal.z = viewProjMatrix.r[2].m128_f32[3] - viewProjMatrix.r[2].m128_f32[1];
 	m_planes[2].distance = viewProjMatrix.r[3].m128_f32[3] - viewProjMatrix.r[3].m128_f32[1];
 
-	// 荳句ｹｳ髱｢
+	// 下平面
 	m_planes[3].normal.x = viewProjMatrix.r[0].m128_f32[3] + viewProjMatrix.r[0].m128_f32[1];
 	m_planes[3].normal.y = viewProjMatrix.r[1].m128_f32[3] + viewProjMatrix.r[1].m128_f32[1];
 	m_planes[3].normal.z = viewProjMatrix.r[2].m128_f32[3] + viewProjMatrix.r[2].m128_f32[1];
 	m_planes[3].distance = viewProjMatrix.r[3].m128_f32[3] + viewProjMatrix.r[3].m128_f32[1];
 
-	// 霑大ｹｳ髱｢
+	// 近平面
 	m_planes[4].normal.x = viewProjMatrix.r[0].m128_f32[2];
 	m_planes[4].normal.y = viewProjMatrix.r[1].m128_f32[2];
 	m_planes[4].normal.z = viewProjMatrix.r[2].m128_f32[2];
 	m_planes[4].distance = viewProjMatrix.r[3].m128_f32[2];
 
-	// 驕蟷ｳ髱｢
+	// 遠平面
 	m_planes[5].normal.x = viewProjMatrix.r[0].m128_f32[3] - viewProjMatrix.r[0].m128_f32[2];
 	m_planes[5].normal.y = viewProjMatrix.r[1].m128_f32[3] - viewProjMatrix.r[1].m128_f32[2];
 	m_planes[5].normal.z = viewProjMatrix.r[2].m128_f32[3] - viewProjMatrix.r[2].m128_f32[2];
 	m_planes[5].distance = viewProjMatrix.r[3].m128_f32[3] - viewProjMatrix.r[3].m128_f32[2];
 
-	// 蟷ｳ髱｢繧呈ｭ｣隕丞喧
+	// 平面を正規化
 	for (int i = 0; i < 6; i++) {
 		float length = sqrtf((m_planes[i].normal.x * m_planes[i].normal.x) + (m_planes[i].normal.y * m_planes[i].normal.y) + (m_planes[i].normal.z * m_planes[i].normal.z));
-		if (length == 0.0f) { continue; } // 繧ｼ繝ｭ髯､邂励ｒ髦ｲ豁｢
+		if (length == 0.0f) { continue; } 
 		m_planes[i].normal.x /= length;
 		m_planes[i].normal.y /= length;
 		m_planes[i].normal.z /= length;
