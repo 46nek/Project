@@ -1,290 +1,290 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <FxCompile Include="DepthVertexShader.hlsl">
+    <FxCompile Include="Shaders\DepthVertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="PostProcessVertexShader.hlsl">
+    <FxCompile Include="Shaders\PostProcessVertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="PixelShader.hlsl">
+    <FxCompile Include="Shaders\PixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="TexturePixelShader.hlsl">
+    <FxCompile Include="Shaders\TexturePixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="VertexShader.hlsl">
+    <FxCompile Include="Shaders\VertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="MotionBlur.hlsl">
+    <FxCompile Include="Shaders\MotionBlur.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="SimplePixelShader.hlsl">
+    <FxCompile Include="Shaders\SimplePixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="SimpleVertexShader.hlsl">
+    <FxCompile Include="Shaders\SimpleVertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Game.cpp">
+    <ClCompile Include="Source\00_Core\Game.cpp">
       <Filter>Source\00_Core</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="Source\00_Core\main.cpp">
       <Filter>Source\00_Core</Filter>
     </ClCompile>
-    <ClCompile Include="Window.cpp">
+    <ClCompile Include="Source\00_Core\Window.cpp">
       <Filter>Source\00_Core</Filter>
     </ClCompile>
-    <ClCompile Include="TitleScene.cpp">
+    <ClCompile Include="Source\01_Scene\TitleScene.cpp">
       <Filter>Source\01_Scene</Filter>
     </ClCompile>
-    <ClCompile Include="GameScene.cpp">
+    <ClCompile Include="Source\01_Scene\GameScene.cpp">
       <Filter>Source\01_Scene</Filter>
     </ClCompile>
-    <ClCompile Include="SceneManager.cpp">
+    <ClCompile Include="Source\01_Scene\SceneManager.cpp">
       <Filter>Source\01_Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Enemy.cpp">
+    <ClCompile Include="Source\04_GamePlay\Entities\Enemy.cpp">
       <Filter>Source\04_GamePlay\Entities</Filter>
     </ClCompile>
-    <ClCompile Include="Orb.cpp">
+    <ClCompile Include="Source\04_GamePlay\Entities\Orb.cpp">
       <Filter>Source\04_GamePlay\Entities</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
+    <ClCompile Include="Source\04_GamePlay\Camera.cpp">
       <Filter>Source\04_GamePlay</Filter>
     </ClCompile>
-    <ClCompile Include="AStar.cpp">
+    <ClCompile Include="Source\04_GamePlay\AI\AStar.cpp">
       <Filter>Source\04_GamePlay\AI</Filter>
     </ClCompile>
-    <ClCompile Include="input.cpp">
+    <ClCompile Include="Source\05_System\input.cpp">
       <Filter>Source\05_System</Filter>
     </ClCompile>
-    <ClCompile Include="OrthoWindow.cpp">
+    <ClCompile Include="Source\05_System\OrthoWindow.cpp">
       <Filter>Source\05_System</Filter>
     </ClCompile>
-    <ClCompile Include="MazeGenerator.cpp">
+    <ClCompile Include="Source\04_GamePlay\Stage\MazeGenerator.cpp">
       <Filter>Source\04_GamePlay\Stage</Filter>
     </ClCompile>
-    <ClCompile Include="Stage.cpp">
+    <ClCompile Include="Source\04_GamePlay\Stage\Stage.cpp">
       <Filter>Source\04_GamePlay\Stage</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
+    <ClCompile Include="Source\04_GamePlay\Player.cpp">
       <Filter>Source\04_GamePlay</Filter>
     </ClCompile>
-    <ClCompile Include="AssetLoader.cpp">
+    <ClCompile Include="Source\05_System\AssetLoader.cpp">
       <Filter>Source\05_System</Filter>
     </ClCompile>
-    <ClCompile Include="GraphicsDevice.cpp">
+    <ClCompile Include="Source\03_DirectX\GraphicsDevice.cpp">
       <Filter>Source\03_DirectX</Filter>
     </ClCompile>
-    <ClCompile Include="LightManager.cpp">
+    <ClCompile Include="Source\02_Graphics\LightManager.cpp">
       <Filter>Source\02_Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="MeshGenerator.cpp">
+    <ClCompile Include="Source\05_System\MeshGenerator.cpp">
       <Filter>Source\05_System</Filter>
     </ClCompile>
-    <ClCompile Include="Model.cpp">
+    <ClCompile Include="Source\02_Graphics\Model.cpp">
       <Filter>Source\02_Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer.cpp">
+    <ClCompile Include="Source\02_Graphics\Renderer.cpp">
       <Filter>Source\02_Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="RenderTarget.cpp">
+    <ClCompile Include="Source\03_DirectX\RenderTarget.cpp">
       <Filter>Source\03_DirectX</Filter>
     </ClCompile>
-    <ClCompile Include="ShaderManager.cpp">
+    <ClCompile Include="Source\03_DirectX\ShaderManager.cpp">
       <Filter>Source\03_DirectX</Filter>
     </ClCompile>
-    <ClCompile Include="ShadowMapper.cpp">
+    <ClCompile Include="Source\03_DirectX\ShadowMapper.cpp">
       <Filter>Source\03_DirectX</Filter>
     </ClCompile>
-    <ClCompile Include="Sprite.cpp">
+    <ClCompile Include="Source\02_Graphics\Sprite.cpp">
       <Filter>Source\02_Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="SwapChain.cpp">
+    <ClCompile Include="Source\03_DirectX\SwapChain.cpp">
       <Filter>Source\03_DirectX</Filter>
     </ClCompile>
-    <ClCompile Include="Timer.cpp">
+    <ClCompile Include="Source\05_System\Timer.cpp">
       <Filter>Source\05_System</Filter>
     </ClCompile>
-    <ClCompile Include="Texture.cpp">
+    <ClCompile Include="Source\02_Graphics\Texture.cpp">
       <Filter>Source\02_Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="UI.cpp">
+    <ClCompile Include="Source\04_GamePlay\UI\UI.cpp">
       <Filter>Source\04_GamePlay\UI</Filter>
     </ClCompile>
-    <ClCompile Include="minimap.cpp">
+    <ClCompile Include="Source\04_GamePlay\UI\minimap.cpp">
       <Filter>Source\04_GamePlay\UI</Filter>
     </ClCompile>
-    <ClCompile Include="LoadingScene.cpp">
+    <ClCompile Include="Source\01_Scene\LoadingScene.cpp">
       <Filter>Source\01_Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Frustum.cpp">
+    <ClCompile Include="Source\02_Graphics\Frustum.cpp">
       <Filter>Source\02_Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="ResultScene.cpp">
+    <ClCompile Include="Source\01_Scene\ResultScene.cpp">
       <Filter>Source\01_Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Easing.cpp">
+    <ClCompile Include="Source\05_System\Easing.cpp">
       <Filter>Source\05_System</Filter>
     </ClCompile>
-    <ClCompile Include="GameObjectManager.cpp">
+    <ClCompile Include="Source\04_GamePlay\GameObjectManager.cpp">
       <Filter>Source\04_GamePlay</Filter>
     </ClCompile>
-    <ClCompile Include="CameraDirector.cpp">
+    <ClCompile Include="Source\04_GamePlay\CameraDirector.cpp">
       <Filter>Source\04_GamePlay</Filter>
     </ClCompile>
-    <ClCompile Include="GameEnvironment.cpp">
+    <ClCompile Include="Source\04_GamePlay\GameEnvironment.cpp">
       <Filter>Source\04_GamePlay</Filter>
     </ClCompile>
-    <ClCompile Include="ParticleSystem.cpp">
+    <ClCompile Include="Source\02_Graphics\ParticleSystem.cpp">
       <Filter>Source\02_Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="SettingScene.cpp">
+    <ClCompile Include="Source\01_Scene\SettingScene.cpp">
       <Filter>Source\01_Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Game.h">
+    <ClInclude Include="Source\00_Core\Game.h">
       <Filter>Source\00_Core</Filter>
     </ClInclude>
-    <ClInclude Include="Window.h">
+    <ClInclude Include="Source\00_Core\Window.h">
       <Filter>Source\00_Core</Filter>
     </ClInclude>
-    <ClInclude Include="TitleScene.h">
+    <ClInclude Include="Source\01_Scene\TitleScene.h">
       <Filter>Source\01_Scene</Filter>
     </ClInclude>
-    <ClInclude Include="GameScene.h">
+    <ClInclude Include="Source\01_Scene\GameScene.h">
       <Filter>Source\01_Scene</Filter>
     </ClInclude>
-    <ClInclude Include="SceneManager.h">
+    <ClInclude Include="Source\01_Scene\SceneManager.h">
       <Filter>Source\01_Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Scene.h">
+    <ClInclude Include="Source\01_Scene\Scene.h">
       <Filter>Source\01_Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Enemy.h">
+    <ClInclude Include="Source\04_GamePlay\Entities\Enemy.h">
       <Filter>Source\04_GamePlay\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="Orb.h">
+    <ClInclude Include="Source\04_GamePlay\Entities\Orb.h">
       <Filter>Source\04_GamePlay\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
+    <ClInclude Include="Source\04_GamePlay\Camera.h">
       <Filter>Source\04_GamePlay</Filter>
     </ClInclude>
-    <ClInclude Include="AStar.h">
+    <ClInclude Include="Source\04_GamePlay\AI\AStar.h">
       <Filter>Source\04_GamePlay\AI</Filter>
     </ClInclude>
-    <ClInclude Include="input.h">
+    <ClInclude Include="Source\05_System\input.h">
       <Filter>Source\05_System</Filter>
     </ClInclude>
-    <ClInclude Include="OrthoWindow.h">
+    <ClInclude Include="Source\05_System\OrthoWindow.h">
       <Filter>Source\05_System</Filter>
     </ClInclude>
-    <ClInclude Include="MazeGenerator.h">
+    <ClInclude Include="Source\04_GamePlay\Stage\MazeGenerator.h">
       <Filter>Source\04_GamePlay\Stage</Filter>
     </ClInclude>
-    <ClInclude Include="Stage.h">
+    <ClInclude Include="Source\04_GamePlay\Stage\Stage.h">
       <Filter>Source\04_GamePlay\Stage</Filter>
     </ClInclude>
-    <ClInclude Include="Player.h">
+    <ClInclude Include="Source\04_GamePlay\Player.h">
       <Filter>Source\04_GamePlay</Filter>
     </ClInclude>
-    <ClInclude Include="AssetLoader.h">
+    <ClInclude Include="Source\05_System\AssetLoader.h">
       <Filter>Source\05_System</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsDevice.h">
+    <ClInclude Include="Source\03_DirectX\GraphicsDevice.h">
       <Filter>Source\03_DirectX</Filter>
     </ClInclude>
-    <ClInclude Include="Light.h">
+    <ClInclude Include="Source\02_Graphics\Light.h">
       <Filter>Source\02_Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="LightManager.h">
+    <ClInclude Include="Source\02_Graphics\LightManager.h">
       <Filter>Source\02_Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="MeshGenerator.h">
+    <ClInclude Include="Source\05_System\MeshGenerator.h">
       <Filter>Source\05_System</Filter>
     </ClInclude>
-    <ClInclude Include="Model.h">
+    <ClInclude Include="Source\02_Graphics\Model.h">
       <Filter>Source\02_Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer.h">
+    <ClInclude Include="Source\02_Graphics\Renderer.h">
       <Filter>Source\02_Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="RenderTarget.h">
+    <ClInclude Include="Source\03_DirectX\RenderTarget.h">
       <Filter>Source\03_DirectX</Filter>
     </ClInclude>
-    <ClInclude Include="ShaderManager.h">
+    <ClInclude Include="Source\03_DirectX\ShaderManager.h">
       <Filter>Source\03_DirectX</Filter>
     </ClInclude>
-    <ClInclude Include="ShadowMapper.h">
+    <ClInclude Include="Source\03_DirectX\ShadowMapper.h">
       <Filter>Source\03_DirectX</Filter>
     </ClInclude>
-    <ClInclude Include="Sprite.h">
+    <ClInclude Include="Source\02_Graphics\Sprite.h">
       <Filter>Source\02_Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="SwapChain.h">
+    <ClInclude Include="Source\03_DirectX\SwapChain.h">
       <Filter>Source\03_DirectX</Filter>
     </ClInclude>
-    <ClInclude Include="Timer.h">
+    <ClInclude Include="Source\05_System\Timer.h">
       <Filter>Source\05_System</Filter>
     </ClInclude>
-    <ClInclude Include="Texture.h">
+    <ClInclude Include="Source\02_Graphics\Texture.h">
       <Filter>Source\02_Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Project.h">
+    <ClInclude Include="Source\06_Other\Project.h">
       <Filter>Source\06_Other</Filter>
     </ClInclude>
-    <ClInclude Include="Resource.h">
+    <ClInclude Include="Source\06_Other\Resource.h">
       <Filter>Source\06_Other</Filter>
     </ClInclude>
-    <ClInclude Include="targetver.h">
+    <ClInclude Include="Source\06_Other\targetver.h">
       <Filter>Source\06_Other</Filter>
     </ClInclude>
-    <ClInclude Include="framework.h">
+    <ClInclude Include="Source\06_Other\framework.h">
       <Filter>Source\06_Other</Filter>
     </ClInclude>
-    <ClInclude Include="UI.h">
+    <ClInclude Include="Source\04_GamePlay\UI\UI.h">
       <Filter>Source\04_GamePlay\UI</Filter>
     </ClInclude>
-    <ClInclude Include="minimap.h">
+    <ClInclude Include="Source\04_GamePlay\UI\minimap.h">
       <Filter>Source\04_GamePlay\UI</Filter>
     </ClInclude>
-    <ClInclude Include="LoadingScene.h">
+    <ClInclude Include="Source\01_Scene\LoadingScene.h">
       <Filter>Source\01_Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Frustum.h">
+    <ClInclude Include="Source\02_Graphics\Frustum.h">
       <Filter>Source\02_Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="ResultScene.h">
+    <ClInclude Include="Source\01_Scene\ResultScene.h">
       <Filter>Source\01_Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Easing.h">
+    <ClInclude Include="Source\05_System\Easing.h">
       <Filter>Source\05_System</Filter>
     </ClInclude>
-    <ClInclude Include="AssetPaths.h">
+    <ClInclude Include="Source\06_Other\AssetPaths.h">
       <Filter>Source\06_Other</Filter>
     </ClInclude>
-    <ClInclude Include="GameObjectManager.h">
+    <ClInclude Include="Source\04_GamePlay\GameObjectManager.h">
       <Filter>Source\04_GamePlay</Filter>
     </ClInclude>
-    <ClInclude Include="CameraDirector.h">
+    <ClInclude Include="Source\04_GamePlay\CameraDirector.h">
       <Filter>Source\04_GamePlay</Filter>
     </ClInclude>
-    <ClInclude Include="GameEnvironment.h">
+    <ClInclude Include="Source\04_GamePlay\GameEnvironment.h">
       <Filter>Source\04_GamePlay</Filter>
     </ClInclude>
-    <ClInclude Include="ParticleSystem.h">
+    <ClInclude Include="Source\02_Graphics\ParticleSystem.h">
       <Filter>Source\02_Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="SettingScene.h">
+    <ClInclude Include="Source\01_Scene\SettingScene.h">
       <Filter>Source\01_Scene</Filter>
     </ClInclude>
-    <ClInclude Include="GameSettings.h">
+    <ClInclude Include="Source\00_Core\GameSettings.h">
       <Filter>Source\00_Core</Filter>
     </ClInclude>
-    <ClInclude Include="Decoy.h">
+    <ClInclude Include="Source\04_GamePlay\Entities\Decoy.h">
       <Filter>Source\04_GamePlay\Entities</Filter>
     </ClInclude>
   </ItemGroup>

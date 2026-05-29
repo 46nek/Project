@@ -1,0 +1,63 @@
+#pragma once
+#include "Source/04_GamePlay/Entities/Enemy.h"
+#include "Source/04_GamePlay/Entities/Orb.h"
+#include "Source/04_GamePlay/Stage/Stage.h"
+#include "Source/02_Graphics/LightManager.h"
+#include "Source/04_GamePlay/Player.h"
+#include "Source/03_DirectX/GraphicsDevice.h"
+#include "Source/04_GamePlay/Entities/Decoy.h"
+
+#include <d3d11.h>
+#include <SimpleMath.h>
+#include <vector>
+#include <memory>
+
+class Camera;
+
+class GameObjectManager {
+public:
+    GameObjectManager();
+    ~GameObjectManager();
+
+    bool Initialize(GraphicsDevice* graphicsDevice, Stage* stage, LightManager* lightManager);
+    void Update(float deltaTime, Player* player, Stage* stage, LightManager* lightManager, DirectX::SoundEffect* collectSound);
+    void Shutdown();
+
+    void CollectRenderModels(std::vector<Model*>& models);
+    bool CheckAndResetZoomRequest();
+
+    void RenderEnemies(GraphicsDevice* graphicsDevice, Camera* camera, LightManager* lightManager);
+
+    int GetRemainingOrbs() const { return m_remainingOrbs; }
+    int GetTotalOrbs() const { return m_totalOrbs; }
+    bool IsGoalSpawned() const { return m_goalSpawned; }
+    bool IsEscapeMode() const { return m_escapeMode; }
+    float GetEnemyRadarTimer() const { return m_enemyRadarTimer; }
+    const std::vector<std::unique_ptr<Enemy>>& GetEnemies() const { return m_enemies; }
+    const std::vector<std::unique_ptr<Orb>>& GetOrbs() const { return m_orbs; }
+    const std::vector<std::unique_ptr<Orb>>& GetSpecialOrbs() const { return m_specialOrbs; }
+
+private:
+    GraphicsDevice* m_graphicsDevice = nullptr;
+    bool InitializeEnemies(GraphicsDevice* graphicsDevice, Stage* stage);
+    bool InitializeOrbs(GraphicsDevice* graphicsDevice, Stage* stage, LightManager* lightManager);
+    bool InitializeSpecialOrbs(GraphicsDevice* graphicsDevice, Stage* stage, LightManager* lightManager);
+    void SpawnGoal(Stage* stage, LightManager* lightManager);
+
+    static constexpr int NUM_ENEMIES = 2;
+    static constexpr int NUM_ORBS = 20;
+
+    std::vector<std::unique_ptr<Enemy>> m_enemies;
+    std::vector<std::unique_ptr<Orb>> m_orbs;
+    std::vector<std::unique_ptr<Orb>> m_specialOrbs;
+    std::unique_ptr<Orb> m_goalOrb;
+    std::vector<std::unique_ptr<Decoy>> m_decoys;
+
+    int m_remainingOrbs;
+    int m_totalOrbs;
+    bool m_goalSpawned;
+    bool m_escapeMode;
+    bool m_requestZoomOut;
+    float m_enemyRadarTimer;
+};
+

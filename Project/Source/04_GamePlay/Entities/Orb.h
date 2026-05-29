@@ -1,0 +1,50 @@
+#pragma once
+#include "Source/02_Graphics/Model.h"
+#include "Source/04_GamePlay/Player.h"
+#include "Source/02_Graphics/LightManager.h"
+#include "Audio.h"
+
+#include <d3d11.h>
+#include <DirectXMath.h>
+#include <memory>
+
+/**
+ * @brief オーブの種類定義
+ */
+enum class OrbType {
+    Normal,
+    MinimapZoomOut,
+    EnemyRadar,
+    Goal
+};
+
+/**
+ * @brief ゲーム内の収集アイテム（オーブ）クラス
+ */
+class Orb {
+public:
+    Orb();
+    ~Orb();
+
+    bool Initialize(ID3D11Device* device, const DirectX::XMFLOAT3& position, int lightIndex, OrbType type = OrbType::Normal);
+    void Shutdown();
+    bool Update(float deltaTime, Player* player, LightManager* lightManager, DirectX::SoundEffect* collectSound);
+    void FollowPlayer(float deltaTime, const DirectX::XMFLOAT3& targetPos, int index);
+    Model* GetModel();
+    
+    bool IsCollected() const;
+    bool IsDelivered() const { return m_isDelivered; }
+
+    DirectX::XMFLOAT3 GetPosition() const;
+    OrbType GetType() const; 
+
+private:
+    std::unique_ptr<Model> m_model;
+    DirectX::XMFLOAT3 m_position;
+
+    bool m_isCollected = false; 
+    bool m_isDelivered = false;
+    int m_lightIndex;
+    float m_animationTimer = 0.0f;
+    OrbType m_type;
+};
