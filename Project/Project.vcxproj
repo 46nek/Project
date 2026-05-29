@@ -96,7 +96,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source;C:\imgui-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);C:\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source;C:\imgui-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -115,7 +115,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source;C:\imgui-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);C:\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source;C:\imgui-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -132,7 +132,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source;C:\imgui-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);C:\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source;C:\imgui-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -150,7 +150,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source;C:\imgui-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);C:\FW1FontWrapper-master\FW1FontWrapper-master\FW1FontWrapper\Source;C:\imgui-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -161,94 +161,94 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AssetLoader.h" />
-    <ClInclude Include="AssetPaths.h" />
-    <ClInclude Include="AStar.h" />
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="CameraDirector.h" />
-    <ClInclude Include="Decoy.h" />
-    <ClInclude Include="Easing.h" />
-    <ClInclude Include="Enemy.h" />
-    <ClInclude Include="framework.h" />
-    <ClInclude Include="Frustum.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="GameEnvironment.h" />
-    <ClInclude Include="GameObjectManager.h" />
-    <ClInclude Include="GameScene.h" />
-    <ClInclude Include="GameSettings.h" />
-    <ClInclude Include="input.h" />
-    <ClInclude Include="Light.h" />
-    <ClInclude Include="LightManager.h" />
-    <ClInclude Include="LoadingScene.h" />
-    <ClInclude Include="MazeGenerator.h" />
-    <ClInclude Include="MeshGenerator.h" />
-    <ClInclude Include="minimap.h" />
-    <ClInclude Include="Model.h" />
-    <ClInclude Include="Orb.h" />
-    <ClInclude Include="OrthoWindow.h" />
-    <ClInclude Include="ParticleSystem.h" />
-    <ClInclude Include="Player.h" />
-    <ClInclude Include="Project.h" />
-    <ClInclude Include="Renderer.h" />
-    <ClInclude Include="RenderTarget.h" />
-    <ClInclude Include="Resource.h" />
-    <ClInclude Include="ResultScene.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="SceneManager.h" />
-    <ClInclude Include="SettingScene.h" />
-    <ClInclude Include="ShaderManager.h" />
-    <ClInclude Include="ShadowMapper.h" />
-    <ClInclude Include="Sprite.h" />
-    <ClInclude Include="Stage.h" />
-    <ClInclude Include="SwapChain.h" />
-    <ClInclude Include="targetver.h" />
-    <ClInclude Include="Texture.h" />
-    <ClInclude Include="Timer.h" />
-    <ClInclude Include="TitleScene.h" />
-    <ClInclude Include="UI.h" />
-    <ClInclude Include="Window.h" />
-    <ClInclude Include="GraphicsDevice.h" />
+    <ClInclude Include="Source\05_System\AssetLoader.h" />
+    <ClInclude Include="Source\06_Other\AssetPaths.h" />
+    <ClInclude Include="Source\04_GamePlay\AI\AStar.h" />
+    <ClInclude Include="Source\04_GamePlay\Camera.h" />
+    <ClInclude Include="Source\04_GamePlay\CameraDirector.h" />
+    <ClInclude Include="Source\04_GamePlay\Entities\Decoy.h" />
+    <ClInclude Include="Source\05_System\Easing.h" />
+    <ClInclude Include="Source\04_GamePlay\Entities\Enemy.h" />
+    <ClInclude Include="Source\06_Other\framework.h" />
+    <ClInclude Include="Source\02_Graphics\Frustum.h" />
+    <ClInclude Include="Source\00_Core\Game.h" />
+    <ClInclude Include="Source\04_GamePlay\GameEnvironment.h" />
+    <ClInclude Include="Source\04_GamePlay\GameObjectManager.h" />
+    <ClInclude Include="Source\01_Scene\GameScene.h" />
+    <ClInclude Include="Source\00_Core\GameSettings.h" />
+    <ClInclude Include="Source\05_System\input.h" />
+    <ClInclude Include="Source\02_Graphics\Light.h" />
+    <ClInclude Include="Source\02_Graphics\LightManager.h" />
+    <ClInclude Include="Source\01_Scene\LoadingScene.h" />
+    <ClInclude Include="Source\04_GamePlay\Stage\MazeGenerator.h" />
+    <ClInclude Include="Source\05_System\MeshGenerator.h" />
+    <ClInclude Include="Source\04_GamePlay\UI\minimap.h" />
+    <ClInclude Include="Source\02_Graphics\Model.h" />
+    <ClInclude Include="Source\04_GamePlay\Entities\Orb.h" />
+    <ClInclude Include="Source\05_System\OrthoWindow.h" />
+    <ClInclude Include="Source\02_Graphics\ParticleSystem.h" />
+    <ClInclude Include="Source\04_GamePlay\Player.h" />
+    <ClInclude Include="Source\06_Other\Project.h" />
+    <ClInclude Include="Source\02_Graphics\Renderer.h" />
+    <ClInclude Include="Source\03_DirectX\RenderTarget.h" />
+    <ClInclude Include="Source\06_Other\Resource.h" />
+    <ClInclude Include="Source\01_Scene\ResultScene.h" />
+    <ClInclude Include="Source\01_Scene\Scene.h" />
+    <ClInclude Include="Source\01_Scene\SceneManager.h" />
+    <ClInclude Include="Source\01_Scene\SettingScene.h" />
+    <ClInclude Include="Source\03_DirectX\ShaderManager.h" />
+    <ClInclude Include="Source\03_DirectX\ShadowMapper.h" />
+    <ClInclude Include="Source\02_Graphics\Sprite.h" />
+    <ClInclude Include="Source\04_GamePlay\Stage\Stage.h" />
+    <ClInclude Include="Source\03_DirectX\SwapChain.h" />
+    <ClInclude Include="Source\06_Other\targetver.h" />
+    <ClInclude Include="Source\02_Graphics\Texture.h" />
+    <ClInclude Include="Source\05_System\Timer.h" />
+    <ClInclude Include="Source\01_Scene\TitleScene.h" />
+    <ClInclude Include="Source\04_GamePlay\UI\UI.h" />
+    <ClInclude Include="Source\00_Core\Window.h" />
+    <ClInclude Include="Source\03_DirectX\GraphicsDevice.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AssetLoader.cpp" />
-    <ClCompile Include="AStar.cpp" />
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="CameraDirector.cpp" />
-    <ClCompile Include="Easing.cpp" />
-    <ClCompile Include="Enemy.cpp" />
-    <ClCompile Include="Frustum.cpp" />
-    <ClCompile Include="Game.cpp" />
-    <ClCompile Include="GameEnvironment.cpp" />
-    <ClCompile Include="GameObjectManager.cpp" />
-    <ClCompile Include="GameScene.cpp" />
-    <ClCompile Include="GraphicsDevice.cpp" />
-    <ClCompile Include="input.cpp" />
-    <ClCompile Include="LightManager.cpp" />
-    <ClCompile Include="LoadingScene.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="MazeGenerator.cpp" />
-    <ClCompile Include="MeshGenerator.cpp" />
-    <ClCompile Include="minimap.cpp" />
-    <ClCompile Include="Model.cpp" />
-    <ClCompile Include="Orb.cpp" />
-    <ClCompile Include="OrthoWindow.cpp" />
-    <ClCompile Include="ParticleSystem.cpp" />
-    <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="RenderTarget.cpp" />
-    <ClCompile Include="ResultScene.cpp" />
-    <ClCompile Include="SceneManager.cpp" />
-    <ClCompile Include="SettingScene.cpp" />
-    <ClCompile Include="ShaderManager.cpp" />
-    <ClCompile Include="ShadowMapper.cpp" />
-    <ClCompile Include="Sprite.cpp" />
-    <ClCompile Include="Stage.cpp" />
-    <ClCompile Include="SwapChain.cpp" />
-    <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="Timer.cpp" />
-    <ClCompile Include="TitleScene.cpp" />
-    <ClCompile Include="UI.cpp" />
-    <ClCompile Include="Window.cpp" />
+    <ClCompile Include="Source\05_System\AssetLoader.cpp" />
+    <ClCompile Include="Source\04_GamePlay\AI\AStar.cpp" />
+    <ClCompile Include="Source\04_GamePlay\Camera.cpp" />
+    <ClCompile Include="Source\04_GamePlay\CameraDirector.cpp" />
+    <ClCompile Include="Source\05_System\Easing.cpp" />
+    <ClCompile Include="Source\04_GamePlay\Entities\Enemy.cpp" />
+    <ClCompile Include="Source\02_Graphics\Frustum.cpp" />
+    <ClCompile Include="Source\00_Core\Game.cpp" />
+    <ClCompile Include="Source\04_GamePlay\GameEnvironment.cpp" />
+    <ClCompile Include="Source\04_GamePlay\GameObjectManager.cpp" />
+    <ClCompile Include="Source\01_Scene\GameScene.cpp" />
+    <ClCompile Include="Source\03_DirectX\GraphicsDevice.cpp" />
+    <ClCompile Include="Source\05_System\input.cpp" />
+    <ClCompile Include="Source\02_Graphics\LightManager.cpp" />
+    <ClCompile Include="Source\01_Scene\LoadingScene.cpp" />
+    <ClCompile Include="Source\00_Core\main.cpp" />
+    <ClCompile Include="Source\04_GamePlay\Stage\MazeGenerator.cpp" />
+    <ClCompile Include="Source\05_System\MeshGenerator.cpp" />
+    <ClCompile Include="Source\04_GamePlay\UI\minimap.cpp" />
+    <ClCompile Include="Source\02_Graphics\Model.cpp" />
+    <ClCompile Include="Source\04_GamePlay\Entities\Orb.cpp" />
+    <ClCompile Include="Source\05_System\OrthoWindow.cpp" />
+    <ClCompile Include="Source\02_Graphics\ParticleSystem.cpp" />
+    <ClCompile Include="Source\04_GamePlay\Player.cpp" />
+    <ClCompile Include="Source\02_Graphics\Renderer.cpp" />
+    <ClCompile Include="Source\03_DirectX\RenderTarget.cpp" />
+    <ClCompile Include="Source\01_Scene\ResultScene.cpp" />
+    <ClCompile Include="Source\01_Scene\SceneManager.cpp" />
+    <ClCompile Include="Source\01_Scene\SettingScene.cpp" />
+    <ClCompile Include="Source\03_DirectX\ShaderManager.cpp" />
+    <ClCompile Include="Source\03_DirectX\ShadowMapper.cpp" />
+    <ClCompile Include="Source\02_Graphics\Sprite.cpp" />
+    <ClCompile Include="Source\04_GamePlay\Stage\Stage.cpp" />
+    <ClCompile Include="Source\03_DirectX\SwapChain.cpp" />
+    <ClCompile Include="Source\02_Graphics\Texture.cpp" />
+    <ClCompile Include="Source\05_System\Timer.cpp" />
+    <ClCompile Include="Source\01_Scene\TitleScene.cpp" />
+    <ClCompile Include="Source\04_GamePlay\UI\UI.cpp" />
+    <ClCompile Include="Source\00_Core\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Project.rc" />
@@ -270,19 +270,19 @@
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="DepthVertexShader.hlsl">
+    <FxCompile Include="Shaders\DepthVertexShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
-    <FxCompile Include="MotionBlur.hlsl">
+    <FxCompile Include="Shaders\MotionBlur.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="PixelShader.hlsl">
+    <FxCompile Include="Shaders\PixelShader.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">PS</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
@@ -296,7 +296,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
-    <FxCompile Include="PostProcessVertexShader.hlsl">
+    <FxCompile Include="Shaders\PostProcessVertexShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
@@ -304,19 +304,19 @@
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS</EntryPointName>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">VS</EntryPointName>
     </FxCompile>
-    <FxCompile Include="SimplePixelShader.hlsl">
+    <FxCompile Include="Shaders\SimplePixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="SimpleVertexShader.hlsl">
+    <FxCompile Include="Shaders\SimpleVertexShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
-    <FxCompile Include="TexturePixelShader.hlsl">
+    <FxCompile Include="Shaders\TexturePixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
@@ -324,7 +324,7 @@
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS</EntryPointName>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PS</EntryPointName>
     </FxCompile>
-    <FxCompile Include="VertexShader.hlsl">
+    <FxCompile Include="Shaders\VertexShader.hlsl">
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
